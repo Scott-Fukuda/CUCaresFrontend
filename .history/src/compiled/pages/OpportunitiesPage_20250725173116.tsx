@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Opportunity, User, SignUp, allInterests, StudentGroup } from '../types';
+import { Opportunity, User, SignUp, allInterests, StudentGroup } from '../../types';
 import OpportunityCard from '../components/OpportunityCard';
 import { PageState } from '../App';
 

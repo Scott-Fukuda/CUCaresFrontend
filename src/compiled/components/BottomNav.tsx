@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Page, PageState } from '../App';
+import { Page, PageState } from '../../App';
 
 
 interface BottomNavProps {

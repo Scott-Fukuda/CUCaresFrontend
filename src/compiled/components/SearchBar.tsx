@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { User, StudentGroup, FriendRequest } from '../types';
-import { PageState } from '../App';
+import { User, StudentGroup, FriendRequest } from '../../types';
+import { PageState } from '../../App';
 
 interface SearchBarProps {
   allUsers: User[];

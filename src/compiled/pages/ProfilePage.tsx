@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Badge, StudentGroup, allInterests, FriendRequest } from '../types';
+import { User, Badge, StudentGroup, allInterests, FriendRequest } from '../../types';
 import BadgeIcon from '../components/BadgeIcon';
 import { PageState } from '../App';
 

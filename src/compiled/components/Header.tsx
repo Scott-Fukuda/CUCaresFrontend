@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { User, StudentGroup, FriendRequest } from '../types';
+import { User, StudentGroup, FriendRequest } from '../../types';
 import SearchBar from './SearchBar';
-import { Page, PageState } from '../App';
+import { Page, PageState } from '../../App';
 
 interface HeaderProps {
   user: User;

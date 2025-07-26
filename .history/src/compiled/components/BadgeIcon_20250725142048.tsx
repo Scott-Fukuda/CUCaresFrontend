@@ -1,6 +1,6 @@
 
 import React, {useState} from 'react';
-import { Badge } from '../types';
+import { Badge } from '../src/types';
 
 interface BadgeIconProps {
     badge: Badge;

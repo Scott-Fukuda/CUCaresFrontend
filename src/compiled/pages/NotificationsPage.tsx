@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FriendRequest, User } from '../types';
+import { FriendRequest, User } from '../../types';
 
 interface NotificationsPageProps {
   requests: FriendRequest[];

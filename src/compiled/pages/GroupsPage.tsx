@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { StudentGroup, User, StudentGroupCategory, studentGroupCategories } from '../types';
+import { StudentGroup, User, StudentGroupCategory, studentGroupCategories } from '../../types';
 
 interface GroupsPageProps {
   currentUser: User;
