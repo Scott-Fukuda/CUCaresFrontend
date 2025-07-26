@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Opportunity, User, SignUp, StudentGroup } from '../types';
+import { Opportunity, User, SignUp, StudentGroup } from '../../types';
 import { PageState } from '../App';
 
 interface OpportunityDetailPageProps {

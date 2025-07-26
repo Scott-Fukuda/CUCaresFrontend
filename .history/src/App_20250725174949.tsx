@@ -5,15 +5,15 @@ import {
   initialStudents, initialOpportunities, initialSignUps, 
   initialStudentGroups, initialFriendRequests, initialBadges
 } from './data/initialData';
-import Header from './components/Header';
-import Login from './components/Login';
-import BottomNav from './components/BottomNav';
-import ProfilePage from './pages/ProfilePage';
-import LeaderboardPage from './pages/LeaderboardPage';
-import NotificationsPage from './pages/NotificationsPage';
-import GroupsPage from './pages/GroupsPage';
-import OpportunitiesPage from './pages/OpportunitiesPage';
-import OpportunityDetailPage from './pages/OpportunityDetailPage';
+import Header from './compiled/components/Header';
+import Login from './compiled/components/Login';
+import BottomNav from './compiled/components/BottomNav';
+import ProfilePage from './compiled/pages/ProfilePage';
+import LeaderboardPage from './compiled/pages/LeaderboardPage';
+import NotificationsPage from './compiled/pages/NotificationsPage';
+import GroupsPage from './compiled/pages/GroupsPage';
+import OpportunitiesPage from './compiled/pages/OpportunitiesPage';
+import OpportunityDetailPage from './compiled/pages/OpportunityDetailPage';
 
 
 export type Page = 'opportunities' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail';
@@ -33,6 +33,7 @@ const AUTO_LOGIN_EMAIL = 'ejm376@cornell.edu';
 const AUTO_ACCEPT_FRIEND_REQUESTS = true;
 // =================================================================
 
+const apiKey = process.env.REACT_APP_API_KEY;
 
 const App: React.FC = () => {
   // Simulates a database

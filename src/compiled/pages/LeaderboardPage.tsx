@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { User, StudentGroup, SignUp, Opportunity, StudentGroupCategory, studentGroupCategories } from '../types';
+import { User, StudentGroup, SignUp, Opportunity, StudentGroupCategory, studentGroupCategories } from '../../types';
 import { PageState } from '../App';
 
 interface LeaderboardPageProps {

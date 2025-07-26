@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
-import { Opportunity, User, SignUp, StudentGroup } from '../types';
-import { PageState } from '../App';
+import { Opportunity, User, SignUp, StudentGroup } from '../../types';
+import { PageState } from '../../App';
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
