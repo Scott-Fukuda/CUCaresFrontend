@@ -1,65 +1,44 @@
 
-export interface Opportunity {
-  id: number;
-  name: string;
-  description: string;
-  date: string;
-  duration: number;
-  cause: string;
-  completed: boolean;
-  host_org_id: number;
-  host_user_id: number;
-  involved_users: {
-    user: string;
-    id: number;
-    registered: boolean;
-    attended: boolean;
-  }[];
-  participating_organizations: string[];
-}
-
 export interface User {
   id: number;
-  name: string;
-  email: string;
-  password?: string;
-  profile_image: string;
-  points: number;
-  organizations: StudentGroup[];
-  opportunities_hosted: {
-    name: string;
-  }[];
-  opportunities_involved: {
-    name: string;
-    registered: boolean;
-    attended: boolean;
-  }[];
+  firstName: string;
+  lastName:string;
+  email: string; // Must be @cornell.edu
+  password?: string; // In a real app, this would be a hash. Storing for simulation.
+  profilePictureUrl?: string; // Can be a URL or a base64 string
+  interests: string[];
+  friendIds: number[];
+  groupIds: number[];
+  isAdmin?: boolean;
 }
-export type StudentGroupCategory = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team';
-export const studentGroupCategories: StudentGroupCategory[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team'];
 
-export interface StudentGroup {
+export interface Opportunity {
   id: number;
-  name: string;
+  organization: string;
+  title: string;
   description: string;
-  member_count: number;
-  type: string;
+  date: string;
+  time: string;
+  duration: number; // Duration of the event in hours
+  totalSlots: number;
+  imageUrl: string;
   points: number;
-  host_user_id: number;
-  users: {
-    id: number;
-    name: string;
-  }[];
-  opportunities_attended: {
-    id: number;
-    name: string;
-  }[];
+  isPrivate?: boolean;
+  cause?: string;
 }
-
 
 export interface SignUp {
   userId: number;
   opportunityId: number;
+}
+
+export type StudentGroupCategory = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team';
+export const studentGroupCategories: StudentGroupCategory[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team'];
+
+export interface StudentGroup {
+    id: number;
+    name: string;
+    category: StudentGroupCategory;
 }
 
 export interface FriendRequest {

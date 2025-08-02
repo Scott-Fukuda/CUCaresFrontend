@@ -66,16 +66,11 @@ const App: React.FC = () => {
 
   const [studentGroups, setStudentGroups] = useState<StudentGroup[]>([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/orgs')
+    fetch('http://localhost:8000/api/orgs') 
       .then((res) => res.json())
-      .then((data) => {
-        setStudentGroups(data.organizations || []);
-      })
-      .catch((err) => {
-        console.error('Error fetching organizations:', err);
-      });
+      .then((data) => setStudentGroups(data.organizations))
+      .catch((err) => console.error('Error fetching data:', err));
   }, []);
-  
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [pageState, setPageState] = useState<PageState>({ page: 'opportunities' });

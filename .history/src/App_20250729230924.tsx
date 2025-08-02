@@ -39,43 +39,38 @@ const App: React.FC = () => {
   // Simulates a database
   const [students, setStudents] = useState<User[]>([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/users')
-      .then((res) => res.json())
+    fetch('http://localhost:8000/api/users') // use the full backend URL + port
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
+        console.log('Fetched students data:', data);
+        // If your API returns an object wrapping users (like { users: [...] }), you need to do:
         setStudents(data.users || []);
       })
       .catch((err) => {
         console.error('Error fetching students:', err);
+        setStudents([]); // fallback to empty array
       });
   }, []);
-  
   
 
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/opps')
+    fetch('http://localhost:8000/api/opps') 
       .then((res) => res.json())
-      .then((data) => {
-        setOpportunities(data.opportunities || []);
-      })
-      .catch((err) => {
-        console.error('Error fetching opportunities:', err);
-      });
+      .then((data) => setOpportunities(data.opportunities_involved))
+      .catch((err) => console.error('Error fetching data:', err));
   }, []);
-  
 
   const [studentGroups, setStudentGroups] = useState<StudentGroup[]>([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/orgs')
+    fetch('http://localhost:8000/api/orgs') 
       .then((res) => res.json())
-      .then((data) => {
-        setStudentGroups(data.organizations || []);
-      })
-      .catch((err) => {
-        console.error('Error fetching organizations:', err);
-      });
+      .then((data) => setStudentGroups(data))
+      .catch((err) => console.error('Error fetching data:', err));
   }, []);
-  
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [pageState, setPageState] = useState<PageState>({ page: 'opportunities' });

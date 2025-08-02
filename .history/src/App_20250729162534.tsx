@@ -33,49 +33,33 @@ const AUTO_LOGIN_EMAIL = 'ejm376@cornell.edu';
 const AUTO_ACCEPT_FRIEND_REQUESTS = true;
 // =================================================================
 
-const apiKey = 'http://localhost:8000'
+const apiKey = process.env.REACT_APP_API_KEY;
 
 const App: React.FC = () => {
   // Simulates a database
   const [students, setStudents] = useState<User[]>([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/users')
+    fetch('${apiKey}/api/users') 
       .then((res) => res.json())
-      .then((data) => {
-        setStudents(data.users || []);
-      })
-      .catch((err) => {
-        console.error('Error fetching students:', err);
-      });
+      .then((data) => setStudents(data.users))
+      .catch((err) => console.error('Error fetching data:', err));
   }, []);
-  
-  
 
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/opps')
+    fetch('${apiKey}/api/opps') 
       .then((res) => res.json())
-      .then((data) => {
-        setOpportunities(data.opportunities || []);
-      })
-      .catch((err) => {
-        console.error('Error fetching opportunities:', err);
-      });
+      .then((data) => setOpportunities(data))
+      .catch((err) => console.error('Error fetching data:', err));
   }, []);
-  
 
   const [studentGroups, setStudentGroups] = useState<StudentGroup[]>([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/orgs')
+    fetch('${apiKey}/api/orgs') 
       .then((res) => res.json())
-      .then((data) => {
-        setStudentGroups(data.organizations || []);
-      })
-      .catch((err) => {
-        console.error('Error fetching organizations:', err);
-      });
+      .then((data) => setStudentGroups(data))
+      .catch((err) => console.error('Error fetching data:', err));
   }, []);
-  
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [pageState, setPageState] = useState<PageState>({ page: 'opportunities' });

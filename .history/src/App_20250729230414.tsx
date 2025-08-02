@@ -39,43 +39,43 @@ const App: React.FC = () => {
   // Simulates a database
   const [students, setStudents] = useState<User[]>([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/users')
+    fetch('http://localhost:8000/api/users') 
       .then((res) => res.json())
-      .then((data) => {
-        setStudents(data.users || []);
+      .then(data => {
+        console.log('Fetched:', data);
+        setStudents(data.users.name); // If the data is { users: [...] }
       })
-      .catch((err) => {
-        console.error('Error fetching students:', err);
-      });
+      
+      .catch((err) => console.error('Error fetching data:', err));
   }, []);
+  if (!students || students.length === 0) {
+    // maybe show an error or handle no users loaded yet
+    setAuthError('User list not loaded yet. Please wait and try again.');
+    return;
+  }
   
+  if (students.some(s => s.email.toLowerCase() === email.toLowerCase())) {
+    setAuthError('An account with this email already exists.');
+    return;
+  }
   
+  console.log(students)
 
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/opps')
+    fetch('http://localhost:8000/api/opps') 
       .then((res) => res.json())
-      .then((data) => {
-        setOpportunities(data.opportunities || []);
-      })
-      .catch((err) => {
-        console.error('Error fetching opportunities:', err);
-      });
+      .then((data) => setOpportunities(data))
+      .catch((err) => console.error('Error fetching data:', err));
   }, []);
-  
 
   const [studentGroups, setStudentGroups] = useState<StudentGroup[]>([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/orgs')
+    fetch('http://localhost:8000/api/orgs') 
       .then((res) => res.json())
-      .then((data) => {
-        setStudentGroups(data.organizations || []);
-      })
-      .catch((err) => {
-        console.error('Error fetching organizations:', err);
-      });
+      .then((data) => setStudentGroups(data))
+      .catch((err) => console.error('Error fetching data:', err));
   }, []);
-  
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [pageState, setPageState] = useState<PageState>({ page: 'opportunities' });

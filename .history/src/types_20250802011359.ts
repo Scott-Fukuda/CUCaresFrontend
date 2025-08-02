@@ -35,15 +35,12 @@ export interface User {
     attended: boolean;
   }[];
 }
-export type StudentGroupCategory = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team';
-export const studentGroupCategories: StudentGroupCategory[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team'];
 
 export interface StudentGroup {
   id: number;
   name: string;
   description: string;
   member_count: number;
-  type: string;
   points: number;
   host_user_id: number;
   users: {
