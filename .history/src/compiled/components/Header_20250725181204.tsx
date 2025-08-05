@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = (props) => {
       <div className="max-w-7xl mx-auto flex justify-between items-center gap-4">
         <div className="flex items-center gap-8">
             <button onClick={() => setPageState({ page: 'opportunities'})} className="text-2xl font-bold text-cornell-red hidden sm:block">
-              Cornell Cares
+              CU Cares
             </button>
             
             {/* Desktop Nav */}
