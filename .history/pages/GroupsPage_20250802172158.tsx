@@ -55,7 +55,7 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
         {/* Create Group */}
         <div className="bg-white p-6 rounded-2xl shadow-lg">
             <h3 className="text-xl font-bold mb-4">Register a New Organization</h3>
-            <p className="text-sm text-gray-600 mb-4">Once registered, your organization will appear here and on the leaderboard.</p>
+            <p className="text-sm text-gray-600 mb-4">Enter organization information below.</p>
             <form onSubmit={handleCreateGroup} className="flex flex-col gap-4">
                  <input
                     type="text"
