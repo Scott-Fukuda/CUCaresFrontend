@@ -33,4 +33,4 @@ dist-ssr
 # Firebase service account (contains private keys)
 .firebase-service-account.json
 
-.history
+.history/.history/
