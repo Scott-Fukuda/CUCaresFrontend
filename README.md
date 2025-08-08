@@ -1,14 +1,16 @@
-# Run and deploy your AI Studio app
+**CUCares**
+CUCares is a web platform designed to connect students with meaningful volunteer opportunities within their community. Our mission is to empower students to engage in service, foster connections, and make a positive impact through easily accessible and well-organized volunteer listings.
 
-This contains everything you need to run your app locally.
+**Features**
+- Volunteer Opportunities: Browse and search a wide range of volunteer opportunities based on interests, locations, and skills.
+- User Authentication: Secure login and registration using Firebase Authentication.
+- Personalized Profiles: Manage your volunteer history, interests, and saved opportunities.
+- Organization Profiles: Organizations can create and manage their volunteer listings.
+- Request & Signup Management: Easily apply for volunteer positions and track your applications.
+- Responsive Design: Accessible and user-friendly on both desktop and mobile devices.
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+**Tech Stack**
+Frontend: React.js
+Backend: Flask with Flask-SQLAlchemy
+Authentication: Firebase Authentication
+Database: PostgreSQL (or SQLite for development)
