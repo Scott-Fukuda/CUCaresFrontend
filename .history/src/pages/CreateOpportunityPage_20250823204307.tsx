@@ -70,7 +70,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
         imageFormData.append('file', imageFile);
         
         try {
-          const uploadResponse = await fetch('http://localhost:8000/api/upload', {
+          const uploadResponse = await fetch('http://localhost:8000/upload', {
             method: 'POST',
             body: imageFormData,
           });
