@@ -85,6 +85,8 @@ const authenticatedRequest = async (endpoint: string, options: RequestInit = {})
     console.warn('No Firebase token available for authenticated request:', endpoint);
   }
   
+  console.log('Request headers:', { ...authHeaders, ...headers });
+  
   return request(endpoint, {
     ...restOptions,
     headers: {
@@ -120,7 +122,7 @@ export const getUserById = async (id: number): Promise<User> => {
     };
 };
 export const getUser = async (id: number): Promise<User> => {
-    const response = await authenticatedRequest(`/users/${id}`);
+    const response = await request(`/users/${id}`);
     return {
         ...response,
         firstName: response.name.split(' ')[0] || '',

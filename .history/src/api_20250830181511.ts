@@ -120,7 +120,7 @@ export const getUserById = async (id: number): Promise<User> => {
     };
 };
 export const getUser = async (id: number): Promise<User> => {
-    const response = await authenticatedRequest(`/users/${id}`);
+    const response = await request(`/users/${id}`);
     return {
         ...response,
         firstName: response.name.split(' ')[0] || '',
