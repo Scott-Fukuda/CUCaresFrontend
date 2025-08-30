@@ -24,6 +24,7 @@ const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
 // Helper to get Firebase token
 const getFirebaseToken = async (): Promise<string | null> => {
   try {
+    const { auth } = await import('./firebase-config');
     const currentUser = auth.currentUser;
     if (currentUser) {
       const token = await currentUser.getIdToken();

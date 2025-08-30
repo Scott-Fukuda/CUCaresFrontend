@@ -1,6 +1,5 @@
 
 import { User, MinimalUser, Opportunity, Organization, SignUp, Friendship, FriendRequest, FriendshipStatus } from './types';
-import { auth } from './firebase-config';
 
 // Helper function to get profile picture URL
 // Returns a generic silhouette when no profile image is available
@@ -24,6 +23,7 @@ const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
 // Helper to get Firebase token
 const getFirebaseToken = async (): Promise<string | null> => {
   try {
+    const { auth } = await import('./firebase-config');
     const currentUser = auth.currentUser;
     if (currentUser) {
       const token = await currentUser.getIdToken();
