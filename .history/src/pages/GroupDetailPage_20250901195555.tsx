@@ -139,7 +139,7 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
       {/* Right Column */}
       <div className="lg:col-span-2 space-y-8">
          <div className="bg-white p-6 rounded-2xl shadow-lg">
-            <h3 className="text-xl font-bold mb-4">Members ({memberCount})</h3>
+            <h3 className="text-xl font-bold mb-4">Members ({members.length})</h3>
             {members.length > 0 ? (
                 <div className="flex flex-wrap gap-4">
                     {members.sort((a,b) => a.firstName.localeCompare(b.firstName)).map(member => (
