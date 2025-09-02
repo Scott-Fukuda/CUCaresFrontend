@@ -861,7 +861,7 @@ const App: React.FC = () => {
                         updateProfilePicture={updateProfilePicture}
                         handleFriendRequest={handleFriendRequest}
                         handleRemoveFriend={handleRemoveFriend}
-                        friendRequests={apiFriendRequests}
+                        friendRequests={friendRequests}
                         checkFriendshipStatus={checkFriendshipStatus}
                         getFriendsForUser={getFriendsForUser}
                     />;
@@ -916,7 +916,7 @@ const App: React.FC = () => {
         onLogout={handleLogout}
         allUsers={students}
         allOrgs={organizations}
-        friendRequests={apiFriendRequests}
+        friendRequests={friendRequests}
         joinOrg={joinOrg}
         leaveOrg={leaveOrg}
         handleFriendRequest={handleFriendRequest}

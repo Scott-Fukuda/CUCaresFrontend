@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { User, Badge, Organization, allInterests, ApiFriendRequest, FriendshipStatus } from '../types';
+import { User, Badge, Organization, allInterests, FriendRequest, FriendshipStatus } from '../types';
 import BadgeIcon from '../components/BadgeIcon';
 import { PageState } from '../App';
 import { getProfilePictureUrl } from '../api';

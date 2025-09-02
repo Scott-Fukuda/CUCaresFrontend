@@ -604,21 +604,27 @@ const App: React.FC = () => {
   // Legacy function names for compatibility with existing components
   const handleFriendRequest = handleSendFriendRequest;
   const handleAddFriend = handleSendFriendRequest;
-  const handleRequestResponse = (requestId: number, response: 'accepted' | 'declined') => {
+  const handleRequestResponse = (fromUserId: number, response: 'accepted' | 'declined') => {
     if (!currentUser) return;
-    
-    // For now, just remove the request from local state and refresh
-    // TODO: Implement proper accept/reject logic when backend provides more info
-    setApiFriendRequests(prev => prev.filter(r => r.id !== requestId));
-    
     if (response === 'accepted') {
-      alert('Friend request accepted! You will need to refresh to see the updated status.');
+      // Find the friendship ID for this request
+      const friendship = friendships.find(f => 
+        (f.user1_id === fromUserId && f.user2_id === currentUser.id) ||
+        (f.user1_id === currentUser.id && f.user2_id === fromUserId)
+      );
+      if (friendship) {
+        handleAcceptFriendRequest(friendship.id, currentUser.id);
+      }
     } else {
-      alert('Friend request declined.');
+      // Find the friendship ID for this request
+      const friendship = friendships.find(f => 
+        (f.user1_id === fromUserId && f.user2_id === currentUser.id) ||
+        (f.user1_id === currentUser.id && f.user2_id === fromUserId)
+      );
+      if (friendship) {
+        handleRejectFriendRequest(friendship.id, currentUser.id);
+      }
     }
-    
-    // Refresh the data to get updated state
-    loadUserFriendships(currentUser.id);
   };
 
   // Load user friendships when user logs in
@@ -861,7 +867,7 @@ const App: React.FC = () => {
                         updateProfilePicture={updateProfilePicture}
                         handleFriendRequest={handleFriendRequest}
                         handleRemoveFriend={handleRemoveFriend}
-                        friendRequests={apiFriendRequests}
+                        friendRequests={friendRequests}
                         checkFriendshipStatus={checkFriendshipStatus}
                         getFriendsForUser={getFriendsForUser}
                     />;
@@ -916,7 +922,7 @@ const App: React.FC = () => {
         onLogout={handleLogout}
         allUsers={students}
         allOrgs={organizations}
-        friendRequests={apiFriendRequests}
+        friendRequests={friendRequests}
         joinOrg={joinOrg}
         leaveOrg={leaveOrg}
         handleFriendRequest={handleFriendRequest}

@@ -916,7 +916,7 @@ const App: React.FC = () => {
         onLogout={handleLogout}
         allUsers={students}
         allOrgs={organizations}
-        friendRequests={apiFriendRequests}
+        friendRequests={friendRequests}
         joinOrg={joinOrg}
         leaveOrg={leaveOrg}
         handleFriendRequest={handleFriendRequest}
