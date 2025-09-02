@@ -13,14 +13,14 @@ interface LeaderboardPageProps {
   handleFriendRequest: (toUserId: number) => void;
   setPageState: (state: PageState) => void;
   checkFriendshipStatus: (otherUserId: number) => Promise<FriendshipStatus>;
-  friendshipsData: FriendshipsResponse | null;
+  friendRequests: FriendRequest[];
 }
 
 type LeaderboardTab = 'Individuals' | 'All Organizations' | OrganizationType;
 
 const TABS: LeaderboardTab[] = ['Individuals', 'All Organizations', ...organizationTypes];
 
-const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, signups, opportunities, currentUser, handleFriendRequest, setPageState, checkFriendshipStatus, friendshipsData }) => {
+const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, signups, opportunities, currentUser, handleFriendRequest, setPageState, checkFriendshipStatus, friendRequests }) => {
   const [activeTab, setActiveTab] = useState<LeaderboardTab>('Individuals');
   const [friendshipStatuses, setFriendshipStatuses] = useState<Map<number, FriendshipStatus>>(new Map());
 
@@ -69,7 +69,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
             statuses.set(user.id, status);
           } catch (error) {
             console.error(`Error checking friendship status for user ${user.id}:`, error);
-            statuses.set(user.id, 'add');
+            statuses.set(user.id, { status: 'none' });
           }
         }
       }
@@ -83,23 +83,29 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
   }, [allUsers, currentUser, checkFriendshipStatus]);
 
   const getFriendshipStatus = (userId: number): FriendshipStatus => {
-    // Check friendshipsData first for immediate updates
-    if (friendshipsData) {
-      const userData = friendshipsData.users.find(user => user.user_id === userId);
-      if (userData) {
-        return userData.friendship_status;
+    // Check local friendRequests first for immediate updates
+    const localRequest = friendRequests.find(r => 
+      (r.fromUserId === currentUser.id && r.toUserId === userId) ||
+      (r.fromUserId === userId && r.toUserId === currentUser.id)
+    );
+    
+    if (localRequest) {
+      if (localRequest.fromUserId === currentUser.id) {
+        return { status: 'pending' };
+      } else {
+        return { status: 'pending' };
       }
     }
     
     // Fall back to cached statuses
-    return friendshipStatuses.get(userId) || 'add';
+    return friendshipStatuses.get(userId) || { status: 'none' };
   };
 
   const UserRow = ({ user, points, index }: { user: User, points: number, index: number}) => {
     const isCurrentUser = user.id === currentUser.id;
     const friendshipStatus = getFriendshipStatus(user.id);
-    const isFriend = friendshipStatus === 'friends';
-    const requestPending = friendshipStatus === 'sent' || friendshipStatus === 'received';
+    const isFriend = friendshipStatus.status === 'friends';
+    const requestPending = friendshipStatus.status === 'pending';
 
     return (
         <li className={`flex items-center justify-between py-4 ${isCurrentUser ? 'bg-yellow-50 rounded-lg -mx-4 px-4' : ''}`}>

@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { User, MinimalUser, Opportunity, SignUp, Organization, Badge, OrganizationType, Notification, Friendship, FriendshipStatus, FriendshipsResponse, UserWithFriendshipStatus } from './types';
 import * as api from './api';
-import { initialBadges } from './data/initialData'; // Using initial data for badges
+import { initialBadges, initialFriendRequests } from './data/initialData'; // Using initial data for badges/requests
 import { signInWithGoogle, FirebaseUser, auth } from './firebase-config';
 import Header from './components/Header';
 import Login from './components/Login';
@@ -737,7 +737,7 @@ const App: React.FC = () => {
                         leaveOrg={leaveOrg}
                     />;
         case 'leaderboard':
-            return <LeaderboardPage allUsers={leaderboardUsers} allOrgs={organizations} signups={signups} opportunities={opportunities} currentUser={currentUser} handleFriendRequest={handleFriendRequest} setPageState={setPageState} checkFriendshipStatus={checkFriendshipStatus} friendshipsData={friendshipsData}/>;
+            return <LeaderboardPage allUsers={leaderboardUsers} allOrgs={organizations} signups={signups} opportunities={opportunities} currentUser={currentUser} handleFriendRequest={handleFriendRequest} setPageState={setPageState} checkFriendshipStatus={checkFriendshipStatus} friendRequests={friendRequests}/>;
         case 'profile':
             const profileUser = pageState.userId ? students.find(s => s.id === pageState.userId) : currentUser;
             if(!profileUser) return <p>User not found</p>;
@@ -770,12 +770,12 @@ const App: React.FC = () => {
                         updateProfilePicture={updateProfilePicture}
                         handleFriendRequest={handleFriendRequest}
                         handleRemoveFriend={handleRemoveFriend}
-                        friendshipsData={friendshipsData}
+                        friendRequests={apiFriendRequests}
                         checkFriendshipStatus={checkFriendshipStatus}
                         getFriendsForUser={getFriendsForUser}
                     />;
         case 'notifications':
-            return <NotificationsPage friendshipsData={friendshipsData} allUsers={students} handleRequestResponse={handleRequestResponse} currentUser={currentUser} />;
+            return <NotificationsPage requests={apiFriendRequests} allUsers={students} handleRequestResponse={handleRequestResponse} currentUser={currentUser} />;
         case 'groups':
             return <GroupsPage currentUser={currentUser} allOrgs={organizations} joinOrg={joinOrg} leaveOrg={leaveOrg} createOrg={createOrg} setPageState={setPageState} />;
         case 'createOpportunity':
@@ -825,7 +825,7 @@ const App: React.FC = () => {
         onLogout={handleLogout}
         allUsers={students}
         allOrgs={organizations}
-        friendshipsData={friendshipsData}
+        friendRequests={apiFriendRequests}
         joinOrg={joinOrg}
         leaveOrg={leaveOrg}
         handleFriendRequest={handleFriendRequest}

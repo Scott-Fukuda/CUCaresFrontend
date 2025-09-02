@@ -85,20 +85,9 @@ export interface Friendship {
 
 
 
-export type FriendshipStatus = 'friends' | 'sent' | 'received' | 'add';
-
-export interface UserWithFriendshipStatus {
-  user_id: number;
-  name: string;
-  profile_image: string | null;
-  email: string;
-  friendship_status: FriendshipStatus;
-}
-
-export interface FriendshipsResponse {
-  current_user_id: number;
-  users: UserWithFriendshipStatus[];
-  total_users: number;
+export interface FriendshipStatus {
+    status: 'friends' | 'pending' | 'none';
+    friendship_id?: number;
 }
 
 export interface BadgeThresholdData {
@@ -127,7 +116,12 @@ export interface Notification {
   createdAt: string; // ISO string
 }
 
-
+// New interface for the actual API response from /api/users/{id}/friend-requests
+export interface ApiFriendRequest {
+  id: number;
+  requester_name: string;
+  requester_profile_image: string | null;
+}
 
 export const allInterests = [
   'Environment & Sustainability',

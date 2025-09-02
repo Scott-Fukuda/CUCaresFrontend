@@ -232,12 +232,14 @@ export const sendFriendRequest = (userId: number, friendId: number) => authentic
   body: JSON.stringify({ receiver_id: friendId }),
 });
 
-export const acceptFriendRequest = (friendshipId: number) => authenticatedRequest(`/friendships/${friendshipId}/accept`, {
+export const acceptFriendRequest = (friendshipId: number, receiverId: number) => authenticatedRequest(`/friendships/${friendshipId}/accept`, {
   method: 'PUT',
+  body: JSON.stringify({ receiver_id: receiverId }),
 });
 
-export const rejectFriendRequest = (friendshipId: number) => authenticatedRequest(`/friendships/${friendshipId}/reject`, {
+export const rejectFriendRequest = (friendshipId: number, receiverId: number) => authenticatedRequest(`/friendships/${friendshipId}/reject`, {
   method: 'PUT',
+  body: JSON.stringify({ receiver_id: receiverId }),
 });
 
 export const removeFriend = (userId: number, friendId: number) => authenticatedRequest(`/users/${userId}/friends/${friendId}`, {

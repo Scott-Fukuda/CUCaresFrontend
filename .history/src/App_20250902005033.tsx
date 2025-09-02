@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { User, MinimalUser, Opportunity, SignUp, Organization, Badge, OrganizationType, Notification, Friendship, FriendshipStatus, FriendshipsResponse, UserWithFriendshipStatus } from './types';
 import * as api from './api';
-import { initialBadges } from './data/initialData'; // Using initial data for badges
+import { initialBadges, initialFriendRequests } from './data/initialData'; // Using initial data for badges/requests
 import { signInWithGoogle, FirebaseUser, auth } from './firebase-config';
 import Header from './components/Header';
 import Login from './components/Login';
@@ -507,15 +507,15 @@ const App: React.FC = () => {
 
   // Get pending friend requests received by current user
   const getPendingRequestsReceived = useMemo(() => {
-    if (!currentUser || !friendshipsData) return [];
-    return friendshipsData.users.filter(user => user.friendship_status === 'received');
-  }, [friendshipsData, currentUser]);
+    if (!currentUser || !Array.isArray(friendRequests)) return [];
+    return friendRequests.filter(r => r.toUserId === currentUser.id && r.status === 'pending');
+  }, [friendRequests, currentUser]);
 
   // Get pending friend requests sent by current user
   const getPendingRequestsSent = useMemo(() => {
-    if (!currentUser || !friendshipsData) return [];
-    return friendshipsData.users.filter(user => user.friendship_status === 'sent');
-  }, [friendshipsData, currentUser]);
+    if (!currentUser || !Array.isArray(friendRequests)) return [];
+    return friendRequests.filter(r => r.fromUserId === currentUser.id && r.status === 'pending');
+  }, [friendRequests, currentUser]);
 
   // Legacy function names for compatibility with existing components
   const handleFriendRequest = handleSendFriendRequest;
@@ -523,11 +523,18 @@ const App: React.FC = () => {
   const handleRequestResponse = (requestId: number, response: 'accepted' | 'declined') => {
     if (!currentUser) return;
     
+    // For now, just remove the request from local state and refresh
+    // TODO: Implement proper accept/reject logic when backend provides more info
+    setApiFriendRequests(prev => prev.filter(r => r.id !== requestId));
+    
     if (response === 'accepted') {
-      handleAcceptFriendRequest(requestId);
+      alert('Friend request accepted! You will need to refresh to see the updated status.');
     } else {
-      handleRejectFriendRequest(requestId);
+      alert('Friend request declined.');
     }
+    
+    // Refresh the data to get updated state
+    loadUserFriendships(currentUser.id);
   };
 
   // Load user friendships when user logs in
@@ -737,7 +744,7 @@ const App: React.FC = () => {
                         leaveOrg={leaveOrg}
                     />;
         case 'leaderboard':
-            return <LeaderboardPage allUsers={leaderboardUsers} allOrgs={organizations} signups={signups} opportunities={opportunities} currentUser={currentUser} handleFriendRequest={handleFriendRequest} setPageState={setPageState} checkFriendshipStatus={checkFriendshipStatus} friendshipsData={friendshipsData}/>;
+            return <LeaderboardPage allUsers={leaderboardUsers} allOrgs={organizations} signups={signups} opportunities={opportunities} currentUser={currentUser} handleFriendRequest={handleFriendRequest} setPageState={setPageState} checkFriendshipStatus={checkFriendshipStatus} friendRequests={friendRequests}/>;
         case 'profile':
             const profileUser = pageState.userId ? students.find(s => s.id === pageState.userId) : currentUser;
             if(!profileUser) return <p>User not found</p>;
@@ -770,12 +777,12 @@ const App: React.FC = () => {
                         updateProfilePicture={updateProfilePicture}
                         handleFriendRequest={handleFriendRequest}
                         handleRemoveFriend={handleRemoveFriend}
-                        friendshipsData={friendshipsData}
+                        friendRequests={apiFriendRequests}
                         checkFriendshipStatus={checkFriendshipStatus}
                         getFriendsForUser={getFriendsForUser}
                     />;
         case 'notifications':
-            return <NotificationsPage friendshipsData={friendshipsData} allUsers={students} handleRequestResponse={handleRequestResponse} currentUser={currentUser} />;
+            return <NotificationsPage requests={apiFriendRequests} allUsers={students} handleRequestResponse={handleRequestResponse} currentUser={currentUser} />;
         case 'groups':
             return <GroupsPage currentUser={currentUser} allOrgs={organizations} joinOrg={joinOrg} leaveOrg={leaveOrg} createOrg={createOrg} setPageState={setPageState} />;
         case 'createOpportunity':
@@ -825,7 +832,7 @@ const App: React.FC = () => {
         onLogout={handleLogout}
         allUsers={students}
         allOrgs={organizations}
-        friendshipsData={friendshipsData}
+        friendRequests={apiFriendRequests}
         joinOrg={joinOrg}
         leaveOrg={leaveOrg}
         handleFriendRequest={handleFriendRequest}

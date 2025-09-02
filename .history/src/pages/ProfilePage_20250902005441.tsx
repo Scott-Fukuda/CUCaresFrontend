@@ -46,7 +46,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
     if (!isCurrentUser && currentUser) {
       checkFriendshipStatus(user.id).then(setFriendshipStatus);
     }
-  }, [isCurrentUser, currentUser, user.id, checkFriendshipStatus, friendshipsData]);
+  }, [isCurrentUser, currentUser, user.id, checkFriendshipStatus, friendRequests]);
 
 
 
@@ -91,8 +91,8 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
     }
   };
   
-  const isFriend = friendshipStatus === 'friends';
-      const requestPending = friendshipStatus === 'sent' || friendshipStatus === 'received';
+  const isFriend = friendshipStatus.status === 'friends';
+      const requestPending = friendshipStatus.status === 'pending';
 
   // Debug logging
   console.log('ProfilePage render:', {

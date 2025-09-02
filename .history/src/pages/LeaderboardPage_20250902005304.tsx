@@ -69,7 +69,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
             statuses.set(user.id, status);
           } catch (error) {
             console.error(`Error checking friendship status for user ${user.id}:`, error);
-            statuses.set(user.id, 'add');
+            statuses.set(user.id, { status: 'none' });
           }
         }
       }
@@ -98,8 +98,8 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
   const UserRow = ({ user, points, index }: { user: User, points: number, index: number}) => {
     const isCurrentUser = user.id === currentUser.id;
     const friendshipStatus = getFriendshipStatus(user.id);
-    const isFriend = friendshipStatus === 'friends';
-    const requestPending = friendshipStatus === 'sent' || friendshipStatus === 'received';
+    const isFriend = friendshipStatus.status === 'friends';
+    const requestPending = friendshipStatus.status === 'pending';
 
     return (
         <li className={`flex items-center justify-between py-4 ${isCurrentUser ? 'bg-yellow-50 rounded-lg -mx-4 px-4' : ''}`}>

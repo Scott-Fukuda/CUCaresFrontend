@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { User, MinimalUser, Opportunity, SignUp, Organization, Badge, OrganizationType, Notification, Friendship, FriendshipStatus, FriendshipsResponse, UserWithFriendshipStatus } from './types';
 import * as api from './api';
-import { initialBadges } from './data/initialData'; // Using initial data for badges
+import { initialBadges, initialFriendRequests } from './data/initialData'; // Using initial data for badges/requests
 import { signInWithGoogle, FirebaseUser, auth } from './firebase-config';
 import Header from './components/Header';
 import Login from './components/Login';
@@ -372,22 +372,35 @@ const App: React.FC = () => {
 
 
   const pendingRequestCount = useMemo(() => {
-    if (!currentUser || !friendshipsData) return 0;
-    return friendshipsData.users.filter(user => user.friendship_status === 'received').length;
-  }, [currentUser, friendshipsData]);
+    if (!currentUser || !Array.isArray(apiFriendRequests)) return 0;
+    return apiFriendRequests.length; // All requests from the new API are pending
+  }, [currentUser, apiFriendRequests]);
 
   // Load user's friendships and friend requests
   const loadUserFriendships = useCallback(async (userId: number) => {
     if (!currentUser) return;
     console.log('Loading friendships for user:', userId);
     try {
-      const friendshipsResponse = await api.getUserFriendships(userId);
-      console.log('Raw friendships data from backend:', friendshipsResponse);
-      setFriendshipsData(friendshipsResponse);
+      const [friendshipsData, requestsData] = await Promise.all([
+        api.getUserFriendships(userId),
+        api.getUserFriendRequests(userId)
+      ]);
+      console.log('Raw friendship data from backend:', friendshipsData);
+      console.log('Raw friend requests data from backend:', requestsData);
+      
+      const validFriendships = Array.isArray(friendshipsData) ? friendshipsData : [];
+      const validRequests = Array.isArray(requestsData) ? requestsData : [];
+      
+      console.log('Setting friendships state:', validFriendships);
+      console.log('Setting friend requests state:', validRequests);
+      
+      setFriendships(validFriendships);
+      setApiFriendRequests(validRequests);
     } catch (e: any) {
       console.error('Error loading friendships:', e.message);
-      // Reset state on error
-      setFriendshipsData(null);
+      // Set empty arrays on error to prevent filter errors
+      setFriendships([]);
+      setFriendRequests([]);
     }
   }, [currentUser]);
 
@@ -396,6 +409,18 @@ const App: React.FC = () => {
     if (!currentUser || friendId === currentUser.id) return;
     try {
       await api.sendFriendRequest(currentUser.id, friendId);
+      
+      // Immediately update local state to show request sent
+      const newRequest: FriendRequest = {
+        id: Date.now(), // Temporary ID for local state
+        fromUserId: currentUser.id,
+        toUserId: friendId,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      setFriendRequests(prev => [...prev, newRequest]);
       
       // Show success message
       alert(`Friend request sent to ${students.find(s => s.id === friendId)?.name}!`);
@@ -408,10 +433,27 @@ const App: React.FC = () => {
   };
 
   // Accept friend request
-  const handleAcceptFriendRequest = async (friendshipId: number) => {
+  const handleAcceptFriendRequest = async (friendshipId: number, receiverId: number) => {
     if (!currentUser) return;
     try {
-      await api.acceptFriendRequest(friendshipId);
+      await api.acceptFriendRequest(friendshipId, receiverId);
+      
+      // Remove the request from local state
+      setFriendRequests(prev => prev.filter(r => 
+        !(r.fromUserId === receiverId && r.toUserId === currentUser.id)
+      ));
+      
+      // Add to friendships
+      const newFriendship: Friendship = {
+        id: friendshipId,
+        user1_id: Math.min(currentUser.id, receiverId),
+        user2_id: Math.max(currentUser.id, receiverId),
+        status: 'accepted',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      setFriendships(prev => [...prev, newFriendship]);
       
       alert('Friend request accepted!');
       
@@ -423,10 +465,15 @@ const App: React.FC = () => {
   };
 
   // Reject friend request
-  const handleRejectFriendRequest = async (friendshipId: number) => {
+  const handleRejectFriendRequest = async (friendshipId: number, receiverId: number) => {
     if (!currentUser) return;
     try {
-      await api.rejectFriendRequest(friendshipId);
+      await api.rejectFriendRequest(friendshipId, receiverId);
+      
+      // Remove the request from local state
+      setFriendRequests(prev => prev.filter(r => 
+        !(r.fromUserId === receiverId && r.toUserId === currentUser.id)
+      ));
       
       alert('Friend request rejected.');
       
@@ -443,6 +490,12 @@ const App: React.FC = () => {
     try {
       await api.removeFriend(currentUser.id, friendId);
       
+      // Remove from local friendships
+      setFriendships(prev => prev.filter(f => 
+        !((f.user1_id === currentUser.id && f.user2_id === friendId) ||
+          (f.user1_id === friendId && f.user2_id === currentUser.id))
+      ));
+      
       alert('Friend removed successfully.');
       
       // Refresh friendships to get the real data from backend
@@ -454,16 +507,41 @@ const App: React.FC = () => {
 
   // Check friendship status with another user
   const checkFriendshipStatus = async (otherUserId: number): Promise<FriendshipStatus> => {
-    if (!currentUser || !friendshipsData) return 'add';
+    if (!currentUser) return { status: 'none' };
     
-    // Find the user in friendships data
-    const userData = friendshipsData.users.find(user => user.user_id === otherUserId);
+    // Check local state first for immediate updates
+    const localRequest = friendRequests.find(r => 
+      (r.fromUserId === currentUser.id && r.toUserId === otherUserId) ||
+      (r.fromUserId === otherUserId && r.toUserId === currentUser.id)
+    );
     
-    if (userData) {
-      return userData.friendship_status;
+    console.log('Checking friendship status for user', otherUserId, 'Local request found:', localRequest);
+    
+    if (localRequest) {
+      if (localRequest.fromUserId === currentUser.id) {
+        return { status: 'pending' };
+      } else {
+        return { status: 'pending' };
+      }
     }
     
-    return 'add';
+    // Check if they are already friends
+    const existingFriendship = friendships.find(f => 
+      (f.user1_id === currentUser.id && f.user2_id === otherUserId) ||
+      (f.user1_id === otherUserId && f.user2_id === currentUser.id)
+    );
+    
+    if (existingFriendship && existingFriendship.status === 'accepted') {
+      return { status: 'friends', friendship_id: existingFriendship.id };
+    }
+    
+    // If no local state, check with backend
+    try {
+      return await api.checkFriendshipStatus(currentUser.id, otherUserId);
+    } catch (e: any) {
+      console.error('Error checking friendship status:', e.message);
+      return { status: 'none' };
+    }
   };
 
   // Get user's friends (accepted friendships) - using the new API endpoint
@@ -507,15 +585,15 @@ const App: React.FC = () => {
 
   // Get pending friend requests received by current user
   const getPendingRequestsReceived = useMemo(() => {
-    if (!currentUser || !friendshipsData) return [];
-    return friendshipsData.users.filter(user => user.friendship_status === 'received');
-  }, [friendshipsData, currentUser]);
+    if (!currentUser || !Array.isArray(friendRequests)) return [];
+    return friendRequests.filter(r => r.toUserId === currentUser.id && r.status === 'pending');
+  }, [friendRequests, currentUser]);
 
   // Get pending friend requests sent by current user
   const getPendingRequestsSent = useMemo(() => {
-    if (!currentUser || !friendshipsData) return [];
-    return friendshipsData.users.filter(user => user.friendship_status === 'sent');
-  }, [friendshipsData, currentUser]);
+    if (!currentUser || !Array.isArray(friendRequests)) return [];
+    return friendRequests.filter(r => r.fromUserId === currentUser.id && r.status === 'pending');
+  }, [friendRequests, currentUser]);
 
   // Legacy function names for compatibility with existing components
   const handleFriendRequest = handleSendFriendRequest;
@@ -523,11 +601,18 @@ const App: React.FC = () => {
   const handleRequestResponse = (requestId: number, response: 'accepted' | 'declined') => {
     if (!currentUser) return;
     
+    // For now, just remove the request from local state and refresh
+    // TODO: Implement proper accept/reject logic when backend provides more info
+    setApiFriendRequests(prev => prev.filter(r => r.id !== requestId));
+    
     if (response === 'accepted') {
-      handleAcceptFriendRequest(requestId);
+      alert('Friend request accepted! You will need to refresh to see the updated status.');
     } else {
-      handleRejectFriendRequest(requestId);
+      alert('Friend request declined.');
     }
+    
+    // Refresh the data to get updated state
+    loadUserFriendships(currentUser.id);
   };
 
   // Load user friendships when user logs in
@@ -737,7 +822,7 @@ const App: React.FC = () => {
                         leaveOrg={leaveOrg}
                     />;
         case 'leaderboard':
-            return <LeaderboardPage allUsers={leaderboardUsers} allOrgs={organizations} signups={signups} opportunities={opportunities} currentUser={currentUser} handleFriendRequest={handleFriendRequest} setPageState={setPageState} checkFriendshipStatus={checkFriendshipStatus} friendshipsData={friendshipsData}/>;
+            return <LeaderboardPage allUsers={leaderboardUsers} allOrgs={organizations} signups={signups} opportunities={opportunities} currentUser={currentUser} handleFriendRequest={handleFriendRequest} setPageState={setPageState} checkFriendshipStatus={checkFriendshipStatus} friendRequests={friendRequests}/>;
         case 'profile':
             const profileUser = pageState.userId ? students.find(s => s.id === pageState.userId) : currentUser;
             if(!profileUser) return <p>User not found</p>;
@@ -770,12 +855,12 @@ const App: React.FC = () => {
                         updateProfilePicture={updateProfilePicture}
                         handleFriendRequest={handleFriendRequest}
                         handleRemoveFriend={handleRemoveFriend}
-                        friendshipsData={friendshipsData}
+                        friendRequests={apiFriendRequests}
                         checkFriendshipStatus={checkFriendshipStatus}
                         getFriendsForUser={getFriendsForUser}
                     />;
         case 'notifications':
-            return <NotificationsPage friendshipsData={friendshipsData} allUsers={students} handleRequestResponse={handleRequestResponse} currentUser={currentUser} />;
+            return <NotificationsPage requests={apiFriendRequests} allUsers={students} handleRequestResponse={handleRequestResponse} currentUser={currentUser} />;
         case 'groups':
             return <GroupsPage currentUser={currentUser} allOrgs={organizations} joinOrg={joinOrg} leaveOrg={leaveOrg} createOrg={createOrg} setPageState={setPageState} />;
         case 'createOpportunity':
@@ -825,7 +910,7 @@ const App: React.FC = () => {
         onLogout={handleLogout}
         allUsers={students}
         allOrgs={organizations}
-        friendshipsData={friendshipsData}
+        friendRequests={apiFriendRequests}
         joinOrg={joinOrg}
         leaveOrg={leaveOrg}
         handleFriendRequest={handleFriendRequest}

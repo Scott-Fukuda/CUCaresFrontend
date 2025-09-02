@@ -108,7 +108,10 @@ export const initialOrganizations: Organization[] = [
     { id: 601, name: 'Cornell Baja SAE Racing', type: 'Project Team' }, { id: 602, name: 'CUAir', type: 'Project Team' },
 ];
 
-
+export const initialFriendRequests: FriendRequest[] = [
+    { id: 1, fromUserId: 6, toUserId: 1, status: 'pending', created_at: '2024-01-15T10:30:00', updated_at: '2024-01-15T10:30:00' }, 
+    { id: 2, fromUserId: 7, toUserId: 1, status: 'pending', created_at: '2024-01-16T14:20:00', updated_at: '2024-01-16T14:20:00' },
+];
 
 const countSignupsForCause = (cause: string, data: { signups: SignUp[]; opportunities: Opportunity[] }) => {
     return data.signups.filter(su => {
