@@ -40,7 +40,7 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
 
   const { members, memberCount, orgTotalPoints, orgRank, upcomingEvents } = useMemo(() => {
     // Use org.users from backend if available, otherwise fall back to local calculation
-    const currentMembers = org.users && org.users.length > 0 ? org.users : allUsers.filter(u => u.organizationIds && u.organizationIds.includes(org.id));
+    const currentMembers = org.users && org.users.length > 0 ? org.users : allUsers.filter(u => u.organizationIds.includes(org.id));
     
     // Use backend member_count if available, otherwise calculate from current members
     const memberCount = org.member_count !== undefined ? org.member_count : currentMembers.length;
@@ -49,7 +49,7 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
 
     const categoryOrgs = allOrgs.filter(g => g.type === org.type)
         .map(g => {
-            const memberIds = allUsers.filter(u => u.organizationIds && u.organizationIds.includes(g.id));
+            const memberIds = allUsers.filter(u => u.organizationIds.includes(g.id));
             const points = memberIds.reduce((sum, member) => sum + (member.points || 0), 0);
             return { id: g.id, points };
         })
