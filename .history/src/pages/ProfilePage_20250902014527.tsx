@@ -259,7 +259,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                             <img 
                                 src={getProfilePictureUrl(friend.profile_image)}
                                 alt={friend.name}
-                                className="w-16 h-16 rounded-full mb-2 border-2 border-cornell-red object-cover"
+                                className="w-16 h-16 rounded-full mb-2 border-2 border-cornell-red object-fill"
                             />
                             <span className="text-sm font-medium text-center">
                                 {friend.name}
