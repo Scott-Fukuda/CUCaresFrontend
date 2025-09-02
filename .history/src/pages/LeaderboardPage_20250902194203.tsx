@@ -45,7 +45,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
 
     return filteredOrgs
         .map(org => {
-            const memberIds = allUsers.filter(u => u.organizationIds && u.organizationIds.includes(org.id)).map(u => u.id);
+            const memberIds = allUsers.filter(u => u.organizationIds.includes(org.id)).map(u => u.id);
             const totalPoints = memberIds.reduce((sum, memberId) => sum + (userPointsMap.get(memberId) || 0), 0);
             return { org, points: totalPoints, memberCount: memberIds.length };
         })

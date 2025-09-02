@@ -36,12 +36,9 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
   // Note: For hosts, being in involved_users means they're signed up, regardless of registered flag
   const signedUpStudents = opportunity.involved_users 
     ? opportunity.involved_users.filter(user => user.registered === true || opportunity.host_id === user.id)
-    : students.filter(student => {
-        const signupUserIds = signups
-          .filter(s => s.opportunityId === opportunity.id)
-          .map(s => s.userId);
-        return signupUserIds.includes(student.id);
-      });
+    : students.filter(student =>
+        signups.filter(s => s.opportunityId === opportunity.id).map(s => s.userId).includes(student.id)
+      );
 
   // Check if current user is signed up by looking in involved_users from backend
   // This persists across login/logout cycles

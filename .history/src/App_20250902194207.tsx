@@ -743,7 +743,7 @@ const App: React.FC = () => {
             if(!profileUser) return <p>User not found</p>;
             
             const profileUserSignups = signups.filter(s => s.userId === profileUser.id);
-            const profileUserOrgs = organizations.filter(g => profileUser.organizationIds && profileUser.organizationIds.includes(g.id));
+            const profileUserOrgs = organizations.filter(g => profileUser.organizationIds.includes(g.id));
             
             const profileUserPoints = profileUser?.points || 0;
             const profileUserHours = profileUserSignups.reduce((total, signup) => {

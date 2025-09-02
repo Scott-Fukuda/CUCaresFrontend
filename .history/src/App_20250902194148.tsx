@@ -618,7 +618,7 @@ const App: React.FC = () => {
 
   const userOrgs = useMemo(() => {
     if (!currentUser) return [];
-    return organizations.filter(g => currentUser.organizationIds && currentUser.organizationIds.includes(g.id));
+    return organizations.filter(g => currentUser.organizationIds.includes(g.id));
   }, [currentUser, organizations]);
 
   const joinOrg = useCallback(async (orgId: number) => {
@@ -647,7 +647,7 @@ const App: React.FC = () => {
   }, [currentUser, organizations]);
 
   const leaveOrg = useCallback(async (orgId: number) => {
-    if (!currentUser || !currentUser.organizationIds || !currentUser.organizationIds.includes(orgId)) return;
+    if (!currentUser || !currentUser.organizationIds.includes(orgId)) return;
     
     // Get organization name for confirmation
     const org = organizations.find(o => o.id === orgId);
@@ -743,7 +743,7 @@ const App: React.FC = () => {
             if(!profileUser) return <p>User not found</p>;
             
             const profileUserSignups = signups.filter(s => s.userId === profileUser.id);
-            const profileUserOrgs = organizations.filter(g => profileUser.organizationIds && profileUser.organizationIds.includes(g.id));
+            const profileUserOrgs = organizations.filter(g => profileUser.organizationIds.includes(g.id));
             
             const profileUserPoints = profileUser?.points || 0;
             const profileUserHours = profileUserSignups.reduce((total, signup) => {
