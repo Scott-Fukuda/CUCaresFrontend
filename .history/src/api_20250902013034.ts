@@ -410,8 +410,15 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
                     registered: involvedUser.registered
                 };
                 
+                console.log('Transformed user result:', transformedUser);
                 return transformedUser;
             });
+            
+            console.log('Final transformedInvolvedUsers:', transformedInvolvedUsers);
+            
+            // Debug: Check if any users have registered: true
+            const registeredUsers = transformedInvolvedUsers.filter((user: any) => user.registered === true);
+            console.log(`Registered users for ${opp.name}:`, registeredUsers);
             
             // Use image URL directly from backend (full URLs like "https://imgur.com/a/y0f0Geb")
             const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';

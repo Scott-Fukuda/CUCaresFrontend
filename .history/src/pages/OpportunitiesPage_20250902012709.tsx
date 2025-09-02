@@ -150,7 +150,12 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           console.log(`Backend signedUpStudents:`, backendSignedUpStudents);
           console.log(`Final combined signedUpStudents:`, signedUpStudents);
           
-
+          // Debug logging
+          console.log('Opportunity:', opp.name, 'ID:', opp.id);
+          console.log('involved_users:', opp.involved_users);
+          console.log('signedUpStudents:', signedUpStudents);
+          console.log('students:', students);
+          console.log('signups:', signups);
 
           // Check if current user is signed up
           const isUserSignedUp = opp.involved_users

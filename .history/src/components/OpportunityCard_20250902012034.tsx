@@ -100,7 +100,17 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, signedUp
              </span>
         </div>
         
-
+        {/* Debug info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-xs text-gray-400 mb-2">
+            Debug: signedUpStudents.length = {signedUpStudents.length}
+            {signedUpStudents.length > 0 && (
+              <div>
+                First student: {JSON.stringify(signedUpStudents[0])}
+              </div>
+            )}
+          </div>
+        )}
         
         {signedUpStudents.length > 0 ? (
              <div className="flex items-center -space-x-2 mb-4">
