@@ -8,7 +8,7 @@ interface SearchBarProps {
   allUsers: User[];
   allOrgs: Organization[];
   currentUser: User;
-  friendRequests: ApiFriendRequest[];
+  friendRequests: FriendRequest[];
   joinOrg: (orgId: number) => void;
   leaveOrg: (orgId: number) => void;
   handleFriendRequest: (toUserId: number) => void;
@@ -63,8 +63,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   const getFriendStatus = (userId: number) => {
     if (currentUser.friendIds.includes(userId)) return 'friends';
-    // For now, we can't determine pending status from the new API structure
-    // This would need to be updated when the backend provides more information
+    if (friendRequests.some(r =>
+      ((r.fromUserId === currentUser.id && r.toUserId === userId) ||
+       (r.fromUserId === userId && r.toUserId === currentUser.id && r.status === 'pending'))
+    )) return 'pending';
     return 'none';
   };
   
@@ -149,7 +151,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                            </div>
                            <div className="pl-2">
                             {friendStatus === 'none' && <button onClick={() => { handleFriendRequest(user.id); handleResultClick(); }} className="text-sm bg-gray-200 text-gray-700 font-semibold py-1 px-3 rounded-full hover:bg-gray-300 transition-colors whitespace-nowrap">Add Friend</button>}
-                            {/* Pending status not available with new API structure */}
+                            {friendStatus === 'pending' && <button disabled className="text-sm bg-gray-100 text-gray-500 font-semibold py-1 px-3 rounded-full cursor-not-allowed">Pending</button>}
                             {friendStatus === 'friends' && <span className="text-sm text-green-600 font-semibold">Friends ✓</span>}
                            </div>
                         </li>
