@@ -103,7 +103,8 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
     },
     friendshipStatus,
     isFriend,
-            requestPending,
+    requestSent,
+    requestReceived,
     currentUserId: currentUser?.id,
     profileUserId: user.id
   });
@@ -167,19 +168,28 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                       Remove Friend
                     </button>
                   </div>
+                ) : requestReceived ? (
+                  <div className="space-y-2">
+                    <span className="w-full inline-block bg-yellow-100 text-yellow-700 font-semibold py-2 px-4 rounded-lg">
+                      Friend Request Received
+                    </span>
+                    <p className="text-sm text-gray-600">
+                      Check your notifications to accept or decline this request.
+                    </p>
+                  </div>
                 ) : (
                   <button 
                     onClick={() => handleFriendRequest(user.id)} 
-                    disabled={requestPending || isFriend} 
+                    disabled={requestSent || isFriend} 
                     className={`w-full font-bold py-2 px-4 rounded-lg transition-colors ${
                       isFriend 
                         ? 'bg-green-600 text-white cursor-default' 
-                        : requestPending 
+                        : requestSent 
                           ? 'bg-red-300 text-white cursor-not-allowed' 
                           : 'bg-cornell-red text-white hover:bg-red-800'
                     }`}
                   >
-                    {isFriend ? 'Friends!' : requestPending ? 'Request Sent' : 'Add Friend'}
+                    {isFriend ? 'Friends!' : requestSent ? 'Request Sent' : 'Add Friend'}
                   </button>
                 )}
               </div>

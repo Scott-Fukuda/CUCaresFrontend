@@ -423,7 +423,12 @@ const App: React.FC = () => {
         updated_at: new Date().toISOString()
       };
       
-      setFriendRequests(prev => [...prev, newRequest]);
+      console.log('Adding friend request to local state:', newRequest);
+      setFriendRequests(prev => {
+        const updated = [...prev, newRequest];
+        console.log('Updated friend requests:', updated);
+        return updated;
+      });
       
       // Show success message
       alert(`Friend request sent to ${students.find(s => s.id === friendId)?.firstName}!`);
@@ -522,8 +527,10 @@ const App: React.FC = () => {
     
     if (localRequest) {
       if (localRequest.fromUserId === currentUser.id) {
+        console.log('Returning pending status for sent request');
         return { status: 'pending' };
       } else {
+        console.log('Returning pending status for received request');
         return { status: 'pending' };
       }
     }
