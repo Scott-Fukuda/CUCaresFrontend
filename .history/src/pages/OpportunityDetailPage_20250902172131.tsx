@@ -165,18 +165,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
   return (
     <div>
         <div className="relative mb-8 rounded-2xl overflow-hidden">
-            <img 
-                src={opportunity.imageUrl || '/backup.jpeg'} 
-                alt={opportunity.name} 
-                className="w-full h-64 md:h-80 object-cover"
-                onError={(e) => {
-                    // Fallback to backup image if the main image fails to load
-                    const target = e.target as HTMLImageElement;
-                    if (target.src !== '/backup.jpeg') {
-                        target.src = '/backup.jpeg';
-                    }
-                }}
-            />
+            <img src={opportunity.imageUrl} alt={opportunity.name} className="w-full h-64 md:h-80 object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             <div className="absolute bottom-0 left-0 p-8">
                 {opportunity.causes && opportunity.causes.length > 0 && (
