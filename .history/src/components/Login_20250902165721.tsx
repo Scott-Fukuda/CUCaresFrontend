@@ -64,7 +64,7 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading }) => {
         </p>
         
         <p className="text-sm text-gray-600 mt-4">
-          Not a student? Reach out to <a href="mailto:team@campuscares.us" className="text-cornell-red hover:underline">team@campuscares.us</a>.
+          Not a student? Reach out to <a href="mailto:info@campuscares.us" className="text-cornell-red hover:underline">info@campuscares.us</a>.
         </p>
       </div>
     </div>
