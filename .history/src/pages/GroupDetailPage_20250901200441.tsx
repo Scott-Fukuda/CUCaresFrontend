@@ -23,6 +23,28 @@ const CalendarIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http:
 
 const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrgs, opportunities, signups, currentUser, setPageState, joinOrg, leaveOrg }) => {
   const isMember = currentUser.organizationIds.includes(org.id);
+  const [fetchedMembers, setFetchedMembers] = useState<User[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+
+  // Fetch organization members from backend
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (org.member_count && org.member_count > 0) {
+        setLoadingMembers(true);
+        try {
+          const members = await getOrganizationMembers(org.id);
+          setFetchedMembers(members);
+        } catch (error) {
+          console.error('Failed to fetch organization members:', error);
+          // Fall back to local calculation
+        } finally {
+          setLoadingMembers(false);
+        }
+      }
+    };
+
+    fetchMembers();
+  }, [org.id, org.member_count]);
 
   const handleUnapproveOrganization = async () => {
     const confirmed = window.confirm(`Are you sure you want to unapprove the organization "${org.name}"? This will hide it from all users.`);
@@ -39,8 +61,8 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
   };
 
   const { members, memberCount, orgTotalPoints, orgRank, upcomingEvents } = useMemo(() => {
-    // Use org.users from backend if available, otherwise fall back to local calculation
-    const currentMembers = org.users && org.users.length > 0 ? org.users : allUsers.filter(u => u.organizationIds.includes(org.id));
+    // Use fetched members from backend if available, otherwise fall back to local calculation
+    const currentMembers = fetchedMembers.length > 0 ? fetchedMembers : allUsers.filter(u => u.organizationIds.includes(org.id));
     
     // Use backend member_count if available, otherwise calculate from current members
     const memberCount = org.member_count !== undefined ? org.member_count : currentMembers.length;
@@ -78,7 +100,7 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
 
 
     return { members: currentMembers, memberCount, orgTotalPoints: totalPoints, orgRank: rank, upcomingEvents: events };
-  }, [org, allUsers, allOrgs, opportunities]);
+  }, [org, allUsers, allOrgs, opportunities, fetchedMembers]);
   
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -143,7 +165,12 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
             <h3 className="text-xl font-bold mb-4">Members ({memberCount})</h3>
             {memberCount > 0 ? (
                 <div className="flex flex-wrap gap-4">
-                    {members.length > 0 ? (
+                    {loadingMembers ? (
+                        <div className="w-full text-center py-4">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cornell-red mx-auto mb-2"></div>
+                            <p className="text-gray-500">Loading members...</p>
+                        </div>
+                    ) : members.length > 0 ? (
                         members.sort((a,b) => a.firstName.localeCompare(b.firstName)).map(member => (
                             <div key={member.id} onClick={() => setPageState({ page: 'profile', userId: member.id })} className="flex items-center gap-2 p-2 pr-4 bg-light-gray rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
                                 <img 

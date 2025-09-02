@@ -54,7 +54,7 @@ const Header: React.FC<HeaderProps> = (props) => {
               </nav>
           </div>
 
-                  <div className="flex-1 flex justify-center md:justify-end items-center gap-4">
+        <div className="flex-1 flex justify-center md:justify-end items-center gap-4">
             {/* Search Bar */}
             <div className="relative w-full max-w-sm hidden md:block">
                 <SearchBar key={`searchbar-${user.id}-${user._lastUpdate || 'no-update'}`} {...props} currentUser={props.user} />
@@ -80,7 +80,6 @@ const Header: React.FC<HeaderProps> = (props) => {
                 Logout
               </button>
             </div>
-          </div>
         </div>
       </div>
     </header>

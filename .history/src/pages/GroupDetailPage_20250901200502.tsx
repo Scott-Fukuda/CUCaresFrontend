@@ -78,7 +78,7 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
 
 
     return { members: currentMembers, memberCount, orgTotalPoints: totalPoints, orgRank: rank, upcomingEvents: events };
-  }, [org, allUsers, allOrgs, opportunities]);
+  }, [org, allUsers, allOrgs, opportunities, fetchedMembers]);
   
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -143,7 +143,12 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
             <h3 className="text-xl font-bold mb-4">Members ({memberCount})</h3>
             {memberCount > 0 ? (
                 <div className="flex flex-wrap gap-4">
-                    {members.length > 0 ? (
+                    {loadingMembers ? (
+                        <div className="w-full text-center py-4">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cornell-red mx-auto mb-2"></div>
+                            <p className="text-gray-500">Loading members...</p>
+                        </div>
+                    ) : members.length > 0 ? (
                         members.sort((a,b) => a.firstName.localeCompare(b.firstName)).map(member => (
                             <div key={member.id} onClick={() => setPageState({ page: 'profile', userId: member.id })} className="flex items-center gap-2 p-2 pr-4 bg-light-gray rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
                                 <img 

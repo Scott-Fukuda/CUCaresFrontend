@@ -423,12 +423,7 @@ const App: React.FC = () => {
         updated_at: new Date().toISOString()
       };
       
-      console.log('Adding friend request to local state:', newRequest);
-      setFriendRequests(prev => {
-        const updated = [...prev, newRequest];
-        console.log('Updated friend requests:', updated);
-        return updated;
-      });
+      setFriendRequests(prev => [...prev, newRequest]);
       
       // Show success message
       alert(`Friend request sent to ${students.find(s => s.id === friendId)?.firstName}!`);
@@ -445,27 +440,8 @@ const App: React.FC = () => {
     if (!currentUser) return;
     try {
       await api.acceptFriendRequest(friendshipId, receiverId);
-      
-      // Remove the request from local state
-      setFriendRequests(prev => prev.filter(r => 
-        !(r.fromUserId === receiverId && r.toUserId === currentUser.id)
-      ));
-      
-      // Add to friendships
-      const newFriendship: Friendship = {
-        id: friendshipId,
-        user1_id: Math.min(currentUser.id, receiverId),
-        user2_id: Math.max(currentUser.id, receiverId),
-        status: 'accepted',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      
-      setFriendships(prev => [...prev, newFriendship]);
-      
       alert('Friend request accepted!');
-      
-      // Refresh friendships to get the real data from backend
+      // Refresh friendships
       await loadUserFriendships(currentUser.id);
     } catch (e: any) {
       alert(`Error accepting friend request: ${e.message}`);
@@ -477,15 +453,8 @@ const App: React.FC = () => {
     if (!currentUser) return;
     try {
       await api.rejectFriendRequest(friendshipId, receiverId);
-      
-      // Remove the request from local state
-      setFriendRequests(prev => prev.filter(r => 
-        !(r.fromUserId === receiverId && r.toUserId === currentUser.id)
-      ));
-      
       alert('Friend request rejected.');
-      
-      // Refresh friendships to get the real data from backend
+      // Refresh friendships
       await loadUserFriendships(currentUser.id);
     } catch (e: any) {
       alert(`Error rejecting friend request: ${e.message}`);
@@ -497,16 +466,8 @@ const App: React.FC = () => {
     if (!currentUser) return;
     try {
       await api.removeFriend(currentUser.id, friendId);
-      
-      // Remove from local friendships
-      setFriendships(prev => prev.filter(f => 
-        !((f.user1_id === currentUser.id && f.user2_id === friendId) ||
-          (f.user1_id === friendId && f.user2_id === currentUser.id))
-      ));
-      
       alert('Friend removed successfully.');
-      
-      // Refresh friendships to get the real data from backend
+      // Refresh friendships
       await loadUserFriendships(currentUser.id);
     } catch (e: any) {
       alert(`Error removing friend: ${e.message}`);
@@ -516,36 +477,6 @@ const App: React.FC = () => {
   // Check friendship status with another user
   const checkFriendshipStatus = async (otherUserId: number): Promise<FriendshipStatus> => {
     if (!currentUser) return { status: 'none' };
-    
-    // Check local state first for immediate updates
-    const localRequest = friendRequests.find(r => 
-      (r.fromUserId === currentUser.id && r.toUserId === otherUserId) ||
-      (r.fromUserId === otherUserId && r.toUserId === currentUser.id)
-    );
-    
-    console.log('Checking friendship status for user', otherUserId, 'Local request found:', localRequest);
-    
-    if (localRequest) {
-      if (localRequest.fromUserId === currentUser.id) {
-        console.log('Returning pending_sent status');
-        return { status: 'pending_sent' };
-      } else {
-        console.log('Returning pending_received status');
-        return { status: 'pending_received' };
-      }
-    }
-    
-    // Check if they are already friends
-    const existingFriendship = friendships.find(f => 
-      (f.user1_id === currentUser.id && f.user2_id === otherUserId) ||
-      (f.user1_id === otherUserId && f.user2_id === currentUser.id)
-    );
-    
-    if (existingFriendship && existingFriendship.status === 'accepted') {
-      return { status: 'friends', friendship_id: existingFriendship.id };
-    }
-    
-    // If no local state, check with backend
     try {
       return await api.checkFriendshipStatus(currentUser.id, otherUserId);
     } catch (e: any) {
