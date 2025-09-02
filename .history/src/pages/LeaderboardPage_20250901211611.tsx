@@ -84,23 +84,30 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
       (r.fromUserId === userId && r.toUserId === currentUser.id)
     );
     
+    console.log('getFriendshipStatus for user', userId, 'Local request found:', localRequest);
+    
     if (localRequest) {
       if (localRequest.fromUserId === currentUser.id) {
-        return { status: 'pending' };
+        console.log('Returning pending_sent for user', userId);
+        return { status: 'pending_sent' };
       } else {
-        return { status: 'pending' };
+        console.log('Returning pending_received for user', userId);
+        return { status: 'pending_received' };
       }
     }
     
     // Fall back to cached statuses
-    return friendshipStatuses.get(userId) || { status: 'none' };
+    const cachedStatus = friendshipStatuses.get(userId) || { status: 'none' };
+    console.log('Returning cached status for user', userId, ':', cachedStatus);
+    return cachedStatus;
   };
 
   const UserRow = ({ user, points, index }: { user: User, points: number, index: number}) => {
     const isCurrentUser = user.id === currentUser.id;
     const friendshipStatus = getFriendshipStatus(user.id);
     const isFriend = friendshipStatus.status === 'friends';
-    const requestPending = friendshipStatus.status === 'pending';
+    const requestSent = friendshipStatus.status === 'pending_sent';
+    const requestReceived = friendshipStatus.status === 'pending_received';
 
     return (
         <li className={`flex items-center justify-between py-4 ${isCurrentUser ? 'bg-yellow-50 rounded-lg -mx-4 px-4' : ''}`}>
@@ -116,9 +123,13 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
                     <span className="text-sm bg-green-100 text-green-700 font-semibold py-1 px-3 rounded-full">
                       Friends ✓
                     </span>
-                 ) : requestPending ? (
+                 ) : requestSent ? (
                     <span className="text-sm bg-yellow-100 text-yellow-700 font-semibold py-1 px-3 rounded-full">
                       Request Sent
+                    </span>
+                 ) : requestReceived ? (
+                    <span className="text-sm bg-blue-100 text-blue-700 font-semibold py-1 px-3 rounded-full">
+                      Request Received
                     </span>
                  ) : (
                     <button onClick={() => handleFriendRequest(user.id)} className="text-sm bg-gray-200 text-gray-700 font-semibold py-1 px-3 rounded-full hover:bg-gray-300 transition-colors">

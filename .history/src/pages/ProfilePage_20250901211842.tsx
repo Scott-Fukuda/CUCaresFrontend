@@ -167,6 +167,15 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                       Remove Friend
                     </button>
                   </div>
+                ) : requestReceived ? (
+                  <div className="space-y-2">
+                    <span className="w-full inline-block bg-yellow-100 text-yellow-700 font-semibold py-2 px-4 rounded-lg">
+                      Friend Request Received
+                    </span>
+                    <p className="text-sm text-gray-600">
+                      Check your notifications to accept or decline this request.
+                    </p>
+                  </div>
                 ) : (
                   <button 
                     onClick={() => handleFriendRequest(user.id)} 

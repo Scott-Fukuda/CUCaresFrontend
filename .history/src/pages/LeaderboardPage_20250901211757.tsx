@@ -84,16 +84,22 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
       (r.fromUserId === userId && r.toUserId === currentUser.id)
     );
     
+    console.log('getFriendshipStatus for user', userId, 'Local request found:', localRequest);
+    
     if (localRequest) {
       if (localRequest.fromUserId === currentUser.id) {
+        console.log('Returning pending status for sent request');
         return { status: 'pending' };
       } else {
+        console.log('Returning pending status for received request');
         return { status: 'pending' };
       }
     }
     
     // Fall back to cached statuses
-    return friendshipStatuses.get(userId) || { status: 'none' };
+    const cachedStatus = friendshipStatuses.get(userId) || { status: 'none' };
+    console.log('Returning cached status for user', userId, ':', cachedStatus);
+    return cachedStatus;
   };
 
   const UserRow = ({ user, points, index }: { user: User, points: number, index: number}) => {

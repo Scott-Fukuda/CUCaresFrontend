@@ -522,8 +522,10 @@ const App: React.FC = () => {
     
     if (localRequest) {
       if (localRequest.fromUserId === currentUser.id) {
+        console.log('Returning pending status for sent request');
         return { status: 'pending' };
       } else {
+        console.log('Returning pending status for received request');
         return { status: 'pending' };
       }
     }
