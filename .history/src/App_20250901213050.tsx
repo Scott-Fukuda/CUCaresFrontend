@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { User, MinimalUser, Opportunity, SignUp, Organization, FriendRequest, Badge, OrganizationType, Notification, Friendship, FriendshipStatus, ApiFriendRequest } from './types';
+import { User, MinimalUser, Opportunity, SignUp, Organization, FriendRequest, Badge, OrganizationType, Notification, Friendship, FriendshipStatus } from './types';
 import * as api from './api';
 import { initialBadges, initialFriendRequests } from './data/initialData'; // Using initial data for badges/requests
 import { signInWithGoogle, FirebaseUser, auth } from './firebase-config';
@@ -38,9 +38,6 @@ const App: React.FC = () => {
   
   // Local state for features not in API spec
   const [legacyFriendRequests, setLegacyFriendRequests] = useState<FriendRequest[]>(initialFriendRequests);
-  
-  // API friend requests state
-  const [apiFriendRequests, setApiFriendRequests] = useState<ApiFriendRequest[]>([]);
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [pageState, setPageState] = useState<PageState>({ page: 'opportunities' });
@@ -376,6 +373,7 @@ const App: React.FC = () => {
   // New friend management system using backend endpoints
   const [friendships, setFriendships] = useState<Friendship[]>([]);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [apiFriendRequests, setApiFriendRequests] = useState<ApiFriendRequest[]>([]);
 
   const pendingRequestCount = useMemo(() => {
     if (!currentUser || !Array.isArray(apiFriendRequests)) return 0;

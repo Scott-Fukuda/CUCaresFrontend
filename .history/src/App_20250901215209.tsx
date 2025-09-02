@@ -378,9 +378,9 @@ const App: React.FC = () => {
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
 
   const pendingRequestCount = useMemo(() => {
-    if (!currentUser || !Array.isArray(apiFriendRequests)) return 0;
-    return apiFriendRequests.length; // All requests from the new API are pending
-  }, [currentUser, apiFriendRequests]);
+    if (!currentUser || !Array.isArray(friendRequests)) return 0;
+    return friendRequests.filter(r => r.toUserId === currentUser.id && r.status === 'pending').length;
+  }, [currentUser, friendRequests]);
 
   // Load user's friendships and friend requests
   const loadUserFriendships = useCallback(async (userId: number) => {

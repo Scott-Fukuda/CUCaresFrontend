@@ -38,9 +38,6 @@ const App: React.FC = () => {
   
   // Local state for features not in API spec
   const [legacyFriendRequests, setLegacyFriendRequests] = useState<FriendRequest[]>(initialFriendRequests);
-  
-  // API friend requests state
-  const [apiFriendRequests, setApiFriendRequests] = useState<ApiFriendRequest[]>([]);
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [pageState, setPageState] = useState<PageState>({ page: 'opportunities' });
@@ -376,6 +373,7 @@ const App: React.FC = () => {
   // New friend management system using backend endpoints
   const [friendships, setFriendships] = useState<Friendship[]>([]);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [apiFriendRequests, setApiFriendRequests] = useState<ApiFriendRequest[]>([]);
 
   const pendingRequestCount = useMemo(() => {
     if (!currentUser || !Array.isArray(apiFriendRequests)) return 0;
@@ -401,7 +399,7 @@ const App: React.FC = () => {
       console.log('Setting friend requests state:', validRequests);
       
       setFriendships(validFriendships);
-      setFriendRequests(validRequests);
+      setApiFriendRequests(validRequests);
     } catch (e: any) {
       console.error('Error loading friendships:', e.message);
       // Set empty arrays on error to prevent filter errors
@@ -604,27 +602,30 @@ const App: React.FC = () => {
   // Legacy function names for compatibility with existing components
   const handleFriendRequest = handleSendFriendRequest;
   const handleAddFriend = handleSendFriendRequest;
-  const handleRequestResponse = (fromUserId: number, response: 'accepted' | 'declined') => {
+  const handleRequestResponse = (requestId: number, response: 'accepted' | 'declined') => {
     if (!currentUser) return;
-    if (response === 'accepted') {
-      // Find the friendship ID for this request
-      const friendship = friendships.find(f => 
-        (f.user1_id === fromUserId && f.user2_id === currentUser.id) ||
-        (f.user1_id === currentUser.id && f.user2_id === fromUserId)
-      );
-      if (friendship) {
-        handleAcceptFriendRequest(friendship.id, currentUser.id);
-      }
-    } else {
-      // Find the friendship ID for this request
-      const friendship = friendships.find(f => 
-        (f.user1_id === fromUserId && f.user2_id === currentUser.id) ||
-        (f.user1_id === currentUser.id && f.user2_id === fromUserId)
-      );
-      if (friendship) {
-        handleRejectFriendRequest(friendship.id, currentUser.id);
-      }
+    
+    // Find the request in our local state
+    const request = apiFriendRequests.find(r => r.id === requestId);
+    if (!request) {
+      console.error('Friend request not found:', requestId);
+      return;
     }
+    
+    if (response === 'accepted') {
+      // For now, just remove the request from local state and refresh
+      // TODO: Implement proper accept logic when backend provides more info
+      setApiFriendRequests(prev => prev.filter(r => r.id !== requestId));
+      alert(`Friend request from ${request.requester_name} accepted!`);
+    } else {
+      // For now, just remove the request from local state and refresh
+      // TODO: Implement proper reject logic when backend provides more info
+      setApiFriendRequests(prev => prev.filter(r => r.id !== requestId));
+      alert(`Friend request from ${request.requester_name} declined.`);
+    }
+    
+    // Refresh the data to get updated state
+    loadUserFriendships(currentUser.id);
   };
 
   // Load user friendships when user logs in
@@ -872,8 +873,7 @@ const App: React.FC = () => {
                         getFriendsForUser={getFriendsForUser}
                     />;
         case 'notifications':
-            const requestsToUser = Array.isArray(friendRequests) ? friendRequests.filter(r => r.toUserId === currentUser.id) : [];
-            return <NotificationsPage requests={requestsToUser} allUsers={students} handleRequestResponse={handleRequestResponse} currentUser={currentUser} />;
+            return <NotificationsPage requests={apiFriendRequests} allUsers={students} handleRequestResponse={handleRequestResponse} currentUser={currentUser} />;
         case 'groups':
             return <GroupsPage currentUser={currentUser} allOrgs={organizations} joinOrg={joinOrg} leaveOrg={leaveOrg} createOrg={createOrg} setPageState={setPageState} />;
         case 'createOpportunity':

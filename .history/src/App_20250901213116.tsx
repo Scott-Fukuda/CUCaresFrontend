@@ -38,9 +38,6 @@ const App: React.FC = () => {
   
   // Local state for features not in API spec
   const [legacyFriendRequests, setLegacyFriendRequests] = useState<FriendRequest[]>(initialFriendRequests);
-  
-  // API friend requests state
-  const [apiFriendRequests, setApiFriendRequests] = useState<ApiFriendRequest[]>([]);
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [pageState, setPageState] = useState<PageState>({ page: 'opportunities' });
@@ -376,6 +373,7 @@ const App: React.FC = () => {
   // New friend management system using backend endpoints
   const [friendships, setFriendships] = useState<Friendship[]>([]);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [apiFriendRequests, setApiFriendRequests] = useState<ApiFriendRequest[]>([]);
 
   const pendingRequestCount = useMemo(() => {
     if (!currentUser || !Array.isArray(apiFriendRequests)) return 0;
@@ -401,7 +399,7 @@ const App: React.FC = () => {
       console.log('Setting friend requests state:', validRequests);
       
       setFriendships(validFriendships);
-      setFriendRequests(validRequests);
+      setApiFriendRequests(validRequests);
     } catch (e: any) {
       console.error('Error loading friendships:', e.message);
       // Set empty arrays on error to prevent filter errors
@@ -872,8 +870,7 @@ const App: React.FC = () => {
                         getFriendsForUser={getFriendsForUser}
                     />;
         case 'notifications':
-            const requestsToUser = Array.isArray(friendRequests) ? friendRequests.filter(r => r.toUserId === currentUser.id) : [];
-            return <NotificationsPage requests={requestsToUser} allUsers={students} handleRequestResponse={handleRequestResponse} currentUser={currentUser} />;
+            return <NotificationsPage requests={apiFriendRequests} allUsers={students} handleRequestResponse={handleRequestResponse} currentUser={currentUser} />;
         case 'groups':
             return <GroupsPage currentUser={currentUser} allOrgs={organizations} joinOrg={joinOrg} leaveOrg={leaveOrg} createOrg={createOrg} setPageState={setPageState} />;
         case 'createOpportunity':

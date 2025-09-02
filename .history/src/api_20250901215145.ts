@@ -1,5 +1,5 @@
 
-import { User, MinimalUser, Opportunity, Organization, SignUp, Friendship, FriendRequest, FriendshipStatus, ApiFriendRequest } from './types';
+import { User, MinimalUser, Opportunity, Organization, SignUp, Friendship, FriendRequest, FriendshipStatus } from './types';
 import { auth } from './firebase-config';
 
 // Helper function to get profile picture URL

@@ -59,8 +59,8 @@ export interface SignUp {
 export type StudentGroupCategory = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team';
 export const studentGroupCategories: StudentGroupCategory[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team'];
 
-export type OrganizationType = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team' | 'Cultural' | 'Community Service' | 'Other';
-export const organizationTypes: OrganizationType[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team', 'Cultural', 'Community Service', 'Other'];
+export type OrganizationType = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team' | 'Other';
+export const organizationTypes: OrganizationType[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team', 'Other'];
 
 export interface StudentGroup {
     id: number;
@@ -125,13 +125,6 @@ export interface Notification {
   link?: string; // e.g., to a post or profile
   isRead: boolean;
   createdAt: string; // ISO string
-}
-
-// New interface for the actual API response from /api/users/{id}/friend-requests
-export interface ApiFriendRequest {
-  id: number;
-  requester_name: string;
-  requester_profile_image: string | null;
 }
 
 export const allInterests = [
