@@ -393,8 +393,13 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
             }
             
             // Transform involved_users from backend format to frontend User format
+            console.log('Raw opportunity involved_users:', opp.involved_users);
             const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => {
                 console.log('Transforming involved user:', involvedUser);
+                console.log('Raw involved user user field:', involvedUser.user);
+                console.log('Raw involved user registered field:', involvedUser.registered);
+                console.log('Raw involved user attended field:', involvedUser.attended);
+                console.log('Raw involved user email field:', involvedUser.email);
                 
                 const transformedUser = {
                     id: involvedUser.id,
@@ -410,11 +415,12 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
                     registered: involvedUser.registered
                 };
                 
+                console.log('Transformed user result:', transformedUser);
                 return transformedUser;
             });
             
             // Use image URL directly from backend (full URLs like "https://imgur.com/a/y0f0Geb")
-            const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
+            const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com/default-opp-image.png';
             
             return {
                 id: opp.id,

@@ -118,39 +118,19 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       {/* Opportunities Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredOpportunities.map(opp => {
-          // Determine signed-up students - prioritize local signups state for immediate updates
-          let signedUpStudents: User[] = [];
+          // Determine signed-up students
+          const signedUpStudents = opp.involved_users
+            ? opp.involved_users.filter(user => user.registered || opp.host_id === user.id)
+            : students.filter(student =>
+                signups.filter(s => s.opportunityId === opp.id).map(s => s.userId).includes(student.id)
+              );
           
-          // First, check local signups state (immediate updates)
-          const opportunitySignups = signups.filter(s => s.opportunityId === opp.id);
-          const localSignedUpStudents = students.filter(student =>
-            opportunitySignups.some(s => s.userId === student.id)
-          );
-          
-          // Then, check backend data (opportunities.involved_users) for any additional signups
-          let backendSignedUpStudents: User[] = [];
-          if (opp.involved_users && opp.involved_users.length > 0) {
-            backendSignedUpStudents = opp.involved_users.filter(user => 
-              user.registered === true || opp.host_id === user.id
-            );
-          }
-          
-          // Combine both sources, prioritizing local state
-          const allSignedUpIds = new Set([
-            ...localSignedUpStudents.map(s => s.id),
-            ...backendSignedUpStudents.map(s => s.id)
-          ]);
-          
-          signedUpStudents = students.filter(student => allSignedUpIds.has(student.id));
-          
-          console.log(`Opportunity: ${opp.name} (ID: ${opp.id})`);
-          console.log(`Local signups:`, opportunitySignups);
-          console.log(`Local signedUpStudents:`, localSignedUpStudents);
-          console.log(`Backend involved_users:`, opp.involved_users);
-          console.log(`Backend signedUpStudents:`, backendSignedUpStudents);
-          console.log(`Final combined signedUpStudents:`, signedUpStudents);
-          
-
+          // Debug logging
+          console.log('Opportunity:', opp.name, 'ID:', opp.id);
+          console.log('involved_users:', opp.involved_users);
+          console.log('signedUpStudents:', signedUpStudents);
+          console.log('students:', students);
+          console.log('signups:', signups);
 
           // Check if current user is signed up
           const isUserSignedUp = opp.involved_users

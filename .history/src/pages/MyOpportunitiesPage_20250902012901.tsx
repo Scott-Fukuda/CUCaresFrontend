@@ -199,15 +199,11 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
 
         {registeredOpportunities.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                          {registeredOpportunities.map(opp => {
-                // Determine signed-up students from backend data
-                let signedUpStudents: User[] = [];
-                if (opp.involved_users && opp.involved_users.length > 0) {
-                  signedUpStudents = opp.involved_users.filter(user => 
-                    user.registered === true || opp.host_id === user.id
-                  );
-                }
-                const isUserSignedUp = currentUserSignupsSet.has(opp.id);
+            {registeredOpportunities.map(opp => {
+              const signedUpStudents = students.filter(student => 
+                opp.involved_users?.some(user => user.id === student.id && user.registered)
+              );
+              const isUserSignedUp = currentUserSignupsSet.has(opp.id);
               
               return (
                 <OpportunityCard
