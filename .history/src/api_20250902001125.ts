@@ -462,7 +462,7 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
                     lastName,
                     email: involvedUser.email || '', // Now provided by backend
                     phone: involvedUser.phone || '',
-                    profile_image: involvedUser.profile_image,
+                    profilePictureUrl: getProfilePictureUrl(involvedUser.profilePictureUrl || involvedUser.profile_image, involvedUser.id),
                     interests: [],
                     friendIds: [],
                     organizationIds: [],

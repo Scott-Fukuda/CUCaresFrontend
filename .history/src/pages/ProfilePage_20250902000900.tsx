@@ -257,7 +257,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                             className="flex flex-col items-center p-3 bg-light-gray rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
                         >
                             <img 
-                                src={getProfilePictureUrl(friend.profile_image)}
+                                src={getProfilePictureUrl(friend.profilePictureUrl)}
                                 alt={friend.name}
                                 className="w-16 h-16 rounded-full mb-2 border-2 border-cornell-red object-fill"
                             />

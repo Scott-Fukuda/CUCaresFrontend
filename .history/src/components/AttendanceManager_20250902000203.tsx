@@ -91,13 +91,13 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
             >
               <div className="flex items-center space-x-3">
                 <img 
-                                      src={api.getProfilePictureUrl(participant.profile_image)} 
+                  src={api.getProfilePictureUrl(participant.profilePictureUrl)} 
                   alt={participant.name}
                   className="w-10 h-10 rounded-full object-cover"
                 />
                 <div>
                   <p className="font-medium text-gray-900">
-                    {participant.name}
+                    {participant.firstName} {participant.lastName}
                   </p>
                   <p className="text-sm text-gray-500">{participant.email}</p>
                 </div>

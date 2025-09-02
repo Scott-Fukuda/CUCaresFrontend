@@ -331,7 +331,7 @@ export const getAcceptedFriendships = async (userId: number): Promise<User[]> =>
         name: friendship.other_user_name || friendship.name || 'Unknown User',
         email: '', // Not provided in friendship response
         password: '', // Not provided in friendship response
-        profile_image: friendship.other_user_profile_image || friendship.profile_image,
+        profilePictureUrl: friendship.other_user_profile_image || friendship.profile_image,
         interests: [], // Not provided in friendship response
         friendIds: [], // Not provided in friendship response
         organizationIds: [], // Not provided in friendship response
@@ -462,7 +462,7 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
                     lastName,
                     email: involvedUser.email || '', // Now provided by backend
                     phone: involvedUser.phone || '',
-                    profile_image: involvedUser.profile_image,
+                    profilePictureUrl: getProfilePictureUrl(involvedUser.profilePictureUrl || involvedUser.profile_image, involvedUser.id),
                     interests: [],
                     friendIds: [],
                     organizationIds: [],

@@ -91,7 +91,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
             >
               <div className="flex items-center space-x-3">
                 <img 
-                                      src={api.getProfilePictureUrl(participant.profile_image)} 
+                  src={api.getProfilePictureUrl(participant.profilePictureUrl)} 
                   alt={participant.name}
                   className="w-10 h-10 rounded-full object-cover"
                 />

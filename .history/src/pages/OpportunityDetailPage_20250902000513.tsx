@@ -279,7 +279,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                             if (participantEmails) {
                               // Create Gmail draft with all participant emails
                               const subject = encodeURIComponent(`Update for ${opportunity.name}`);
-                                                             const body = encodeURIComponent(`Hi everyone,\n\nThis is an update regarding ${opportunity.name}.\n\nBest regards,\n${currentUser.name}`);
+                              const body = encodeURIComponent(`Hi everyone,\n\nThis is an update regarding ${opportunity.name}.\n\nBest regards,\n${currentUser.firstName} ${currentUser.lastName}`);
                               const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(participantEmails)}&su=${subject}&body=${body}`;
                               window.open(gmailUrl, '_blank');
                             } else {

@@ -147,7 +147,7 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
                         members.sort((a,b) => a.name.localeCompare(b.name)).map(member => (
                             <div key={member.id} onClick={() => setPageState({ page: 'profile', userId: member.id })} className="flex items-center gap-2 p-2 pr-4 bg-light-gray rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
                                 <img 
-                                    src={getProfilePictureUrl(member.profile_image)} 
+                                    src={getProfilePictureUrl(member.profilePictureUrl)} 
                                                                          alt={member.name}
                                     className="w-9 h-9 rounded-full object-cover"
                                 />
