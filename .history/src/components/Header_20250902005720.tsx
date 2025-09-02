@@ -14,7 +14,7 @@ interface HeaderProps {
   onLogout: () => void;
   allUsers: User[];
   allOrgs: Organization[];
-  friendshipsData: FriendshipsResponse | null;
+  friendRequests: ApiFriendRequest[];
   joinOrg: (orgId: number) => void;
   leaveOrg: (orgId: number) => void;
   handleFriendRequest: (toUserId: number) => void;

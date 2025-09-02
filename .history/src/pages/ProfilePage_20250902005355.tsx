@@ -18,7 +18,7 @@ interface ProfilePageProps {
   updateProfilePicture: (file: File) => void;
   handleFriendRequest: (toUserId: number) => void;
   handleRemoveFriend: (friendId: number) => void;
-  friendshipsData: FriendshipsResponse | null;
+  friendRequests: ApiFriendRequest[];
   checkFriendshipStatus: (otherUserId: number) => Promise<FriendshipStatus>;
   getFriendsForUser: (userId: number) => Promise<User[]>; // New async function
 }
@@ -27,11 +27,11 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const { 
     user, isCurrentUser, currentUser, earnedBadges, userOrgs, 
     hoursVolunteered, userFriends, setPageState, updateInterests, 
-    updateProfilePicture, handleFriendRequest, handleRemoveFriend, friendshipsData, checkFriendshipStatus, getFriendsForUser
+    updateProfilePicture, handleFriendRequest, handleRemoveFriend, friendRequests, checkFriendshipStatus, getFriendsForUser
   } = props;
   
   const [selectedInterests, setSelectedInterests] = useState(user.interests);
-  const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>('add');
+  const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>({ status: 'none' });
   const [profileUserFriends, setProfileUserFriends] = useState<User[]>([]);
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [uploadingProfilePic, setUploadingProfilePic] = useState(false);
@@ -46,7 +46,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
     if (!isCurrentUser && currentUser) {
       checkFriendshipStatus(user.id).then(setFriendshipStatus);
     }
-  }, [isCurrentUser, currentUser, user.id, checkFriendshipStatus, friendshipsData]);
+  }, [isCurrentUser, currentUser, user.id, checkFriendshipStatus, friendRequests]);
 
 
 
@@ -91,8 +91,8 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
     }
   };
   
-  const isFriend = friendshipStatus === 'friends';
-      const requestPending = friendshipStatus === 'sent' || friendshipStatus === 'received';
+  const isFriend = friendshipStatus.status === 'friends';
+      const requestPending = friendshipStatus.status === 'pending';
 
   // Debug logging
   console.log('ProfilePage render:', {

@@ -87,20 +87,6 @@ export interface Friendship {
 
 export type FriendshipStatus = 'friends' | 'sent' | 'received' | 'add';
 
-export interface UserWithFriendshipStatus {
-  user_id: number;
-  name: string;
-  profile_image: string | null;
-  email: string;
-  friendship_status: FriendshipStatus;
-}
-
-export interface FriendshipsResponse {
-  current_user_id: number;
-  users: UserWithFriendshipStatus[];
-  total_users: number;
-}
-
 export interface BadgeThresholdData {
     points: number;
     signUpCount: number;

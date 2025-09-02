@@ -69,7 +69,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
             statuses.set(user.id, status);
           } catch (error) {
             console.error(`Error checking friendship status for user ${user.id}:`, error);
-            statuses.set(user.id, 'add');
+            statuses.set(user.id, { status: 'none' });
           }
         }
       }

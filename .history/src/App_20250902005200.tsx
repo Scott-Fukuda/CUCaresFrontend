@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { User, MinimalUser, Opportunity, SignUp, Organization, Badge, OrganizationType, Notification, Friendship, FriendshipStatus, FriendshipsResponse, UserWithFriendshipStatus } from './types';
 import * as api from './api';
-import { initialBadges } from './data/initialData'; // Using initial data for badges
+import { initialBadges, initialFriendRequests } from './data/initialData'; // Using initial data for badges/requests
 import { signInWithGoogle, FirebaseUser, auth } from './firebase-config';
 import Header from './components/Header';
 import Login from './components/Login';

@@ -225,19 +225,49 @@ export const getUserFriendships = async (userId: number): Promise<FriendshipsRes
   return result;
 };
 
-
+export const getUserFriendships = async (userId: number): Promise<Friendship[]> => {
+  console.log(`API: Fetching friendships for user ${userId}`);
+  const result = await authenticatedRequest(`/users/${userId}/friendships`);
+  console.log(`API: Friendships response:`, result);
+  
+  let rawFriendships: any[] = [];
+  
+  // Handle different response structures the backend might return
+  if (Array.isArray(result)) {
+    rawFriendships = result;
+  } else if (result && Array.isArray(result.friendships)) {
+    rawFriendships = result.friendships;
+  } else if (result && Array.isArray(result.data)) {
+    rawFriendships = result.data;
+  } else {
+    console.warn('Unexpected friendships response structure:', result);
+    return [];
+  }
+  
+  // Transform field names to match our interface
+  return rawFriendships.map(friendship => ({
+    id: friendship.id,
+    user1_id: friendship.user1_id || friendship.user1Id,
+    user2_id: friendship.user2_id || friendship.user2Id,
+    status: friendship.status,
+    created_at: friendship.created_at || friendship.createdAt,
+    updated_at: friendship.updated_at || friendship.updatedAt
+  }));
+};
 
 export const sendFriendRequest = (userId: number, friendId: number) => authenticatedRequest(`/users/${userId}/friends`, {
   method: 'POST',
   body: JSON.stringify({ receiver_id: friendId }),
 });
 
-export const acceptFriendRequest = (friendshipId: number) => authenticatedRequest(`/friendships/${friendshipId}/accept`, {
+export const acceptFriendRequest = (friendshipId: number, receiverId: number) => authenticatedRequest(`/friendships/${friendshipId}/accept`, {
   method: 'PUT',
+  body: JSON.stringify({ receiver_id: receiverId }),
 });
 
-export const rejectFriendRequest = (friendshipId: number) => authenticatedRequest(`/friendships/${friendshipId}/reject`, {
+export const rejectFriendRequest = (friendshipId: number, receiverId: number) => authenticatedRequest(`/friendships/${friendshipId}/reject`, {
   method: 'PUT',
+  body: JSON.stringify({ receiver_id: receiverId }),
 });
 
 export const removeFriend = (userId: number, friendId: number) => authenticatedRequest(`/users/${userId}/friends/${friendId}`, {

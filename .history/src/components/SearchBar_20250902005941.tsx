@@ -151,7 +151,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                                 <p className="font-semibold text-gray-800">{user.name}</p>
                            </div>
                            <div className="pl-2">
-                            {friendStatus === 'add' && <button onClick={() => { handleFriendRequest(user.id); handleResultClick(); }} className="text-sm bg-gray-200 text-gray-700 font-semibold py-1 px-3 rounded-full hover:bg-gray-300 transition-colors whitespace-nowrap">Add Friend</button>}
+                            {friendStatus === 'none' && <button onClick={() => { handleFriendRequest(user.id); handleResultClick(); }} className="text-sm bg-gray-200 text-gray-700 font-semibold py-1 px-3 rounded-full hover:bg-gray-300 transition-colors whitespace-nowrap">Add Friend</button>}
                             {/* Pending status not available with new API structure */}
                             {friendStatus === 'friends' && <span className="text-sm text-green-600 font-semibold">Friends ✓</span>}
                            </div>
