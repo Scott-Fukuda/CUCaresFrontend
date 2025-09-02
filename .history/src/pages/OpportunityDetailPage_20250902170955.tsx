@@ -271,34 +271,17 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                 )}
                 
                 <div className="mt-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-2xl font-bold">Participants ({signedUpStudents.length}/{opportunity.totalSlots})</h3>
-                        <div className="text-right">
-                            <p className="text-sm text-gray-600">Available Slots</p>
-                            <p className={`text-lg font-semibold ${availableSlots > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {availableSlots}
-                            </p>
-                        </div>
-                    </div>
+                    <h3 className="text-2xl font-bold mb-4">Participants ({signedUpStudents.length}/{opportunity.totalSlots})</h3>
                     {signedUpStudents.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             {signedUpStudents.map(student => (
                                 <div key={`${student.id}-${student._lastUpdate || 'no-update'}`} onClick={() => setPageState({ page: 'profile', userId: student.id})} className="text-center cursor-pointer group">
-                                    <p className="font-semibold text-gray-800 group-hover:text-cornell-red transition">{student.name}</p>
+                                                                         <p className="font-semibold text-gray-800 group-hover:text-cornell-red transition">{student.name}</p>
                                 </div>
                             ))}
                         </div>
                     ) : (
                          <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up!</div>
-                    )}
-                    
-                    {/* Slot limit warning for hosts */}
-                    {isUserHost && availableSlots <= 0 && (
-                        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <p className="text-sm text-yellow-700 text-center">
-                                ⚠️ This event has reached its maximum capacity. Consider increasing the slot limit if you want to allow more participants.
-                            </p>
-                        </div>
                     )}
                 </div>
             </div>
@@ -310,68 +293,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                       participants={signedUpStudents}
                       onAttendanceSubmitted={handleAttendanceSubmitted}
                     />
-                    
-                    {/* Slot Limit Management */}
-                    <div className="bg-white p-6 rounded-2xl shadow-lg">
-                      <h4 className="text-lg font-bold mb-4">Slot Management</h4>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm text-gray-600">Current Slot Limit</p>
-                            <p className="text-2xl font-bold text-gray-800">{opportunity.totalSlots}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-gray-600">Available Slots</p>
-                            <p className={`text-lg font-semibold ${availableSlots > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {availableSlots}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        {!isEditingSlots ? (
-                          <button
-                            onClick={handleStartSlotEdit}
-                            className="w-full bg-cornell-red hover:bg-red-800 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-                          >
-                            Update Slot Limit
-                          </button>
-                        ) : (
-                          <div className="space-y-3">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                New Slot Limit
-                              </label>
-                              <input
-                                type="number"
-                                value={newSlotLimit}
-                                onChange={(e) => setNewSlotLimit(parseInt(e.target.value) || 1)}
-                                min={signedUpStudents.length}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-                              />
-                              <p className="text-xs text-gray-500 mt-1">
-                                Minimum: {signedUpStudents.length} (current participants)
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={handleUpdateSlotLimit}
-                                disabled={isUpdatingSlots || newSlotLimit < signedUpStudents.length}
-                                className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
-                              >
-                                {isUpdatingSlots ? 'Updating...' : 'Save Changes'}
-                              </button>
-                              <button
-                                onClick={handleCancelSlotEdit}
-                                disabled={isUpdatingSlots}
-                                className="flex-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
                     
                     {/* Send Email to All Participants Button */}
                     {signedUpStudents.length > 0 && (
@@ -442,15 +363,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         >
                         {isUserSignedUp ? 'Signed Up ✓' : canSignUp ? 'Sign Up Now' : 'Event Full'}
                     </button>
-                    
-                    {/* Slot limit enforcement message */}
-                    {!isUserSignedUp && availableSlots <= 0 && (
-                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm text-red-700 text-center">
-                          This event has reached its maximum capacity of {opportunity.totalSlots} participants.
-                        </p>
-                      </div>
-                    )}
                     
                     {/* Admin Unapprove Button */}
                     {currentUser.admin && opportunity.approved !== false && (

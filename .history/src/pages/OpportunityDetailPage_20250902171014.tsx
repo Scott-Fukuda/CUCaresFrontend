@@ -271,34 +271,17 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                 )}
                 
                 <div className="mt-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-2xl font-bold">Participants ({signedUpStudents.length}/{opportunity.totalSlots})</h3>
-                        <div className="text-right">
-                            <p className="text-sm text-gray-600">Available Slots</p>
-                            <p className={`text-lg font-semibold ${availableSlots > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {availableSlots}
-                            </p>
-                        </div>
-                    </div>
+                    <h3 className="text-2xl font-bold mb-4">Participants ({signedUpStudents.length}/{opportunity.totalSlots})</h3>
                     {signedUpStudents.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             {signedUpStudents.map(student => (
                                 <div key={`${student.id}-${student._lastUpdate || 'no-update'}`} onClick={() => setPageState({ page: 'profile', userId: student.id})} className="text-center cursor-pointer group">
-                                    <p className="font-semibold text-gray-800 group-hover:text-cornell-red transition">{student.name}</p>
+                                                                         <p className="font-semibold text-gray-800 group-hover:text-cornell-red transition">{student.name}</p>
                                 </div>
                             ))}
                         </div>
                     ) : (
                          <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up!</div>
-                    )}
-                    
-                    {/* Slot limit warning for hosts */}
-                    {isUserHost && availableSlots <= 0 && (
-                        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <p className="text-sm text-yellow-700 text-center">
-                                ⚠️ This event has reached its maximum capacity. Consider increasing the slot limit if you want to allow more participants.
-                            </p>
-                        </div>
                     )}
                 </div>
             </div>
@@ -442,15 +425,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         >
                         {isUserSignedUp ? 'Signed Up ✓' : canSignUp ? 'Sign Up Now' : 'Event Full'}
                     </button>
-                    
-                    {/* Slot limit enforcement message */}
-                    {!isUserSignedUp && availableSlots <= 0 && (
-                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm text-red-700 text-center">
-                          This event has reached its maximum capacity of {opportunity.totalSlots} participants.
-                        </p>
-                      </div>
-                    )}
                     
                     {/* Admin Unapprove Button */}
                     {currentUser.admin && opportunity.approved !== false && (
