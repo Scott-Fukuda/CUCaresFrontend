@@ -269,7 +269,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                     ))}
                 </div>
             ) : (
-                <p className="text-gray-500 text-center">{user.name} hasn't added any friends yet.</p>
+                <p className="text-gray-500 text-center">{user.firstName} hasn't added any friends yet.</p>
             )}
         </div>
       </div>

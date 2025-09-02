@@ -259,17 +259,17 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                         >
                             <img 
                                 src={getProfilePictureUrl(friend.profilePictureUrl)}
-                                alt={friend.name}
+                                alt={`${friend.firstName} ${friend.lastName}`}
                                 className="w-16 h-16 rounded-full mb-2 border-2 border-cornell-red object-fill"
                             />
                             <span className="text-sm font-medium text-center">
-                                {friend.name}
+                                {friend.firstName} {friend.lastName}
                             </span>
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-gray-500 text-center">{user.name} hasn't added any friends yet.</p>
+                <p className="text-gray-500 text-center">{user.firstName} hasn't added any friends yet.</p>
             )}
         </div>
       </div>

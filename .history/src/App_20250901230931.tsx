@@ -644,7 +644,7 @@ const App: React.FC = () => {
     try {
         // Prepare the complete user data for the API
         const completeUserData = {
-            name: currentUser.name,
+            name: `${currentUser.firstName} ${currentUser.lastName}`,
             email: currentUser.email,
             phone: currentUser.phone || '',
             interests: currentUser.interests,

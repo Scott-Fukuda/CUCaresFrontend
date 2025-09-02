@@ -246,7 +246,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-lg">
-            <h3 className="text-xl font-bold mb-4">{user.name}'s Friends ({profileUserFriends.length})</h3>
+            <h3 className="text-xl font-bold mb-4">{user.firstName}'s Friends ({profileUserFriends.length})</h3>
             {loadingFriends ? (
                 <p className="text-gray-500 text-center">Loading friends...</p>
             ) : profileUserFriends.length > 0 ? (
@@ -259,17 +259,17 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                         >
                             <img 
                                 src={getProfilePictureUrl(friend.profilePictureUrl)}
-                                alt={friend.name}
+                                alt={`${friend.firstName} ${friend.lastName}`}
                                 className="w-16 h-16 rounded-full mb-2 border-2 border-cornell-red object-fill"
                             />
                             <span className="text-sm font-medium text-center">
-                                {friend.name}
+                                {friend.firstName} {friend.lastName}
                             </span>
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-gray-500 text-center">{user.name} hasn't added any friends yet.</p>
+                <p className="text-gray-500 text-center">{user.firstName} hasn't added any friends yet.</p>
             )}
         </div>
       </div>
