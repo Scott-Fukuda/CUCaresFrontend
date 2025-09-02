@@ -523,14 +523,10 @@ const App: React.FC = () => {
       (r.fromUserId === otherUserId && r.toUserId === currentUser.id)
     );
     
-    console.log('Checking friendship status for user', otherUserId, 'Local request found:', localRequest);
-    
     if (localRequest) {
       if (localRequest.fromUserId === currentUser.id) {
-        console.log('Returning pending_sent status');
         return { status: 'pending_sent' };
       } else {
-        console.log('Returning pending_received status');
         return { status: 'pending_received' };
       }
     }

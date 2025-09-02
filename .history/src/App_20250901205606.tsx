@@ -423,12 +423,7 @@ const App: React.FC = () => {
         updated_at: new Date().toISOString()
       };
       
-      console.log('Adding friend request to local state:', newRequest);
-      setFriendRequests(prev => {
-        const updated = [...prev, newRequest];
-        console.log('Updated friend requests:', updated);
-        return updated;
-      });
+      setFriendRequests(prev => [...prev, newRequest]);
       
       // Show success message
       alert(`Friend request sent to ${students.find(s => s.id === friendId)?.firstName}!`);
@@ -497,16 +492,8 @@ const App: React.FC = () => {
     if (!currentUser) return;
     try {
       await api.removeFriend(currentUser.id, friendId);
-      
-      // Remove from local friendships
-      setFriendships(prev => prev.filter(f => 
-        !((f.user1_id === currentUser.id && f.user2_id === friendId) ||
-          (f.user1_id === friendId && f.user2_id === currentUser.id))
-      ));
-      
       alert('Friend removed successfully.');
-      
-      // Refresh friendships to get the real data from backend
+      // Refresh friendships
       await loadUserFriendships(currentUser.id);
     } catch (e: any) {
       alert(`Error removing friend: ${e.message}`);
@@ -523,14 +510,10 @@ const App: React.FC = () => {
       (r.fromUserId === otherUserId && r.toUserId === currentUser.id)
     );
     
-    console.log('Checking friendship status for user', otherUserId, 'Local request found:', localRequest);
-    
     if (localRequest) {
       if (localRequest.fromUserId === currentUser.id) {
-        console.log('Returning pending_sent status');
         return { status: 'pending_sent' };
       } else {
-        console.log('Returning pending_received status');
         return { status: 'pending_received' };
       }
     }

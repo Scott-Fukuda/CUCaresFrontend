@@ -102,11 +102,6 @@ export const getUsers = async (): Promise<MinimalUser[]> => {
     return response.users || [];
 };
 
-export const getSecureUsers = async (): Promise<User[]> => {
-    const response = await authenticatedRequest('/users/secure');
-    return response.users || [];
-};
-
 // Get detailed user data for a specific user
 export const getUserById = async (id: number): Promise<User> => {
     const response = await authenticatedRequest(`/users/${id}`);
@@ -204,6 +199,11 @@ export const updateOrganization = (id: number, data: object): Promise<Organizati
 export const deleteOrganization = (id: number): Promise<void> => authenticatedRequest(`/orgs/${id}`, {
     method: 'DELETE'
 });
+
+export const getOrganizationMembers = async (orgId: number): Promise<User[]> => {
+    const response = await authenticatedRequest(`/orgs/${orgId}/members`);
+    return response.members || [];
+};
 
 // --- Friend Management ---
 export const getAllFriendships = (): Promise<Friendship[]> => authenticatedRequest('/friendships');
