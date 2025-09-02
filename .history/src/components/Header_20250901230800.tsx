@@ -66,7 +66,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                   <span className="font-bold text-cornell-red">{points}</span> points earned ✨
                 </p>
               </div>
-              <img src={getProfilePictureUrl(user.profilePictureUrl)} alt={user.name} className="h-10 w-10 rounded-full object-fill cursor-pointer" onClick={() => setPageState({ page: 'profile' })} />
+              <img src={getProfilePictureUrl(user.profilePictureUrl)} alt={`${user.firstName} ${user.lastName}`} className="h-10 w-10 rounded-full object-fill cursor-pointer" onClick={() => setPageState({ page: 'profile' })} />
               <button onClick={onLogout} className="text-sm bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors hidden sm:block">
                 Logout
               </button>

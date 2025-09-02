@@ -225,7 +225,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
 
          <div className="bg-white p-6 rounded-2xl shadow-lg">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">{user.name}'s Organizations</h3>
+              <h3 className="text-xl font-bold">{user.firstName}'s Organizations</h3>
               {isCurrentUser && (
                 <button onClick={() => setPageState({ page: 'groups'})} className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm">
                   Manage Orgs
@@ -241,12 +241,12 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                     ))}
                 </ul>
             ) : (
-                <p className="text-gray-500 text-center">{user.name} hasn't joined any organizations yet.</p>
+                <p className="text-gray-500 text-center">{user.firstName} hasn't joined any organizations yet.</p>
             )}
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-lg">
-            <h3 className="text-xl font-bold mb-4">{user.name}'s Friends ({profileUserFriends.length})</h3>
+            <h3 className="text-xl font-bold mb-4">{user.firstName}'s Friends ({profileUserFriends.length})</h3>
             {loadingFriends ? (
                 <p className="text-gray-500 text-center">Loading friends...</p>
             ) : profileUserFriends.length > 0 ? (
@@ -259,17 +259,17 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                         >
                             <img 
                                 src={getProfilePictureUrl(friend.profilePictureUrl)}
-                                alt={friend.name}
+                                alt={`${friend.firstName} ${friend.lastName}`}
                                 className="w-16 h-16 rounded-full mb-2 border-2 border-cornell-red object-fill"
                             />
                             <span className="text-sm font-medium text-center">
-                                {friend.name}
+                                {friend.firstName} {friend.lastName}
                             </span>
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-gray-500 text-center">{user.name} hasn't added any friends yet.</p>
+                <p className="text-gray-500 text-center">{user.firstName} hasn't added any friends yet.</p>
             )}
         </div>
       </div>

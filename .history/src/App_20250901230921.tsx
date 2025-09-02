@@ -427,7 +427,7 @@ const App: React.FC = () => {
       setFriendRequests(prev => [...prev, newRequest]);
       
       // Show success message
-      alert(`Friend request sent to ${students.find(s => s.id === friendId)?.name}!`);
+      alert(`Friend request sent to ${students.find(s => s.id === friendId)?.firstName}!`);
       
       // Refresh friendships to get the real data from backend
       await loadUserFriendships(currentUser.id);
@@ -644,7 +644,7 @@ const App: React.FC = () => {
     try {
         // Prepare the complete user data for the API
         const completeUserData = {
-            name: currentUser.name,
+            name: `${currentUser.firstName} ${currentUser.lastName}`,
             email: currentUser.email,
             phone: currentUser.phone || '',
             interests: currentUser.interests,
