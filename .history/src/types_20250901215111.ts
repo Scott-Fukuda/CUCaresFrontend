@@ -59,8 +59,8 @@ export interface SignUp {
 export type StudentGroupCategory = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team';
 export const studentGroupCategories: StudentGroupCategory[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team'];
 
-export type OrganizationType = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team' | 'Cultural' | 'Community Service' | 'Other';
-export const organizationTypes: OrganizationType[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team', 'Cultural', 'Community Service', 'Other'];
+export type OrganizationType = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team' | 'Other';
+export const organizationTypes: OrganizationType[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team', 'Other'];
 
 export interface StudentGroup {
     id: number;

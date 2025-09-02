@@ -227,28 +227,13 @@ export const getUserFriendRequests = async (userId: number): Promise<ApiFriendRe
   const result = await authenticatedRequest(`/users/${userId}/friend-requests`);
   console.log(`API: Friend requests response:`, result);
   
-  let rawRequests: any[] = [];
-  
-  // Handle different response structures the backend might return
-  if (Array.isArray(result)) {
-    rawRequests = result;
-  } else if (result && Array.isArray(result.friend_requests)) {
-    rawRequests = result.friend_requests;
-  } else if (result && Array.isArray(result.friendRequests)) {
-    rawRequests = result.friendRequests;
-  } else if (result && Array.isArray(result.data)) {
-    rawRequests = result.data;
-  } else {
-    console.warn('Unexpected friend requests response structure:', result);
-    return [];
+  // The new API returns { friend_requests: [...] }
+  if (result && Array.isArray(result.friend_requests)) {
+    return result.friend_requests;
   }
   
-  // Transform field names to match our new ApiFriendRequest interface
-  return rawRequests.map(req => ({
-    id: req.id,
-    requester_name: req.requester_name,
-    requester_profile_image: req.requester_profile_image
-  }));
+  console.warn('Unexpected friend requests response structure:', result);
+  return [];
 };
 
 export const getUserFriendships = async (userId: number): Promise<Friendship[]> => {

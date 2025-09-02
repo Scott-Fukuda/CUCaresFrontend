@@ -1,5 +1,5 @@
 
-import { User, MinimalUser, Opportunity, Organization, SignUp, Friendship, FriendRequest, FriendshipStatus, ApiFriendRequest } from './types';
+import { User, MinimalUser, Opportunity, Organization, SignUp, Friendship, FriendRequest, FriendshipStatus } from './types';
 import { auth } from './firebase-config';
 
 // Helper function to get profile picture URL
@@ -222,7 +222,7 @@ export const getUserFriends = async (userId: number): Promise<any> => {
   return { count: 0, friendships: [] };
 };
 
-export const getUserFriendRequests = async (userId: number): Promise<ApiFriendRequest[]> => {
+export const getUserFriendRequests = async (userId: number): Promise<FriendRequest[]> => {
   console.log(`API: Fetching friend requests for user ${userId}`);
   const result = await authenticatedRequest(`/users/${userId}/friend-requests`);
   console.log(`API: Friend requests response:`, result);
@@ -243,11 +243,14 @@ export const getUserFriendRequests = async (userId: number): Promise<ApiFriendRe
     return [];
   }
   
-  // Transform field names to match our new ApiFriendRequest interface
+  // Transform field names to match our interface
   return rawRequests.map(req => ({
     id: req.id,
-    requester_name: req.requester_name,
-    requester_profile_image: req.requester_profile_image
+    fromUserId: req.fromUserId || req.from_user_id || req.sender_id,
+    toUserId: req.toUserId || req.to_user_id || req.receiver_id,
+    status: req.status,
+    created_at: req.created_at || req.createdAt,
+    updated_at: req.updated_at || req.updatedAt
   }));
 };
 
