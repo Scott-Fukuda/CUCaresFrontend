@@ -96,10 +96,11 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
 
   // Debug logging
   console.log('ProfilePage render:', {
-          user: {
-        id: user.id,
-        profile_image: user.profile_image
-      },
+    user: {
+      id: user.id,
+              profile_image: user.profile_image,
+      profile_image: user.profile_image
+    },
     friendshipStatus,
     isFriend,
             requestPending,
@@ -114,7 +115,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
         <div className="bg-white p-6 rounded-2xl shadow-lg text-center">
             <div className="relative w-32 h-32 mx-auto">
                 <img 
-                    src={getProfilePictureUrl(user.profile_image)}
+                    src={getProfilePictureUrl(user.profilePictureUrl)}
                     alt={user.name}
                     className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-cornell-red object-fill"
                 />
@@ -257,7 +258,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                             className="flex flex-col items-center p-3 bg-light-gray rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
                         >
                             <img 
-                                src={getProfilePictureUrl(friend.profile_image)}
+                                src={getProfilePictureUrl(friend.profilePictureUrl)}
                                 alt={friend.name}
                                 className="w-16 h-16 rounded-full mb-2 border-2 border-cornell-red object-fill"
                             />

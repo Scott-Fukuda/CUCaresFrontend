@@ -111,7 +111,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
         <li className={`flex items-center justify-between py-4 ${isCurrentUser ? 'bg-yellow-50 rounded-lg -mx-4 px-4' : ''}`}>
             <div className="flex items-center gap-4">
               <span className="font-bold text-lg text-gray-500 w-8 text-center">{index + 1}</span>
-                                      <img src={getProfilePictureUrl(user.profile_image)} alt={user.name} className="h-10 w-10 rounded-full object-fill cursor-pointer" onClick={() => setPageState({ page: 'profile', userId: user.id})}/>
+                                      <img src={getProfilePictureUrl(user.profilePictureUrl)} alt={user.name} className="h-10 w-10 rounded-full object-fill cursor-pointer" onClick={() => setPageState({ page: 'profile', userId: user.id})}/>
               <span className="font-medium text-gray-900 cursor-pointer" onClick={() => setPageState({ page: 'profile', userId: user.id})}>{user.name}</span>
             </div>
             <div className="flex items-center gap-4">

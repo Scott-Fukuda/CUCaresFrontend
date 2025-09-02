@@ -681,8 +681,8 @@ const App: React.FC = () => {
         // Add a timestamp to force React to detect the change
         _lastUpdate: Date.now()
       };
-      console.log('Updating profile picture - before:', currentUser.profile_image);
-              console.log('Updating profile picture - after:', updatedUser.profile_image);
+      console.log('Updating profile picture - before:', currentUser.profilePictureUrl);
+      console.log('Updating profile picture - after:', updatedUser.profilePictureUrl);
     setCurrentUser(updatedUser);
     setStudents(prev => prev.map(s => s.id === currentUser.id ? updatedUser : s));
       

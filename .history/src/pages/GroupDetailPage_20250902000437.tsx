@@ -147,11 +147,11 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
                         members.sort((a,b) => a.name.localeCompare(b.name)).map(member => (
                             <div key={member.id} onClick={() => setPageState({ page: 'profile', userId: member.id })} className="flex items-center gap-2 p-2 pr-4 bg-light-gray rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
                                 <img 
-                                    src={getProfilePictureUrl(member.profile_image)} 
-                                                                         alt={member.name}
+                                    src={getProfilePictureUrl(member.profilePictureUrl)} 
+                                    alt={`${member.firstName} ${member.lastName}`}
                                     className="w-9 h-9 rounded-full object-cover"
                                 />
-                                                                 <span className="text-sm font-medium text-gray-800">{member.name}</span>
+                                <span className="text-sm font-medium text-gray-800">{member.firstName} {member.lastName}</span>
                             </div>
                         ))
                     ) : (
