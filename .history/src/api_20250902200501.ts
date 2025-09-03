@@ -106,23 +106,17 @@ export const getSecureUsers = async (): Promise<User[]> => {
     const response = await authenticatedRequest('/users/secure');
     const users = response.users || [];
     
-    // Transform each user to extract organizationIds from organizations array
+    // Transform each user to ensure organizationIds is properly populated
     return users.map((user: any) => ({
         ...user,
         // Extract organization IDs from the organizations array
         organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
-        // Ensure other fields have fallbacks
-        friendIds: user.friends || [],
+        friendIds: user.friendIds || user.friends || [],
         interests: user.interests || [],
         // Use profile_image from backend
         profile_image: user.profile_image,
         // Handle registration_date field from backend
-        registration_date: user.registration_date,
-        // Ensure required fields have defaults
-        points: user.points || 0,
-        admin: user.admin || false,
-        registered: false, // Default value
-        attended: false, // Default value
+        registration_date: user.registration_date || user.registrationDate,
     }));
 };
 
@@ -133,7 +127,7 @@ export const getUserById = async (id: number): Promise<User> => {
         ...response,
         // Extract organization IDs from the organizations array
         organizationIds: (response.organizations || []).map((org: any) => org.id) || [],
-        friendIds: response.friendIds || [],
+        friendIds: response.friendIds || response.friends || [],
         interests: response.interests || [],
         // Use profile_image from backend
         profile_image: response.profile_image,
@@ -147,7 +141,7 @@ export const getUser = async (id: number): Promise<User> => {
         ...response,
         // Extract organization IDs from the organizations array
         organizationIds: (response.organizations || []).map((org: any) => org.id) || [],
-        friendIds: response.friendIds || [],
+        friendIds: response.friendIds || response.friends || [],
         interests: response.interests || [],
         // Use profile_image from backend
         profile_image: response.profile_image,
@@ -275,7 +269,7 @@ export const getAcceptedFriendships = async (userId: number): Promise<User[]> =>
   console.log(`API: Fetching accepted friendships for user ${userId}`);
   try {
     const result = await authenticatedRequest(`/users/${userId}/friends`);
-    console.log(`API: Friends response:`, result);
+  console.log(`API: Friends response:`, result);
     
     let friendsArray: any[] = [];
     if (Array.isArray(result)) {
