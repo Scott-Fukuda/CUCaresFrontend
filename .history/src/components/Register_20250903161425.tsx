@@ -181,27 +181,11 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
               How many seats do you have? *
             </label>
             <input
-              type="text"
-              value={carSeats === 0 ? '' : carSeats}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '') {
-                  setCarSeats(0);
-                } else {
-                  const numValue = parseInt(value);
-                  if (!isNaN(numValue) && numValue >= 1 && numValue <= 15) {
-                    setCarSeats(numValue);
-                  }
-                }
-              }}
-              onBlur={(e) => {
-                const value = parseInt(e.target.value);
-                if (isNaN(value) || value < 1) {
-                  setCarSeats(1);
-                } else if (value > 15) {
-                  setCarSeats(15);
-                }
-              }}
+              type="number"
+              value={carSeats}
+              onChange={(e) => setCarSeats(parseInt(e.target.value) || 0)}
+              min="1"
+              max="15"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:outline-none transition"
               required
               placeholder="Enter number of seats"
