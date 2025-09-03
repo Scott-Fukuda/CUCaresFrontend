@@ -96,8 +96,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
     const isCurrentUser = user.id === currentUser.id;
     const friendshipStatus = getFriendshipStatus(user.id);
     const isFriend = friendshipStatus === 'friends';
-    const requestSent = friendshipStatus === 'sent';
-    const requestReceived = friendshipStatus === 'received';
+    const requestPending = friendshipStatus === 'sent' || friendshipStatus === 'received';
 
     return (
         <li className={`flex items-center justify-between py-4 ${isCurrentUser ? 'bg-yellow-50 rounded-lg -mx-4 px-4' : ''}`}>
@@ -113,25 +112,10 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
                     <span className="text-sm bg-green-100 text-green-700 font-semibold py-1 px-3 rounded-full">
                       Friends ✓
                     </span>
-                 ) : requestSent ? (
+                 ) : requestPending ? (
                     <span className="text-sm bg-yellow-100 text-yellow-700 font-semibold py-1 px-3 rounded-full">
                       Request Sent
                     </span>
-                 ) : requestReceived ? (
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => handleAcceptFriendRequest(user.id)} 
-                        className="text-sm bg-green-600 text-white font-semibold py-1 px-3 rounded-full hover:bg-green-700 transition-colors"
-                      >
-                        Accept
-                      </button>
-                      <button 
-                        onClick={() => handleRejectFriendRequest(user.id)} 
-                        className="text-sm bg-gray-300 text-gray-800 font-semibold py-1 px-3 rounded-full hover:bg-gray-400 transition-colors"
-                      >
-                        Decline
-                      </button>
-                    </div>
                  ) : (
                     <button onClick={() => handleFriendRequest(user.id)} className="text-sm bg-gray-200 text-gray-700 font-semibold py-1 px-3 rounded-full hover:bg-gray-300 transition-colors">
                       Add Friend
