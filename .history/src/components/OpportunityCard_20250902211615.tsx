@@ -11,7 +11,7 @@ interface OpportunityCardProps {
   allOrgs: Organization[];
   currentUser: User;
   onSignUp: (opportunityId: number) => void;
-  onUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
+  onUnSignUp: (opportunityId: number) => void;
   isUserSignedUp: boolean;
   setPageState: (state: PageState) => void;
 }
@@ -53,7 +53,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, signedUp
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isUserSignedUp) {
-      onUnSignUp(opportunity.id, opportunity.date, opportunity.time);
+      onUnSignUp(opportunity.id);
     } else {
       onSignUp(opportunity.id);
     }

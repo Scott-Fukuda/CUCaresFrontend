@@ -11,7 +11,7 @@ interface OpportunityCardProps {
   allOrgs: Organization[];
   currentUser: User;
   onSignUp: (opportunityId: number) => void;
-  onUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
+  onUnSignUp: (opportunityId: number) => void;
   isUserSignedUp: boolean;
   setPageState: (state: PageState) => void;
 }
@@ -53,7 +53,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, signedUp
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isUserSignedUp) {
-      onUnSignUp(opportunity.id, opportunity.date, opportunity.time);
+      onUnSignUp(opportunity.id);
     } else {
       onSignUp(opportunity.id);
     }
@@ -168,36 +168,17 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, signedUp
 
         <button
           onClick={handleButtonClick}
-          disabled={(!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister)}
+          disabled={(!canSignUp && !isUserSignedUp)}
           className={`w-full mt-auto font-bold py-3 px-4 rounded-lg transition-colors text-white ${
             isUserSignedUp
-              ? canUnregister
-                ? 'bg-green-600 hover:bg-green-700'
-                : 'bg-orange-500 cursor-not-allowed'
+              ? 'bg-green-600 hover:bg-green-700'
               : canSignUp
               ? 'bg-cornell-red hover:bg-red-800'
               : 'bg-gray-400 cursor-not-allowed'
           }`}
         >
-          {isUserSignedUp 
-            ? canUnregister 
-              ? 'Signed Up ✓' 
-              : `Unregistration Closed (${formatTimeUntilEvent(timeUntilEvent)})`
-            : canSignUp 
-              ? 'Sign Up' 
-              : 'No Slots Available'
-          }
+          {isUserSignedUp ? 'Signed Up ✓' : canSignUp ? 'Sign Up' : 'No Slots Available'}
         </button>
-        
-        {/* Show warning message if unregistration is blocked */}
-        {isUserSignedUp && !canUnregister && (
-          <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded-lg">
-            <p className="text-xs text-orange-800 text-center">
-              ⚠️ Unregistration closed within 12 hours of event. 
-              Contact organizer if you need to cancel.
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
