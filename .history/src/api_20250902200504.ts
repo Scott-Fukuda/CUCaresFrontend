@@ -104,26 +104,7 @@ export const getUsers = async (): Promise<MinimalUser[]> => {
 
 export const getSecureUsers = async (): Promise<User[]> => {
     const response = await authenticatedRequest('/users/secure');
-    const users = response.users || [];
-    
-    // Transform each user to extract organizationIds from organizations array
-    return users.map((user: any) => ({
-        ...user,
-        // Extract organization IDs from the organizations array
-        organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
-        // Ensure other fields have fallbacks
-        friendIds: user.friends || [],
-        interests: user.interests || [],
-        // Use profile_image from backend
-        profile_image: user.profile_image,
-        // Handle registration_date field from backend
-        registration_date: user.registration_date,
-        // Ensure required fields have defaults
-        points: user.points || 0,
-        admin: user.admin || false,
-        registered: false, // Default value
-        attended: false, // Default value
-    }));
+    return response.users || [];
 };
 
 // Get detailed user data for a specific user
