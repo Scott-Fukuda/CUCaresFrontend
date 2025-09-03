@@ -2,16 +2,16 @@
 import { User, Opportunity, SignUp, Badge, Organization } from '../types';
 
 export const initialStudents: User[] = [
-    { id: 1, name: 'Alice Johnson', email: 'aj123@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Food Security and Hunger Relief', 'Other'], friendIds: [8, 3, 9], organizationIds: [101, 201], graduationYear: '2025', academicLevel: 'Undergraduate', major: 'Computer Science', birthday: '2003-05-15', points: 180, registration_date: '2024-01-15T10:30:00', car_seats: 4 },
-  { id: 2, name: 'Ben Carter', email: 'bc456@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Environment & Sustainability', 'Education'], friendIds: [4, 9], organizationIds: [102, 301], graduationYear: '2026', academicLevel: 'Undergraduate', major: 'Environmental Engineering', birthday: '2002-08-22', points: 150, registration_date: '2024-01-20T14:15:00', car_seats: 0 },
-  { id: 3, name: 'Chloe Davis', email: 'cd789@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Food Security and Hunger Relief'], friendIds: [1], organizationIds: [401], graduationYear: '2025', academicLevel: 'Undergraduate', major: 'Human Ecology', birthday: '2003-12-03', points: 180, registration_date: '2024-02-05T09:45:00', car_seats: 2 },
-  { id: 4, name: 'David Evans', email: 'de101@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Environment & Sustainability'], friendIds: [2], organizationIds: [102, 501], graduationYear: '2027', academicLevel: 'Undergraduate', major: 'Mechanical Engineering', birthday: '2004-03-18', points: 240, registration_date: '2024-02-12T16:20:00', car_seats: 0 },
-  { id: 5, name: 'Emily Frank', email: 'ef112@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Food Security and Hunger Relief'], friendIds: [], organizationIds: [101, 601], graduationYear: '2025', academicLevel: 'Undergraduate', major: 'Nutrition Science', birthday: '2003-07-30', points: 120, registration_date: '2024-02-18T11:30:00', car_seats: 3 },
-  { id: 6, name: 'Frank Green', email: 'fg131@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Education'], friendIds: [], organizationIds: [402], graduationYear: '2026', academicLevel: 'Graduate', major: 'Educational Psychology', birthday: '2001-11-14', points: 210, registration_date: '2024-03-01T13:45:00', car_seats: 0 },
-  { id: 7, name: 'Grace Hill', email: 'gh141@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Other', 'Environment & Sustainability'], friendIds: [], organizationIds: [102], graduationYear: '2025', academicLevel: 'Undergraduate', major: 'Business', birthday: '2003-09-07', points: 240, registration_date: '2024-03-08T15:10:00', car_seats: 1 },
-  { id: 8, name: 'Henry Irving', email: 'hi151@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Food Security and Hunger Relief'], friendIds: [1], organizationIds: [202], graduationYear: '2026', academicLevel: 'Undergraduate', major: 'Agriculture', birthday: '2002-04-25', points: 180, registration_date: '2024-03-15T12:00:00', car_seats: 0 },
+    { id: 1, name: 'Alice Johnson', email: 'aj123@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Food Security and Hunger Relief', 'Other'], friendIds: [8, 3, 9], organizationIds: [101, 201], graduationYear: '2025', academicLevel: 'Undergraduate', major: 'Computer Science', birthday: '2003-05-15', points: 180, registration_date: '2024-01-15T10:30:00' },
+  { id: 2, name: 'Ben Carter', email: 'bc456@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Environment & Sustainability', 'Education'], friendIds: [4, 9], organizationIds: [102, 301], graduationYear: '2026', academicLevel: 'Undergraduate', major: 'Environmental Engineering', birthday: '2002-08-22', points: 150, registration_date: '2024-01-20T14:15:00' },
+  { id: 3, name: 'Chloe Davis', email: 'cd789@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Food Security and Hunger Relief'], friendIds: [1], organizationIds: [401], graduationYear: '2025', academicLevel: 'Undergraduate', major: 'Human Ecology', birthday: '2003-12-03', points: 180, registration_date: '2024-02-05T09:45:00' },
+  { id: 4, name: 'David Evans', email: 'de101@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Environment & Sustainability'], friendIds: [2], organizationIds: [102, 501], graduationYear: '2027', academicLevel: 'Undergraduate', major: 'Mechanical Engineering', birthday: '2004-03-18', points: 240, registration_date: '2024-02-12T16:20:00' },
+  { id: 5, name: 'Emily Frank', email: 'ef112@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Food Security and Hunger Relief'], friendIds: [], organizationIds: [101, 601], graduationYear: '2025', academicLevel: 'Undergraduate', major: 'Nutrition Science', birthday: '2003-07-30', points: 120, registration_date: '2024-02-18T11:30:00' },
+  { id: 6, name: 'Frank Green', email: 'fg131@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Education'], friendIds: [], organizationIds: [402], graduationYear: '2026', academicLevel: 'Graduate', major: 'Educational Psychology', birthday: '2001-11-14', points: 210, registration_date: '2024-03-01T13:45:00' },
+  { id: 7, name: 'Grace Hill', email: 'gh141@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Other', 'Environment & Sustainability'], friendIds: [], organizationIds: [102], graduationYear: '2025', academicLevel: 'Undergraduate', major: 'Business', birthday: '2003-09-07', points: 240, registration_date: '2024-03-08T15:10:00' },
+  { id: 8, name: 'Henry Irving', email: 'hi151@cornell.edu', password: 'password123', profile_image: undefined, interests: ['Food Security and Hunger Relief'], friendIds: [1], organizationIds: [202], graduationYear: '2026', academicLevel: 'Undergraduate', major: 'Agriculture', birthday: '2002-04-25', points: 180, registration_date: '2024-03-15T12:00:00' },
   // Admin User
-  { id: 9, name: 'Ezra Min', email: 'ejm376@cornell.edu', password: 'test1234', profile_image: undefined, interests: ['Food Security and Hunger Relief', 'Education', 'Other'], friendIds: [1,2], organizationIds: [101, 502], admin: true, graduationYear: '2026', academicLevel: 'Undergraduate', major: 'Information Science', birthday: '2002-01-12', points: 420, registration_date: '2024-01-10T08:00:00', car_seats: 5 },
+  { id: 9, name: 'Ezra Min', email: 'ejm376@cornell.edu', password: 'test1234', profile_image: undefined, interests: ['Food Security and Hunger Relief', 'Education', 'Other'], friendIds: [1,2], organizationIds: [101, 502], admin: true, graduationYear: '2026', academicLevel: 'Undergraduate', major: 'Information Science', birthday: '2002-01-12', points: 420, registration_date: '2024-01-10T08:00:00' },
 ];
 
 export const initialOpportunities: Opportunity[] = [
@@ -55,9 +55,7 @@ export const initialOpportunities: Opportunity[] = [
     description: 'Assist the staff with daily feeding, cleaning, and care for the resident animals at the nature center.',
     date: '2025-09-04', time: '13:00', duration: 4, totalSlots: 6,
     imageUrl: 'https://www.priweb.org/wp-content/uploads/2021/08/CayugaNatureCenter-Lodge-1.jpg',
-    points: 240, causes: ['Other'], address: '321 Pine Rd, Ithaca, NY', approved: true,
-    comments: [],
-    qualifications: ['No experience required', 'Comfortable around animals', 'Ability to follow safety protocols']
+    points: 240, causes: ['Other'], address: '321 Pine Rd, Ithaca, NY', approved: true
   },
   {
     id: 5,
@@ -66,9 +64,7 @@ export const initialOpportunities: Opportunity[] = [
     description: 'Give shelter dogs some much-needed exercise and affection by taking them for walks on the SPCA trails.',
     date: '2025-09-05', time: '10:00', duration: 2, totalSlots: 12,
     imageUrl: 'https://www.humanesociety.org/sites/default/files/2022-08/woman-walking-dog-leash-575359.jpg',
-    points: 120, causes: ['Other'], address: '654 Maple Dr, Ithaca, NY', approved: true,
-    comments: [],
-    qualifications: ['No experience required', 'Comfortable around dogs', 'Ability to walk for extended periods']
+    points: 120, causes: ['Other'], address: '654 Maple Dr, Ithaca, NY', approved: true
   },
   {
     id: 6,
@@ -77,9 +73,7 @@ export const initialOpportunities: Opportunity[] = [
     description: 'Engage with families and children on the museum floor, helping them interact with exhibits and facilitating scientific discovery.',
     date: '2025-09-06', time: '12:00', duration: 3.5, totalSlots: 8,
     imageUrl: 'https://www.sciencenter.org/images/sized/images/uploads/exhibits/Curiosity_Corner_from_above-1200x800.jpg',
-    points: 210, causes: ['Education'], address: '987 Cedar Ln, Ithaca, NY', approved: true,
-    comments: [],
-    qualifications: ['No experience required', 'Comfortable interacting with children', 'Interest in science education']
+    points: 210, causes: ['Education'], address: '987 Cedar Ln, Ithaca, NY', approved: true
   },
   {
     id: 7,
@@ -88,9 +82,7 @@ export const initialOpportunities: Opportunity[] = [
     description: 'Help with ticket scanning, guiding patrons to their seats, and ensuring a great experience for a concert night.',
     date: '2025-09-06', time: '18:00', duration: 4, totalSlots: 10,
     imageUrl: 'https://stateofithaca.org/wp-content/uploads/2021/11/IMG_8778-scaled.jpg',
-    points: 240, causes: ['Other'], address: '147 State St, Ithaca, NY', approved: true,
-    comments: [],
-    qualifications: ['No experience required', 'Comfortable with crowds', 'Professional appearance']
+    points: 240, causes: ['Other'], address: '147 State St, Ithaca, NY', approved: true
   },
   {
     id: 8,
@@ -99,9 +91,7 @@ export const initialOpportunities: Opportunity[] = [
     description: 'Work with a team to clear brush, repair pathways, and help maintain the beautiful natural trails around Ithaca.',
     date: '2025-09-07', time: '09:00', duration: 4, totalSlots: 20,
     imageUrl: 'https://www.visitithaca.com/sites/default/files/styles/16_9_1200x675/public/2022-06/robert-h-treman-lucifer-falls-hike-ithaca-ny-1_0.jpg?h=a5f15949&itok=BAP-cTcu',
-    points: 240, causes: ['Environment & Sustainability'], address: '258 Forest Way, Ithaca, NY', approved: true,
-    comments: [],
-    qualifications: ['No experience required', 'Comfortable working outdoors', 'Ability to use basic tools']
+    points: 240, causes: ['Environment & Sustainability'], address: '258 Forest Way, Ithaca, NY', approved: true
   },
 ];
 

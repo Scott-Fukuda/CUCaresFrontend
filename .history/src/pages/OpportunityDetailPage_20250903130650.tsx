@@ -184,7 +184,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       alert('Announcement added successfully!');
       
       // Force a re-render by updating the opportunity object
-      setPageState({ page: 'opportunityDetail', id: opportunity.id });
+      setPageState({ ...setPageState, page: 'opportunityDetail', opportunityId: opportunity.id });
     } catch (error: any) {
       alert(`Error adding announcement: ${error.message}`);
     } finally {

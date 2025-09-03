@@ -47,8 +47,8 @@ export interface Opportunity {
   involved_users?: User[]; // Users involved in this opportunity from backend
   address: string; // Location/address of the opportunity (now required)
   approved?: boolean; // Whether the opportunity has been approved by admin
-  comments: string[]; // Comments on the opportunity
-  qualifications: string[]; // Qualifications for the opportunity
+  comments: string[];
+  qualifications: string[];
 }
 
 export interface SignUp {
