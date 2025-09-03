@@ -166,32 +166,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     setIsEditingSlots(false);
   };
 
-  const handleAddComment = async () => {
-    if (!newComment.trim()) return;
-    
-    setIsAddingComment(true);
-    try {
-      const currentComments = opportunity.comments || [];
-      const updatedComments = [...currentComments, newComment.trim()];
-      
-      await updateOpportunity(opportunity.id, { comments: updatedComments });
-      
-      // Update the local opportunity object to reflect changes
-      opportunity.comments = updatedComments;
-      
-      // Clear the input and show success message
-      setNewComment('');
-      alert('Announcement added successfully!');
-      
-      // Force a re-render by updating the opportunity object
-      setPageState({ page: 'opportunityDetail', id: opportunity.id });
-    } catch (error: any) {
-      alert(`Error adding announcement: ${error.message}`);
-    } finally {
-      setIsAddingComment(false);
-    }
-  };
-
   const handleStartSlotEdit = () => {
     setNewSlotLimit(opportunity.totalSlots);
     setIsEditingSlots(true);
@@ -344,68 +318,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                             <p className="text-sm text-yellow-700 text-center">
                                 ⚠️ This event has reached its maximum capacity. Consider increasing the slot limit if you want to allow more participants.
                             </p>
-                        </div>
-                    )}
-                </div>
-                
-                {/* Announcements Section */}
-                <div className="mt-8">
-                    <h3 className="text-2xl font-bold mb-4">Announcements</h3>
-                    
-                    {/* Host can add new announcements */}
-                    {isUserHost && (
-                        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <h4 className="text-lg font-semibold text-blue-800 mb-3">Add New Announcement</h4>
-                            <div className="space-y-3">
-                                <textarea
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    placeholder="Enter your announcement here..."
-                                    className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    rows={3}
-                                />
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={handleAddComment}
-                                        disabled={!newComment.trim() || isAddingComment}
-                                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
-                                    >
-                                        {isAddingComment ? 'Adding...' : 'Post Announcement'}
-                                    </button>
-                                    <button
-                                        onClick={() => setNewComment('')}
-                                        disabled={!newComment.trim()}
-                                        className="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
-                                    >
-                                        Clear
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    
-                    {/* Display existing announcements */}
-                    {opportunity.comments && opportunity.comments.length > 0 ? (
-                        <div className="space-y-4">
-                            {opportunity.comments.map((comment, index) => (
-                                <div key={index} className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-8 h-8 bg-cornell-red rounded-full flex items-center justify-center flex-shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-gray-800 leading-relaxed">{comment}</p>
-                                            <p className="text-xs text-gray-500 mt-2">Posted by host</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center p-6 bg-gray-50 rounded-lg text-gray-500">
-                            {isUserHost ? 'No announcements yet. Add one above!' : 'No announcements yet.'}
                         </div>
                     )}
                 </div>
