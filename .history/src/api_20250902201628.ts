@@ -252,9 +252,11 @@ export const getFriendshipId = async (userId: number, otherUserId: number): Prom
     
     // Find the friendship for the other user
     const userData = result.users?.find((user: any) => user.user_id === otherUserId);
-    if (userData && userData.friendship_id) {
-      // The friendship_id is now provided directly in the response
-      return userData.friendship_id;
+    if (userData) {
+      // We need to get the actual friendship ID from the backend
+      // For now, we'll need to make a separate call to get the friendship details
+      const friendshipDetails = await authenticatedRequest(`/users/${userId}/friendships/with/${otherUserId}`);
+      return friendshipDetails.friendship_id || friendshipDetails.id || null;
     }
     return null;
   } catch (error) {
