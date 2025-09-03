@@ -62,7 +62,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
 
   const handleButtonClick = () => {
     if (isUserSignedUp) {
-              handleUnSignUp(opportunity.id, opportunity.date, opportunity.time);
+      handleUnSignUp(opportunity.id);
     } else {
       handleSignUp(opportunity.id);
     }
