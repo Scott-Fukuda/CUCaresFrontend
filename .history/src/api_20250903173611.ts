@@ -522,12 +522,12 @@ export const unregisterForOpp = async (data: { user_id: number; opportunity_id: 
   }
   
   return authenticatedRequest('/unregister-opp', {
-  method: 'POST',
+    method: 'POST',
     body: JSON.stringify({
       user_id: data.user_id,
       opportunity_id: data.opportunity_id
     }),
-});
+  });
 };
 
 // --- Create Opportunity ---
