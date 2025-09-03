@@ -405,7 +405,8 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
             const dateObj = new Date(opp.date);
             
             // Extract date and time components
-            // Use the date as provided by the backend without manipulation
+            // Subtract one day from the date
+            dateObj.setDate(dateObj.getDate() + 1);
             const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
           
             
