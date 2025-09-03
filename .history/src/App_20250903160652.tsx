@@ -104,7 +104,6 @@ const App: React.FC = () => {
             registered: false,
             attended: false,
             points: 0,
-            car_seats: 0, // Add default car_seats
             registration_date: ''
           }));
           setStudents(fullUsersData);
@@ -223,7 +222,6 @@ const App: React.FC = () => {
             academicLevel,
             major,
             birthday,
-            car_seats, // Add car_seats from registration
             registration_date: api.formatRegistrationDate() // Format: YYYY-MM-DDTHH:MM:SS
         };
       
