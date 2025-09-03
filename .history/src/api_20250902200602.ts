@@ -244,27 +244,6 @@ export const getUserFriendships = async (userId: number): Promise<FriendshipsRes
   return result;
 };
 
-// Get friendship ID between two users
-export const getFriendshipId = async (userId: number, otherUserId: number): Promise<number | null> => {
-  try {
-    console.log(`API: Getting friendship ID between user ${userId} and ${otherUserId}`);
-    const result = await authenticatedRequest(`/users/${userId}/friendships/all`);
-    
-    // Find the friendship for the other user
-    const userData = result.users?.find((user: any) => user.user_id === otherUserId);
-    if (userData) {
-      // We need to get the actual friendship ID from the backend
-      // For now, we'll need to make a separate call to get the friendship details
-      const friendshipDetails = await authenticatedRequest(`/users/${userId}/friendships/with/${otherUserId}`);
-      return friendshipDetails.friendship_id || friendshipDetails.id || null;
-    }
-    return null;
-  } catch (error) {
-    console.error(`API: Error getting friendship ID:`, error);
-    return null;
-  }
-};
-
 
 
 export const sendFriendRequest = (userId: number, friendId: number) => authenticatedRequest(`/users/${userId}/friends`, {
