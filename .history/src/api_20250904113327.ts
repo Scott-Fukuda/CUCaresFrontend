@@ -96,31 +96,10 @@ const authenticatedRequest = async (endpoint: string, options: RequestInit = {})
 
 
 // --- Users ---
-// Get all users data - now requires authentication and returns full user data
-export const getUsers = async (): Promise<User[]> => {
+// Get minimal user data (id and name only) for lists - now requires authentication
+export const getUsers = async (): Promise<MinimalUser[]> => {
     const response = await authenticatedRequest('/users');
-    const users = response.users || [];
-    
-    // Transform each user to match our User interface
-    return users.map((user: any) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        profile_image: user.profile_image,
-        interests: user.interests || [],
-        friendIds: user.friends || [],
-        organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
-        admin: user.admin || false,
-        gender: user.gender,
-        graduationYear: user.graduation_year,
-        academicLevel: user.academic_level,
-        major: user.major,
-        birthday: user.birthday,
-        points: user.points || 0,
-        registration_date: user.registration_date,
-        phone: user.phone,
-        car_seats: user.car_seats || 0,
-    }));
+    return response.users || [];
 };
 
 // Get user by email for login - new endpoint
