@@ -36,7 +36,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [uploadingProfilePic, setUploadingProfilePic] = useState(false);
   
-  // Update selectedPassions when user.passions changes
+  // Update selectedInterests when user.interests changes
   React.useEffect(() => {
     setSelectedPassions(user.passions);
   }, [user.passions]);
