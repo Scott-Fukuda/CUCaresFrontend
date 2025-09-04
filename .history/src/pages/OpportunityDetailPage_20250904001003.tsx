@@ -102,7 +102,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       await deleteOpportunity(opportunity.id);
       alert('Opportunity has been deleted successfully!');
       // Navigate back to opportunities page
-      setPageState({ page: 'opportunities' });
+      setPageState('opportunities');
     } catch (error: any) {
       alert(`Error deleting opportunity: ${error.message}`);
     }

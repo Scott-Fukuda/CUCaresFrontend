@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import { PageState } from '../App';
-import { getProfilePictureUrl, updateOpportunity, getUserById, deleteOpportunity } from '../api';
+import { getProfilePictureUrl, updateOpportunity, getUserById } from '../api';
 import AttendanceManager from '../components/AttendanceManager';
 
 interface OpportunityDetailPageProps {
@@ -20,7 +20,6 @@ interface OpportunityDetailPageProps {
 const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportunity, students, signups, currentUser, handleSignUp, handleUnSignUp, setPageState, allOrgs, currentUserSignupsSet }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    name: opportunity.name,
     description: opportunity.description,
     address: opportunity.address,
     date: opportunity.date,
@@ -94,20 +93,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     }
   };
 
-  const handleDeleteOpportunity = async () => {
-    const confirmed = window.confirm(`Are you sure you want to delete the opportunity "${opportunity.name}"? This action cannot be undone.`);
-    if (!confirmed) return;
-
-    try {
-      await deleteOpportunity(opportunity.id);
-      alert('Opportunity has been deleted successfully!');
-      // Navigate back to opportunities page
-      setPageState({ page: 'opportunities' });
-    } catch (error: any) {
-      alert(`Error deleting opportunity: ${error.message}`);
-    }
-  };
-
   const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
@@ -115,7 +100,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       const formattedDate = `${editForm.date}T${opportunity.time}`;
       
       const updateData = {
-        name: editForm.name,
         description: editForm.description,
         address: editForm.address,
         date: formattedDate,
@@ -128,7 +112,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       
       // Update the local opportunity object to reflect changes
       Object.assign(opportunity, {
-        name: editForm.name,
         description: editForm.description,
         address: editForm.address,
         date: editForm.date,
@@ -143,7 +126,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
 
   const handleCancelEdit = () => {
     setEditForm({
-      name: opportunity.name,
       description: opportunity.description,
       address: opportunity.address,
       date: opportunity.date,
@@ -258,23 +240,15 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
             <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-2xl font-bold">Event Details</h3>
-                    {(isUserHost || currentUser.admin) && (
+                    {isUserHost && (
                         <div className="flex gap-2">
                             {!isEditing ? (
-                                <>
-                                    <button
-                                        onClick={() => setIsEditing(true)}
-                                        className="bg-cornell-red text-white px-4 py-2 rounded-lg hover:bg-red-800 transition-colors"
-                                    >
-                                        Edit Details
-                                    </button>
-                                    <button
-                                        onClick={handleDeleteOpportunity}
-                                        className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                                    >
-                                        Delete Opportunity
-                                    </button>
-                                </>
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="bg-cornell-red text-white px-4 py-2 rounded-lg hover:bg-red-800 transition-colors"
+                                >
+                                    Edit Details
+                                </button>
                             ) : (
                                 <>
                                     <button
@@ -298,15 +272,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                 
                 {isEditing ? (
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Event Name</label>
-                            <input
-                                type="text"
-                                value={editForm.name}
-                                onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-                            />
-                        </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Event Description</label>
                             <textarea
