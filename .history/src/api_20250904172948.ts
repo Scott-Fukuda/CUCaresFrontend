@@ -184,9 +184,9 @@ export const getUser = async (id: number): Promise<User> => {
 };
 export const updateUser = (id: number, data: object): Promise<User> => {
   //console.log('📡 API: updateUser called with:', {
-  //   userId: id,
-  //   data: data
-  // });
+    userId: id,
+    data: data
+  });
   
   return authenticatedRequest(`/users/${id}`, {
   method: 'PUT',

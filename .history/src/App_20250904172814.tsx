@@ -66,25 +66,25 @@ const App: React.FC = () => {
 
   // Load all app data after user is logged in
   useEffect(() => {
-    //console.log('App useEffect triggered:', { currentUser, isLoading, lastLoadedUserId: lastLoadedUserId.current });
+    console.log('App useEffect triggered:', { currentUser, isLoading, lastLoadedUserId: lastLoadedUserId.current });
     if (currentUser && currentUser.id !== lastLoadedUserId.current) {
       const loadAppData = async () => {
-        //console.log('Loading app data...');
+        console.log('Loading app data...');
         setIsLoading(true);
         setAppError(null);
         try {
-          //console.log('Making API calls...');
+          console.log('Making API calls...');
           const [usersData, oppsData, orgsData] = await Promise.all([
             api.getUsers(),
             api.getOpportunities(),
             api.getApprovedOrgs(),
           ]);
           
-          //console.log('API calls completed:', {
-          //   usersCount: usersData.length,
-          //   opportunitiesCount: oppsData.length,
-          //   orgsCount: orgsData.length
-          // });
+          console.log('API calls completed:', {
+            usersCount: usersData.length,
+            opportunitiesCount: oppsData.length,
+            orgsCount: orgsData.length
+          });
           // getUsers now returns full User objects, no conversion needed
           setStudents(usersData);
           setLeaderboardUsers(usersData); // Use the same data for leaderboard
@@ -96,10 +96,10 @@ const App: React.FC = () => {
           if (currentUser) {
             const fullCurrentUser = usersData.find(u => u.id === currentUser.id);
             if (fullCurrentUser) {
-              //console.log('🔄 App: Updating currentUser with full data:', {
-                // before: { interests: currentUser.interests, organizationIds: currentUser.organizationIds },
-              //   after: { interests: fullCurrentUser.interests, organizationIds: fullCurrentUser.organizationIds }
-              // });
+              console.log('🔄 App: Updating currentUser with full data:', {
+                before: { interests: currentUser.interests, organizationIds: currentUser.organizationIds },
+                after: { interests: fullCurrentUser.interests, organizationIds: fullCurrentUser.organizationIds }
+              });
               setCurrentUser(fullCurrentUser);
             }
             // Mark this user as loaded to prevent infinite loops
@@ -114,21 +114,21 @@ const App: React.FC = () => {
       };
       loadAppData();
     } else {
-      //console.log('No currentUser, skipping API calls');
+      console.log('No currentUser, skipping API calls');
     }
   }, [currentUser]);
 
   // Google Sign-In Handler
   const handleGoogleSignIn = async () => {
-    //console.log('handleGoogleSignIn called');
+    console.log('handleGoogleSignIn called');
     setAuthError(null);
     setIsLoading(true);
     
     try {
       // Trigger Firebase Google sign-in popup
-      //console.log('Triggering Firebase sign-in...');
+      console.log('Triggering Firebase sign-in...');
       const firebaseUser = await signInWithGoogle();
-      //console.log('Firebase sign-in successful:', firebaseUser.email);
+      console.log('Firebase sign-in successful:', firebaseUser.email);
       
       // Check if email is @cornell.edu
       if (!firebaseUser.email.toLowerCase().endsWith('@cornell.edu')) {
@@ -141,23 +141,23 @@ const App: React.FC = () => {
       const token = await firebaseUser.getIdToken();
       
       // Verify token with backend
-      //console.log('Verifying Firebase token with backend...');
+      console.log('Verifying Firebase token with backend...');
       const authResult = await api.verifyFirebaseToken(token);
-      //console.log('Token verification result:', authResult);
+      console.log('Token verification result:', authResult);
       
       if (authResult.success) {
         // User is authenticated, check if they exist in our database
-        //console.log('Checking if user exists in database...');
+        console.log('Checking if user exists in database...');
         const existingUser = await api.getUserByEmail(firebaseUser.email);
         
         if (existingUser) {
           // User exists, log them in
-          // //console.log('User found, logging in:', existingUser);
+          // console.log('User found, logging in:', existingUser);
           setCurrentUser(existingUser);
       setPageState({ page: 'opportunities' });
     } else {
           // User doesn't exist, redirect to registration
-          //console.log('User not found, redirecting to registration');
+          console.log('User not found, redirecting to registration');
           setAuthView('register');
         }
       }
@@ -263,13 +263,13 @@ const App: React.FC = () => {
   // Data Handlers
   const handleSignUp = useCallback(async (opportunityId: number) => {
     if (!currentUser) return;
-    //console.log('handleSignUp called for opportunity:', opportunityId, 'user:', currentUser.id);
+    console.log('handleSignUp called for opportunity:', opportunityId, 'user:', currentUser.id);
     
     try {
       // Check if opportunity is fully booked before attempting registration
-      //console.log('Checking opportunity availability...');
+      console.log('Checking opportunity availability...');
       const availabilityCheck = await api.checkOpportunityAvailability(opportunityId);
-      //console.log('Availability check result:', availabilityCheck);
+      console.log('Availability check result:', availabilityCheck);
       
       if (availabilityCheck.is_full) {
         // Show popup explaining the opportunity is full
@@ -280,27 +280,27 @@ const App: React.FC = () => {
         );
         
         // Refresh opportunities to get updated state from backend
-        //console.log('Refreshing opportunities data after finding opportunity is full...');
+        console.log('Refreshing opportunities data after finding opportunity is full...');
         const updatedOpps = await api.getOpportunities();
-        //console.log('Updated opportunities received:', updatedOpps.length);
+        console.log('Updated opportunities received:', updatedOpps.length);
         setOpportunities(updatedOpps);
         
         return; // Exit early, don't proceed with registration
       }
       
       // If not full, proceed with registration
-      //console.log('Opportunity has available slots, proceeding with registration...');
+      console.log('Opportunity has available slots, proceeding with registration...');
       
       // Optimistically update local state immediately
       setSignups(prev => [...prev, { userId: currentUser.id, opportunityId }]);
       
       await api.registerForOpp({ user_id: currentUser.id, opportunity_id: opportunityId });
-      //console.log('API registerForOpp successful');
+      console.log('API registerForOpp successful');
       
       // Refresh opportunities to get updated involved_users from backend
-      //console.log('Refreshing opportunities data...');
+      console.log('Refreshing opportunities data...');
       const updatedOpps = await api.getOpportunities();
-      //console.log('Updated opportunities received:', updatedOpps.length);
+      console.log('Updated opportunities received:', updatedOpps.length);
       setOpportunities(updatedOpps);
       
       // Show success popup
@@ -319,7 +319,7 @@ const App: React.FC = () => {
 
   const handleUnSignUp = useCallback(async (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => {
     if (!currentUser) return;
-    //console.log('handleUnSignUp called for opportunity:', opportunityId, 'user:', currentUser.id);
+    console.log('handleUnSignUp called for opportunity:', opportunityId, 'user:', currentUser.id);
     
     // Store original state for potential rollback
     const originalSignups = [...signups];
@@ -334,12 +334,12 @@ const App: React.FC = () => {
           opportunityDate,
           opportunityTime
         });
-        //console.log('API unregisterForOpp successful');
+        console.log('API unregisterForOpp successful');
         
         // Refresh opportunities to get updated involved_users from backend
-        //console.log('Refreshing opportunities data...');
+        console.log('Refreshing opportunities data...');
         const updatedOpps = await api.getOpportunities();
-        //console.log('Updated opportunities received:', updatedOpps.length);
+        console.log('Updated opportunities received:', updatedOpps.length);
         setOpportunities(updatedOpps);
     } catch (e: any) {
         console.error('Error in handleUnSignUp:', e);
@@ -389,10 +389,10 @@ const App: React.FC = () => {
   // Load user's friendships and friend requests
   const loadUserFriendships = useCallback(async (userId: number) => {
     if (!currentUser) return;
-    //console.log('Loading friendships for user:', userId);
+    console.log('Loading friendships for user:', userId);
     try {
       const friendshipsResponse = await api.getUserFriendships(userId);
-      //console.log('Raw friendships data from backend:', friendshipsResponse);
+      console.log('Raw friendships data from backend:', friendshipsResponse);
       setFriendshipsData(friendshipsResponse);
     } catch (e: any) {
       console.error('Error loading friendships:', e.message);
@@ -517,11 +517,11 @@ const App: React.FC = () => {
 
   // Get friends for any user (for viewing other profiles)
   const getFriendsForUser = useCallback(async (userId: number): Promise<User[]> => {
-    //console.log('Getting friends for user:', userId);
+    console.log('Getting friends for user:', userId);
     
     try {
       const friends = await api.getAcceptedFriendships(userId);
-      //console.log('Friends response from API:', friends);
+      console.log('Friends response from API:', friends);
       return friends;
     } catch (error) {
       console.error('Error fetching friends for user:', error);
@@ -575,9 +575,9 @@ const App: React.FC = () => {
   };
 
   const updateUserProfile = useCallback(async (userData: Partial<User>) => {
-    //console.log('🔄 App: updateUserProfile called with:', userData);
+    console.log('🔄 App: updateUserProfile called with:', userData);
     if (!currentUser) {
-      //console.log('🔄 App: No currentUser, returning early');
+      console.log('🔄 App: No currentUser, returning early');
       return;
     }
     try {
@@ -590,7 +590,7 @@ const App: React.FC = () => {
             ...userData // Override with the new data
         };
         
-        //console.log('🔄 App: Complete user data being sent to backend:', completeUserData);
+        console.log('🔄 App: Complete user data being sent to backend:', completeUserData);
         
         const updatedUser = await api.updateUser(currentUser.id, completeUserData);
         const finalUser = { ...currentUser, ...updatedUser };
@@ -606,11 +606,11 @@ const App: React.FC = () => {
     if (!currentUser) return;
     
     try {
-      //console.log('Starting profile picture upload for file:', file.name, file.size, file.type);
+      console.log('Starting profile picture upload for file:', file.name, file.size, file.type);
       
       // First upload the file to get the S3 URL
       const imageUrl = await api.uploadProfilePicture(file);
-      //console.log('Upload successful, got S3 URL:', imageUrl);
+      console.log('Upload successful, got S3 URL:', imageUrl);
       
       // Immediately update frontend state with the new image URL
       const updatedUser = { 
@@ -620,15 +620,15 @@ const App: React.FC = () => {
         // Add a timestamp to force React to detect the change
         _lastUpdate: Date.now()
       };
-      //console.log('Updating profile picture - before:', currentUser.profile_image);
-              //console.log('Updating profile picture - after:', updatedUser.profile_image);
+      console.log('Updating profile picture - before:', currentUser.profile_image);
+              console.log('Updating profile picture - after:', updatedUser.profile_image);
     setCurrentUser(updatedUser);
     setStudents(prev => prev.map(s => s.id === currentUser.id ? updatedUser : s));
       
       // Then update the backend (in background)
-      //console.log('Updating backend with image URL:', imageUrl);
+      console.log('Updating backend with image URL:', imageUrl);
       await updateUserProfile({ profile_image: imageUrl });
-      //console.log('Backend update successful');
+      console.log('Backend update successful');
       
       // Show success message
       showPopup('Profile Picture Updated!', 'Your profile picture has been successfully updated! To see changes, reload the page.', 'success');
@@ -878,7 +878,7 @@ const App: React.FC = () => {
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
-          className="h-4 w-4 md:h-5 md:w-5" 
+          className="h-5 w-5" 
           fill="none" 
           viewBox="0 0 24 24" 
           stroke="currentColor"
@@ -890,7 +890,7 @@ const App: React.FC = () => {
             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" 
           />
         </svg>
-        <span className="hidden sm:inline">Report Bug</span>n        <span className="sm:hidden">Bug</span>
+        Report Bug
       </a>
     </div>
   );

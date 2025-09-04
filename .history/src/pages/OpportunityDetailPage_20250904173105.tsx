@@ -588,10 +588,10 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                               //     email: student.email,
                               //     hasEmail: !!hasEmail 
                               //   });
-                                return hasEmail;
-                              })
-                              .map(student => student.email)
-                              .join(', ');
+                              //   return hasEmail;
+                              // // })
+                              // .map(student => student.email)
+                              // .join(', ');
                             
                             //console.log('Participant emails collected:', participantEmails);
                             
