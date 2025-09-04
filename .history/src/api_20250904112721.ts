@@ -102,40 +102,31 @@ export const getUsers = async (): Promise<MinimalUser[]> => {
     return response.users || [];
 };
 
-// Get user by email for login - new endpoint
-export const getUserByEmail = async (email: string): Promise<User | null> => {
-    try {
-        const response = await authenticatedRequest(`/users/email/${encodeURIComponent(email)}`);
-        
-        if (response.exists && response.user) {
-            // Transform the user data to match our User interface
-            return {
-                id: response.user.id,
-                name: response.user.name,
-                email: response.user.email,
-                profile_image: response.user.profile_image,
-                interests: [],
-                friendIds: [],
-                organizationIds: [],
-                admin: response.user.admin || false,
-                points: 0,
-                car_seats: 0,
-                // These will be filled when we load full user data
-                gender: undefined,
-                graduationYear: undefined,
-                academicLevel: undefined,
-                major: undefined,
-                birthday: undefined,
-                registration_date: undefined,
-                phone: undefined,
-            };
-        } else {
-            return null;
-        }
-    } catch (error) {
-        console.error('Error fetching user by email:', error);
-        return null;
-    }
+export const getSecureUsers = async (): Promise<User[]> => {
+    const response = await authenticatedRequest('/users/secure');
+    const users = response.users || [];
+    
+    // Transform each user to extract organizationIds from organizations array
+    return users.map((user: any) => ({
+        ...user,
+        id: response.id,
+        name: response.name,
+        email: response.email,
+        profile_image: response.profile_image,
+        interests: response.interests || [],
+        friendIds: response.friends || [],
+        organizationIds: (response.organizations || []).map((org: any) => org.id) || [],
+        admin: response.admin || false,
+        gender: response.gender,
+        graduationYear: response.graduation_year,
+        academicLevel: response.academic_level,
+        major: response.major,
+        birthday: response.birthday,
+        points: response.points || 0,
+        registration_date: response.registration_date,
+        phone: response.phone,
+        car_seats: response.car_seats || 0,
+    }));
 };
 
 // Get detailed user data for a specific user

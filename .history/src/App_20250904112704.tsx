@@ -77,8 +77,17 @@ const App: React.FC = () => {
             api.getApprovedOrgs(),
           ]);
           
+          // Fetch secure users separately to avoid failing the entire load if this fails
+          let leaderboardData: User[] = [];
+          try {
+            leaderboardData = await api.getSecureUsers();
+          } catch (error) {
+            console.error('Failed to fetch secure users for leaderboard:', error);
+            // Continue with empty leaderboard data
+          }
           console.log('API calls completed:', {
             usersCount: usersData.length,
+            leaderboardCount: leaderboardData.length,
             opportunitiesCount: oppsData.length,
             orgsCount: orgsData.length
           });
@@ -99,7 +108,7 @@ const App: React.FC = () => {
             registration_date: ''
           }));
           setStudents(fullUsersData);
-          setLeaderboardUsers(fullUsersData); // Use the same data for leaderboard since getSecureUsers no longer exists
+          setLeaderboardUsers(leaderboardData);
           setOpportunities(oppsData);
           setOrganizations(orgsData);
           setSignups([]); // Initialize empty signups - we'll track this locally
@@ -146,14 +155,30 @@ const App: React.FC = () => {
       if (authResult.success) {
         // User is authenticated, check if they exist in our database
         console.log('Checking if user exists in database...');
-        const existingUser = await api.getUserByEmail(firebaseUser.email);
+        const allUsers = await api.getUsers();
+        console.log('Retrieved users from database:', allUsers.length);
+        
+        // Find user by email - we need to get full user data for each user to check email
+        let existingUser: User | null = null;
+        for (const user of allUsers) {
+          try {
+            const fullUser = await api.getUserById(user.id);
+            if (fullUser.email.toLowerCase() === firebaseUser.email.toLowerCase()) {
+              existingUser = fullUser;
+              break;
+            }
+          } catch (error) {
+            console.warn(`Failed to get full data for user ${user.id}:`, error);
+            continue;
+          }
+        }
         
         if (existingUser) {
           // User exists, log them in
           console.log('User found, logging in:', existingUser);
           setCurrentUser(existingUser);
-          setPageState({ page: 'opportunities' });
-        } else {
+      setPageState({ page: 'opportunities' });
+    } else {
           // User doesn't exist, redirect to registration
           console.log('User not found, redirecting to registration');
           setAuthView('register');
