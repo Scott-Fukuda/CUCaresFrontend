@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { User, MinimalUser, Opportunity, SignUp, Organization, Badge, OrganizationType, Notification, Friendship, FriendshipStatus, FriendshipsResponse, UserWithFriendshipStatus } from './types';
 import * as api from './api';
 import { initialBadges } from './data/initialData'; // Using initial data for badges
@@ -42,9 +42,6 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [pageState, setPageState] = useState<PageState>({ page: 'opportunities' });
   
-  // Track last loaded user to prevent infinite loops
-  const lastLoadedUserId = useRef<number | null>(null);
-  
   // UI State
   const [authError, setAuthError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,8 +63,8 @@ const App: React.FC = () => {
 
   // Load all app data after user is logged in
   useEffect(() => {
-    console.log('App useEffect triggered:', { currentUser, isLoading, lastLoadedUserId: lastLoadedUserId.current });
-    if (currentUser && currentUser.id !== lastLoadedUserId.current) {
+    console.log('App useEffect triggered:', { currentUser, isLoading });
+    if (currentUser && !isLoading) {
       const loadAppData = async () => {
         console.log('Loading app data...');
         setIsLoading(true);
@@ -102,8 +99,6 @@ const App: React.FC = () => {
               });
               setCurrentUser(fullCurrentUser);
             }
-            // Mark this user as loaded to prevent infinite loops
-            lastLoadedUserId.current = currentUser.id;
           }
         } catch (e: any) {
           console.error('API call failed:', e);
