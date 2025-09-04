@@ -82,9 +82,24 @@ const App: React.FC = () => {
             opportunitiesCount: oppsData.length,
             orgsCount: orgsData.length
           });
-          // getUsers now returns full User objects, no conversion needed
-          setStudents(usersData);
-          setLeaderboardUsers(usersData); // Use the same data for leaderboard
+          // Convert minimal user data to full User objects for backward compatibility
+          const fullUsersData = usersData.map((user: MinimalUser) => ({
+            id: user.id,
+            name: user.name,
+            email: '', // Will be filled when needed
+            interests: [],
+            friendIds: [],
+            organizationIds: [],
+            profilePictureUrl: '',
+            admin: false,
+            registered: false,
+            attended: false,
+            points: 0,
+            car_seats: 0, // Add default car_seats
+            registration_date: ''
+          }));
+          setStudents(fullUsersData);
+          setLeaderboardUsers(fullUsersData); // Use the same data for leaderboard since getSecureUsers no longer exists
           setOpportunities(oppsData);
           setOrganizations(orgsData);
           setSignups([]); // Initialize empty signups - we'll track this locally

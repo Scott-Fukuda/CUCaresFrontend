@@ -96,31 +96,10 @@ const authenticatedRequest = async (endpoint: string, options: RequestInit = {})
 
 
 // --- Users ---
-// Get all users data - now requires authentication and returns full user data
-export const getUsers = async (): Promise<User[]> => {
+// Get minimal user data (id and name only) for lists - now requires authentication
+export const getUsers = async (): Promise<MinimalUser[]> => {
     const response = await authenticatedRequest('/users');
-    const users = response.users || [];
-    
-    // Transform each user to match our User interface
-    return users.map((user: any) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        profile_image: user.profile_image,
-        interests: user.interests || [],
-        friendIds: user.friends || [],
-        organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
-        admin: user.admin || false,
-        gender: user.gender,
-        graduationYear: user.graduation_year,
-        academicLevel: user.academic_level,
-        major: user.major,
-        birthday: user.birthday,
-        points: user.points || 0,
-        registration_date: user.registration_date,
-        phone: user.phone,
-        car_seats: user.car_seats || 0,
-    }));
+    return response.users || [];
 };
 
 // Get user by email for login - new endpoint
@@ -160,6 +139,29 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
 };
 
 // Get detailed user data for a specific user
+export const getUserById = async (id: number): Promise<User> => {
+    const response = await authenticatedRequest(`/users/${id}`);
+    return {
+        ...response,
+        id: response.id,
+        name: response.name,
+        email: response.email,
+        profile_image: response.profile_image,
+        interests: response.interests || [],
+        friendIds: response.friends || [],
+        organizationIds: (response.organizations || []).map((org: any) => org.id) || [],
+        admin: response.admin || false,
+        gender: response.gender,
+        graduationYear: response.graduation_year,
+        academicLevel: response.academic_level,
+        major: response.major,
+        birthday: response.birthday,
+        points: response.points || 0,
+        registration_date: response.registration_date,
+        phone: response.phone,
+        car_seats: response.car_seats || 0,
+    };
+};
 export const getUser = async (id: number): Promise<User> => {
     const response = await authenticatedRequest(`/users/${id}`);
     return {
