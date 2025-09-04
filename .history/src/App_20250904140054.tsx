@@ -173,7 +173,7 @@ const App: React.FC = () => {
         name: `${firstName} ${lastName}`,
         email, 
             phone,
-        passions: [], 
+        interests: [], 
         friendIds: [], 
             organizationIds: [], 
             profile_image: '',
@@ -248,35 +248,10 @@ const App: React.FC = () => {
     if (!currentUser) return;
     console.log('handleSignUp called for opportunity:', opportunityId, 'user:', currentUser.id);
     
+    // Optimistically update local state immediately
+    setSignups(prev => [...prev, { userId: currentUser.id, opportunityId }]);
+    
     try {
-      // Check if opportunity is fully booked before attempting registration
-      console.log('Checking opportunity availability...');
-      const availabilityCheck = await api.checkOpportunityAvailability(opportunityId);
-      console.log('Availability check result:', availabilityCheck);
-      
-      if (availabilityCheck.is_full) {
-        // Show popup explaining the opportunity is full
-        showPopup(
-          'Opportunity Full',
-          'This opportunity has recently filled up. We apologize for the inconvenience. Please check back later or look for other opportunities to get involved!',
-          'warning'
-        );
-        
-        // Refresh opportunities to get updated state from backend
-        console.log('Refreshing opportunities data after finding opportunity is full...');
-        const updatedOpps = await api.getOpportunities();
-        console.log('Updated opportunities received:', updatedOpps.length);
-        setOpportunities(updatedOpps);
-        
-        return; // Exit early, don't proceed with registration
-      }
-      
-      // If not full, proceed with registration
-      console.log('Opportunity has available slots, proceeding with registration...');
-      
-      // Optimistically update local state immediately
-      setSignups(prev => [...prev, { userId: currentUser.id, opportunityId }]);
-      
       await api.registerForOpp({ user_id: currentUser.id, opportunity_id: opportunityId });
       console.log('API registerForOpp successful');
       
@@ -565,7 +540,7 @@ const App: React.FC = () => {
             name: currentUser.name,
             email: currentUser.email,
             phone: currentUser.phone || '',
-            passions: currentUser.passions,
+            interests: currentUser.interests,
             ...userData // Override with the new data
         };
         
@@ -773,7 +748,7 @@ const App: React.FC = () => {
                         hoursVolunteered={profileUserHours}
                         userFriends={profileUserFriends}
                         setPageState={setPageState}
-                        updatePassions={updatePassions}
+                        updateInterests={updateInterests}
                         updateProfilePicture={updateProfilePicture}
                         handleFriendRequest={handleFriendRequest}
                         handleRemoveFriend={handleRemoveFriend}

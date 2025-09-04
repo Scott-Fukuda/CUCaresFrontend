@@ -36,10 +36,10 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [uploadingProfilePic, setUploadingProfilePic] = useState(false);
   
-  // Update selectedPassions when user.passions changes
+  // Update selectedInterests when user.interests changes
   React.useEffect(() => {
-    setSelectedPassions(user.passions);
-  }, [user.passions]);
+    setSelectedInterests(user.interests);
+  }, [user.interests]);
 
   // Check friendship status when component mounts or user changes
   useEffect(() => {
@@ -217,8 +217,8 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                     </button>
                 ))}
             </div>
-             {isCurrentUser && user.passions.length === 0 && (
-                <p className="text-sm text-gray-500 mt-4">Select some passions to get personalized recommendations!</p>
+             {isCurrentUser && user.interests.length === 0 && (
+                <p className="text-sm text-gray-500 mt-4">Select some interests to get personalized recommendations!</p>
              )}
          </div>
 

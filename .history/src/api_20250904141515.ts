@@ -525,10 +525,10 @@ export const deleteOpportunity = (id: number): Promise<void> => authenticatedReq
     method: 'DELETE'
 });
 // --- SignUps (Registrations) ---
-// Check if opportunity is fully booked
-export const checkOpportunityAvailability = async (opportunityId: number): Promise<{ is_full: boolean }> => {
+// Check if opportunity has available slots before registration
+export const checkOpportunityAvailability = async (opportunityId: number): Promise<{ isFull: boolean; registeredCount: number; totalSlots: number }> => {
   console.log('Checking availability for opportunity:', opportunityId);
-  const result = await authenticatedRequest(`/opps/${opportunityId}/full`);
+  const result = await authenticatedRequest(`/opps/${opportunityId}/availability`);
   console.log('Opportunity availability response:', result);
   return result;
 };

@@ -107,7 +107,7 @@ export const getUsers = async (): Promise<User[]> => {
         name: user.name,
         email: user.email,
         profile_image: user.profile_image,
-        passions: user.interests || [],
+        interests: user.interests || [],
         friendIds: user.friends || [],
         organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
         admin: user.admin || false,
@@ -135,7 +135,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
                 name: response.user.name,
                 email: response.user.email,
                 profile_image: response.user.profile_image,
-                passions: [],
+                interests: [],
                 friendIds: [],
                 organizationIds: [],
                 admin: response.user.admin || false,
@@ -467,7 +467,7 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
                     email: involvedUser.email || '', // Now provided by backend
                     phone: involvedUser.phone || '',
                     profile_image: involvedUser.profile_image,
-                    passions: [],
+                    interests: [],
                     friendIds: [],
                     organizationIds: [],
                     // Add attendance info if needed
@@ -525,14 +525,6 @@ export const deleteOpportunity = (id: number): Promise<void> => authenticatedReq
     method: 'DELETE'
 });
 // --- SignUps (Registrations) ---
-// Check if opportunity is fully booked
-export const checkOpportunityAvailability = async (opportunityId: number): Promise<{ is_full: boolean }> => {
-  console.log('Checking availability for opportunity:', opportunityId);
-  const result = await authenticatedRequest(`/opps/${opportunityId}/full`);
-  console.log('Opportunity availability response:', result);
-  return result;
-};
-
 // POST /register-opp for signing up.
 export const registerForOpp = async (data: { user_id: number; opportunity_id: number }) => {
   console.log('Making registerForOpp API call with data:', data);

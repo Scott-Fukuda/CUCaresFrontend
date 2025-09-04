@@ -203,7 +203,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
               >
-                {allPassions.map(cause => (
+                {allInterests.map(cause => (
                   <option key={cause} value={cause}>{cause}</option>
                 ))}
               </select>

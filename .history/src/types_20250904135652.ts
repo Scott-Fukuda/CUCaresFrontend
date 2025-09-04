@@ -11,7 +11,7 @@ export interface User {
   email: string; // Must be @cornell.edu
   password?: string; // In a real app, this would be a hash. Storing for simulation.
   profile_image?: string; // Profile image URL from backend
-  passions: string[];
+  interests: string[];
   friendIds: number[];
   organizationIds: number[]; // Changed from groupIds to organizationIds
   admin?: boolean;
@@ -60,8 +60,8 @@ export interface SignUp {
 export type StudentGroupCategory = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team';
 export const studentGroupCategories: StudentGroupCategory[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team'];
 
-export type OrganizationType = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team' | 'Cultural' | 'Community Service' | 'Religious' | 'Other';
-export const organizationTypes: OrganizationType[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team', 'Cultural', 'Community Service', 'Religious', 'Other'];
+export type OrganizationType = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team' | 'Cultural' | 'Community Service' | 'Other';
+export const organizationTypes: OrganizationType[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team', 'Cultural', 'Community Service', 'Other'];
 
 export interface StudentGroup {
     id: number;
