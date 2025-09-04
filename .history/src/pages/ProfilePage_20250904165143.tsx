@@ -203,7 +203,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
       {/* Right Column */}
       <div className="lg:col-span-2 space-y-8">
          <div className="bg-white p-6 rounded-2xl shadow-lg">
-            <h3 className="text-xl font-bold mb-4">{user.name}'s Passions</h3>
+            <h3 className="text-xl font-bold mb-4">{user.name}'s Interests</h3>
             <div className="flex flex-wrap gap-3">
                 {allInterests.map(interest => (
                     <button 

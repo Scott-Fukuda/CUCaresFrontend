@@ -107,7 +107,7 @@ export const getUsers = async (): Promise<User[]> => {
         name: user.name,
         email: user.email,
         profile_image: user.profile_image,
-        interests: user.interests || [],
+        passions: user.passion || [],
         friendIds: user.friends || [],
         organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
         admin: user.admin || false,
@@ -135,7 +135,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
                 name: response.user.name,
                 email: response.user.email,
                 profile_image: response.user.profile_image,
-                interests: [],
+                passions: [],
                 friendIds: [],
                 organizationIds: [],
                 admin: response.user.admin || false,
@@ -167,7 +167,7 @@ export const getUser = async (id: number): Promise<User> => {
         name: response.name,
         email: response.email,
         profile_image: response.profile_image,
-        interests: response.interests || [],
+        passions: response.interests || [],
         friendIds: response.friends || [],
         organizationIds: (response.organizations || []).map((org: any) => org.id) || [],
         admin: response.admin || false,
@@ -189,9 +189,9 @@ export const updateUser = (id: number, data: object): Promise<User> => {
   });
   
   return authenticatedRequest(`/users/${id}`, {
-  method: 'PUT',
-  body: JSON.stringify(data),
-});
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 };
 
 export const uploadProfilePicture = async (file: File): Promise<string> => {
@@ -352,7 +352,7 @@ export const getAcceptedFriendships = async (userId: number): Promise<User[]> =>
         email: '', // Not provided in friendship response
         password: '', // Not provided in friendship response
         profile_image: friendship.other_user_profile_image || friendship.profile_image,
-        interests: [], // Not provided in friendship response
+        passions: [], // Not provided in friendship response
         friendIds: [], // Not provided in friendship response
         organizationIds: [], // Not provided in friendship response
         graduationYear: '', // Not provided in friendship response
@@ -474,7 +474,7 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
                     email: involvedUser.email || '', // Now provided by backend
                     phone: involvedUser.phone || '',
                     profile_image: involvedUser.profile_image,
-                    interests: [],
+                    passions: [],
                     friendIds: [],
                     organizationIds: [],
                     // Add attendance info if needed
