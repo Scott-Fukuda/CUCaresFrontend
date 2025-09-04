@@ -77,8 +77,17 @@ const App: React.FC = () => {
             api.getApprovedOrgs(),
           ]);
           
+          // Fetch secure users separately to avoid failing the entire load if this fails
+          let leaderboardData: User[] = [];
+          try {
+            leaderboardData = await api.getSecureUsers();
+          } catch (error) {
+            console.error('Failed to fetch secure users for leaderboard:', error);
+            // Continue with empty leaderboard data
+          }
           console.log('API calls completed:', {
             usersCount: usersData.length,
+            leaderboardCount: leaderboardData.length,
             opportunitiesCount: oppsData.length,
             orgsCount: orgsData.length
           });
@@ -99,7 +108,7 @@ const App: React.FC = () => {
             registration_date: ''
           }));
           setStudents(fullUsersData);
-          setLeaderboardUsers(fullUsersData); // Use the same data for leaderboard since getSecureUsers no longer exists
+          setLeaderboardUsers(leaderboardData);
           setOpportunities(oppsData);
           setOrganizations(orgsData);
           setSignups([]); // Initialize empty signups - we'll track this locally

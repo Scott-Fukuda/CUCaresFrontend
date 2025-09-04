@@ -99,7 +99,7 @@ const App: React.FC = () => {
             registration_date: ''
           }));
           setStudents(fullUsersData);
-          setLeaderboardUsers(fullUsersData); // Use the same data for leaderboard since getSecureUsers no longer exists
+          setLeaderboardUsers(leaderboardData);
           setOpportunities(oppsData);
           setOrganizations(orgsData);
           setSignups([]); // Initialize empty signups - we'll track this locally
