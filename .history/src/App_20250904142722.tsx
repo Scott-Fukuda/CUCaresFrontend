@@ -137,8 +137,8 @@ const App: React.FC = () => {
           // User exists, log them in
           console.log('User found, logging in:', existingUser);
           setCurrentUser(existingUser);
-      setPageState({ page: 'opportunities' });
-    } else {
+          setPageState({ page: 'opportunities' });
+        } else {
           // User doesn't exist, redirect to registration
           console.log('User not found, redirecting to registration');
           setAuthView('register');
