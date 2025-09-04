@@ -143,7 +143,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                 description: editForm.description,
                 address: editForm.address,
                 date: editForm.date,
-                time: editForm.time,
                 duration: editForm.duration
               }
             : opp
@@ -156,7 +155,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
         description: editForm.description,
         address: editForm.address,
         date: editForm.date,
-        time: editForm.time,
         duration: editForm.duration
       });
       
@@ -175,7 +173,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       description: opportunity.description,
       address: opportunity.address,
       date: opportunity.date,
-      time: opportunity.time,
       duration: opportunity.duration
     });
     setIsEditing(false);
@@ -354,22 +351,13 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                             />
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
                                 <input
                                     type="date"
                                     value={editForm.date}
                                     onChange={(e) => setEditForm({...editForm, date: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
-                                <input
-                                    type="time"
-                                    value={editForm.time}
-                                    onChange={(e) => setEditForm({...editForm, time: e.target.value})}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                                 />
                             </div>

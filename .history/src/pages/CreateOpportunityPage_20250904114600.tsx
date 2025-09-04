@@ -116,7 +116,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
       formData.causes.forEach(cause => {
         formDataToSend.append('causes', cause);
       });
-      formDataToSend.append('date', formatDateTimeForBackend(formData.date, formData.time));
+      formDataToSend.append('date', `${formData.date}T${formData.time}:00`);
       formDataToSend.append('duration', formData.duration.toString());
       formDataToSend.append('total_slots', formData.total_slots.toString());
       formDataToSend.append('nonprofit', formData.nonprofit);

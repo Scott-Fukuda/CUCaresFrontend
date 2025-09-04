@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import { PageState } from '../App';
 import { getProfilePictureUrl, updateOpportunity, getUser, deleteOpportunity } from '../api';
-import { formatDateTimeForBackend } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 
 interface OpportunityDetailPageProps {
@@ -120,14 +119,14 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
   const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
-      // Format the date and time correctly using the utility function
-      const formattedDateTime = formatDateTimeForBackend(editForm.date, editForm.time);
+      // Format the date correctly by combining the new date with the original time
+      const formattedDate = `${editForm.date}T${opportunity.time}`;
       
       const updateData = {
         name: editForm.name,
         description: editForm.description,
         address: editForm.address,
-        date: formattedDateTime,
+        date: formattedDate,
         duration: editForm.duration
       };
       
@@ -143,7 +142,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                 description: editForm.description,
                 address: editForm.address,
                 date: editForm.date,
-                time: editForm.time,
                 duration: editForm.duration
               }
             : opp
@@ -156,7 +154,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
         description: editForm.description,
         address: editForm.address,
         date: editForm.date,
-        time: editForm.time,
         duration: editForm.duration
       });
       
@@ -175,7 +172,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       description: opportunity.description,
       address: opportunity.address,
       date: opportunity.date,
-      time: opportunity.time,
       duration: opportunity.duration
     });
     setIsEditing(false);
@@ -354,22 +350,13 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                             />
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
                                 <input
                                     type="date"
                                     value={editForm.date}
                                     onChange={(e) => setEditForm({...editForm, date: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
-                                <input
-                                    type="time"
-                                    value={editForm.time}
-                                    onChange={(e) => setEditForm({...editForm, time: e.target.value})}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                                 />
                             </div>
