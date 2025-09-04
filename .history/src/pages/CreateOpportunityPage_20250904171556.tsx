@@ -42,7 +42,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
     const selectedCauses = Array.from(e.target.selectedOptions, option => option.value);
     setFormData(prev => ({
       ...prev,
-      cause: selectedCauses
+      causes: selectedCauses
     }));
   };
 
@@ -114,7 +114,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
       formDataToSend.append('description', formData.description);
       // Add causes as array
       formData.cause.forEach(cause => {
-        formDataToSend.append('cause', cause);
+        formDataToSend.append('causes', cause);
       });
       formDataToSend.append('date', formatDateTimeForBackend(formData.date, formData.time));
       formDataToSend.append('duration', formData.duration.toString());

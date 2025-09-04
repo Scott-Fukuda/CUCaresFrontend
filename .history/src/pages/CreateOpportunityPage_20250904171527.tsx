@@ -14,7 +14,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    cause: [] as string[],
+    causes: [] as string[],
     date: '',
     time: '',
     duration: 60, // Default 60 minutes
@@ -42,7 +42,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
     const selectedCauses = Array.from(e.target.selectedOptions, option => option.value);
     setFormData(prev => ({
       ...prev,
-      cause: selectedCauses
+      causes: selectedCauses
     }));
   };
 
@@ -113,8 +113,8 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
       // Add causes as array
-      formData.cause.forEach(cause => {
-        formDataToSend.append('cause', cause);
+      formData.causes.forEach(cause => {
+        formDataToSend.append('causes', cause);
       });
       formDataToSend.append('date', formatDateTimeForBackend(formData.date, formData.time));
       formDataToSend.append('duration', formData.duration.toString());
@@ -196,7 +196,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
                 Causes *
               </label>
               <select
-                name="cause"
+                name="causes"
                 multiple
                 value={formData.cause}
                 onChange={handleCausesChange}

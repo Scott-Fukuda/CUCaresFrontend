@@ -499,7 +499,7 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
                 total_slots: opp.total_slots || 10, // Use total_slots from backend
                 imageUrl: resolvedImageUrl,
                 points: opp.duration || 0, // 1 minute = 1 point
-                cause: opp.cause || opp.cause ? [opp.cause] : [], // Handle both array and single cause
+                causes: opp.causes || opp.cause ? [opp.cause] : [], // Handle both array and single cause
                 isPrivate: false, // Default
                 host_id: opp.host_user_id || opp.host_org_id, // Include host_id from backend
                 host_org_id: opp.host_org_id, // Include host organization ID
