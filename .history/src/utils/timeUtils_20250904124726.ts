@@ -80,13 +80,18 @@ export const isWithinUnregistrationWindow = (
 };
 
 /**
- * Format datetime for backend
+ * Format datetime for backend in GMT
  * @param date - Date in YYYY-MM-DD format
  * @param time - Time in HH:MM format
- * @returns ISO string in the exact format expected by backend (YYYY-MM-DDTHH:MM:SS)
+ * @returns ISO string in GMT timezone without milliseconds (YYYY-MM-DDTHH:MM:SS)
  */
 export const formatDateTimeForBackend = (date: string, time: string): string => {
-  // Return the datetime exactly as entered, without timezone conversion
-  // Backend expects format: YYYY-MM-DDTHH:MM:SS
-  return `${date}T${time}:00`;
+  // Create a date object from the input date and time
+  const dateTimeString = `${date}T${time}:00`;
+  const dateObj = new Date(dateTimeString);
+  
+  // Convert to GMT and format without milliseconds
+  const isoString = dateObj.toISOString();
+  // Remove the .000Z suffix to match backend expected format
+  return isoString.replace('.000Z', '');
 };
