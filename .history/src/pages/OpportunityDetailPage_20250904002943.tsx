@@ -130,22 +130,8 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       };
       
       await updateOpportunity(opportunity.id, updateData);
-      
-      // Update the opportunity in the state
-      setOpportunities(prevOpportunities => 
-        prevOpportunities.map(opp => 
-          opp.id === opportunity.id 
-            ? {
-                ...opp,
-                name: editForm.name,
-                description: editForm.description,
-                address: editForm.address,
-                date: editForm.date,
-                duration: editForm.duration
-              }
-            : opp
-        )
-      );
+      alert('Opportunity details updated successfully!');
+      setIsEditing(false);
       
       // Update the local opportunity object to reflect changes
       Object.assign(opportunity, {
@@ -155,9 +141,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
         date: editForm.date,
         duration: editForm.duration
       });
-      
-      alert('Opportunity details updated successfully!');
-      setIsEditing(false);
     } catch (error: any) {
       alert(`Error updating opportunity: ${error.message}`);
     } finally {

@@ -15,10 +15,9 @@ interface OpportunityDetailPageProps {
   setPageState: (state: PageState) => void;
   allOrgs: Organization[];
   currentUserSignupsSet: Set<number>;
-  setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
 }
 
-const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportunity, students, signups, currentUser, handleSignUp, handleUnSignUp, setPageState, allOrgs, currentUserSignupsSet, setOpportunities }) => {
+const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportunity, students, signups, currentUser, handleSignUp, handleUnSignUp, setPageState, allOrgs, currentUserSignupsSet }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: opportunity.name,
@@ -101,12 +100,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
 
     try {
       await deleteOpportunity(opportunity.id);
-      
-      // Remove the opportunity from the state
-      setOpportunities(prevOpportunities => 
-        prevOpportunities.filter(opp => opp.id !== opportunity.id)
-      );
-      
       alert('Opportunity has been deleted successfully!');
       // Navigate back to opportunities page
       setPageState({ page: 'opportunities' });
@@ -130,22 +123,8 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       };
       
       await updateOpportunity(opportunity.id, updateData);
-      
-      // Update the opportunity in the state
-      setOpportunities(prevOpportunities => 
-        prevOpportunities.map(opp => 
-          opp.id === opportunity.id 
-            ? {
-                ...opp,
-                name: editForm.name,
-                description: editForm.description,
-                address: editForm.address,
-                date: editForm.date,
-                duration: editForm.duration
-              }
-            : opp
-        )
-      );
+      alert('Opportunity details updated successfully!');
+      setIsEditing(false);
       
       // Update the local opportunity object to reflect changes
       Object.assign(opportunity, {
@@ -155,9 +134,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
         date: editForm.date,
         duration: editForm.duration
       });
-      
-      alert('Opportunity details updated successfully!');
-      setIsEditing(false);
     } catch (error: any) {
       alert(`Error updating opportunity: ${error.message}`);
     } finally {
