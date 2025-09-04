@@ -869,29 +869,6 @@ const App: React.FC = () => {
         message={popupMessage.message}
         type={popupMessage.type}
       />
-      
-      {/* Report Bug Button */}
-      <a
-        href="mailto:scott@campuscares.us?subject=Bug Report - CUCares Frontend&body=Please describe the bug you encountered:"
-        className="fixed bottom-6 right-6 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-lg transition-colors duration-200 flex items-center gap-2 z-50"
-        title="Report a Bug"
-      >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          className="h-5 w-5" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" 
-          />
-        </svg>
-        Report Bug
-      </a>
     </div>
   );
 };
