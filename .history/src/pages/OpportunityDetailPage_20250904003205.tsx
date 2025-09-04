@@ -31,7 +31,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
   
   // Slot limit management state
   const [isEditingSlots, setIsEditingSlots] = useState(false);
-  const [newSlotLimit, setNewSlotLimit] = useState(opportunity.total_slots);
+  const [newSlotLimit, setNewSlotLimit] = useState(opportunity.totalSlots);
   const [isUpdatingSlots, setIsUpdatingSlots] = useState(false);
   
   // Comment/announcement state
@@ -57,7 +57,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     : currentUserSignupsSet.has(opportunity.id);
 
   const isUserHost = opportunity.host_id === currentUser.id;
-  const availableSlots = opportunity.total_slots - signedUpStudents.length;
+  const availableSlots = opportunity.totalSlots - signedUpStudents.length;
   const canSignUp = availableSlots > 0 && !isUserSignedUp;
 
   // Parse date components manually to avoid timezone issues
@@ -183,18 +183,18 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       return;
     }
 
-    if (newSlotLimit === opportunity.total_slots) {
+    if (newSlotLimit === opportunity.totalSlots) {
       setIsEditingSlots(false);
       return;
     }
 
     setIsUpdatingSlots(true);
     try {
-      await updateOpportunity(opportunity.id, { total_slots: newSlotLimit });
+      await updateOpportunity(opportunity.id, { totalSlots: newSlotLimit });
       alert(`Slot limit updated successfully to ${newSlotLimit}!`);
       
       // Update the local opportunity object
-      opportunity.total_slots = newSlotLimit;
+      opportunity.totalSlots = newSlotLimit;
       setIsEditingSlots(false);
     } catch (error: any) {
       alert(`Error updating slot limit: ${error.message}`);
@@ -204,7 +204,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
   };
 
   const handleCancelSlotEdit = () => {
-    setNewSlotLimit(opportunity.total_slots);
+    setNewSlotLimit(opportunity.totalSlots);
     setIsEditingSlots(false);
   };
 
@@ -235,7 +235,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
   };
 
   const handleStartSlotEdit = () => {
-    setNewSlotLimit(opportunity.total_slots);
+    setNewSlotLimit(opportunity.totalSlots);
     setIsEditingSlots(true);
   };
 
@@ -377,7 +377,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                 
                 <div className="mt-8">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-2xl font-bold">Participants ({signedUpStudents.length}/{opportunity.total_slots})</h3>
+                        <h3 className="text-2xl font-bold">Participants ({signedUpStudents.length}/{opportunity.totalSlots})</h3>
                         <div className="text-right">
                             <p className="text-sm text-gray-600">Available Slots</p>
                             <p className={`text-lg font-semibold ${availableSlots > 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -485,7 +485,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm text-gray-600">Current Slot Limit</p>
-                            <p className="text-2xl font-bold text-gray-800">{opportunity.total_slots}</p>
+                            <p className="text-2xl font-bold text-gray-800">{opportunity.totalSlots}</p>
                           </div>
                           <div className="text-right">
                             <p className="text-sm text-gray-600">Available Slots</p>
@@ -609,7 +609,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     <ul className="space-y-4 text-gray-700">
                         <li className="flex items-center gap-3"><CalendarIcon /> <span>{displayDate}</span></li>
                         <li className="flex items-center gap-3"><ClockIcon /> <span>{displayTime}</span></li>
-                        <li className="flex items-center gap-3"><UsersIcon /> <span>{availableSlots} of {opportunity.total_slots} slots remaining</span></li>
+                        <li className="flex items-center gap-3"><UsersIcon /> <span>{availableSlots} of {opportunity.totalSlots} slots remaining</span></li>
                         <li className="flex items-center gap-3"><StarIcon /> <span>{opportunity.points} points</span></li>
                     </ul>
                      <button
@@ -630,7 +630,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     {!isUserSignedUp && availableSlots <= 0 && (
                       <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
                         <p className="text-sm text-red-700 text-center">
-                          This event has reached its maximum capacity of {opportunity.total_slots} participants.
+                          This event has reached its maximum capacity of {opportunity.totalSlots} participants.
                         </p>
                       </div>
                     )}
