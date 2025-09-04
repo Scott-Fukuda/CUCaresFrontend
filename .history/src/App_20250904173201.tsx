@@ -81,10 +81,10 @@ const App: React.FC = () => {
           ]);
           
           //console.log('API calls completed:', {
-          //   usersCount: usersData.length,
-          //   opportunitiesCount: oppsData.length,
-          //   orgsCount: orgsData.length
-          // });
+            usersCount: usersData.length,
+            opportunitiesCount: oppsData.length,
+            orgsCount: orgsData.length
+          });
           // getUsers now returns full User objects, no conversion needed
           setStudents(usersData);
           setLeaderboardUsers(usersData); // Use the same data for leaderboard

@@ -99,16 +99,16 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
 
   // Debug logging
   //console.log('ProfilePage render:', {
-  //         user: {
-  //       id: user.id,
-  //       profile_image: user.profile_image
-  //     },
-  //   friendshipStatus,
-  //   isFriend,
-  //           requestPending,
-  //   currentUserId: currentUser?.id,
-  //   profileUserId: user.id
-  // });
+          user: {
+        id: user.id,
+        profile_image: user.profile_image
+      },
+    friendshipStatus,
+    isFriend,
+            requestPending,
+    currentUserId: currentUser?.id,
+    profileUserId: user.id
+  });
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -81,10 +81,10 @@ const App: React.FC = () => {
           ]);
           
           //console.log('API calls completed:', {
-          //   usersCount: usersData.length,
-          //   opportunitiesCount: oppsData.length,
-          //   orgsCount: orgsData.length
-          // });
+            usersCount: usersData.length,
+            opportunitiesCount: oppsData.length,
+            orgsCount: orgsData.length
+          });
           // getUsers now returns full User objects, no conversion needed
           setStudents(usersData);
           setLeaderboardUsers(usersData); // Use the same data for leaderboard
@@ -97,9 +97,9 @@ const App: React.FC = () => {
             const fullCurrentUser = usersData.find(u => u.id === currentUser.id);
             if (fullCurrentUser) {
               //console.log('🔄 App: Updating currentUser with full data:', {
-                // before: { interests: currentUser.interests, organizationIds: currentUser.organizationIds },
-              //   after: { interests: fullCurrentUser.interests, organizationIds: fullCurrentUser.organizationIds }
-              // });
+                before: { interests: currentUser.interests, organizationIds: currentUser.organizationIds },
+                after: { interests: fullCurrentUser.interests, organizationIds: fullCurrentUser.organizationIds }
+              });
               setCurrentUser(fullCurrentUser);
             }
             // Mark this user as loaded to prevent infinite loops

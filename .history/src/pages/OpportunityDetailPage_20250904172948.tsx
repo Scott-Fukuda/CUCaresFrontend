@@ -585,9 +585,9 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                               .filter(student => {
                                 const hasEmail = student.email && student.email.trim() !== '';
                                 //console.log(`Student ${student.name}:`, { 
-                              //     email: student.email,
-                              //     hasEmail: !!hasEmail 
-                              //   });
+                                  email: student.email,
+                                  hasEmail: !!hasEmail 
+                                });
                                 return hasEmail;
                               })
                               .map(student => student.email)
