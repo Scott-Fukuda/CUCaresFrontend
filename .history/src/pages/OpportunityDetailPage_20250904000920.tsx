@@ -102,7 +102,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       await deleteOpportunity(opportunity.id);
       alert('Opportunity has been deleted successfully!');
       // Navigate back to opportunities page
-      setPageState({ page: 'opportunities' });
+      setPageState('opportunities');
     } catch (error: any) {
       alert(`Error deleting opportunity: ${error.message}`);
     }
@@ -128,7 +128,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       
       // Update the local opportunity object to reflect changes
       Object.assign(opportunity, {
-        name: editForm.name,
         description: editForm.description,
         address: editForm.address,
         date: editForm.date,
@@ -143,7 +142,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
 
   const handleCancelEdit = () => {
     setEditForm({
-      name: opportunity.name,
       description: opportunity.description,
       address: opportunity.address,
       date: opportunity.date,
@@ -298,15 +296,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                 
                 {isEditing ? (
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Event Name</label>
-                            <input
-                                type="text"
-                                value={editForm.name}
-                                onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-                            />
-                        </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Event Description</label>
                             <textarea
