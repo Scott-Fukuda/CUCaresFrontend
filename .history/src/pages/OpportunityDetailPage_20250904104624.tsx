@@ -659,9 +659,9 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                    <div className="bg-white p-6 rounded-2xl shadow-lg">
                      <h4 className="text-lg font-bold mb-4">Contact Host</h4>
                      {(() => {
+                       console.log(hostUser.json());
                        const hostUser = students.find(student => student.id === opportunity.host_id);
                        if (hostUser) {
-                        console.log(hostUser);
                          return (
                            <div className="space-y-3">
                              <div className="flex items-center gap-3">
