@@ -586,7 +586,7 @@ const App: React.FC = () => {
             name: currentUser.name,
             email: currentUser.email,
             phone: currentUser.phone || '',
-            interests: currentUser.interests,
+            passions: currentUser.passions,
             ...userData // Override with the new data
         };
         
@@ -601,7 +601,7 @@ const App: React.FC = () => {
     }
   }, [currentUser]);
 
-  const updateInterests = useCallback((interests: string[]) => updateUserProfile({ interests }), [updateUserProfile]);
+  const updatePassions = useCallback((passions: string[]) => updateUserProfile({ passions }), [updateUserProfile]);
   const updateProfilePicture = useCallback(async (file: File) => {
     if (!currentUser) return;
     
@@ -794,7 +794,7 @@ const App: React.FC = () => {
                         hoursVolunteered={profileUserHours}
                         userFriends={profileUserFriends}
                         setPageState={setPageState}
-                        updateInterests={updateInterests}
+                        updatePassions={updatePassions}
                         updateProfilePicture={updateProfilePicture}
                         handleFriendRequest={handleFriendRequest}
                         handleRemoveFriend={handleRemoveFriend}

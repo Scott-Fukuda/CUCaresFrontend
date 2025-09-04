@@ -474,7 +474,7 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
                     email: involvedUser.email || '', // Now provided by backend
                     phone: involvedUser.phone || '',
                     profile_image: involvedUser.profile_image,
-                    interests: [],
+                    passions: [],
                     friendIds: [],
                     organizationIds: [],
                     // Add attendance info if needed

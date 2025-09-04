@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { allInterests, Opportunity, Organization } from '../types';
+import { Opportunity, Organization } from '../types';
 import { PageState } from '../App';
 import * as api from '../api';
 import { formatDateTimeForBackend } from '../utils/timeUtils';
@@ -203,7 +203,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
               >
-                {allInterests.map(cause => (
+                {allPassions.map(cause => (
                   <option key={cause} value={cause}>{cause}</option>
                 ))}
               </select>

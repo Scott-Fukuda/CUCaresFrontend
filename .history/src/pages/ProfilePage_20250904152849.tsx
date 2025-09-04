@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { User, Badge, Organization, allInterests, FriendshipStatus, FriendshipsResponse } from '../types';
+import { User, Badge, Organization, allPassions, FriendshipStatus, FriendshipsResponse } from '../types';
 import BadgeIcon from '../components/BadgeIcon';
 import { PageState } from '../App';
 import { getProfilePictureUrl } from '../api';
@@ -14,7 +14,7 @@ interface ProfilePageProps {
   hoursVolunteered: number;
   userFriends: User[]; // Friends of the user being viewed (legacy, will be replaced)
   setPageState: (state: PageState) => void;
-  updateInterests: (interests: string[]) => void;
+  updatePassions: (passions: string[]) => void;
   updateProfilePicture: (file: File) => void;
   handleFriendRequest: (toUserId: number) => void;
   handleRemoveFriend: (friendId: number) => void;
@@ -26,20 +26,20 @@ interface ProfilePageProps {
 const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const { 
     user, isCurrentUser, currentUser, earnedBadges, userOrgs, 
-    hoursVolunteered, userFriends, setPageState, updateInterests, 
+    hoursVolunteered, userFriends, setPageState, updatePassions, 
     updateProfilePicture, handleFriendRequest, handleRemoveFriend, friendshipsData, checkFriendshipStatus, getFriendsForUser
   } = props;
   
-  const [selectedInterests, setSelectedInterests] = useState(user.interests);
+  const [selectedPassions, setSelectedPassions] = useState(user.passions);
   const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>('add');
   const [profileUserFriends, setProfileUserFriends] = useState<User[]>([]);
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [uploadingProfilePic, setUploadingProfilePic] = useState(false);
   
-  // Update selectedInterests when user.interests changes
+  // Update selectedPassions when user.passions changes
   React.useEffect(() => {
-    setSelectedInterests(user.interests);
-  }, [user.interests]);
+    setSelectedPassions(user.passions);
+  }, [user.passions]);
 
   // Check friendship status when component mounts or user changes
   useEffect(() => {
@@ -71,13 +71,13 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const handleInterestChange = (interest: string) => {
     console.log('🎯 ProfilePage: handleInterestChange called', { interest, isCurrentUser });
     if (!isCurrentUser) return;
-    const newInterests = selectedInterests.includes(interest)
-      ? selectedInterests.filter(i => i !== interest)
-      : [...selectedInterests, interest];
-    console.log('🎯 ProfilePage: New interests array:', newInterests);
-    setSelectedInterests(newInterests);
-    console.log('🎯 ProfilePage: Calling updateInterests...');
-    updateInterests(newInterests);
+    const newPassions = selectedPassions.includes(interest)
+      ? selectedPassions.filter(i => i !== interest)
+      : [...selectedPassions, interest];
+    console.log('🎯 ProfilePage: New passions array:', newPassions);
+    setSelectedPassions(newPassions);
+    console.log('🎯 ProfilePage: Calling updatePassions...');
+    updatePassions(newPassions);
   };
 
   const handleProfilePicUpdate = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,13 +205,13 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
          <div className="bg-white p-6 rounded-2xl shadow-lg">
             <h3 className="text-xl font-bold mb-4">{user.name}'s Passions</h3>
             <div className="flex flex-wrap gap-3">
-                {allInterests.map(interest => (
+                {allPassions.map(interest => (
                     <button 
                         key={interest}
                         onClick={() => handleInterestChange(interest)}
                         disabled={!isCurrentUser}
                         className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${
-                            selectedInterests.includes(interest) 
+                            selectedPassions.includes(interest) 
                                 ? 'bg-cornell-red text-white' 
                                 : 'bg-light-gray text-gray-700'
                         } ${isCurrentUser ? 'hover:bg-gray-300 cursor-pointer' : 'cursor-default opacity-50'}`}
@@ -220,8 +220,8 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                     </button>
                 ))}
             </div>
-             {isCurrentUser && user.interests.length === 0 && (
-                <p className="text-sm text-gray-500 mt-4">Select some interests to get personalized recommendations!</p>
+             {isCurrentUser && user.passions.length === 0 && (
+                <p className="text-sm text-gray-500 mt-4">Select some passions to get personalized recommendations!</p>
              )}
          </div>
 

@@ -101,7 +101,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-cornell-red focus:border-cornell-red sm:text-sm rounded-md bg-white"
           >
             <option>All</option>
-            {allInterests.map(interest => <option key={interest}>{interest}</option>)}
+            {allPassions.map(passion => <option key={passion}>{passion}</option>)}
           </select>
         </div>
         <div className="flex-1 w-full">

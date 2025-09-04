@@ -794,7 +794,7 @@ const App: React.FC = () => {
                         hoursVolunteered={profileUserHours}
                         userFriends={profileUserFriends}
                         setPageState={setPageState}
-                        updateInterests={updateInterests}
+                        updatePassions={updatePassions}
                         updateProfilePicture={updateProfilePicture}
                         handleFriendRequest={handleFriendRequest}
                         handleRemoveFriend={handleRemoveFriend}

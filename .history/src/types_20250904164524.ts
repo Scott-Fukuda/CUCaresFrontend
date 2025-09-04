@@ -133,7 +133,7 @@ export interface Notification {
 
 
 
-export const allInterests = [
+export const allPassions = [
   'Environment & Sustainability',
   'Homelessness Relief',
   'Food Security and Hunger Relief',

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { User, Badge, Organization, allInterests, FriendshipStatus, FriendshipsResponse } from '../types';
+import { User, Badge, Organization, allPassions, FriendshipStatus, FriendshipsResponse } from '../types';
 import BadgeIcon from '../components/BadgeIcon';
 import { PageState } from '../App';
 import { getProfilePictureUrl } from '../api';
@@ -205,7 +205,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
          <div className="bg-white p-6 rounded-2xl shadow-lg">
             <h3 className="text-xl font-bold mb-4">{user.name}'s Passions</h3>
             <div className="flex flex-wrap gap-3">
-                {allInterests.map(interest => (
+                {allPassions.map(interest => (
                     <button 
                         key={interest}
                         onClick={() => handleInterestChange(interest)}
