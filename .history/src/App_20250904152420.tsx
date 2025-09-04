@@ -575,11 +575,7 @@ const App: React.FC = () => {
   };
 
   const updateUserProfile = useCallback(async (userData: Partial<User>) => {
-    console.log('🔄 App: updateUserProfile called with:', userData);
-    if (!currentUser) {
-      console.log('🔄 App: No currentUser, returning early');
-      return;
-    }
+    if (!currentUser) return;
     try {
         // Prepare the complete user data for the API
         const completeUserData = {
@@ -590,7 +586,7 @@ const App: React.FC = () => {
             ...userData // Override with the new data
         };
         
-        console.log('🔄 App: Complete user data being sent to backend:', completeUserData);
+        console.log('Sending user update to API:', completeUserData);
         
         const updatedUser = await api.updateUser(currentUser.id, completeUserData);
         const finalUser = { ...currentUser, ...updatedUser };
