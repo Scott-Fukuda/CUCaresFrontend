@@ -891,7 +891,7 @@ const App: React.FC = () => {
           />
         </svg>
         <span className="hidden sm:inline">Report Bug</span>
-        <span className="sm:hidden">Report Bug</span>
+                <span className="sm:hidden">Report Bug</span>
       </a>
     </div>
   );
