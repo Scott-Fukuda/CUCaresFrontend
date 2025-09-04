@@ -102,8 +102,6 @@ const App: React.FC = () => {
               });
               setCurrentUser(fullCurrentUser);
             }
-            // Mark this user as loaded to prevent infinite loops
-            lastLoadedUserId.current = currentUser.id;
           }
         } catch (e: any) {
           console.error('API call failed:', e);
