@@ -51,11 +51,19 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         // Only approved opportunities
         if (!opp.approved) return false;
 
+        // Cause filter
+        if (causeFilter !== 'All' && (!opp.causes || !opp.causes.includes(causeFilter))) {
+          return false;
+        }
+
+        // Date filter (from calendar input) - compare with actual date
+        if (dateFilter && opp.actualDateString !== dateFilter) return false;
+
         // Don't show past events - compare with actual date
         return opp.localDate.getTime() >= today.getTime();
       })
       .sort((a, b) => a.localDate.getTime() - b.localDate.getTime());
-  }, [opportunities]);
+  }, [opportunities, causeFilter, dateFilter]);
 
   return (
     <>
@@ -83,8 +91,8 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         </div>
       </div>
 
-      {/* Filters - Disabled */}
-      {/* <div className="bg-white p-4 rounded-xl shadow-md mb-8 flex flex-col sm:flex-row gap-4 items-center">
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-xl shadow-md mb-8 flex flex-col sm:flex-row gap-4 items-center">
         <div className="flex-1 w-full">
           <label htmlFor="cause-filter" className="block text-sm font-medium text-gray-700">Filter by Cause</label>
           <select
@@ -113,7 +121,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         >
           Clear
         </button>
-      </div> */}
+      </div>
 
       {/* Opportunities Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
