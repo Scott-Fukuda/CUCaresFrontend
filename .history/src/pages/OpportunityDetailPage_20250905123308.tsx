@@ -625,7 +625,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                   <div className="bg-white p-6 rounded-2xl shadow-lg">
                     <ul className="space-y-4 text-gray-700">
                         <li className="flex items-center gap-3"><CalendarIcon /> <span>{displayDate}</span></li>
-                        <li className="flex items-center gap-3"><ClockIcon /> <span>{displayTime} - {displayEndTime}</span></li>
+                        <li className="flex items-center gap-3"><ClockIcon /> <span>{displayTime}</span></li>
                         <li className="flex items-center gap-3"><UsersIcon /> <span>{availableSlots} of {opportunity.total_slots} slots remaining</span></li>
                         <li className="flex items-center gap-3"><StarIcon /> <span>{opportunity.points} points</span></li>
                     </ul>

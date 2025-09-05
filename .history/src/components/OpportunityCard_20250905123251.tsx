@@ -122,7 +122,7 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
             <span className="bg-yellow-200 text-yellow-800 text-xs font-bold px-2.5 py-1 rounded-full">{opportunity.points} PTS</span>
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-2">{opportunity.name}</h3>
-        <p className="text-gray-500 text-sm mb-4">{displayDate} &bull; {displayTime} - {displayEndTime}</p>
+        <p className="text-gray-500 text-sm mb-4">{displayDate} &bull; {displayTime}</p>
         {opportunity.address && (
           <p className="text-gray-600 text-sm mb-4">📍 {opportunity.address}</p>
         )}
