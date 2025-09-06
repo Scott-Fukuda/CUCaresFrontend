@@ -29,12 +29,6 @@ const TrophyIcon: React.FC<{className?: string}> = ({className}) => (
 );
 
 const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, signedUpStudents, allOrgs, currentUser, onSignUp, onUnSignUp, isUserSignedUp, setPageState }) => {
-  // Debug logging
-  console.log('Debug - Opportunity:', opportunity.name, 'ID:', opportunity.id);
-  console.log('Debug - signedUpStudents:', signedUpStudents);
-  console.log('Debug - signedUpStudents.length:', signedUpStudents.length);
-  console.log('Debug - signedUpStudents data:', signedUpStudents.map(s => ({ id: s.id, name: s.name, profile_image: s.profile_image })));
-  
   const availableSlots = opportunity.total_slots - signedUpStudents.length;
   const canSignUp = availableSlots > 0 && !isUserSignedUp;
   const isUserHost = opportunity.host_id === currentUser.id;
