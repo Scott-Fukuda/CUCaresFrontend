@@ -767,7 +767,7 @@ const App: React.FC = () => {
         case 'leaderboard':
             return <LeaderboardPage allUsers={leaderboardUsers} allOrgs={organizations} signups={signups} opportunities={opportunities} currentUser={currentUser} handleFriendRequest={handleFriendRequest} handleAcceptFriendRequest={handleAcceptFriendRequest} handleRejectFriendRequest={handleRejectFriendRequest} setPageState={setPageState} checkFriendshipStatus={checkFriendshipStatus} friendshipsData={friendshipsData}/>;
         case 'profile':
-            let profileUser = pageState.userId ? students.find(s => s.id === pageState.userId) : currentUser;
+            const profileUser = pageState.userId ? students.find(s => s.id === pageState.userId) : currentUser;
             if(!profileUser) {
                 // If user not found in students array, try to find them in opportunity involved_users
                 let foundUser = null;
@@ -779,7 +779,7 @@ const App: React.FC = () => {
                 }
                 if (!foundUser) return <p>User not found</p>;
                 // Use the found user from involved_users
-                profileUser = foundUser;
+                const profileUser = foundUser;
             }
             
             const profileUserSignups = signups.filter(s => s.userId === profileUser.id);
