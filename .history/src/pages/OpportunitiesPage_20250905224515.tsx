@@ -140,8 +140,11 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           }
           
           console.log(`Opportunity: ${opp.name} (ID: ${opp.id})`);
+          console.log(`Local signups:`, opportunitySignups);
+          console.log(`Local signedUpStudents:`, localSignedUpStudents);
           console.log(`Backend involved_users:`, opp.involved_users);
-          console.log(`Final signedUpStudents:`, signedUpStudents);
+          console.log(`Backend signedUpStudents:`, backendSignedUpStudents);
+          console.log(`Final combined signedUpStudents:`, signedUpStudents);
           
 
 
