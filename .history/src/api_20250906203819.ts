@@ -18,8 +18,9 @@ export const formatRegistrationDate = (date: Date = new Date()): string => {
   return date.toISOString().slice(0, 19);
 };
 
-// A helper for making Acucaresbackend.onrender.comPI requests.
-const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
+// A helper for making API requests.
+const ENDPOINT_URL = 'http://127.0.0.1:8000'
+// const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
 
 // Helper to get Firebase token
 const getFirebaseToken = async (): Promise<string | null> => {
