@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import { PageState } from '../App';
-import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp } from '../api';
+import { getProfilePictureUrl, updateOpportunity, getUser, deleteOpportunity, registerForOpp, unregisterForOpp } from '../api';
 import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 
@@ -96,7 +96,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     if (!userLookupEmail.trim()) return;
     
     try {
-      const user = await getUserByEmail(userLookupEmail.trim());
+      const user = await getUser(userLookupEmail.trim());
       setUserLookupResult(user);
     } catch (error) {
       console.error('Error looking up user:', error);

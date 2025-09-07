@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import { PageState } from '../App';
-import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp } from '../api';
+import { getProfilePictureUrl, updateOpportunity, getUser, deleteOpportunity, registerForOpp, unregisterForOpp } from '../api';
 import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 
@@ -96,7 +96,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     if (!userLookupEmail.trim()) return;
     
     try {
-      const user = await getUserByEmail(userLookupEmail.trim());
+      const user = await getUser(userLookupEmail.trim());
       setUserLookupResult(user);
     } catch (error) {
       console.error('Error looking up user:', error);
@@ -464,90 +464,13 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     {signedUpStudents.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             {signedUpStudents.map(student => (
-                                <div key={`${student.id}-${student._lastUpdate || 'no-update'}`} className="text-center group relative">
-                                    <div onClick={() => setPageState({ page: 'profile', userId: student.id})} className="cursor-pointer">
-                                        <p className="font-semibold text-gray-800 group-hover:text-cornell-red transition">{student.name}</p>
-                                    </div>
-                                    {currentUser.admin && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleUnregisterUser(student.id);
-                                            }}
-                                            className="mt-1 text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors"
-                                        >
-                                            Unregister
-                                        </button>
-                                    )}
+                                <div key={`${student.id}-${student._lastUpdate || 'no-update'}`} onClick={() => setPageState({ page: 'profile', userId: student.id})} className="text-center cursor-pointer group">
+                                    <p className="font-semibold text-gray-800 group-hover:text-cornell-red transition">{student.name}</p>
                                 </div>
                             ))}
                         </div>
                     ) : (
                          <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up!</div>
-                    )}
-                    
-                    {/* Admin User Registration Section */}
-                    {currentUser.admin && (
-                        <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                            <h4 className="text-lg font-bold text-purple-800 mb-4">Admin: Register Users</h4>
-                            
-                            {!showUserLookup ? (
-                                <button
-                                    onClick={() => setShowUserLookup(true)}
-                                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-                                >
-                                    Register User by Email
-                                </button>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="email"
-                                            placeholder="Enter user email"
-                                            value={userLookupEmail}
-                                            onChange={(e) => setUserLookupEmail(e.target.value)}
-                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                        />
-                                        <button
-                                            onClick={handleUserLookup}
-                                            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-                                        >
-                                            Lookup
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setShowUserLookup(false);
-                                                setUserLookupEmail('');
-                                                setUserLookupResult(null);
-                                            }}
-                                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                    
-                                    {userLookupResult && (
-                                        <div className="p-3 bg-white border border-purple-200 rounded-lg">
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <p className="font-semibold">{userLookupResult.name}</p>
-                                                    <p className="text-sm text-gray-600">{userLookupResult.email}</p>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleRegisterUser(userLookupResult.id)}
-                                                    disabled={isRegisteringUser || signedUpStudents.some(s => s.id === userLookupResult.id)}
-                                                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                                >
-                                                    {isRegisteringUser ? 'Registering...' : 
-                                                     signedUpStudents.some(s => s.id === userLookupResult.id) ? 'Already Registered' : 
-                                                     'Register'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
                     )}
                     
                     {/* Slot limit warning for hosts */}
