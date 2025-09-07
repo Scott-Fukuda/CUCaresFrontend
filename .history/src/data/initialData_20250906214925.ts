@@ -37,9 +37,7 @@ export const initialOpportunities: Opportunity[] = [
     imageUrl: 'https://www.ithaca.com/content/tncms/assets/v3/editorial/b/5a/b5a45b88-51f7-11ed-b5f7-3b2b52865983/635c13e4811a4.image.jpg?resize=1200%2C900',
     points: 150, causes: ['Environment & Sustainability'], address: '456 Elm St, Ithaca, NY', approved: true,
     comments: [],
-    qualifications: ['No experience required', 'Attention to detail', 'Ability to lift up to 20 lbs'],
-    visibility: ['public'],
-    attendance_marked: false
+    qualifications: ['No experience required', 'Attention to detail', 'Ability to lift up to 20 lbs']
   },
   {
     id: 3,
@@ -50,9 +48,7 @@ export const initialOpportunities: Opportunity[] = [
     imageUrl: 'https://ithacachildrensgarden.org/wp-content/uploads/2019/12/hands-on-nature-anarchy-zone.jpg',
     points: 180, causes: ['Education'], address: '789 Oak Ave, Ithaca, NY', approved: true,
     comments: [],
-    qualifications: ['No experience required', 'Comfortable working outdoors', 'Ability to bend and kneel'],
-    visibility: ['public'],
-    attendance_marked: false
+    qualifications: ['No experience required', 'Comfortable working outdoors', 'Ability to bend and kneel']
   },
   {
     id: 4,
@@ -63,9 +59,7 @@ export const initialOpportunities: Opportunity[] = [
     imageUrl: 'https://www.priweb.org/wp-content/uploads/2021/08/CayugaNatureCenter-Lodge-1.jpg',
     points: 240, causes: ['Other'], address: '321 Pine Rd, Ithaca, NY', approved: true,
     comments: [],
-    qualifications: ['No experience required', 'Comfortable around animals', 'Ability to follow safety protocols'],
-    visibility: ['public'],
-    attendance_marked: false
+    qualifications: ['No experience required', 'Comfortable around animals', 'Ability to follow safety protocols']
   },
   {
     id: 5,
@@ -76,9 +70,7 @@ export const initialOpportunities: Opportunity[] = [
     imageUrl: 'https://www.humanesociety.org/sites/default/files/2022-08/woman-walking-dog-leash-575359.jpg',
     points: 120, causes: ['Other'], address: '654 Maple Dr, Ithaca, NY', approved: true,
     comments: [],
-    qualifications: ['No experience required', 'Comfortable around dogs', 'Ability to walk for extended periods'],
-    visibility: ['public'],
-    attendance_marked: false
+    qualifications: ['No experience required', 'Comfortable around dogs', 'Ability to walk for extended periods']
   },
   {
     id: 6,
@@ -89,9 +81,7 @@ export const initialOpportunities: Opportunity[] = [
     imageUrl: 'https://www.sciencenter.org/images/sized/images/uploads/exhibits/Curiosity_Corner_from_above-1200x800.jpg',
     points: 210, causes: ['Education'], address: '987 Cedar Ln, Ithaca, NY', approved: true,
     comments: [],
-    qualifications: ['No experience required', 'Comfortable interacting with children', 'Interest in science education'],
-    visibility: ['public'],
-    attendance_marked: false
+    qualifications: ['No experience required', 'Comfortable interacting with children', 'Interest in science education']
   },
   {
     id: 7,
@@ -102,9 +92,7 @@ export const initialOpportunities: Opportunity[] = [
     imageUrl: 'https://stateofithaca.org/wp-content/uploads/2021/11/IMG_8778-scaled.jpg',
     points: 240, causes: ['Other'], address: '147 State St, Ithaca, NY', approved: true,
     comments: [],
-    qualifications: ['No experience required', 'Comfortable with crowds', 'Professional appearance'],
-    visibility: ['public'],
-    attendance_marked: false
+    qualifications: ['No experience required', 'Comfortable with crowds', 'Professional appearance']
   },
   {
     id: 8,
@@ -115,9 +103,7 @@ export const initialOpportunities: Opportunity[] = [
     imageUrl: 'https://www.visitithaca.com/sites/default/files/styles/16_9_1200x675/public/2022-06/robert-h-treman-lucifer-falls-hike-ithaca-ny-1_0.jpg?h=a5f15949&itok=BAP-cTcu',
     points: 240, causes: ['Environment & Sustainability'], address: '258 Forest Way, Ithaca, NY', approved: true,
     comments: [],
-    qualifications: ['No experience required', 'Comfortable working outdoors', 'Ability to use basic tools'],
-    visibility: ['public'],
-    attendance_marked: false
+    qualifications: ['No experience required', 'Comfortable working outdoors', 'Ability to use basic tools']
   },
 ];
 
