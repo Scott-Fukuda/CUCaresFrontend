@@ -493,7 +493,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                 </div>
             </div>
             <div className="lg:col-span-1 space-y-8">
-                {canManageOpportunity ? (
+                {isUserHost ? (
                   <div className="space-y-6">
                     <AttendanceManager 
                       opportunity={opportunity}
