@@ -614,13 +614,12 @@ export const createOpportunity = async (formData: FormData): Promise<Opportunity
 
 // --- Attendance ---
 // PUT /api/attendance for marking attendance
-export const markAttendance = async (data: { user_ids: number[]; opportunity_id: number; duration: number }) => {
+export const markAttendance = async (data: { user_ids: number[]; opportunity_id: number }) => {
   return authenticatedRequest('/attendance', {
     method: 'PUT',
     body: JSON.stringify({
-      user_ids: data.user_ids,
+      user_ids: data.user_ids,        // send array directly
       opportunity_id: data.opportunity_id,
-      duration: data.duration,
     }),
   });
 };

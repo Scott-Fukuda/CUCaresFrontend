@@ -618,7 +618,7 @@ export const markAttendance = async (data: { user_ids: number[]; opportunity_id:
   return authenticatedRequest('/attendance', {
     method: 'PUT',
     body: JSON.stringify({
-      user_ids: data.user_ids,
+      user_ids: data.user_ids,        // send array directly
       opportunity_id: data.opportunity_id,
       duration: data.duration,
     }),

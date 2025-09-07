@@ -511,7 +511,6 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
                 comments: opp.comments !== undefined ? opp.comments : [],
                 qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
                 causes: opp.causes !== undefined ? opp.causes : [],
-                
               };
         });
         
@@ -614,13 +613,17 @@ export const createOpportunity = async (formData: FormData): Promise<Opportunity
 
 // --- Attendance ---
 // PUT /api/attendance for marking attendance
-export const markAttendance = async (data: { user_ids: number[]; opportunity_id: number; duration: number }) => {
-  return authenticatedRequest('/attendance', {
-    method: 'PUT',
-    body: JSON.stringify({
-      user_ids: data.user_ids,
-      opportunity_id: data.opportunity_id,
-      duration: data.duration,
-    }),
-  });
+export const markAttendance = async (data: { user_ids: number[]; opportunity_id: number }) => {
+  // The API expects user_id (singular), so we need to make individual calls for each user
+  const promises = data.user_ids.map(userId => 
+    authenticatedRequest('/attendance', {
+      method: 'PUT',
+      body: JSON.stringify({
+        user_id: userId,
+        opportunity_id: data.opportunity_id
+      }),
+    })
+  );
+  
+  return Promise.all(promises);
 };
