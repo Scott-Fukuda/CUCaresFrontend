@@ -767,19 +767,32 @@ const App: React.FC = () => {
         case 'leaderboard':
             return <LeaderboardPage allUsers={leaderboardUsers} allOrgs={organizations} signups={signups} opportunities={opportunities} currentUser={currentUser} handleFriendRequest={handleFriendRequest} handleAcceptFriendRequest={handleAcceptFriendRequest} handleRejectFriendRequest={handleRejectFriendRequest} setPageState={setPageState} checkFriendshipStatus={checkFriendshipStatus} friendshipsData={friendshipsData}/>;
         case 'profile':
-            const profileUser = pageState.userId ? students.find(s => s.id === pageState.userId) : currentUser;
-            if(!profileUser) return <p>User not found</p>;
+            let profileUser = pageState.userId ? students.find(s => s.id === pageState.userId) : currentUser;
+            if(!profileUser) {
+                // If user not found in students array, try to find them in opportunity involved_users
+                let foundUser = null;
+                for (const opp of opportunities) {
+                    if (opp.involved_users) {
+                        foundUser = opp.involved_users.find(u => u.id === pageState.userId);
+                        if (foundUser) break;
+                    }
+                }
+                if (!foundUser) return <p>User not found</p>;
+                // Use the found user from involved_users
+                profileUser = foundUser;
+            }
             
-            const profileUserSignups = signups.filter(s => s.userId === profileUser.id);
-            const profileUserOrgs = organizations.filter(g => profileUser.organizationIds && profileUser.organizationIds.includes(g.id));
+            // At this point, profileUser is guaranteed to be defined
+            const profileUserSignups = signups.filter(s => s.userId === profileUser!.id);
+            const profileUserOrgs = organizations.filter(g => profileUser!.organizationIds && profileUser!.organizationIds.includes(g.id));
             
-            const profileUserPoints = profileUser?.points || 0;
+            const profileUserPoints = profileUser!.points || 0;
             const profileUserHours = profileUserSignups.reduce((total, signup) => {
               const opportunity = opportunities.find(o => o.id === signup.opportunityId);
               return total + (opportunity?.duration || 0);
             }, 0);
 
-            const profileUserBadges = initialBadges.filter(b => b.threshold({points: profileUserPoints, signUpCount: profileUserSignups.length, signups, opportunities, friendsCount: profileUser.friendIds.length}));
+            const profileUserBadges = initialBadges.filter(b => b.threshold({points: profileUserPoints, signUpCount: profileUserSignups.length, signups, opportunities, friendsCount: profileUser!.friendIds.length}));
             // Note: getFriendsForUser is now async, so we'll need to handle this differently
             // For now, we'll pass an empty array and handle the async loading in ProfilePage
             const profileUserFriends: User[] = [];
