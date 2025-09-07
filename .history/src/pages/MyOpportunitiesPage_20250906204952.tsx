@@ -68,8 +68,8 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
       const isPast = oppDate < threeDaysAgo;
       
       if (isPast) {
-        // Check if user is the host or admin
-        if (opp.host_id === currentUser.id || currentUser.admin) {
+        // Check if user is the host
+        if (opp.host_id === currentUser.id) {
           pastHosted.push(opp);
         }
         // Check if user is registered but not the host

@@ -487,13 +487,13 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         </div>
                     ) : (
                         <div className="text-center p-6 bg-gray-50 rounded-lg text-gray-500">
-                            {canManageOpportunity ? 'No announcements yet. Add one above!' : 'No announcements yet.'}
+                            {isUserHost ? 'No announcements yet. Add one above!' : 'No announcements yet.'}
                         </div>
                     )}
                 </div>
             </div>
             <div className="lg:col-span-1 space-y-8">
-                {canManageOpportunity ? (
+                {isUserHost ? (
                   <div className="space-y-6">
                     <AttendanceManager 
                       opportunity={opportunity}

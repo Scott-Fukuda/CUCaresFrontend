@@ -125,11 +125,6 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
                         Host
                     </span>
                 )}
-                {currentUser.admin && !isUserHost && (
-                    <span className="bg-purple-100 text-purple-800 text-xs font-semibold px-2 py-1 rounded-full">
-                        Admin
-                    </span>
-                )}
             </div>
             <span className="bg-yellow-200 text-yellow-800 text-xs font-bold px-2.5 py-1 rounded-full">{opportunity.points} PTS</span>
         </div>

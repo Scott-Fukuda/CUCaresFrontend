@@ -435,7 +435,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     <h3 className="text-2xl font-bold mb-4">Announcements</h3>
                     
                     {/* Host can add new announcements */}
-                    {canManageOpportunity && (
+                    {isUserHost && (
                         <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                             <h4 className="text-lg font-semibold text-blue-800 mb-3">Add New Announcement</h4>
                             <div className="space-y-3">
@@ -487,13 +487,13 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         </div>
                     ) : (
                         <div className="text-center p-6 bg-gray-50 rounded-lg text-gray-500">
-                            {canManageOpportunity ? 'No announcements yet. Add one above!' : 'No announcements yet.'}
+                            {isUserHost ? 'No announcements yet. Add one above!' : 'No announcements yet.'}
                         </div>
                     )}
                 </div>
             </div>
             <div className="lg:col-span-1 space-y-8">
-                {canManageOpportunity ? (
+                {isUserHost ? (
                   <div className="space-y-6">
                     <AttendanceManager 
                       opportunity={opportunity}

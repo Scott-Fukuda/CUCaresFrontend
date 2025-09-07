@@ -284,11 +284,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     <span className="text-white bg-green-600/80 px-3 py-1 rounded-full text-sm font-semibold">You are the host</span>
                   </div>
                 )}
-                {currentUser.admin && !isUserHost && (
-                  <div className="mt-2">
-                    <span className="text-white bg-blue-600/80 px-3 py-1 rounded-full text-sm font-semibold">Admin View</span>
-                  </div>
-                )}
             </div>
         </div>
         
@@ -296,7 +291,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
             <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-2xl font-bold">Event Details</h3>
-                    {canManageOpportunity && (
+                    {(isUserHost || currentUser.admin) && (
                         <div className="flex gap-2">
                             {!isEditing ? (
                                 <>
@@ -421,7 +416,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     )}
                     
                     {/* Slot limit warning for hosts */}
-                    {canManageOpportunity && availableSlots <= 0 && (
+                    {isUserHost && availableSlots <= 0 && (
                         <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                             <p className="text-sm text-yellow-700 text-center">
                                 ⚠️ This event has reached its maximum capacity. Consider increasing the slot limit if you want to allow more participants.
@@ -435,7 +430,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     <h3 className="text-2xl font-bold mb-4">Announcements</h3>
                     
                     {/* Host can add new announcements */}
-                    {canManageOpportunity && (
+                    {isUserHost && (
                         <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                             <h4 className="text-lg font-semibold text-blue-800 mb-3">Add New Announcement</h4>
                             <div className="space-y-3">
@@ -487,13 +482,13 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         </div>
                     ) : (
                         <div className="text-center p-6 bg-gray-50 rounded-lg text-gray-500">
-                            {canManageOpportunity ? 'No announcements yet. Add one above!' : 'No announcements yet.'}
+                            {isUserHost ? 'No announcements yet. Add one above!' : 'No announcements yet.'}
                         </div>
                     )}
                 </div>
             </div>
             <div className="lg:col-span-1 space-y-8">
-                {canManageOpportunity ? (
+                {isUserHost ? (
                   <div className="space-y-6">
                     <AttendanceManager 
                       opportunity={opportunity}
