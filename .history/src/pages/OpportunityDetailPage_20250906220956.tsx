@@ -342,6 +342,11 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     <span className="text-white bg-blue-600/80 px-3 py-1 rounded-full text-sm font-semibold">Admin View</span>
                   </div>
                 )}
+                {currentUser.admin && (
+                  <div className="mt-2">
+                    <span className="text-white bg-purple-600/80 px-3 py-1 rounded-full text-sm font-semibold">Opportunity ID: {opportunity.id}</span>
+                  </div>
+                )}
             </div>
         </div>
         

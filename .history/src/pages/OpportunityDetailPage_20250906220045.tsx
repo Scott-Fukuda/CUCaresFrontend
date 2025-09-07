@@ -96,7 +96,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     if (!userLookupEmail.trim()) return;
     
     try {
-      const user = await getUserByEmail(userLookupEmail.trim());
+      const user = await getUser(userLookupEmail.trim());
       setUserLookupResult(user);
     } catch (error) {
       console.error('Error looking up user:', error);
