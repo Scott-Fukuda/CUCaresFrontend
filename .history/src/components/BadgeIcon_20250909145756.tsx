@@ -19,7 +19,7 @@ const BadgeIcon: React.FC<BadgeIconProps> = ({ badge }) => {
                 <img 
                     src={badge.icon} 
                     alt={badge.name}
-                    className="h-12 w-12 rounded-full object-cover"
+                    className="h-12 w-12 object-contain"
                 />
             </div>
             {isHovered && (
