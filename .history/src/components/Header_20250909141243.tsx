@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { User, Organization, FriendshipsResponse } from '../types';
-import { PageState } from '../App';
+import { User, PageState } from '../App';
 import { getProfilePictureUrl } from '../api';
 import SearchBar from './SearchBar';
 
@@ -14,12 +13,7 @@ interface HeaderProps {
   currentPage: Page;
   setPageState: (state: PageState) => void;
   onLogout: () => void;
-  allUsers: User[];
-  allOrgs: Organization[];
-  friendshipsData: FriendshipsResponse | null;
-  joinOrg: (orgId: number) => void;
-  leaveOrg: (orgId: number) => void;
-  handleFriendRequest: (toUserId: number) => void;
+  onUserClick: (toUserId: number) => void;
 }
 
 const Header: React.FC<HeaderProps> = (props) => {
@@ -69,17 +63,7 @@ const Header: React.FC<HeaderProps> = (props) => {
         <div className="flex items-center gap-4">
             {/* Search Bar */}
             <div className="relative w-full max-w-sm hidden md:block">
-                <SearchBar 
-                  key={`searchbar-${user.id}-${user._lastUpdate || 'no-update'}`}
-                  allUsers={props.allUsers}
-                  allOrgs={props.allOrgs}
-                  currentUser={props.user}
-                  friendshipsData={props.friendshipsData}
-                  joinOrg={props.joinOrg}
-                  leaveOrg={props.leaveOrg}
-                  handleFriendRequest={props.handleFriendRequest}
-                  setPageState={props.setPageState}
-                />
+                <SearchBar key={`searchbar-${user.id}-${user._lastUpdate || 'no-update'}`} {...props} currentUser={props.user} />
             </div>
 
             <div className="flex items-center gap-4">
