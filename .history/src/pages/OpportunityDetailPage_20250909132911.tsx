@@ -40,8 +40,8 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
   const [newComment, setNewComment] = useState('');
   const [isAddingComment, setIsAddingComment] = useState(false);
   const [showUserLookup, setShowUserLookup] = useState(false);
-  const [userLookupName, setUserLookupName] = useState(''); // Changed from userLookupEmail
-  const [userLookupResults, setUserLookupResults] = useState<User[]>([]); // Changed to array
+  const [userLookupEmail, setUserLookupEmail] = useState('');
+  const [userLookupResult, setUserLookupResult] = useState<User | null>(null);
   const [isRegisteringUser, setIsRegisteringUser] = useState(false);
   
   // Use involved_users from backend if available, but filter to only registered users
@@ -93,23 +93,15 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
 
   // Admin functions for user management
   const handleUserLookup = async () => {
-    if (!userLookupName.trim()) return;
+    if (!userLookupEmail.trim()) return;
     
     try {
-      // Filter students by name (case-insensitive partial match)
-      const matchingUsers = students.filter(student => 
-        student.name.toLowerCase().includes(userLookupName.toLowerCase().trim())
-      );
-      
-      setUserLookupResults(matchingUsers);
-      
-      if (matchingUsers.length === 0) {
-        alert('No users found with that name.');
-      }
+      const user = await getUserByEmail(userLookupEmail.trim());
+      setUserLookupResult(user);
     } catch (error) {
-      console.error('Error looking up users:', error);
-      setUserLookupResults([]);
-      alert('Error searching for users.');
+      console.error('Error looking up user:', error);
+      setUserLookupResult(null);
+      alert('User not found. Please check the email address.');
     }
   };
 
@@ -508,29 +500,29 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                                     onClick={() => setShowUserLookup(true)}
                                     className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
                                 >
-                                    Register User by Name
+                                    Register User by Email
                                 </button>
                             ) : (
                                 <div className="space-y-4">
                                     <div className="flex gap-2">
                                         <input
-                                            type="text"
-                                            placeholder="Enter user name"
-                                            value={userLookupName}
-                                            onChange={(e) => setUserLookupName(e.target.value)}
+                                            type="email"
+                                            placeholder="Enter user email"
+                                            value={userLookupEmail}
+                                            onChange={(e) => setUserLookupEmail(e.target.value)}
                                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                                         />
                                         <button
                                             onClick={handleUserLookup}
                                             className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
                                         >
-                                            Search
+                                            Lookup
                                         </button>
                                         <button
                                             onClick={() => {
                                                 setShowUserLookup(false);
-                                                setUserLookupName('');
-                                                setUserLookupResults([]);
+                                                setUserLookupEmail('');
+                                                setUserLookupResult(null);
                                             }}
                                             className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
                                         >
@@ -538,40 +530,24 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                                         </button>
                                     </div>
                                     
-                                    {userLookupResults.length > 0 && (
-                                        <div className="max-h-60 overflow-y-auto space-y-2">
-                                            <p className="text-sm text-gray-600 font-medium">
-                                                Found {userLookupResults.length} user{userLookupResults.length !== 1 ? 's' : ''}:
-                                            </p>
-                                            {userLookupResults.map(user => {
-                                                const isAlreadyRegistered = signedUpStudents.some(s => s.id === user.id);
-                                                return (
-                                                    <div key={user.id} className="p-3 bg-white border border-purple-200 rounded-lg">
-                                                        <div className="flex justify-between items-center">
-                                                            <div>
-                                                                <p className="font-semibold">{user.name}</p>
-                                                                <p className="text-sm text-gray-600">{user.email}</p>
-                                                            </div>
-                                                            <button
-                                                                onClick={() => handleRegisterUser(user.id)}
-                                                                disabled={isRegisteringUser || isAlreadyRegistered}
-                                                                className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                                            >
-                                                                {isRegisteringUser ? 'Registering...' : 
-                                                                 isAlreadyRegistered ? 'Already Registered' : 
-                                                                 'Register'}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
+                                    {userLookupResult && (
+                                        <div className="p-3 bg-white border border-purple-200 rounded-lg">
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <p className="font-semibold">{userLookupResult.name}</p>
+                                                    <p className="text-sm text-gray-600">{userLookupResult.email}</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleRegisterUser(userLookupResult.id)}
+                                                    disabled={isRegisteringUser || signedUpStudents.some(s => s.id === userLookupResult.id)}
+                                                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                                >
+                                                    {isRegisteringUser ? 'Registering...' : 
+                                                     signedUpStudents.some(s => s.id === userLookupResult.id) ? 'Already Registered' : 
+                                                     'Register'}
+                                                </button>
+                                            </div>
                                         </div>
-                                    )}
-                                    
-                                    {userLookupName.trim() && userLookupResults.length === 0 && (
-                                        <p className="text-sm text-gray-500 text-center py-2">
-                                            No users found. Try a different name or check the spelling.
-                                        </p>
                                     )}
                                 </div>
                             )}
