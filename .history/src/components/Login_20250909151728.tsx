@@ -10,11 +10,6 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading }) => {
   return (
     <div className="w-full max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg text-center mt-10">
-      <img 
-        src="/logo.png" 
-        alt="CampusCares Logo" 
-        className="mx-auto mb-4 h-16 w-16 object-contain"
-      />
       <h1 className="text-3xl font-bold text-cornell-red mb-2">CampusCares</h1>
       <p className="text-gray-600 mb-6">Your hub for making a difference in Ithaca.</p>
       
