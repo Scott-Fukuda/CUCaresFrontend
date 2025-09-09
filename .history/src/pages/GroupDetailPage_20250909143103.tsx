@@ -25,14 +25,14 @@ const TrophyIcon: React.FC<{className?: string}> = ({className}) => (
 );
 const UsersIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <img 
-    src="dist/icons/groups-icon.png" 
+    src="/icons/groups-icon.png" 
     alt="Groups" 
     className={props.className || 'h-6 w-6'}
   />
 );
 const LeaderboardIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <img 
-    src="dist/icons/leaderboard-icon.png" 
+    src="/icons/leaderboard-icon.png" 
     alt="Leaderboard" 
     className={props.className || 'h-6 w-6'}
   />
