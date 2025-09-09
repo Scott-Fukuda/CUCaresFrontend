@@ -306,20 +306,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     setIsEditingSlots(true);
   };
 
-  useEffect(() => {
-    if (!userLookupName.trim()) {
-      setUserLookupResults([]);
-      return;
-    }
-    
-    // Filter students by name (case-insensitive partial match) in real-time
-    const matchingUsers = students.filter(student => 
-      student.name.toLowerCase().includes(userLookupName.toLowerCase().trim())
-    );
-    
-    setUserLookupResults(matchingUsers);
-  }, [userLookupName, students]);
-
   return (
     <div>
         <div className="relative mb-8 rounded-2xl overflow-hidden">
@@ -522,12 +508,20 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                                     <div className="flex gap-2">
                                         <input
                                             type="text"
-                                            placeholder="Type user name to search..."
+                                            placeholder="Enter user name"
                                             value={userLookupName}
-                                            onChange={(e) => setUserLookupName(e.target.value)}
+                                            onChange={(e) => {
+                                                setUserLookupName(e.target.value);
+                                                handleUserLookup(); // Call handleUserLookup as you type
+                                            }}
                                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                            autoFocus
                                         />
+                                        <button
+                                            onClick={handleUserLookup}
+                                            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                                        >
+                                            Search
+                                        </button>
                                         <button
                                             onClick={() => {
                                                 setShowUserLookup(false);
@@ -540,49 +534,39 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                                         </button>
                                     </div>
                                     
-                                    {/* Show results as you type */}
-                                    {userLookupName.trim() && (
+                                    {userLookupResults.length > 0 && (
                                         <div className="max-h-60 overflow-y-auto space-y-2">
-                                            {userLookupResults.length > 0 ? (
-                                                <>
-                                                    <p className="text-sm text-gray-600 font-medium">
-                                                        {userLookupResults.length} user{userLookupResults.length !== 1 ? 's' : ''} found:
-                                                    </p>
-                                                    {userLookupResults.map(user => {
-                                                        const isAlreadyRegistered = signedUpStudents.some(s => s.id === user.id);
-                                                        return (
-                                                            <div key={user.id} className="p-3 bg-white border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors">
-                                                                <div className="flex justify-between items-center">
-                                                                    <div>
-                                                                        <p className="font-semibold">{user.name}</p>
-                                                                        <p className="text-sm text-gray-600">{user.email}</p>
-                                                                    </div>
-                                                                    <button
-                                                                        onClick={() => handleRegisterUser(user.id)}
-                                                                        disabled={isRegisteringUser || isAlreadyRegistered}
-                                                                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                                                    >
-                                                                        {isRegisteringUser ? 'Registering...' : 
-                                                                         isAlreadyRegistered ? 'Already Registered' : 
-                                                                         'Register'}
-                                                                    </button>
-                                                                </div>
+                                            <p className="text-sm text-gray-600 font-medium">
+                                                Found {userLookupResults.length} user{userLookupResults.length !== 1 ? 's' : ''}:
+                                            </p>
+                                            {userLookupResults.map(user => {
+                                                const isAlreadyRegistered = signedUpStudents.some(s => s.id === user.id);
+                                                return (
+                                                    <div key={user.id} className="p-3 bg-white border border-purple-200 rounded-lg">
+                                                        <div className="flex justify-between items-center">
+                                                            <div>
+                                                                <p className="font-semibold">{user.name}</p>
+                                                                <p className="text-sm text-gray-600">{user.email}</p>
                                                             </div>
-                                                        );
-                                                    })}
-                                                </>
-                                            ) : (
-                                                <p className="text-sm text-gray-500 text-center py-4">
-                                                    No users found matching "{userLookupName}"
-                                                </p>
-                                            )}
+                                                            <button
+                                                                onClick={() => handleRegisterUser(user.id)}
+                                                                disabled={isRegisteringUser || isAlreadyRegistered}
+                                                                className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                                            >
+                                                                {isRegisteringUser ? 'Registering...' : 
+                                                                 isAlreadyRegistered ? 'Already Registered' : 
+                                                                 'Register'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                     
-                                    {/* Show hint when input is empty */}
-                                    {!userLookupName.trim() && (
+                                    {userLookupName.trim() && userLookupResults.length === 0 && (
                                         <p className="text-sm text-gray-500 text-center py-2">
-                                            Start typing a name to search for users...
+                                            No users found. Try a different name or check the spelling.
                                         </p>
                                     )}
                                 </div>
