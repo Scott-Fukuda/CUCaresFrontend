@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import { PageState } from '../App';
-import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp, getOpportunities } from '../api';
+import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp } from '../api';
 import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 
@@ -114,10 +114,8 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     setIsRegisteringUser(true);
     try {
       await registerForOpp({ user_id: userId, opportunity_id: opportunity.id });
-      // Refresh opportunities data to get updated involved_users
-      const updatedOpps = await getOpportunities();
-      setOpportunities(updatedOpps);
-      alert('User registered successfully!');
+      // Refresh the opportunity data
+      window.location.reload(); // Simple refresh for now
     } catch (error) {
       console.error('Error registering user:', error);
       alert('Failed to register user. They may already be registered.');
@@ -134,10 +132,8 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
         opportunityDate: opportunity.date,
         opportunityTime: opportunity.time
       });
-      // Refresh opportunities data to get updated involved_users
-      const updatedOpps = await getOpportunities();
-      setOpportunities(updatedOpps);
-      alert('User unregistered successfully!');
+      // Refresh the opportunity data
+      window.location.reload(); // Simple refresh for now
     } catch (error) {
       console.error('Error unregistering user:', error);
       alert('Failed to unregister user.');
