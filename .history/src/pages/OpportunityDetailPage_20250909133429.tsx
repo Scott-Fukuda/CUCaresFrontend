@@ -524,7 +524,15 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                                             type="text"
                                             placeholder="Type user name to search..."
                                             value={userLookupName}
-                                            onChange={(e) => setUserLookupName(e.target.value)}
+                                            onChange={(e) => {
+                                                setUserLookupName(e.target.value);
+                                                // Trigger search on every keystroke
+                                                setTimeout(() => {
+                                                    if (e.target.value === userLookupName) {
+                                                        handleUserLookup();
+                                                    }
+                                                }, 0);
+                                            }}
                                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                                             autoFocus
                                         />
