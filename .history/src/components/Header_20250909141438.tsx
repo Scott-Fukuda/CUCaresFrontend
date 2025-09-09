@@ -14,6 +14,7 @@ interface HeaderProps {
   currentPage: Page;
   setPageState: (state: PageState) => void;
   onLogout: () => void;
+  onUserClick: (toUserId: number) => void;
   allUsers: User[];
   allOrgs: Organization[];
   friendshipsData: FriendshipsResponse | null;
