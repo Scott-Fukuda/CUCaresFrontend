@@ -72,11 +72,8 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
 
     const categoryOrgs = allOrgs.filter(g => g.type === org.type)
         .map(g => {
-            const orgMemberIds = allUsers.filter(u => u.organizationIds && u.organizationIds.includes(g.id)).map(u => u.id);
-            const points = orgMemberIds.reduce((sum, memberId) => {
-                const user = allUsers.find(u => u.id === memberId);
-                return sum + (user?.points || 0);
-            }, 0);
+            const memberIds = allUsers.filter(u => u.organizationIds && u.organizationIds.includes(g.id));
+            const points = memberIds.reduce((sum, member) => sum + (member.points || 0), 0);
             return { id: g.id, points };
         })
         .sort((a,b) => b.points - a.points);
@@ -86,10 +83,10 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
     // Find upcoming events for the group
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const memberIdsSet = new Set(currentMembers.map(m => m.id));
+    const memberIds = new Set(currentMembers.map(m => m.id));
     const groupOppIds = new Set<number>();
     signups.forEach(s => {
-        if(memberIdsSet.has(s.userId)) {
+        if(memberIds.has(s.userId)) {
             groupOppIds.add(s.opportunityId);
         }
     });
@@ -97,14 +94,14 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
     const events = opportunities
         .filter(opp => groupOppIds.has(opp.id) && new Date(`${opp.date}T00:00:00`).getTime() >= today.getTime())
         .map(opp => {
-            const attendingMemberCount = signups.filter(s => s.opportunityId === opp.id && memberIdsSet.has(s.userId)).length;
+            const attendingMemberCount = signups.filter(s => s.opportunityId === opp.id && memberIds.has(s.userId)).length;
             return { ...opp, attendingMemberCount };
         })
         .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 
     return { members: currentMembers, memberCount, orgTotalPoints: totalPoints, orgRank: rank, upcomingEvents: events };
-  }, [org, allUsers, allOrgs, opportunities, signups]);
+  }, [org, allUsers, allOrgs, opportunities]);
   
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -72,7 +72,7 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
 
     const categoryOrgs = allOrgs.filter(g => g.type === org.type)
         .map(g => {
-            const orgMemberIds = allUsers.filter(u => u.organizationIds && u.organizationIds.includes(g.id)).map(u => u.id);
+            const orgMemberIds = allUsers.filter(u => u.organizationIds && u.organizationIds.includes(g.id));
             const points = orgMemberIds.reduce((sum, memberId) => {
                 const user = allUsers.find(u => u.id === memberId);
                 return sum + (user?.points || 0);
