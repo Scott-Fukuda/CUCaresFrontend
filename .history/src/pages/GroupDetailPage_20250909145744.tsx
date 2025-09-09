@@ -18,14 +18,14 @@ interface GroupDetailPageProps {
 
 const TrophyIcon: React.FC<{className?: string}> = ({className}) => (
   <img 
-    src="/icons/points-icon.png" 
+    src="dist/icons/points-icon.png" 
     alt="Points" 
     className={className || 'h-5 w-5'}
   />
 );
 const UsersIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <img 
-    src="/icons/groups-icon.png" 
+    src="dist/icons/groups-icon.png" 
     alt="Groups" 
     className={props.className || 'h-6 w-6'}
   />
