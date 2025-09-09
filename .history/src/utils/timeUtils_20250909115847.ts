@@ -66,18 +66,17 @@ export const formatTimeUntilEvent = (hoursUntilEvent: number): string => {
 };
 
 /**
- * Check if an opportunity is within the unregistration window
- * Since users can now unregister at any time, this always returns false
+ * Check if an opportunity is within the 12-hour unregistration window
  * @param opportunityDate - The event date (YYYY-MM-DD format)
  * @param opportunityTime - The event time (HH:MM:SS format)
- * @returns boolean indicating if within unregistration window (always false now)
+ * @returns boolean indicating if within 12-hour window
  */
 export const isWithinUnregistrationWindow = (
   opportunityDate: string,
   opportunityTime: string
 ): boolean => {
-  // Users can now unregister at any time, so this window no longer exists
-  return false;
+  const { canUnregister } = canUnregisterFromOpportunity(opportunityDate, opportunityTime);
+  return !canUnregister;
 };
 
 /**

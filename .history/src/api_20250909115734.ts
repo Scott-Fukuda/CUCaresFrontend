@@ -557,8 +557,16 @@ export const registerForOpp = async (data: { user_id: number; opportunity_id: nu
 };
 // POST /unregister-opp for un-registering.
 export const unregisterForOpp = async (data: { user_id: number; opportunity_id: number; opportunityDate?: string; opportunityTime?: string }) => {
-  // Users can now unregister at any time, so no validation needed
-  // The opportunityDate and opportunityTime parameters are kept for backward compatibility
+  // If opportunity date/time is provided, validate the 12-hour rule on frontend
+  if (data.opportunityDate && data.opportunityTime) {
+    const { canUnregister } = await import('./utils/timeUtils').then(utils => 
+      utils.canUnregisterFromOpportunity(data.opportunityDate!, data.opportunityTime!)
+    );
+    
+    if (!canUnregister) {
+      throw new Error('Cannot unregister within 12 hours of the event. Please contact the event organizer if you need to cancel.');
+    }
+  }
   
   return authenticatedRequest('/unregister-opp', {
   method: 'POST',
