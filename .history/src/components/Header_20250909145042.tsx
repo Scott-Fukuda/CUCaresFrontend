@@ -39,7 +39,7 @@ const Header: React.FC<HeaderProps> = (props) => {
             >
               {/* Logo */}
               <img 
-                src="/header.png" 
+                src="dist/header" 
                 alt="CampusCares Logo" 
                 className="h-8 w-8 object-contain"
               />
