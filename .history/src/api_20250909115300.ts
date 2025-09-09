@@ -568,6 +568,7 @@ export const unregisterForOpp = async (data: { user_id: number; opportunity_id: 
     }
   }
   console.log('unregisterForOpp API call with data:', data);
+  console.log('unregisterForOpp API call with data:', data);
   
   return authenticatedRequest('/unregister-opp', {
   method: 'POST',
