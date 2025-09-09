@@ -976,7 +976,7 @@ const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-
 const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-cornell-red" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const UsersIcon = () => (
   <img 
-    src="dist/icons/groups-icon.png" 
+    src="/icons/groups-icon.png" 
     alt="Groups" 
     className="h-6 w-6"
   />
