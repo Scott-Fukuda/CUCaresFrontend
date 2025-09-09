@@ -15,11 +15,11 @@ const BadgeIcon: React.FC<BadgeIconProps> = ({ badge }) => {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <div className="text-4xl bg-light-gray p-3 rounded-full cursor-pointer">
+            <div className="text-4xl bg-light-gray p-2 rounded-full cursor-pointer">
                 <img 
                     src={badge.icon} 
                     alt={badge.name}
-                    className="h-12 w-12 object-contain"
+                    className="h-8 w-8 object-contain"
                 />
             </div>
             {isHovered && (

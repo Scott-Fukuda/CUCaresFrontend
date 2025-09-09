@@ -18,7 +18,7 @@ interface GroupDetailPageProps {
 
 const TrophyIcon: React.FC<{className?: string}> = ({className}) => (
   <img 
-    src="/icons/points-icon.png" 
+    src="dist/icons/points-icon.png" 
     alt="Points" 
     className={className || 'h-5 w-5'}
   />
