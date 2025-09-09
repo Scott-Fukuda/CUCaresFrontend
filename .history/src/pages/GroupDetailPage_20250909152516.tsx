@@ -57,18 +57,13 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
   };
 
   const { members, memberCount, orgTotalPoints, orgRank, upcomingEvents } = useMemo(() => {
-    // Use the same calculation method as leaderboard
-    const memberIds = allUsers.filter(u => u.organizationIds && u.organizationIds.includes(org.id)).map(u => u.id);
-    const currentMembers = allUsers.filter(u => memberIds.includes(u.id));
+    // Use org.users from backend if available, otherwise fall back to local calculation
+    const currentMembers = org.users && org.users.length > 0 ? org.users : allUsers.filter(u => u.organizationIds && u.organizationIds.includes(org.id));
     
     // Use backend member_count if available, otherwise calculate from current members
     const memberCount = org.member_count !== undefined ? org.member_count : currentMembers.length;
 
-    // Use the same points calculation as leaderboard
-    const totalPoints = memberIds.reduce((sum, memberId) => {
-        const user = allUsers.find(u => u.id === memberId);
-        return sum + (user?.points || 0);
-    }, 0);
+    const totalPoints = currentMembers.reduce((sum, member) => sum + (member.points || 0), 0);
 
     const categoryOrgs = allOrgs.filter(g => g.type === org.type)
         .map(g => {
