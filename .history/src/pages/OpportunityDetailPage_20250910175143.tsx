@@ -2,10 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import { PageState } from '../App';
-import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp, getOpportunities, uploadProfilePicture } from '../api';
+import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp, getOpportunities, uploadFile } from '../api';
 import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
-import { upload } from '@testing-library/user-event/dist/upload';
 
 interface OpportunityDetailPageProps {
   opportunity: Opportunity;
@@ -341,8 +340,8 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
 
     setIsUploadingImage(true);
     try {
-      const uploadResult = await uploadProfilePicture(selectedImage);
-      const imageUrl = uploadResult;
+      const uploadResult = await uploadFile(selectedImage);
+      const imageUrl = uploadResult.url;
 
       // Update the opportunity with the new image URL
       await updateOpportunity(opportunity.id, { image: imageUrl });
