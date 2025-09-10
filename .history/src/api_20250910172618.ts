@@ -628,20 +628,3 @@ export const markAttendance = async (data: { user_ids: number[]; opportunity_id:
       }),
   });
 };
-
-// --- Email Approval Check ---
-// GET /api/approved-emails/check/{email} for checking if email is approved
-export const checkEmailApproval = async (email: string) => {
-  const response = await fetch(`${ENDPOINT_URL}/api/approved-emails/check/${encodeURIComponent(email)}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to check email approval: ${response.statusText}`);
-  }
-
-  return response.json();
-};
