@@ -342,7 +342,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     setIsUploadingImage(true);
     try {
       const uploadResult = await uploadProfilePicture(selectedImage);
-      const imageUrl = uploadResult;
+      const imageUrl = uploadResult.url;
 
       // Update the opportunity with the new image URL
       await updateOpportunity(opportunity.id, { image: imageUrl });
