@@ -474,7 +474,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-2xl font-bold">Participants ({signedUpStudents.length}/{opportunity.total_slots})</h3>
                         <div className="text-right">
-                            <p className="text-sm text-gray-600">Available Slot</p>
+                            <p className="text-sm text-gray-600">Available Slots</p>
                             <p className={`text-lg font-semibold ${availableSlots > 0 ? 'text-green-600' : 'text-red-600'}`}>
                                 {availableSlots}
                             </p>
@@ -859,8 +859,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     {!isUserSignedUp && availableSlots <= 0 && (
                       <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
                         <p className="text-sm text-red-700 text-center">
-                          This event has reached its maximum capacity of {opportunity.total_slots} participants. {'currentUser.admin'+ currentUser.admin}
-                          {'opportunity.approved'+ opportunity.approved}
+                          This event has reached its maximum capacity of {opportunity.total_slots} participants.
                         </p>
                       </div>
                     )}
