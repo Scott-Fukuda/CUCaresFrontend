@@ -1,7 +1,6 @@
 
 import { User, MinimalUser, Opportunity, Organization, SignUp, Friendship, FriendshipStatus, FriendshipsResponse } from './types';
 import { auth } from './firebase-config';
-import { canUnregisterFromOpportunity } from './utils/timeUtils';
 
 // Helper function to get profile picture URL
 // Returns a generic silhouette when no profile image is available
