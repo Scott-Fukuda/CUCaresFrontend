@@ -750,7 +750,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                       </div>
                     </div>
                     {/* Admin Unapprove Button - Now visible to admins and hosts */}
-                    {currentUser.admin && opportunity.approved !== false && (
+                    {currentUser.admin && !(isUserHost) && opportunity.approved !== false && (
                       <div className="bg-white p-6 rounded-2xl shadow-lg">
                         <h4 className="text-lg font-bold mb-4">Admin Actions</h4>
                         <button
