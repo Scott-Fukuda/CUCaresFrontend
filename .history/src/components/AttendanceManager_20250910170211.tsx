@@ -174,64 +174,24 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Hours</label>
                   <input
-                    type="text"
+                    type="number"
+                    min="0"
+                    max="24"
                     value={durationHours}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === '') {
-                        setDurationHours(0);
-                      } else {
-                        const numValue = parseInt(value);
-                        if (!isNaN(numValue) && numValue >= 0 && numValue <= 24) {
-                          setDurationHours(numValue);
-                        }
-                      }
-                    }}
-                    onBlur={(e) => {
-                      const value = parseInt(e.target.value);
-                      if (isNaN(value) || value < 0) {
-                        setDurationHours(0);
-                      } else if (value > 24) {
-                        setDurationHours(24);
-                      }
-                    }}
-                    placeholder="0-24"
+                    onChange={(e) => setDurationHours(parseInt(e.target.value) || 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Range: 0-24 hours
-                  </p>
                 </div>
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Minutes</label>
                   <input
-                    type="text"
+                    type="number"
+                    min="0"
+                    max="59"
                     value={durationMinutes}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === '') {
-                        setDurationMinutes(0);
-                      } else {
-                        const numValue = parseInt(value);
-                        if (!isNaN(numValue) && numValue >= 0 && numValue <= 59) {
-                          setDurationMinutes(numValue);
-                        }
-                      }
-                    }}
-                    onBlur={(e) => {
-                      const value = parseInt(e.target.value);
-                      if (isNaN(value) || value < 0) {
-                        setDurationMinutes(0);
-                      } else if (value > 59) {
-                        setDurationMinutes(59);
-                      }
-                    }}
-                    placeholder="0-59"
+                    onChange={(e) => setDurationMinutes(parseInt(e.target.value) || 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Range: 0-59 minutes
-                  </p>
                 </div>
               </div>
               
