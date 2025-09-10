@@ -866,14 +866,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     )}
               
                     {/* Admin Unapprove Button */}
-                    {/* Debug all conditions */}
-                    <div className="mt-4 p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
-                      <p>DEBUG CONDITIONS:</p>
-                      <p>currentUser.admin: {String(currentUser.admin)} (type: {typeof currentUser.admin})</p>
-                      <p>opportunity.approved: {String(opportunity.approved)} (type: {typeof opportunity.approved})</p>
-                      <p>opportunity.approved !== false: {String(opportunity.approved !== false)}</p>
-                      <p>Full condition result: {String(currentUser.admin && opportunity.approved !== false)}</p>
-                    </div>
                     {currentUser.admin && opportunity.approved !== false && (
                       <div>
                         <p>DEBUG: Button should be visible - currentUser.admin: {String(currentUser.admin)}, opportunity.approved: {String(opportunity.approved)}</p>
