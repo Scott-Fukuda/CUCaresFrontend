@@ -749,18 +749,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         )}
                       </div>
                     </div>
-                    {/* Admin Unapprove Button - Now visible to admins and hosts */}
-                    {currentUser.admin && opportunity.approved !== false && (
-                      <div className="bg-white p-6 rounded-2xl shadow-lg">
-                        <h4 className="text-lg font-bold mb-4">Admin Actions</h4>
-                        <button
-                          onClick={handleUnapproveOpportunity}
-                          className="w-full font-bold py-3 px-4 rounded-lg transition-colors text-white text-lg bg-orange-600 hover:bg-orange-700"
-                        >
-                          Unapprove Opportunity
-                        </button>
-                      </div>
-                    )}
+                    
                     {/* Send Email to All Participants Button */}
                     {signedUpStudents.length > 0 && (
                       <div className="bg-white p-6 rounded-2xl shadow-lg">
