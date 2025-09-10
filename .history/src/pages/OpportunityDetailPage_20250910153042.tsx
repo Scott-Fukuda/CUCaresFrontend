@@ -316,9 +316,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     const matchingUsers = students.filter(student => 
       student.name.toLowerCase().includes(userLookupName.toLowerCase().trim())
     );
-    console.log('Unapprove Opportunity')
-    console.log('currentUser.admin', currentUser.admin)
-    console.log('opportunity.approved', opportunity.approved)
+    
     setUserLookupResults(matchingUsers);
   }, [userLookupName, students]);
 
@@ -856,7 +854,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         {isUserSignedUp ? 'Signed Up ✓' : canSignUp ? 'Sign Up Now' : 'Event Full'}
                     </button>
                     
-                    
                     {/* Slot limit enforcement message */}
                     {!isUserSignedUp && availableSlots <= 0 && (
                       <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -865,10 +862,12 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         </p>
                       </div>
                     )}
-              
+                    
                     {/* Admin Unapprove Button */}
                     {currentUser.admin && opportunity.approved !== false && (
-  
+                      console.log('Unapprove Opportunity'),
+                      console.log('currentUser.admin', currentUser.admin),
+                      console.log('opportunity.approved', opportunity.approved),
                       <button
                         onClick={handleUnapproveOpportunity}
                         className="w-full mt-4 font-bold py-3 px-4 rounded-lg transition-colors text-white text-lg bg-orange-600 hover:bg-orange-700"
@@ -886,7 +885,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     
                  </div>
                  
-                 {/* Contact Host Section - Available to all users */}
+                 {/* Contact Host Section - Only for registered users */}
                  {opportunity.host_id && (
                    <div className="bg-white p-6 rounded-2xl shadow-lg">
                      <h4 className="text-lg font-bold mb-4">Contact Host</h4>

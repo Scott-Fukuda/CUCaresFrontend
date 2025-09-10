@@ -316,9 +316,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     const matchingUsers = students.filter(student => 
       student.name.toLowerCase().includes(userLookupName.toLowerCase().trim())
     );
-    console.log('Unapprove Opportunity')
-    console.log('currentUser.admin', currentUser.admin)
-    console.log('opportunity.approved', opportunity.approved)
+    
     setUserLookupResults(matchingUsers);
   }, [userLookupName, students]);
 
