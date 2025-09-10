@@ -869,8 +869,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     {/* Admin Unapprove Button */}
                     {currentUser.admin && opportunity.approved !== false && (
                       <div>
-                        <p>DEBUG: Button should be visible - currentUser.admin: {String(currentUser.admin)}, opportunity.approved: {String(opportunity.approved)}</p>
-
+    
                         <button
                           onClick={handleUnapproveOpportunity}
                           className="w-full mt-4 font-bold py-3 px-4 rounded-lg transition-colors text-white text-lg bg-orange-600 hover:bg-orange-700"
