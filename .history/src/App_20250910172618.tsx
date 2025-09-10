@@ -132,21 +132,9 @@ const App: React.FC = () => {
       
       // Check if email is @cornell.edu
       if (!firebaseUser.email.toLowerCase().endsWith('@cornell.edu')) {
-        // For non-Cornell emails, check if they're in the approved list
-        try {
-          const approvalCheck = await api.checkEmailApproval(firebaseUser.email);
-          if (!approvalCheck.is_approved) {
-            setAuthError('Your email is not approved for this platform. Please contact team@campuscares.us for access.');
-            setIsLoading(false);
-            return;
-          }
-          // Email is approved, continue with the process
-        } catch (error) {
-          console.error('Error checking email approval:', error);
-          setAuthError('Unable to verify email approval. Please try again or contact team@campuscares.us.');
-          setIsLoading(false);
-          return;
-        }
+        setAuthError('Please use a valid @cornell.edu email address.');
+        setIsLoading(false);
+        return;
       }
       
       // Get the ID token from Firebase
@@ -166,8 +154,8 @@ const App: React.FC = () => {
           // User exists, log them in
           // //console.log('User found, logging in:', existingUser);
           setCurrentUser(existingUser);
-          setPageState({ page: 'opportunities' });
-        } else {
+      setPageState({ page: 'opportunities' });
+    } else {
           // User doesn't exist, redirect to registration
           //console.log('User not found, redirecting to registration');
           setAuthView('register');
