@@ -46,9 +46,6 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
         duration: totalMinutes
       });
       
-      // Update the local opportunity object to reflect attendance submission
-      opportunity.attendance_marked = true;
-      
       setShowDurationPopup(false);
       onAttendanceSubmitted();
     } catch (error: any) {
@@ -158,7 +155,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
         }`}
       >
         {isAttendanceMarked 
-          ? 'Attendance Already Submitted'
+          ? 'Attendance Already Marked'
           : isSubmitting 
             ? 'Submitting...' 
             : `Submit Attendance (${attendedUsers.size} marked)`
