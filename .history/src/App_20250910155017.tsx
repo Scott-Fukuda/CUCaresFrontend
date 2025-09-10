@@ -337,7 +337,7 @@ const App: React.FC = () => {
           opportunity_id: opportunityId,
           opportunityDate,
           opportunityTime,
-          // Pass admin/host status
+          isAdminOrHost // Pass admin/host status
         });
         
         // Refresh opportunities to get updated involved_users from backend
