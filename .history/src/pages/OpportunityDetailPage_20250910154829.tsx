@@ -912,7 +912,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                </svg>
                              </div>
-                             
                              {/* Host Organization Information */}
                              {opportunity.host_org_name && (
                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
