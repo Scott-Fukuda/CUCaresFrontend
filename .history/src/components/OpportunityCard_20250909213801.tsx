@@ -227,7 +227,7 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
         {isUserSignedUp && !canUnregister && (
           <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded-lg">
             <p className="text-xs text-orange-800 text-center">
-              ⚠️ Unregistration closed within 7 hours of event. 
+              ⚠️ Unregistration closed within 12 hours of event. 
               Contact organizer if you need to cancel.
             </p>
           </div>
