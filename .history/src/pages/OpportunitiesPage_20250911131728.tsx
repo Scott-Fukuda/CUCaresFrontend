@@ -63,17 +63,11 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   }, [opportunities]);
 
   const [showExternalSignupModal, setShowExternalSignupModal] = useState(false);
-  const [showExternalUnsignupModal, setShowExternalUnsignupModal] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
 
   const handleExternalSignup = (opportunity: Opportunity) => {
     setSelectedOpportunity(opportunity);
     setShowExternalSignupModal(true);
-  };
-
-  const handleExternalUnsignup = (opportunity: Opportunity) => {
-    setSelectedOpportunity(opportunity);
-    setShowExternalUnsignupModal(true);
   };
 
   const handleExternalSignupConfirm = () => {
@@ -90,24 +84,8 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     }
   };
 
-  const handleExternalUnsignupConfirm = () => {
-    if (selectedOpportunity) {
-      // Proceed with local unregistration
-      handleUnSignUp(selectedOpportunity.id, selectedOpportunity.date, selectedOpportunity.time);
-      
-      // Close the modal
-      setShowExternalUnsignupModal(false);
-      setSelectedOpportunity(null);
-    }
-  };
-
   const handleExternalSignupCancel = () => {
     setShowExternalSignupModal(false);
-    setSelectedOpportunity(null);
-  };
-
-  const handleExternalUnsignupCancel = () => {
-    setShowExternalUnsignupModal(false);
     setSelectedOpportunity(null);
   };
 
@@ -211,7 +189,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               setPageState={setPageState}
               allOrgs={allOrgs}
               onExternalSignup={handleExternalSignup} // Add the callback
-              onExternalUnsignup={handleExternalUnsignup} // Add the callback
             />
           );
         })}
@@ -252,35 +229,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               </button>
               <button
                 onClick={handleExternalSignupCancel}
-                className="flex-1 bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* External Unsignup Modal */}
-      {showExternalUnsignupModal && selectedOpportunity && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md mx-4">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">External Application Notice</h3>
-            <p className="text-gray-600 mb-4">
-              This opportunity required an external application. Please notify the host non-profit that you no longer are able to participate in this opportunity.
-            </p>
-            <p className="text-sm text-gray-500 mb-6">
-              You will still be unregistered from our local system.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={handleExternalUnsignupConfirm}
-                className="flex-1 bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors"
-              >
-                Unregister Locally
-              </button>
-              <button
-                onClick={handleExternalUnsignupCancel}
                 className="flex-1 bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors"
               >
                 Cancel
