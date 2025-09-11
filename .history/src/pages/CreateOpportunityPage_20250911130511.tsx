@@ -21,8 +21,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
     total_slots: 10,
     nonprofit: '',
     host_org_id: '',
-    address: '',
-    redirect_url: '' // Add redirect URL field
+    address: ''
   });
   
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -124,11 +123,6 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
       formDataToSend.append('host_org_id', formData.host_org_id);
       formDataToSend.append('host_user_id', currentUser.id.toString());
       formDataToSend.append('address', formData.address);
-      
-      // Add redirect URL if provided
-      if (formData.redirect_url.trim()) {
-        formDataToSend.append('redirect_url', formData.redirect_url.trim());
-      }
 
       // Add image URL if uploaded
       if (imageUrl) {
@@ -319,23 +313,6 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                 placeholder="Enter the location or address for this opportunity"
               />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Redirect Link (Optional)
-              </label>
-              <input
-                type="url"
-                name="redirect_url"
-                value={formData.redirect_url}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-                placeholder="https://example.com/register"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                If you would like this opportunity to redirect to an external registration, enter the link here.
-              </p>
             </div>
           </div>
 
