@@ -4,7 +4,6 @@ import { Opportunity, User, SignUp, Organization } from '../types';
 import { PageState } from '../App';
 import { getProfilePictureUrl } from '../api';
 import { canUnregisterFromOpportunity, formatTimeUntilEvent, calculateEndTime } from '../utils/timeUtils';
-import { useState } from 'react';
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -60,28 +59,13 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, signedUp
     setPageState({ page: 'opportunityDetail', id: opportunity.id });
   };
   
-  const handleButtonClick = () => {
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (isUserSignedUp) {
       onUnSignUp(opportunity.id, opportunity.date, opportunity.time);
     } else {
-      // Check if this is an external signup opportunity
-      if (opportunity.redirect_url) {
-        setShowExternalSignupModal(true);
-      } else {
-        onSignUp(opportunity.id);
-      }
+      onSignUp(opportunity.id);
     }
-  };
-
-  const handleExternalSignup = () => {
-    // Open the external URL in a new tab
-    window.open(opportunity.redirect_url!, '_blank');
-    
-    // Still register the user locally
-    onSignUp(opportunity.id);
-    
-    // Close the modal
-    setShowExternalSignupModal(false);
   };
 
   const topOrgs = useMemo(() => {
@@ -119,8 +103,6 @@ const displayTime = new Date(`1970-01-01T${opportunity.time}`).toLocaleTimeStrin
 });
 
 const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, opportunity.duration);
-
-  const [showExternalSignupModal, setShowExternalSignupModal] = useState(false);
 
   return (
     <div onClick={handleCardClick} className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105 duration-300 cursor-pointer">
@@ -235,48 +217,11 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
               ? 'Signed Up ✓' 
               : `Unregistration Closed (${formatTimeUntilEvent(timeUntilEvent)})`
             : canSignUp 
-              ? (opportunity.redirect_url ? 'Sign Up Externally' : 'Sign Up')
+              ? 'Sign Up' 
               : 'No Slots Available'
           }
         </button>
-
-        {/* External Signup Modal */}
-        {showExternalSignupModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md mx-4">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">External Registration Required</h3>
-              <p className="text-gray-600 mb-4">
-                Please register externally on this link: 
-                <a 
-                  href={opportunity.redirect_url!} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-cornell-red hover:underline ml-1"
-                >
-                  {opportunity.redirect_url}
-                </a>
-              </p>
-              <p className="text-sm text-gray-500 mb-6">
-                After registering externally, you'll still be registered locally in our system.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={handleExternalSignup}
-                  className="flex-1 bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors"
-                >
-                  Open Link & Register Locally
-                </button>
-                <button
-                  onClick={() => setShowExternalSignupModal(false)}
-                  className="flex-1 bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
+        
         {/* Show warning message if unregistration is blocked */}
         {isUserSignedUp && !canUnregister && (
           <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded-lg">
