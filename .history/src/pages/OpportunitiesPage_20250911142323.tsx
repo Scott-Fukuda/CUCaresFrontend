@@ -230,7 +230,15 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           <div className="bg-white rounded-lg p-6 max-w-md mx-4">
             <h3 className="text-lg font-bold text-gray-900 mb-4">External Registration Required</h3>
             <p className="text-gray-600 mb-4">
-              Please register externally on this link by clicking the button below.
+              Please register externally on this link: 
+              <a 
+                href={selectedOpportunity.redirect_url!} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-cornell-red hover:underline ml-1"
+              >
+                {selectedOpportunity.redirect_url}
+              </a>
             </p>
             <p className="text-sm text-gray-500 mb-6">
               After registering externally, you'll still be registered locally in our system.
