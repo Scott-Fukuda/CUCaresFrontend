@@ -62,33 +62,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       .sort((a, b) => a.fullDateTime.getTime() - b.fullDateTime.getTime());
   }, [opportunities]);
 
-  const [showExternalSignupModal, setShowExternalSignupModal] = useState(false);
-  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
-
-  const handleExternalSignup = (opportunity: Opportunity) => {
-    setSelectedOpportunity(opportunity);
-    setShowExternalSignupModal(true);
-  };
-
-  const handleExternalSignupConfirm = () => {
-    if (selectedOpportunity) {
-      // Open the external URL in a new tab
-      window.open(selectedOpportunity.redirect_url!, '_blank');
-      
-      // Still register the user locally
-      handleSignUp(selectedOpportunity.id);
-      
-      // Close the modal
-      setShowExternalSignupModal(false);
-      setSelectedOpportunity(null);
-    }
-  };
-
-  const handleExternalSignupCancel = () => {
-    setShowExternalSignupModal(false);
-    setSelectedOpportunity(null);
-  };
-
   return (
     <>
       {/* Header */}
@@ -188,7 +161,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               isUserSignedUp={isUserSignedUp}
               setPageState={setPageState}
               allOrgs={allOrgs}
-              onExternalSignup={handleExternalSignup} // Add the callback
             />
           );
         })}
@@ -198,43 +170,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         <div className="col-span-full text-center py-12 px-6 bg-white rounded-2xl shadow-lg">
           <h3 className="text-xl font-semibold text-gray-800">No opportunities match your filters.</h3>
           <p className="text-gray-500 mt-2">Try clearing the filters to see all upcoming events.</p>
-        </div>
-      )}
-
-      {/* External Signup Modal */}
-      {showExternalSignupModal && selectedOpportunity && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md mx-4">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">External Registration Required</h3>
-            <p className="text-gray-600 mb-4">
-              Please register externally on this link: 
-              <a 
-                href={selectedOpportunity.redirect_url!} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-cornell-red hover:underline ml-1"
-              >
-                {selectedOpportunity.redirect_url}
-              </a>
-            </p>
-            <p className="text-sm text-gray-500 mb-6">
-              After registering externally, you'll still be registered locally in our system.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={handleExternalSignupConfirm}
-                className="flex-1 bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors"
-              >
-                Open Link & Register Locally
-              </button>
-              <button
-                onClick={handleExternalSignupCancel}
-                className="flex-1 bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </>
