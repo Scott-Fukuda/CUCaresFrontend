@@ -16,7 +16,6 @@ interface OpportunityCardProps {
   isUserSignedUp: boolean;
   setPageState: (state: PageState) => void;
   onExternalSignup?: (opportunity: Opportunity) => void; // Add callback for external signup
-  onExternalUnsignup?: (opportunity: Opportunity) => void; // Add callback for external unsignup
 }
 
 const PeopleIcon: React.FC<{className?: string}> = ({className}) => (
@@ -42,8 +41,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   onUnSignUp, 
   isUserSignedUp, 
   setPageState,
-  onExternalSignup,
-  onExternalUnsignup 
+  onExternalSignup 
 }) => {
   // Debug logging
   console.log('Debug - Opportunity:', opportunity.name, 'ID:', opportunity.id);
@@ -75,12 +73,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   
   const handleButtonClick = () => {
     if (isUserSignedUp) {
-      // Check if this is an external opportunity and user is trying to unregister
-      if (opportunity.redirect_url && onExternalUnsignup) {
-        onExternalUnsignup(opportunity);
-      } else {
-        onUnSignUp(opportunity.id, opportunity.date, opportunity.time);
-      }
+      onUnSignUp(opportunity.id, opportunity.date, opportunity.time);
     } else {
       // Check if this is an external signup opportunity
       if (opportunity.redirect_url && onExternalSignup) {
@@ -100,50 +93,6 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
     
     // Close the modal
     // setShowExternalSignupModal(false); // This state is removed, so this line is removed
-  };
-
-  const handleExternalUnsignup = () => {
-    // Open the external URL in a new tab
-    window.open(opportunity.redirect_url!, '_blank');
-    
-    // Still register the user locally
-    onSignUp(opportunity.id);
-    
-    // Close the modal
-    // setShowExternalUnsignupModal(false); // This state is removed, so this line is removed
-  };
-
-  const handleExternalSignupConfirm = () => {
-    if (opportunity) {
-      // Open the external URL in a new tab
-      window.open(opportunity.redirect_url!, '_blank');
-      
-      // Still register the user locally
-      onSignUp(opportunity.id);
-      
-      // Close the modal
-      // setShowExternalSignupModal(false); // This state is removed, so this line is removed
-    }
-  };
-
-  const handleExternalUnsignupConfirm = () => {
-    if (opportunity) {
-      // Proceed with local unregistration
-      onUnSignUp(opportunity.id, opportunity.date, opportunity.time);
-      
-      // Close the modal
-      // setShowExternalUnsignupModal(false); // This state is removed, so this line is removed
-    }
-  };
-
-  const handleExternalSignupCancel = () => {
-    // setShowExternalSignupModal(false); // This state is removed, so this line is removed
-    // setSelectedOpportunity(null); // This state is removed, so this line is removed
-  };
-
-  const handleExternalUnsignupCancel = () => {
-    // setShowExternalUnsignupModal(false); // This state is removed, so this line is removed
-    // setSelectedOpportunity(null); // This state is removed, so this line is removed
   };
 
   const topOrgs = useMemo(() => {
