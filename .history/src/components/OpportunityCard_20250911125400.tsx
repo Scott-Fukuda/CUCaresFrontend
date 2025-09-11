@@ -232,7 +232,7 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
               ? 'Signed Up ✓' 
               : `Unregistration Closed (${formatTimeUntilEvent(timeUntilEvent)})`
             : canSignUp 
-              ? ((opportunity.redirect_url !== null)? 'Sign Up Externally' : 'Sign Up')
+              ? (opportunity.redirect_url !== null? 'Sign Up Externally' : 'Sign Up')
               : 'No Slots Available'
           }
         </button>
