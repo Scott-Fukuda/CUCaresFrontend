@@ -67,7 +67,7 @@ const LeaderboardIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <img 
     src="/icons/leaderboard-icon.png" 
     alt="Leaderboard" 
-    className={props.className || 'h-10 w-10'}
+    className={props.className || 'h-6 w-6'}
   />
 );
 

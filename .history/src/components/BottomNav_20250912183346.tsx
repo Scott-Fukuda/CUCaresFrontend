@@ -67,7 +67,7 @@ const LeaderboardIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <img 
     src="/icons/leaderboard-icon.png" 
     alt="Leaderboard" 
-    className={props.className || 'h-10 w-10'}
+    className={props.className || 'h-6 w-6'}
   />
 );
 
@@ -75,7 +75,7 @@ const ProfileIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <img 
     src="/icons/profile-icon.png" 
     alt="Profile" 
-    className={props.className || 'h-10 w-10'}
+    className={props.className || 'h-6 w-6'}
     />
 );
 
@@ -83,7 +83,7 @@ const CalendarIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <img 
   src="/icons/calendar-icon.png" 
   alt="Events" 
-  className={props.className || 'h-10 w-10'}
+  className={props.className || 'h-6 w-6'}
   />
 );
 
@@ -91,7 +91,7 @@ const UsersIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <img 
     src="/icons/groups-icon-grey.png" 
     alt="Groups" 
-    className={props.className || 'h-10 w-10'}
+    className={props.className || 'h-6 w-6'}
   />
 );
 
