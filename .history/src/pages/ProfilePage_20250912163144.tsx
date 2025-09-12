@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Badge, Organization, allInterests, FriendshipStatus, FriendshipsResponse } from '../types';
 import BadgeIcon from '../components/BadgeIcon';
 import { PageState } from '../App';
-import { getProfilePictureUrl, updateUser } from '../api';
+import { getProfilePictureUrl } from '../api';
 
 interface ProfilePageProps {
   user: User; // The user whose profile is being viewed
@@ -36,17 +36,12 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [uploadingProfilePic, setUploadingProfilePic] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editingBio, setEditingBio] = useState(user.bio || ''); // Add bio editing state
+
 
   // Update selectedInterests when user.interests changes
   React.useEffect(() => {
     setSelectedInterests(user.interests);
   }, [user.interests]);
-
-  // Update editingBio when user.bio changes
-  React.useEffect(() => {
-    setEditingBio(user.bio || '');
-  }, [user.bio]);
 
   // Check friendship status when component mounts or user changes
   useEffect(() => {
@@ -211,47 +206,18 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
       <div className="lg:col-span-2 space-y-8">
         <div className="bg-white p-6 rounded-2xl shadow-lg">
             <h3 className="text-xl font-bold mb-4">{user.name}'s Bio</h3>
- 
             <div className="flex flex-wrap gap-3">
-                {isEditing ? (
-                    <textarea
-                        value={editingBio}
-                        onChange={(e) => setEditingBio(e.target.value)}
-                        placeholder="Tell us about yourself..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent resize-none"
-                        rows={4}
-                    />
-                ) : (
-                    <p className="text-sm text-gray-500">{user.bio || 'No bio added yet.'}</p>
-                )}
+                <p className="text-sm text-gray-500">{user.bio}</p>
             </div>
-            {isCurrentUser && (
-                <>
-                    {!isEditing ? (
-                        <button onClick={() => setIsEditing(true)} className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm mt-4">
-                            {user.bio ? 'Edit Bio' : 'Add Bio'}
-                        </button>
-                    ) : (
-                        <div className="flex gap-2 mt-4">
-                            <button onClick={() => {
-                                setIsEditing(false);
-                                updateUser(user.id, { bio: editingBio });
-                            }}
-                            className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm">
-                                Save Bio
-                            </button>
-                            <button onClick={() => {
-                                setIsEditing(false);
-                                setEditingBio(user.bio || '');
-                            }}
-                            className="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors text-sm">
-                                Cancel
-                            </button>
-                        </div>
-                    )}
-                </>
-            )}
-        </div>
+             {isCurrentUser && !user.bio && (
+                <p className="text-sm text-gray-500 mt-4">Add a bio to your profile!</p>
+                { isEditing && (
+                  <button onClick={setIsEditing(true)} className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm">
+                      Edit Bio
+                  </button>)
+                  }
+             )}
+         </div>
          <div className="bg-white p-6 rounded-2xl shadow-lg">
             <h3 className="text-xl font-bold mb-4">{user.name}'s Passions</h3>
             <div className="flex flex-wrap gap-3">
