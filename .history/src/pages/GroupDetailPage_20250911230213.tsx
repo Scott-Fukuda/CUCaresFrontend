@@ -56,39 +56,6 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
     }
   };
 
-  // Function to format description text with newlines and links
-  const formatDescription = (text: string) => {
-    // Split by newlines and process each line
-    const lines = text.split(/\r?\n/); // Handle both \n and \r\n
-    
-    return lines.map((line, lineIndex) => {
-      // URL regex pattern
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const parts = line.split(urlRegex);
-      
-      return (
-        <div key={lineIndex} className="mb-2">
-          {parts.map((part, partIndex) => {
-            if (urlRegex.test(part)) {
-              return (
-                <a
-                  key={partIndex}
-                  href={part}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-cornell-red hover:text-red-800 underline break-all"
-                >
-                  {part}
-                </a>
-              );
-            }
-            return <span key={partIndex}>{part}</span>;
-          })}
-        </div>
-      );
-    });
-  };
-
   const { members, memberCount, orgTotalPoints, orgRank, upcomingEvents } = useMemo(() => {
     // Use the same calculation method as leaderboard
     const memberIds = allUsers.filter(u => u.organizationIds && u.organizationIds.includes(org.id)).map(u => u.id);
@@ -167,16 +134,6 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
               </button>
             )}
         </div>
-
-        {/* Organization Description */}
-        {org.description && (
-            <div className="bg-white p-6 rounded-2xl shadow-lg">
-                <h3 className="text-xl font-bold mb-4">About {org.name}</h3>
-                <div className="text-gray-700 text-lg leading-relaxed break-words">
-                    {formatDescription(org.description)}
-                </div>
-            </div>
-        )}
 
         <div className="bg-white p-6 rounded-2xl shadow-lg">
              <h3 className="text-xl font-bold mb-4">Organization Stats</h3>
