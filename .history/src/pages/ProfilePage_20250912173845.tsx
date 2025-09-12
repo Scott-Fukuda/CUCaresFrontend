@@ -39,8 +39,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const [uploadingProfilePic, setUploadingProfilePic] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingBio, setEditingBio] = useState(user.bio || '');
-  const [savingBio, setSavingBio] = useState(false);
-  const [localUser, setLocalUser] = useState(user); // Add local user state
+  const [savingBio, setSavingBio] = useState(false); // Add loading state
 
   // Update selectedInterests when user.interests changes
   React.useEffect(() => {
@@ -50,8 +49,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   // Update editingBio when user.bio changes
   React.useEffect(() => {
     setEditingBio(user.bio || '');
-    setLocalUser(user); // Update local user when user prop changes
-  }, [user]);
+  }, [user.bio]);
 
   // Check friendship status when component mounts or user changes
   useEffect(() => {
@@ -227,7 +225,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                         rows={4}
                     />
                 ) : (
-                    <p className="text-sm text-gray-500">{localUser.bio || 'No bio added yet.'}</p>
+                    <p className="text-sm text-gray-500">{user.bio || 'No bio added yet.'}</p>
                 )}
             </div>
             {isCurrentUser && (
@@ -242,9 +240,10 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                                 setSavingBio(true);
                                 try {
                                     const updatedUser = await updateUser(user.id, { bio: editingBio });
-                                    // Update local user state
-                                    setLocalUser({ ...localUser, bio: editingBio });
+                                    // Remove the setCurrentUser call that's causing the white screen
+                                    // setCurrentUser(updatedUser);
                                     setIsEditing(false);
+                                    
                                 } catch (error) {
                                     console.error('Error saving bio:', error);
                                     alert('Failed to save bio. Please try again.');
@@ -258,7 +257,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                             </button>
                             <button onClick={() => {
                                 setIsEditing(false);
-                                setEditingBio(localUser.bio || ''); // Use localUser instead of user
+                                setEditingBio(user.bio || '');
                             }}
                             disabled={savingBio}
                             className="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors text-sm disabled:opacity-50">
