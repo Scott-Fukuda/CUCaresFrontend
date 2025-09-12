@@ -35,9 +35,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const [profileUserFriends, setProfileUserFriends] = useState<User[]>([]);
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [uploadingProfilePic, setUploadingProfilePic] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-
-
+  
   // Update selectedInterests when user.interests changes
   React.useEffect(() => {
     setSelectedInterests(user.interests);
@@ -211,9 +209,6 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
             </div>
              {isCurrentUser && !user.bio && (
                 <p className="text-sm text-gray-500 mt-4">Add a bio to your profile!</p>
-                <button onClick={} className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm">
-                  Edit Bio
-                </button>
              )}
          </div>
          <div className="bg-white p-6 rounded-2xl shadow-lg">
