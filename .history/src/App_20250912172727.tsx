@@ -815,7 +815,6 @@ const App: React.FC = () => {
                         friendshipsData={friendshipsData}
                         checkFriendshipStatus={checkFriendshipStatus}
                         getFriendsForUser={getFriendsForUser}
-                        setCurrentUser={setCurrentUser}
                     />;
         case 'notifications':
             return <NotificationsPage friendshipsData={friendshipsData} allUsers={students} handleRequestResponse={handleRequestResponse} currentUser={currentUser} />;

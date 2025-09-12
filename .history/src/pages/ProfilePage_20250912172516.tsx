@@ -21,15 +21,13 @@ interface ProfilePageProps {
   friendshipsData: FriendshipsResponse | null;
   checkFriendshipStatus: (otherUserId: number) => Promise<FriendshipStatus>;
   getFriendsForUser: (userId: number) => Promise<User[]>; // New async function
-  setCurrentUser: (user: User | null) => void; // Add this prop
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const { 
     user, isCurrentUser, currentUser, earnedBadges, userOrgs, 
     hoursVolunteered, userFriends, setPageState, updateInterests, 
-    updateProfilePicture, handleFriendRequest, handleRemoveFriend, 
-    friendshipsData, checkFriendshipStatus, getFriendsForUser, setCurrentUser
+    updateProfilePicture, handleFriendRequest, handleRemoveFriend, friendshipsData, checkFriendshipStatus, getFriendsForUser
   } = props;
   
   const [selectedInterests, setSelectedInterests] = useState(user.interests);
