@@ -386,7 +386,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
   // Function to format description text with newlines and links
   const formatDescription = (text: string) => {
     // Split by newlines and process each line
-    const lines = text.split(/\r?\n/); // Handle both \n and \r\n (Windows line endings)
+    const lines = text.split('\n');
     
     return lines.map((line, lineIndex) => {
       // URL regex pattern
