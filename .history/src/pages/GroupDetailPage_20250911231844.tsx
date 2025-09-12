@@ -198,7 +198,7 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
       </div>
       
       {/* Right Column */}
-    <div className="lg:col-span-2 space-y-8">
+      <div className="lg:col-span-2 space-y-8">
          <div className="bg-white p-6 rounded-2xl shadow-lg">
             <h3 className="text-xl font-bold mb-4">Members ({memberCount})</h3>
             {memberCount > 0 ? (
@@ -222,6 +222,7 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
                 <p className="text-gray-500">This organization has no members yet.</p>
             )}
          </div>
+
          {/* Organization Description - Moved to right column */}
          {org.description && (
              <div className="bg-white p-6 rounded-2xl shadow-lg">
@@ -231,7 +232,6 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
                  </div>
              </div>
          )}
-
       </div>
     </div>
   );
