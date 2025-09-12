@@ -227,7 +227,7 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
                  <div className="text-gray-700 text-lg leading-relaxed break-words">
                      {showFullDescription 
                          ? formatDescription(org.description)
-                         : formatDescription(org.description, 5)
+                         : formatDescription(org.description, 10)
                      }
                  </div>
                  {showFullDescription && (
