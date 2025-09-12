@@ -108,44 +108,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
               <img src={getProfilePictureUrl(user.profile_image)} alt={user.name} className="h-10 w-10 rounded-full object-cover cursor-pointer flex-shrink-0" onClick={() => setPageState({ page: 'profile', userId: user.id})}/>
               <span className="font-medium text-gray-900 cursor-pointer truncate min-w-0" onClick={() => setPageState({ page: 'profile', userId: user.id})}>{user.name}</span>
             </div>
-            
-            {/* Mobile layout: stacked vertically */}
-            <div className="flex flex-col items-end gap-1 sm:hidden">
-              {!isCurrentUser && (
-                 isFriend ? (
-                    <span className="text-xs bg-green-100 text-green-700 font-medium py-1 px-2 rounded-full text-center flex items-center justify-center min-w-[60px]">
-                      Friends ✓
-                    </span>
-                 ) : requestSent ? (
-                    <span className="text-xs bg-yellow-100 text-yellow-700 font-medium py-1 px-2 rounded-full text-center flex items-center justify-center min-w-[80px]">
-                      Request Sent
-                    </span>
-                 ) : requestReceived ? (
-                    <div className="flex gap-1">
-                      <button 
-                        onClick={() => handleAcceptFriendRequest(user.id)} 
-                        className="text-xs bg-green-600 text-white font-medium py-1 px-2 rounded-full hover:bg-green-700 transition-colors text-center"
-                      >
-                        Accept
-                      </button>
-                      <button 
-                        onClick={() => handleRejectFriendRequest(user.id)} 
-                        className="text-xs bg-gray-300 text-gray-800 font-medium py-1 px-2 rounded-full hover:bg-gray-400 transition-colors text-center"
-                      >
-                        Decline
-                      </button>
-                    </div>
-                 ) : (
-                    <button onClick={() => handleFriendRequest(user.id)} className="text-xs bg-gray-200 text-gray-700 font-medium py-1 px-2 rounded-full hover:bg-gray-300 transition-colors text-center min-w-[70px]">
-                      Add Friend
-                    </button>
-                 )
-              )}
-              <span className="font-bold text-cornell-red text-sm">{points} pts</span>
-            </div>
-
-            {/* Desktop layout: horizontal */}
-            <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-3 flex-shrink-0">
               <span className="font-bold text-cornell-red text-lg">{points} pts</span>
               {!isCurrentUser && (
                  isFriend ? (
@@ -235,7 +198,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
                       isJoined ? (
                         <button 
                           onClick={(e) => { e.stopPropagation(); leaveOrg(org.id); }}
-                          className="text-xs bg-gray-500 text-white font-medium py-1 px-2 rounded-full hover:bg-gray-600 transition-colors text-center min-w-[50px]"
+                          className="text-xs bg-red-600 text-white font-medium py-1 px-2 rounded-full hover:bg-red-700 transition-colors text-center min-w-[50px]"
                         >
                           Leave
                         </button>
@@ -258,7 +221,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
                       isJoined ? (
                         <button 
                           onClick={(e) => { e.stopPropagation(); leaveOrg(org.id); }}
-                          className="text-xs bg-gray-500 text-white font-medium py-1 px-2 rounded-full hover:bg-gray-600 transition-colors text-center min-w-[60px]"
+                          className="text-xs bg-red-600 text-white font-medium py-1 px-2 rounded-full hover:bg-red-700 transition-colors text-center min-w-[60px]"
                         >
                           Leave
                         </button>
