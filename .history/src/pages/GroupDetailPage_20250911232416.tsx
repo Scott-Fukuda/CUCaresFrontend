@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Organization, User, Opportunity, SignUp } from '../types';
 import { PageState } from '../App';
 import { getProfilePictureUrl, updateOrganization } from '../api';
@@ -56,58 +56,37 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
     }
   };
 
-  const [showFullDescription, setShowFullDescription] = useState(false);
-
   // Function to format description text with newlines and links
-  const formatDescription = (text: string, maxLines?: number) => {
+  const formatDescription = (text: string) => {
     // Split by newlines and process each line
     const lines = text.split(/\r?\n/); // Handle both \n and \r\n
     
-    // Limit lines if maxLines is specified
-    const displayLines = maxLines ? lines.slice(0, maxLines) : lines;
-    const hasMoreLines = maxLines && lines.length > maxLines;
-    
-    return (
-      <>
-        {displayLines.map((line, lineIndex) => {
-          // URL regex pattern
-          const urlRegex = /(https?:\/\/[^\s]+)/g;
-          const parts = line.split(urlRegex);
-          
-          return (
-            <div key={lineIndex} className="mb-2">
-              {parts.map((part, partIndex) => {
-                if (urlRegex.test(part)) {
-                  return (
-                    <a
-                      key={partIndex}
-                      href={part}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-cornell-red hover:text-red-800 underline break-all"
-                    >
-                      {part}
-                    </a>
-                  );
-                }
-                return <span key={partIndex}>{part}</span>;
-              })}
-            </div>
-          );
-        })}
-        {hasMoreLines && !showFullDescription && (
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent h-8 pointer-events-none"></div>
-            <button
-              onClick={() => setShowFullDescription(true)}
-              className="text-cornell-red hover:text-red-800 font-medium text-sm mt-2"
-            >
-              See more...
-            </button>
-          </div>
-        )}
-      </>
-    );
+    return lines.map((line, lineIndex) => {
+      // URL regex pattern
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const parts = line.split(urlRegex);
+      
+      return (
+        <div key={lineIndex} className="mb-2">
+          {parts.map((part, partIndex) => {
+            if (urlRegex.test(part)) {
+              return (
+                <a
+                  key={partIndex}
+                  href={part}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cornell-red hover:text-red-800 underline break-all"
+                >
+                  {part}
+                </a>
+              );
+            }
+            return <span key={partIndex}>{part}</span>;
+          })}
+        </div>
+      );
+    });
   };
 
   const { members, memberCount, orgTotalPoints, orgRank, upcomingEvents } = useMemo(() => {
@@ -220,26 +199,6 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
       
       {/* Right Column */}
     <div className="lg:col-span-2 space-y-8">
-      {/* Organization Description - Moved to right column */}
-      {org.description && (
-             <div className="bg-white p-6 rounded-2xl shadow-lg">
-                 <h3 className="text-xl font-bold mb-4">About {org.name}</h3>
-                 <div className="text-gray-700 text-lg leading-relaxed break-words">
-                     {showFullDescription 
-                         ? formatDescription(org.description)
-                         : formatDescription(org.description, 10)
-                     }
-                 </div>
-                 {showFullDescription && (
-                     <button
-                         onClick={() => setShowFullDescription(false)}
-                         className="text-cornell-red hover:text-red-800 font-medium text-sm mt-2"
-                     >
-                         See less
-                     </button>
-                 )}
-             </div>
-         )}
          <div className="bg-white p-6 rounded-2xl shadow-lg">
             <h3 className="text-xl font-bold mb-4">Members ({memberCount})</h3>
             {memberCount > 0 ? (
@@ -263,6 +222,15 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
                 <p className="text-gray-500">This organization has no members yet.</p>
             )}
          </div>
+         {/* Organization Description - Moved to right column */}
+         {org.description && (
+             <div className="bg-white p-6 rounded-2xl shadow-lg">
+                 <h3 className="text-xl font-bold mb-4">About {org.name}</h3>
+                 <div className="text-gray-700 text-lg leading-relaxed break-words">
+                     {formatDescription(org.description)}
+                 </div>
+             </div>
+         )}
 
       </div>
     </div>
