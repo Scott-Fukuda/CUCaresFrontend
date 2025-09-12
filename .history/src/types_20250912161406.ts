@@ -27,8 +27,7 @@ export interface User {
   phone?: string; // Phone number
   _lastUpdate?: number; // Internal timestamp for forcing re-renders
   car_seats: number; // Number of car seats available
-  bio?: string; // bio
-}
+  bio?: string; // Bio from backend
 
 export interface Opportunity {
   id: number;

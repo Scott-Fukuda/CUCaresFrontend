@@ -35,9 +35,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const [profileUserFriends, setProfileUserFriends] = useState<User[]>([]);
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [uploadingProfilePic, setUploadingProfilePic] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-
-
+  
   // Update selectedInterests when user.interests changes
   React.useEffect(() => {
     setSelectedInterests(user.interests);
@@ -205,15 +203,25 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
       {/* Right Column */}
       <div className="lg:col-span-2 space-y-8">
         <div className="bg-white p-6 rounded-2xl shadow-lg">
-            <h3 className="text-xl font-bold mb-4">{user.name}'s Bio</h3>
+            <h3 className="text-xl font-bold mb-4">{user.name}'s Passions</h3>
             <div className="flex flex-wrap gap-3">
-                <p className="text-sm text-gray-500">{user.bio}</p>
+                {allInterests.map(interest => (
+                    <button 
+                        key={interest}
+                        onClick={() => handleInterestChange(interest)}
+                        disabled={!isCurrentUser}
+                        className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${
+                            selectedInterests.includes(interest) 
+                                ? 'bg-cornell-red text-white' 
+                                : 'bg-light-gray text-gray-700'
+                        } ${isCurrentUser ? 'hover:bg-gray-300 cursor-pointer' : 'cursor-default opacity-50'}`}
+                    >
+                        {interest}
+                    </button>
+                ))}
             </div>
-             {isCurrentUser && !user.bio && (
-                <p className="text-sm text-gray-500 mt-4">Add a bio to your profile!</p>
-                <button onClick={} className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm">
-                  Edit Bio
-                </button>
+             {isCurrentUser && user.interests.length === 0 && (
+                <p className="text-sm text-gray-500 mt-4">Select some interests to get personalized recommendations!</p>
              )}
          </div>
          <div className="bg-white p-6 rounded-2xl shadow-lg">

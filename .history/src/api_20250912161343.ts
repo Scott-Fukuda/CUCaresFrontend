@@ -150,7 +150,6 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
                 birthday: undefined,
                 registration_date: undefined,
                 phone: undefined,
-                bio: undefined,
             };
         } else {
             return null;
