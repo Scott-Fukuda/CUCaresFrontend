@@ -383,39 +383,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     setUserLookupResults(matchingUsers);
   }, [userLookupName, students]);
 
-  // Function to format description text with newlines and links
-  const formatDescription = (text: string) => {
-    // Split by newlines and process each line
-    const lines = text.split('\n');
-    
-    return lines.map((line, lineIndex) => {
-      // URL regex pattern
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const parts = line.split(urlRegex);
-      
-      return (
-        <div key={lineIndex} className="mb-2">
-          {parts.map((part, partIndex) => {
-            if (urlRegex.test(part)) {
-              return (
-                <a
-                  key={partIndex}
-                  href={part}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-cornell-red hover:text-red-800 underline break-all"
-                >
-                  {part}
-                </a>
-              );
-            }
-            return <span key={partIndex}>{part}</span>;
-          })}
-        </div>
-      );
-    });
-  };
-
   return (
     <div>
         <div className="relative mb-8 rounded-2xl overflow-hidden">
@@ -614,9 +581,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         </div>
                     </div>
                 ) : (
-                    <div className="text-gray-700 text-lg leading-relaxed break-words">
-                        {formatDescription(opportunity.description)}
-                    </div>
+                    <p className="text-gray-700 text-lg leading-relaxed">{opportunity.description}</p>
                 )}
                 
                 <div className="mt-8">
