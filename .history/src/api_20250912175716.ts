@@ -245,23 +245,7 @@ export const getOrgs = async (): Promise<Organization[]> => {
 
 export const getApprovedOrgs = async (): Promise<Organization[]> => {
     const response = await authenticatedRequest('/orgs/approved');
-    const orgs = response.organizations || [];
-    
-    // Transform backend data to match frontend expectations and define local state
-    return orgs.map((org: any) => ({
-        id: org.id,
-        name: org.name,
-        type: org.type || 'Other',
-        description: org.description || '',
-        approved: org.approved || false,
-        host_user_id: org.host_user_id || null,
-        member_count: org.member_count || 0,
-        users: org.users || [], // Ensure users array exists
-        // Add local state properties
-        _lastUpdate: Date.now(), // Track when this org data was last updated
-        _isLocal: false, // Mark as coming from backend
-        _isJoined: false, // Will be set by parent component based on currentUser.organizationIds
-    }));
+    return response.organizations || [];
 };
 
 export const getOrg = (id: number): Promise<Organization> => authenticatedRequest(`/orgs/${id}`);

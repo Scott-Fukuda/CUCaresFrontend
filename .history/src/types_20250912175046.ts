@@ -79,7 +79,7 @@ export interface Organization {
     type: string;
     description?: string;
     approved?: boolean;
-    host_user_id?: number;
+    host_id?: number;
     member_count?: number;
     users?: User[]; // Array of users who are members of this organization
 }

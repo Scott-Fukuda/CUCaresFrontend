@@ -16,15 +16,13 @@ interface LeaderboardPageProps {
   setPageState: (state: PageState) => void;
   checkFriendshipStatus: (otherUserId: number) => Promise<FriendshipStatus>;
   friendshipsData: FriendshipsResponse | null;
-  joinOrg: (orgId: number) => void; // Add joinOrg prop
-  leaveOrg: (orgId: number) => void; // Add leaveOrg prop
 }
 
 type LeaderboardTab = 'Individuals' | 'All Organizations' | OrganizationType;
 
 const TABS: LeaderboardTab[] = ['Individuals', 'All Organizations', ...organizationTypes];
 
-const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, signups, opportunities, currentUser, handleFriendRequest, handleAcceptFriendRequest, handleRejectFriendRequest, setPageState, checkFriendshipStatus, friendshipsData, joinOrg, leaveOrg }) => {
+const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, signups, opportunities, currentUser, handleFriendRequest, handleAcceptFriendRequest, handleRejectFriendRequest, setPageState, checkFriendshipStatus, friendshipsData }) => {
   const [activeTab, setActiveTab] = useState<LeaderboardTab>('Individuals');
   const [friendshipStatuses, setFriendshipStatuses] = useState<Map<number, FriendshipStatus>>(new Map());
 
@@ -108,7 +106,44 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
               <img src={getProfilePictureUrl(user.profile_image)} alt={user.name} className="h-10 w-10 rounded-full object-cover cursor-pointer flex-shrink-0" onClick={() => setPageState({ page: 'profile', userId: user.id})}/>
               <span className="font-medium text-gray-900 cursor-pointer truncate min-w-0" onClick={() => setPageState({ page: 'profile', userId: user.id})}>{user.name}</span>
             </div>
-            <div className="flex items-center gap-3 flex-shrink-0">
+            
+            {/* Mobile layout: stacked vertically */}
+            <div className="flex flex-col items-end gap-1 sm:hidden">
+              {!isCurrentUser && (
+                 isFriend ? (
+                    <span className="text-xs bg-green-100 text-green-700 font-medium py-1 px-2 rounded-full text-center flex items-center justify-center min-w-[60px]">
+                      Friends ✓
+                    </span>
+                 ) : requestSent ? (
+                    <span className="text-xs bg-yellow-100 text-yellow-700 font-medium py-1 px-2 rounded-full text-center flex items-center justify-center min-w-[80px]">
+                      Request Sent
+                    </span>
+                 ) : requestReceived ? (
+                    <div className="flex gap-1">
+                      <button 
+                        onClick={() => handleAcceptFriendRequest(user.id)} 
+                        className="text-xs bg-green-600 text-white font-medium py-1 px-2 rounded-full hover:bg-green-700 transition-colors text-center"
+                      >
+                        Accept
+                      </button>
+                      <button 
+                        onClick={() => handleRejectFriendRequest(user.id)} 
+                        className="text-xs bg-gray-300 text-gray-800 font-medium py-1 px-2 rounded-full hover:bg-gray-400 transition-colors text-center"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                 ) : (
+                    <button onClick={() => handleFriendRequest(user.id)} className="text-xs bg-gray-200 text-gray-700 font-medium py-1 px-2 rounded-full hover:bg-gray-300 transition-colors text-center min-w-[70px]">
+                      Add Friend
+                    </button>
+                 )
+              )}
+              <span className="font-bold text-cornell-red text-sm">{points} pts</span>
+            </div>
+
+            {/* Desktop layout: horizontal */}
+            <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
               <span className="font-bold text-cornell-red text-lg">{points} pts</span>
               {!isCurrentUser && (
                  isFriend ? (
@@ -178,66 +213,18 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
           </ul>
         ) : (
           <ul className="divide-y divide-gray-200">
-            {groupLeaderboard.map(({ org, points, memberCount }, index) => {
-              const isJoined = currentUser.organizationIds?.includes(org.id) || false;
-              const isCurrentUserHost = org.host_user_id === currentUser.id;
-              
-              return (
-                <li key={org.id} className="flex items-center justify-between py-4">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <span className="font-bold text-lg text-gray-500 w-6 text-center flex-shrink-0">{index + 1}</span>
-                    <div className="cursor-pointer flex-1 min-w-0" onClick={() => setPageState({ page: 'groupDetail', id: org.id})}>
-                      <p className="font-medium text-gray-900 hover:text-cornell-red truncate">{org.name}</p>
-                      <p className="text-sm text-gray-500">{memberCount} members &bull; {org.type}</p>
-                    </div>
+            {groupLeaderboard.map(({ org, points, memberCount }, index) => (
+               <li key={org.id} className="flex items-center justify-between py-4">
+                <div className="flex items-center gap-4">
+                  <span className="font-bold text-lg text-gray-500 w-8 text-center">{index + 1}</span>
+                  <div className="cursor-pointer" onClick={() => setPageState({ page: 'groupDetail', id: org.id})}>
+                    <p className="font-medium text-gray-900 hover:text-cornell-red">{org.name}</p>
+                    <p className="text-sm text-gray-500">{memberCount} members &bull; {org.type}</p>
                   </div>
-                  
-                  {/* Mobile layout: stacked vertically */}
-                  <div className="flex flex-col items-end gap-1 sm:hidden">
-                    {!isCurrentUserHost && (
-                      isJoined ? (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); leaveOrg(org.id); }}
-                          className="text-xs bg-red-600 text-white font-medium py-1 px-2 rounded-full hover:bg-red-700 transition-colors text-center min-w-[50px]"
-                        >
-                          Leave
-                        </button>
-                      ) : (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); joinOrg(org.id); }}
-                          className="text-xs bg-cornell-red text-white font-medium py-1 px-2 rounded-full hover:bg-red-800 transition-colors text-center min-w-[50px]"
-                        >
-                          Join
-                        </button>
-                      )
-                    )}
-                    <span className="font-bold text-cornell-red text-sm">{points} pts</span>
-                  </div>
-
-                  {/* Desktop layout: horizontal */}
-                  <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
-                    <span className="font-bold text-cornell-red text-lg">{points} pts</span>
-                    {!isCurrentUserHost && (
-                      isJoined ? (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); leaveOrg(org.id); }}
-                          className="text-xs bg-red-600 text-white font-medium py-1 px-2 rounded-full hover:bg-red-700 transition-colors text-center min-w-[60px]"
-                        >
-                          Leave
-                        </button>
-                      ) : (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); joinOrg(org.id); }}
-                          className="text-xs bg-cornell-red text-white font-medium py-1 px-2 rounded-full hover:bg-red-800 transition-colors text-center min-w-[60px]"
-                        >
-                          Join
-                        </button>
-                      )
-                    )}
-                  </div>
-                </li>
-              );
-            })}
+                </div>
+                <span className="font-bold text-cornell-red text-lg">{points} pts</span>
+              </li>
+            ))}
           </ul>
         )}
       </div>
