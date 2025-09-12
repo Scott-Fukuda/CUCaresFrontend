@@ -200,12 +200,10 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
       />
       <div className="p-6 flex flex-col flex-grow">
         <div className="flex justify-between items-start mb-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-                <span className="text-sm font-semibold text-cornell-red uppercase tracking-wider truncate">
-                    {opportunity.nonprofit}
-                </span>
+            <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-cornell-red uppercase tracking-wider">{opportunity.nonprofit}</span>
                 {isUserHost && (
-                    <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full flex-shrink-0">
+                    <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full">
                         Host
                     </span>
                 )}
@@ -215,9 +213,7 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
                     </span>
                 )} */}
             </div>
-            <span className="bg-yellow-200 text-yellow-800 text-xs font-bold py-1 rounded-full w-[80px] text-center inline-block flex-shrink-0 ml-2">
-                {opportunity.points} PTS
-            </span>
+            <span className="bg-yellow-200 text-yellow-800 text-xs font-bold py-1 rounded-full w-[80px] text-center inline-block">{opportunity.points} PTS</span>
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-2">{opportunity.name}</h3>
         <p className="text-gray-500 text-sm mb-4">{displayDate} &bull; {displayTime} - {displayEndTime}</p>
