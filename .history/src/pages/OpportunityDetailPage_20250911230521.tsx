@@ -1029,14 +1029,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                  <div className="bg-white p-6 rounded-2xl shadow-lg">
                     <h4 className="text-lg font-bold mb-2">Location</h4>
                     <div className="mb-4">
-                      <a 
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(opportunity.address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-cornell-red hover:text-red-800 underline"
-                      >
-                        {opportunity.address}
-                      </a>
+                      <p className="text-gray-700">{opportunity.address}</p>
                     </div>
                     
                  </div>
