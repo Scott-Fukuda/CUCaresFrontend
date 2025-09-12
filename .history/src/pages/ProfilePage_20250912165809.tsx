@@ -36,8 +36,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [uploadingProfilePic, setUploadingProfilePic] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editingBio, setEditingBio] = useState(user.bio || '');
-  const [savingBio, setSavingBio] = useState(false); // Add loading state
+  const [editingBio, setEditingBio] = useState(user.bio || ''); // Add bio editing state
 
   // Update selectedInterests when user.interests changes
   React.useEffect(() => {
@@ -234,32 +233,18 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                         </button>
                     ) : (
                         <div className="flex gap-2 mt-4">
-                            <button onClick={async () => {
-                                setSavingBio(true);
-                                try {
-                                    const updatedUser = await updateUser(user.id, { bio: editingBio });
-                                    // Update the user prop if there's a callback to update parent state
-                                    // For now, we'll just update the local editingBio state
-                                    setIsEditing(false);
-                                    // If the parent component has a way to update user state, call it here
-                                    // updateUserInParent?.(updatedUser);
-                                } catch (error) {
-                                    console.error('Error saving bio:', error);
-                                    alert('Failed to save bio. Please try again.');
-                                } finally {
-                                    setSavingBio(false);
-                                }
+                            <button onClick={() => {
+                                setIsEditing(false);
+                                updateUser(user.id, { bio: editingBio });
                             }}
-                            disabled={savingBio}
-                            className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                                {savingBio ? 'Saving...' : 'Save Bio'}
+                            className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm">
+                                Save Bio
                             </button>
                             <button onClick={() => {
                                 setIsEditing(false);
                                 setEditingBio(user.bio || '');
                             }}
-                            disabled={savingBio}
-                            className="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors text-sm disabled:opacity-50">
+                            className="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors text-sm">
                                 Cancel
                             </button>
                         </div>
