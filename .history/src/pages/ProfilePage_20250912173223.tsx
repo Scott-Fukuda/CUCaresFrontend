@@ -240,10 +240,12 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                                 setSavingBio(true);
                                 try {
                                     const updatedUser = await updateUser(user.id, { bio: editingBio });
-                                    // Remove the setCurrentUser call that's causing the white screen
-                                    // setCurrentUser(updatedUser);
+                                    setCurrentUser(updatedUser);
+                                    // Update the user prop if there's a callback to update parent state
+                                    // For now, we'll just update the local editingBio state
                                     setIsEditing(false);
-                                    
+                                    // If the parent component has a way to update user state, call it here
+                                    // updateUserInParent?.(updatedUser);
                                 } catch (error) {
                                     console.error('Error saving bio:', error);
                                     alert('Failed to save bio. Please try again.');

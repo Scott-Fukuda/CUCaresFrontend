@@ -243,7 +243,8 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                                     // Remove the setCurrentUser call that's causing the white screen
                                     // setCurrentUser(updatedUser);
                                     setIsEditing(false);
-                                    
+                                    // Show success message instead of updating parent state
+                                    alert('Bio saved successfully!');
                                 } catch (error) {
                                     console.error('Error saving bio:', error);
                                     alert('Failed to save bio. Please try again.');
