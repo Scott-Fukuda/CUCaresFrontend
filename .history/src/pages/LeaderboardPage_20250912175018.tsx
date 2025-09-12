@@ -180,7 +180,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
           <ul className="divide-y divide-gray-200">
             {groupLeaderboard.map(({ org, points, memberCount }, index) => {
               const isJoined = currentUser.organizationIds?.includes(org.id) || false;
-              const isCurrentUserHost = org.host_user_id === currentUser.id;
+              const isCurrentUserHost = org.host_id === currentUser.id;
               
               return (
                 <li key={org.id} className="flex items-center justify-between py-4">
