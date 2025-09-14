@@ -15,6 +15,21 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
   const [durationHours, setDurationHours] = useState(0);
   const [durationMinutes, setDurationMinutes] = useState(0);
 
+  // Initialize attendedUsers with actual attendance data from backend
+  useEffect(() => {
+    if (opportunity.attendance_marked && opportunity.involved_users) {
+      const attendedUserIds = new Set<number>();
+      
+      opportunity.involved_users.forEach(user => {
+        if (user.attended === true) {
+          attendedUserIds.add(user.id);
+        }
+      });
+      
+      setAttendedUsers(attendedUserIds);
+    }
+  }, [opportunity.attendance_marked, opportunity.involved_users]);
+
   const handleAttendanceToggle = (userId: number) => {
     setAttendedUsers(prev => {
       const newSet = new Set(prev);
