@@ -902,7 +902,7 @@ const App: React.FC = () => {
       {/* Report Bug Button */}
       <a
         href="mailto:scott@campuscares.us?subject=Bug Report - CUCares Frontend&body=Please describe the bug you encountered:"
-        className="fixed top-4 left-1/2 transform -translate-x-1/2 md:bottom-6 md:top-auto md:left-auto md:right-6 md:transform-none bg-red-600 hover:bg-red-700 text-white px-3 py-2 md:px-4 md:py-2 rounded-full shadow-lg transition-colors duration-200 flex items-center gap-1 md:gap-2 z-50 text-sm md:text-base"
+        className="hidden md:flex fixed bottom-6 right-6 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-lg transition-colors duration-200 items-center gap-2 z-50 text-base"
         title="Report a Bug"
       >
         <svg 
