@@ -1,11 +1,17 @@
 
 import React from 'react';
 import { Page, PageState } from '../App';
-
+import GroupsIcon from '@mui/icons-material/Groups';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import PersonIcon from '@mui/icons-material/Person';
+import EventIcon from '@mui/icons-material/Event';
+import { useNavigate } from "react-router-dom";
+import { User } from '../types';
 
 interface BottomNavProps {
   currentPage: Page;
   setPageState: (page: PageState) => void;
+  currentUser: User;
 }
 
 const NavItem: React.FC<{
@@ -26,74 +32,41 @@ const NavItem: React.FC<{
   </button>
 );
 
-const BottomNav: React.FC<BottomNavProps> = ({ currentPage, setPageState }) => {
+const BottomNav: React.FC<BottomNavProps> = ({ currentPage, setPageState, currentUser }) => {
+  // const navigate = useNavigate();
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white shadow-[0_-2px_5px_rgba(0,0,0,0.1)] flex md:hidden z-20">
       <NavItem
         label="Events"
-        icon={<CalendarIcon />}
+        icon={<EventIcon />}
         isActive={currentPage === 'opportunities'}
-        onClick={() => setPageState({ page: 'opportunities' })}
+        // onClick={() => navigate("/")}
+        onClick={() => setPageState({ page: 'opportunities'})}
       />
        <NavItem
         label="Groups"
-        icon={<UsersIcon />}
+        icon={<GroupsIcon />}
         isActive={currentPage === 'groups'}
+        // onClick={() => navigate("/groups")}
         onClick={() => setPageState({ page: 'groups'})}
       />
       <NavItem
-        label="Leaders"
+        label="Leaderboard"
         icon={<LeaderboardIcon />}
         isActive={currentPage === 'leaderboard'}
+        // onClick={() => navigate("/leaderboard")}
         onClick={() => setPageState({ page: 'leaderboard'})}
       />
       <NavItem
         label="Profile"
-        icon={<ProfileIcon />}
+        icon={<PersonIcon />}
         isActive={currentPage === 'profile'}
+        // onClick={() => navigate(`/profile/${currentUser.id}`)}
         onClick={() => setPageState({ page: 'profile'})}
       />
     </nav>
   );
 };
-
-const HomeIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-  </svg>
-);
-
-const LeaderboardIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <img 
-    src="/icons/leaderboard-icon.png" 
-    alt="Leaderboard" 
-    className={props.className || 'h-10 w-10'}
-  />
-);
-
-const ProfileIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <img 
-    src="/icons/profile-icon.png" 
-    alt="Profile" 
-    className={props.className || 'h-10 w-10'}
-    />
-);
-
-const CalendarIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <img 
-  src="/icons/calendar-icon.png" 
-  alt="Events" 
-  className={props.className || 'h-10 w-10'}
-  />
-);
-
-const UsersIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <img 
-    src="/icons/groups-icon-grey.png" 
-    alt="Groups" 
-    className={props.className || 'h-10 w-10'}
-  />
-);
-
 
 export default BottomNav;

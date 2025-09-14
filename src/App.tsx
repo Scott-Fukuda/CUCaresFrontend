@@ -890,7 +890,7 @@ const App: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         {renderPage()}
       </main>
-      <BottomNav currentPage={pageState.page} setPageState={setPageState} />
+      <BottomNav currentUser={currentUser} currentPage={pageState.page} setPageState={setPageState} />
       <PopupMessage
         isOpen={popupMessage.isOpen}
         onClose={closePopup}
