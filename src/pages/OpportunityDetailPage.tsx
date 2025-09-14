@@ -670,7 +670,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                             ))}
                         </div>
                     ) : (
-                         <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up! +10 extra points</div>
+                         <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up!</div>
                     )}
                     
                     {/* Admin User Registration Section */}
