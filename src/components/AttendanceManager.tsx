@@ -155,7 +155,10 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
                   className="w-4 h-4 text-cornell-red border-gray-300 rounded focus:ring-cornell-red disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <span className={`text-sm font-medium ${isAttendanceMarked ? 'text-gray-400' : 'text-gray-700'}`}>
-                  Attended
+                  {isAttendanceMarked 
+                    ? (attendedUsers.has(participant.id) ? 'Attended' : 'Did not attend')
+                    : 'Attended'
+                  }
                 </span>
               </label>
             </div>
