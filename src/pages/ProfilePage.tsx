@@ -21,7 +21,7 @@ interface ProfilePageProps {
   friendshipsData: FriendshipsResponse | null;
   checkFriendshipStatus: (otherUserId: number) => Promise<FriendshipStatus>;
   getFriendsForUser: (userId: number) => Promise<User[]>; // New async function
-  setCurrentUser: (user: User | null) => void; // Add this prop
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>// Add this prop
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = (props) => {
@@ -60,7 +60,9 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
     }
   }, [isCurrentUser, currentUser, user.id, checkFriendshipStatus, friendshipsData]);
 
-
+  useEffect(() => {
+    console.log('current user: ', currentUser)
+  }, [currentUser])
 
   // Load friends when user changes
   useEffect(() => {
@@ -244,6 +246,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                                     const updatedUser = await updateUser(user.id, { bio: editingBio });
                                     // Update local user state
                                     setLocalUser({ ...localUser, bio: editingBio });
+                                    setCurrentUser(prev => ({...prev!, bio: editingBio}));
                                     setIsEditing(false);
                                 } catch (error) {
                                     console.error('Error saving bio:', error);

@@ -57,7 +57,7 @@ const Header: React.FC<HeaderProps> = (props) => {
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-6">
               <NavButton page="opportunities" label="Opportunities" />
-              <NavButton page="myOpportunities" label="My Opportunities" />
+              <NavButton page="groups" label="Groups" />
               {user.admin && <NavButton page="admin" label="Admin Page" />}
               <NavButton page="leaderboard" label="Leaderboard" />
               <NavButton page="profile" label="Profile" />
