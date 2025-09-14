@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { User, Organization, FriendshipsResponse } from '../types';
 import { PageState } from '../App';
 import { getProfilePictureUrl } from '../api';
 import SearchBar from './SearchBar';
+import Sidebar from './Sidebar';
 
 type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity';
 
@@ -24,6 +25,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = (props) => {
   const { user, points, pendingRequestCount, currentPage, setPageState, onLogout } = props;
+  const [toggleSideBar, setToggleSideBar] = useState<boolean>(false);
   
   const NavButton = ({ page, label }: { page: Page, label: string }) => (
     <button onClick={() => setPageState({ page })} className={`font-semibold ${currentPage === page ? 'text-cornell-red' : 'text-gray-600 hover:text-cornell-red'}`}>{label}</button>
@@ -35,7 +37,7 @@ const Header: React.FC<HeaderProps> = (props) => {
         <div className="flex items-center gap-8">
             <button 
               onClick={() => setPageState({ page: 'opportunities'})} 
-              className="hidden sm:block"
+              className="hidden md:block"
             >
               <img 
                 src="/logo.png" 
@@ -45,18 +47,27 @@ const Header: React.FC<HeaderProps> = (props) => {
             </button>
             
             {/* Mobile logo and title */}
-            <div className="flex items-center gap-2 sm:hidden">
+            <div className="flex items-center gap-2 md:hidden">
               <img 
                 src="/logo.png" 
                 alt="CampusCares Logo" 
-                className="h-8 w-8 object-contain cursor-pointer"
-                onClick={() => setPageState({ page: 'opportunities'})}
+                className="h-11 w-12 object-contain cursor-pointer"
+                onClick={() => setToggleSideBar(prev => !prev)}
+              />
+            </div>
+
+            {/* Mobile sidebar */}
+            <div className="md:hidden">
+              <Sidebar
+                setPageState={setPageState}
+                toggleSideBar={toggleSideBar}
+                setToggleSideBar={setToggleSideBar}
               />
             </div>
             
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-6">
-              <NavButton page="opportunities" label="Opportunities" />
+              <NavButton page="opportunities" label="Events" />
               <NavButton page="groups" label="Groups" />
               {user.admin && <NavButton page="admin" label="Admin Page" />}
               <NavButton page="leaderboard" label="Leaderboard" />
