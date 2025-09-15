@@ -201,6 +201,13 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
               </div>
             )}
         </div>
+        {isCurrentUser && (
+        <button 
+          onClick={() => setPageState({ page: 'myOpportunities'})} 
+          className={`w-full font-bold py-2 px-4 rounded-lg transition-colors`}>
+          See my opportunities
+        </button>
+        )}
 
         {/* <div className="bg-white p-6 rounded-2xl shadow-lg">
              <h3 className="text-xl font-bold mb-4">{user.name}'s Badges</h3>

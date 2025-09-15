@@ -153,6 +153,10 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       // Make the API call
       await api.createOpportunity(formDataToSend);
 
+      // const newOpp = await api.createOpportunity(formDataToSend);
+      // setOpportunities(prev => [newOpp, ...prev]);
+
+
       setSuccess(true);
       setTimeout(() => {
         setPageState({ page: 'opportunities' });
