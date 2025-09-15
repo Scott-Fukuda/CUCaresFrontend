@@ -212,7 +212,7 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
             </div>
             <span 
               className="text-white-50 text-xs font-bold py-1 rounded-full w-[80px] text-center inline-block flex-shrink-0 ml-2"
-              style={{backgroundColor: "#fda11c"}}
+              style={{backgroundColor: "#94e8b3"}}
             >
                 {opportunity.points} PTS
             </span>
