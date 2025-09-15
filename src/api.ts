@@ -614,14 +614,8 @@ export const unregisterForOpp = async (data: {
 
 // --- Create Opportunity ---
 export const createOpportunity = async (formData: FormData): Promise<Opportunity> => {
-  // Don't add approved field - let the backend set the default value
-  // FormData only accepts strings, but backend expects boolean for approved field
   
-  // Debug: Log the form data being sent
-  //console.log('Creating opportunity with form data:');
-  for (let [key, value] of formData.entries()) {
-    //console.log(`${key}:`, value);
-  }
+
   
   const token = await getFirebaseToken();
   const headers: Record<string, string> = {};

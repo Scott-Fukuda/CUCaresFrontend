@@ -32,7 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({ toggleSideBar, setToggleSideBar, setP
                     }}>
                     <p>My Opportunities</p>
                 </div>
-                <div className="nav-opt" onClick={() => window.location.href = "mailto:scott@campuscares.us?subject=Bug Report - CUCares Frontend&body=Please describe the bug you encountered:"}>
+                <div className="nav-opt" onClick={() => window.location.href = "mailto:sdf72@cornell.edu?subject=Bug Report - CUCares Frontend&body=Please describe the bug you encountered:"}>
                     <p>Report Bug</p>
                 </div>
             </div>
