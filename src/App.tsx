@@ -836,7 +836,12 @@ const App: React.FC = () => {
         case 'groups':
             return <GroupsPage currentUser={currentUser} allOrgs={organizations} joinOrg={joinOrg} leaveOrg={leaveOrg} createOrg={createOrg} setPageState={setPageState} />;
         case 'createOpportunity':
-            return <CreateOpportunityPage currentUser={currentUser} organizations={organizations} setPageState={setPageState} />;
+            return <CreateOpportunityPage 
+              currentUser={currentUser} 
+              organizations={organizations} 
+              setPageState={setPageState}
+              clonedOpportunityData={pageState.clonedOpportunityData}
+            />;
         default:
             return <OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} setPageState={setPageState} currentUserSignupsSet={currentUserSignupsSet} />;
     }

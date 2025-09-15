@@ -421,6 +421,30 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     });
   };
 
+  const handleCloneOpportunity = () => {
+    // Prepare the opportunity data for cloning
+    const clonedOpportunityData = {
+      name: opportunity.name,
+      description: opportunity.description,
+      address: opportunity.address,
+      date: opportunity.date,
+      time: opportunity.time,
+      duration: opportunity.duration,
+      total_slots: opportunity.total_slots,
+      nonprofit: opportunity.nonprofit || '',
+      host_org_id: opportunity.host_org_id || '',
+      causes: opportunity.causes || [],
+      redirect_url: opportunity.redirect_url || '',
+      imageUrl: opportunity.imageUrl
+    };
+
+    // Navigate to create opportunity page with cloned data
+    setPageState({
+      page: 'createOpportunity',
+      clonedOpportunityData: clonedOpportunityData
+    });
+  };
+
   return (
     <div>
         <div className="relative mb-8 rounded-2xl overflow-hidden">
@@ -438,10 +462,12 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             <div className="absolute bottom-0 left-0 p-8">
-                {opportunity.causes && opportunity.causes.length > 0 && (
+                {opportunity.causes && Array.isArray(opportunity.causes) && opportunity.causes.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-2">
                     {opportunity.causes.map((cause, index) => (
-                      <span key={index} className="text-white bg-cornell-red/80 px-3 py-1 rounded-full text-sm font-semibold">{cause}</span>
+                      <span key={index} className="text-white bg-cornell-red/80 px-3 py-1 rounded-full text-sm font-semibold">
+                        {cause}
+                      </span>
                     ))}
                   </div>
                 )}
@@ -478,6 +504,12 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                                         className="bg-cornell-red text-white px-4 py-2 rounded-lg hover:bg-red-800 transition-colors"
                                     >
                                         Edit Details
+                                    </button>
+                                    <button
+                                        onClick={handleCloneOpportunity}
+                                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        Clone Opportunity
                                     </button>
                                     <button
                                         onClick={handleDeleteOpportunity}
