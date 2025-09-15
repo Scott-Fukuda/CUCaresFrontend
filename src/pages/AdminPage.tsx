@@ -340,14 +340,15 @@ const AdminPage: React.FC<AdminPageProps> = ({
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900">{opp.name}</div>
-                          <div className="text-sm text-gray-500">
-                            {opp.causes && opp.causes.length > 0 ? opp.causes.join(', ') : 'No causes specified'}
+                          <div className="break-words whitespace-pre-wrap">
+                            {opp.description ? opp.description : 'No description specified'}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {opp.nonprofit}
                       </td>
+
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatDate(opp.date)}
                       </td>

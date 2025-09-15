@@ -8,22 +8,34 @@ interface CreateOpportunityPageProps {
   currentUser: any;
   organizations: Organization[];
   setPageState: (state: PageState) => void;
+  clonedOpportunityData?: any; // Add this line
 }
 
-const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUser, organizations, setPageState }) => {
+const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ 
+  currentUser, 
+  organizations, 
+  setPageState, 
+  clonedOpportunityData // Add this parameter
+}) => {
+  // Update the initial formData state to use cloned data
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    cause: [] as string[],
-    date: '',
-    time: '',
-    duration: 60, // Default 60 minutes
-    total_slots: 10,
-    nonprofit: '',
-    host_org_id: '',
-    address: '',
-    redirect_url: '' // Add redirect URL field
+    name: clonedOpportunityData?.name || '',
+    description: clonedOpportunityData?.description || '',
+    cause: clonedOpportunityData?.causes || [] as string[],
+    date: clonedOpportunityData?.date || '',
+    time: clonedOpportunityData?.time || '',
+    duration: clonedOpportunityData?.duration || 60,
+    total_slots: clonedOpportunityData?.total_slots || 10,
+    nonprofit: clonedOpportunityData?.nonprofit || '',
+    host_org_id: clonedOpportunityData?.host_org_id || '',
+    address: clonedOpportunityData?.address || '',
+    redirect_url: clonedOpportunityData?.redirect_url || ''
   });
+
+  // Add image preview state for cloned images
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    clonedOpportunityData?.imageUrl || null
+  );
   
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -114,8 +126,8 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
       // Add causes as array
-      formData.cause.forEach(cause => {
-        formDataToSend.append('cause', cause);
+      formData.cause.forEach((cause: string) => {
+        formDataToSend.append('causes', cause);
       });
       formDataToSend.append('date', formatDateTimeForBackend(formData.date, formData.time));
       formDataToSend.append('duration', formData.duration.toString());
@@ -374,6 +386,16 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
               {imageFile ? (
                 <div>
                   <p className="text-green-600 font-medium">✓ {imageFile.name} selected</p>
+                  <p className="text-sm text-gray-500 mt-1">Click to change or drag a new image</p>
+                </div>
+              ) : imagePreview ? (
+                <div>
+                  <img 
+                    src={imagePreview} 
+                    alt="Cloned opportunity preview" 
+                    className="max-h-32 mx-auto mb-2 rounded-lg"
+                  />
+                  <p className="text-blue-600 font-medium">✓ Using cloned image</p>
                   <p className="text-sm text-gray-500 mt-1">Click to change or drag a new image</p>
                 </div>
               ) : (
