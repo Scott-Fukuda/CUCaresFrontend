@@ -253,7 +253,10 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
                             className="h-8 w-8 rounded-full object-cover ring-2 ring-white cursor-pointer" 
                             src={getProfilePictureUrl(student.profile_image)} 
                             alt={student.name}
-                            onClick={() => handleProfileClick(student.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleProfileClick(student.id);
+                            }}
                         />
                         <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded-md transition-opacity pointer-events-none ${
                           clickedStudentId === student.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
