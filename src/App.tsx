@@ -759,6 +759,7 @@ const App: React.FC = () => {
               setOpportunities={setOpportunities}
               organizations={organizations}
               setOrganizations={setOrganizations}
+              allUsers={students}
             />;
         case 'opportunityDetail':
             const opp = opportunities.find(o => o.id === pageState.id);
