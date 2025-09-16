@@ -337,7 +337,14 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
       </div>
       
       <div className="bg-white rounded-2xl shadow-lg p-6">
-        {activeTab === 'Individuals' ? (
+        {isLoadingMonthlyPoints && pointsView === 'monthly' ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-3 text-gray-500">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cornell-red"></div>
+              <span className="text-lg">Loading monthly leaderboard...</span>
+            </div>
+          </div>
+        ) : activeTab === 'Individuals' ? (
           <ul className="divide-y divide-gray-200">
             {individualLeaderboard.map(({ user, points, rank }) => (
               <UserRow key={user.id} user={user} points={points} rank={rank} />
@@ -359,47 +366,33 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
                     </div>
                   </div>
                   
-                  {/* Mobile layout: stacked vertically */}
-                  <div className="flex flex-col items-end gap-1 sm:hidden">
-                    {!isCurrentUserHost && (
-                      isJoined ? (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); leaveOrg(org.id); }}
-                          className="text-xs bg-gray-500 text-white font-medium py-1 px-2 rounded-full hover:bg-gray-600 transition-colors text-center min-w-[50px]"
-                        >
-                          Leave
-                        </button>
-                      ) : (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); joinOrg(org.id); }}
-                          className="text-xs bg-cornell-red text-white font-medium py-1 px-2 rounded-full hover:bg-red-800 transition-colors text-center min-w-[50px]"
-                        >
-                          Join
-                        </button>
-                      )
-                    )}
-                    <span className="font-bold text-cornell-red text-sm">{points} pts</span>
-                  </div>
-
-                  {/* Desktop layout: horizontal */}
-                  <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
-                    <span className="font-bold text-cornell-red text-lg">{points} pts</span>
-                    {!isCurrentUserHost && (
-                      isJoined ? (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); leaveOrg(org.id); }}
-                          className="text-xs bg-gray-500 text-white font-medium py-1 px-2 rounded-full hover:bg-gray-600 transition-colors text-center min-w-[60px]"
-                        >
-                          Leave
-                        </button>
-                      ) : (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); joinOrg(org.id); }}
-                          className="text-xs bg-cornell-red text-white font-medium py-1 px-2 rounded-full hover:bg-red-800 transition-colors text-center min-w-[60px]"
-                        >
-                          Join
-                        </button>
-                      )
+                  <div className="flex items-center gap-3">
+                    <span className="font-bold text-lg text-cornell-red">{points} PTS</span>
+                    
+                    {isCurrentUserHost ? (
+                      <span className="text-xs bg-cornell-red/10 text-cornell-red px-2 py-1 rounded-full font-medium">
+                        Host
+                      </span>
+                    ) : isJoined ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          leaveOrg(org.id);
+                        }}
+                        className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium hover:bg-green-200 transition-colors"
+                      >
+                        Joined
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          joinOrg(org.id);
+                        }}
+                        className="text-xs bg-cornell-red/10 text-cornell-red px-2 py-1 rounded-full font-medium hover:bg-cornell-red/20 transition-colors"
+                      >
+                        Join
+                      </button>
                     )}
                   </div>
                 </li>

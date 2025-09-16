@@ -42,7 +42,8 @@ export interface Opportunity {
   imageUrl: string;
   points: number;
   isPrivate?: boolean;
-  causes: string[]; // Changed from cause to causes as array
+  causes: string[]; 
+  tags: string[]; 
   host_id?: number; // ID of the user who created this opportunity
   host_org_id?: number; // ID of the organization hosting this opportunity
   host_org_name?: string; // Name of the organization hosting this opportunity

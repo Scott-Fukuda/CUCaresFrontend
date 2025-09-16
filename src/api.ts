@@ -542,6 +542,7 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
                 comments: opp.comments !== undefined ? opp.comments : [],
                 qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
                 causes: opp.causes !== undefined ? opp.causes : [],
+                tags: opp.tags !== undefined ? opp.tags : [],
                 redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
                 
             };
