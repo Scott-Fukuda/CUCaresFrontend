@@ -670,3 +670,24 @@ export const checkEmailApproval = async (email: string) => {
 
   return response.json();
 };
+
+// --- Monthly Points ---
+// GET /api/monthly-points for getting monthly points
+export const getMonthlyPoints = async (date: string): Promise<{users: Array<{id: number, points: number}>}> => {
+  const token = await getFirebaseToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  const response = await fetch(`${ENDPOINT_URL}/api/monthly-points?date=${encodeURIComponent(date)}`, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to get monthly points: ${response.statusText}`);
+  }
+
+  return response.json();
+};
