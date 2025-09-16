@@ -22,6 +22,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
     name: clonedOpportunityData?.name || '',
     description: clonedOpportunityData?.description || '',
     cause: clonedOpportunityData?.causes || [] as string[],
+    tags: clonedOpportunityData?.tags || [] as string[],
     date: clonedOpportunityData?.date || '',
     time: clonedOpportunityData?.time || '',
     duration: clonedOpportunityData?.duration || 60,
@@ -56,6 +57,14 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
     setFormData(prev => ({
       ...prev,
       cause: selectedCauses
+    }));
+  };
+
+  const handleTagsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedTags = Array.from(e.target.selectedOptions, option => option.value);
+    setFormData(prev => ({
+      ...prev,
+      tags: selectedTags
     }));
   };
 
@@ -128,6 +137,10 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       // Add causes as array
       formData.cause.forEach((cause: string) => {
         formDataToSend.append('causes', cause);
+      });
+      // Add tags as array
+      formData.tags.forEach((tag: string) => {
+        formDataToSend.append('tags', tag);
       });
       formDataToSend.append('date', formatDateTimeForBackend(formData.date, formData.time));
       formDataToSend.append('duration', formData.duration.toString());
@@ -211,25 +224,6 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                 placeholder="Enter opportunity name"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Causes *
-              </label>
-              <select
-                name="cause"
-                multiple
-                value={formData.cause}
-                onChange={handleCausesChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-              >
-                {allInterests.map(cause => (
-                  <option key={cause} value={cause}>{cause}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple causes</p>
             </div>
 
             <div>
@@ -369,6 +363,42 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
               placeholder="Describe the opportunity..."
             />
           </div>
+
+          <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tags
+              </label>
+              <select
+                name="tags"
+                multiple
+                value={formData.tags}
+                onChange={handleTagsChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+              >
+                <option value="Rides Provided">Rides Provided</option>
+                <option value="Food Provided">Food Provided</option>
+                <option value="Fundraiser">Fundraiser</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple tags</p>
+            </div>
+
+          <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Causes
+              </label>
+              <select
+                name="cause"
+                multiple
+                value={formData.cause}
+                onChange={handleCausesChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+              >
+                {allInterests.map(cause => (
+                  <option key={cause} value={cause}>{cause}</option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple causes</p>
+            </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
