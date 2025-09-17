@@ -742,8 +742,14 @@ const App: React.FC = () => {
   const createOrg = async (orgName: string, type: OrganizationType, description?: string) => {
     if (!currentUser) return;
     try {
-        // API takes `host_user_id`
-        const newOrg = await api.createOrg({ name: orgName, type, description, host_user_id: currentUser.id });
+        // API takes `host_user_id` and `date_created`
+        const newOrg = await api.createOrg({ 
+          name: orgName, 
+          type, 
+          description, 
+          host_user_id: currentUser.id,
+          date_created: api.formatRegistrationDate() // Add current date/time in YYYY-MM-DDTHH:MM:SS format
+        });
         
         // Refresh the organizations list from backend to get the most current approved organizations
         await refreshOrganizations();
