@@ -460,7 +460,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
             />
           </div>
 
-          <div>
+          {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tags
               </label>
@@ -476,7 +476,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
                 <option value="Fundraiser">Fundraiser</option>
               </select>
               <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple tags</p>
-            </div>
+            </div> */}
 
           <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

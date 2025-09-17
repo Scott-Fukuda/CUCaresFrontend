@@ -28,7 +28,7 @@ export type PageState = {
   [key: string]: any;
 };
 
-type AuthView = 'login' | 'register';
+type AuthView = 'login' | 'register' | 'aboutUs';
 
 const App: React.FC = () => {
   // Data state from API
@@ -256,6 +256,11 @@ const App: React.FC = () => {
 
   const handleBackToLogin = () => {
     setAuthView('login');
+    setAuthError(null);
+  };
+
+  const handleShowAboutUs = () => {
+    setAuthView('aboutUs');
     setAuthError(null);
   };
 
@@ -724,13 +729,31 @@ const App: React.FC = () => {
     }
   }, [currentUser, organizations]);
 
+  // Function to refresh organizations from backend
+  const refreshOrganizations = async () => {
+    try {
+      const orgsData = await api.getApprovedOrgs();
+      setOrganizations(orgsData);
+    } catch (error) {
+      console.error('Error refreshing organizations:', error);
+    }
+  };
+
   const createOrg = async (orgName: string, type: OrganizationType, description?: string) => {
     if (!currentUser) return;
     try {
         // API takes `host_user_id`
         const newOrg = await api.createOrg({ name: orgName, type, description, host_user_id: currentUser.id });
-        setOrganizations(prev => [...prev, newOrg]);
-        joinOrg(newOrg.id);
+        
+        // Refresh the organizations list from backend to get the most current approved organizations
+        await refreshOrganizations();
+        
+        // Try to join the organization (this might fail if it's not approved yet)
+        try {
+          await joinOrg(newOrg.id);
+        } catch (joinError) {
+          console.log('Could not auto-join organization (likely not approved yet):', joinError);
+        }
         
         // Show success popup
         showPopup(
@@ -876,14 +899,28 @@ const App: React.FC = () => {
               onGoogleSignIn={handleGoogleSignIn} 
               error={authError} 
               isLoading={isLoading}
+              onShowAboutUs={handleShowAboutUs}
             />
-          ) : (
+          ) : authView === 'register' ? (
             <Register 
               onRegister={handleRegister} 
               onBackToLogin={handleBackToLogin} 
               error={authError} 
               isLoading={isLoading}
             />
+          ) : (
+            // About Us view from login
+            <div className="w-full max-w-6xl mx-auto">
+              <div className="mb-6">
+                <button
+                  onClick={handleBackToLogin}
+                  className="bg-cornell-red text-white px-4 py-2 rounded-lg hover:bg-red-800 transition-colors"
+                >
+                  ← Back to Login
+                </button>
+              </div>
+              <AboutUsPage setPageState={handleBackToLogin} />
+            </div>
           )}
           <PopupMessage
             isOpen={popupMessage.isOpen}

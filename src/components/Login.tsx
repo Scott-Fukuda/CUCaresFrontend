@@ -5,9 +5,10 @@ interface LoginProps {
   onGoogleSignIn: () => void;
   error: string | null;
   isLoading: boolean;
+  onShowAboutUs: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading }) => {
+const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, onShowAboutUs }) => {
   return (
     <div className="w-full max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg text-center mt-10">
       <img 
@@ -62,7 +63,12 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading }) => {
           Create New Account
         </button>
         
-
+        <button
+          onClick={onShowAboutUs}
+          className="w-full bg-gray-100 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors mt-4"
+        >
+          About CampusCares
+        </button>
         
         <p className="text-xs text-gray-500 mt-6">
           By signing in, you agree to our Terms of Service and Privacy Policy.
