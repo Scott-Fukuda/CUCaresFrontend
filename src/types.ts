@@ -83,6 +83,7 @@ export interface Organization {
     host_user_id?: number;
     member_count?: number;
     users?: User[]; // Array of users who are members of this organization
+    date_created?: string;
 }
 
 export interface Friendship {

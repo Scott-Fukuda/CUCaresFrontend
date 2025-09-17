@@ -101,28 +101,28 @@ const AboutUsPage: React.FC<AboutUsPageProps> = ({ setPageState }) => {
           
           <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
             <div className="text-left">
-              <div className="mb-8 flex items-start space-x-6">
-                <div className="w-20 h-20 bg-cornell-red/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-10 h-10 text-cornell-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mb-8 flex flex-col md:flex-row md:items-start md:space-x-6 space-y-4 md:space-y-0">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-cornell-red/10 rounded-full flex items-center justify-center flex-shrink-0 mx-auto md:mx-0">
+                  <svg className="w-8 h-8 md:w-10 md:h-10 text-cornell-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
                 <div>
                   {/* <h3 className="text-2xl font-bold text-gray-900 mb-4">About CampusCares</h3> */}
-                  <p className="text-base md:text-lg text-gray-700 leading-relaxed">
+                  <p className="text-sm md:text-lg text-gray-700 leading-relaxed">
                   We believe in the power of service to transform communities, build friendships, and cultivate unity. 
                   We seek to catalyze change by equipping students with service opportunities to build a community we are proud of, demonstrating that our campus cares.
                   </p>
                   <br />
-                  <p className="text-base md:text-lg text-gray-700 leading-relaxed">
+                  <p className="text-sm md:text-lg text-gray-700 leading-relaxed">
                   We began as a group of Christian students looking for ways to build community around volunteering. 
                   Driven by faith-based values of love and kindness, we wanted to unite our campus in serving our community. 
                   That's why we started CampusCares, an online platform to mobilize Cornell students to create genuine social impact. 
                   </p>
                 
                   <br />
-                  <p className="text-base md:text-lg text-gray-700 leading-relaxed">
+                  <p className="text-sm md:text-lg text-gray-700 leading-relaxed">
                   CampusCares connects you with a wide range of nonprofit partners—all in one simple, free platform. 
                   You can discover causes you care about, help your student organizations climb the leaderboard, and meet new friends through volunteering. 
                   We open doors to new opportunities, motivate you to stay involved, and help bridge the Cornell and Ithaca communities. 
