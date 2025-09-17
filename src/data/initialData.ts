@@ -191,8 +191,41 @@ export const initialBadges: Badge[] = [
         "major": "Industrial and Labor Relations",
         "class": "2028",
         "campusOrgs": ["Cru", "Club Hockey", "SEGC", "180DC"],
-        "favoriteService": "working at a summer camp in Clay County, KY",
+        "favoriteService": "Adopt-A-Highway cleanup on a rainy Ithaca day–there’s something beautiful about digging in the dirt with some of your best friends.",
         "role": "Chief Executive Officer"
+      },
+      {
+        "id": "lee-brown",
+        "name": "Lee Brown",
+        "picture":"./team_pic/lee.png",
+        "hometown": "Chapin, SC",
+        "major": "Industrial and Labor Relations",
+        "class": "2028",
+        "campusOrgs": ["Cornell Business Review", "Cornell Votes", "Housing and Res Life"],
+        "favoriteService": "I had the wonderful opportunity to help clean trails at the Adirondacks.",
+        "role": "Chief Operating Officer"
+      },
+      {
+        "id": "scott-fukuda",
+        "name": "Scott Fukuda",
+        "picture": "./team_pic/scott.png",
+        "hometown": "El Segundo, CA",
+        "major": "Computer Science",
+        "class": "2028",
+        "campusOrgs": ["Cru", "CUAir"],
+        "favoriteService": "Moving couches with the boys in Tyvek suits in the rain 😤",
+        "role": "Chief Technology Officer"
+      },
+      {
+        "id": "ailin-chen",
+        "name": "Ailin Chen",
+        "picture": "./team_pic/ailin.png",
+        "hometown": "Bay Area, CA",
+        "major": "Industrial and Labor Relations",
+        "class": "2027",
+        "campusOrgs": ["AAIV", "Cornell Political Union", "Prep"],
+        "favoriteService": "Through Prison Express, I was able to view artwork created by incarcerated youth and write letters in response. It’s a powerful way to connect with them, offer encouragement, and create a sense of shared humanity through art and words.",
+        "role": "Director of Marketing"
       },
       {
         "id": "benjamin-chen",
@@ -205,16 +238,17 @@ export const initialBadges: Badge[] = [
         "favoriteService": "Volunteering with HEART to teach elementary school students about health has been one of my most meaningful experiences. Introducing concepts like nutrition, exercise, and wellness at an early age showed me how education can empower young people to make informed choices and build healthier futures.",
         "role": "Chief Growth Officer"
       },
+    
       {
-        "id": "lee-brown",
-        "name": "Lee Brown",
-        "picture":"./team_pic/lee.png",
-        "hometown": "Chapin, SC",
-        "major": "Industrial and Labor Relations",
+        "id": "grace-matsuoka",
+        "name": "Grace Matsuoka",
+        "picture": "./team_pic/grace.jpeg",
+        "hometown": "Olympia, WA",
+        "major": "Computer Science",
         "class": "2028",
-        "campusOrgs": ["Cornell Business Review", "Cornell Votes", "Housing and Res Life"],
-        "favoriteService": "I had the wonderful opportunity to help clean trails at the Adirondacks.",
-        "role": "Chief Operating Officer"
+        "campusOrgs": ["Cru", "Hack4Impact"],
+        "favoriteService": "Helping clean local trails to make them more accessible to the public back in Washington!",
+        "role": "Director of Technical Development"
       },
       {
         "id": "william-mullins",
@@ -233,27 +267,15 @@ export const initialBadges: Badge[] = [
         "role": "Director of Strategy and Development"
       },
       {
-        "id": "scott-fukuda",
-        "name": "Scott Fukuda",
-        "picture": "./team_pic/scott.png",
-        "hometown": "El Segundo, CA",
-        "major": "Computer Science",
-        "class": "2028",
-        "campusOrgs": ["Cru", "CUAir"],
-        "favoriteService": "Moving couches with the boys in Tyvek suits in the rain 😤",
-        "role": "Chief Technology Officer"
-
-      },
-      {
-        "id": "ailin-chen",
-        "name": "Ailin Chen",
-        "picture": "./team_pic/ailin.png",
-        "hometown": "Bay Area, CA",
+        "id": "riley-smith",
+        "name": "Riley Smith",
+        "picture": "./team_pic/riley.png",
+        "hometown": "Buffalo, New York",
         "major": "Industrial and Labor Relations",
-        "class": "2027",
-        "campusOrgs": ["AAIV", "Cornell Political Union", "Prep"],
-        "favoriteService": "Through Prison Express, I was able to view artwork created by incarcerated youth and write letters in response. It’s a powerful way to connect with them, offer encouragement, and create a sense of shared humanity through art and words.",
-        "role": "Director of Marketing"
+        "class": "2028",
+        "campusOrgs": ["Outdoor Odyssey Guide", "Tradition Fellow"],
+        "favoriteService": "Any time I am able to coach soccer in my hometown Buffalo, New York. There is something so special to me giving back to a community that has shaped me into the person I am today.",
+        "role": "Director of Partnerships"
       },
       {
         "id": "leslie-baker",
@@ -265,27 +287,5 @@ export const initialBadges: Badge[] = [
         "campusOrgs": ["Cru", "Big Red Buddies", "Perfect Pair", "Society of Women Engineers", "CU Empower"],
         "favoriteService": "My favorite service experience was coaching 3rd and 4th grade girls’ soccer. All through high school, I was very involved in my town’s soccer program, including volunteer coaching. Over seven seasons, I had the privilege of watching each girl grow in skill and confidence while also learning to love the game. Building connections with every player and giving them the same fun and educational soccer experience I had as a child was incredibly rewarding. Last year, I even got to see two of the girls I once coached compete in the state semifinals. Watching their growth and continued passion for soccer was one of the most fulfilling moments of my coaching experience.",
         "role": "Outreach Manager"
-      },
-      {
-        "id": "grace-matsuoka",
-        "name": "Grace Matsuoka",
-        "picture": "./team_pic/grace.jpeg",
-        "hometown": "Olympia, WA",
-        "major": "Computer Science",
-        "class": "2028",
-        "campusOrgs": ["Cru", "Hack4Impact"],
-        "favoriteService": "Helping clean local trails to make them more accessible to the public back in Washington!",
-        "role": "Director of Technical Development"
-      },
-      {
-        "id": "riley-smith",
-        "name": "Riley Smith",
-        "picture": "./team_pic/riley.png",
-        "hometown": "Buffalo, New York",
-        "major": "Industrial and Labor Relations",
-        "class": "2028",
-        "campusOrgs": ["Outdoor Odyssey Guide", "Tradition Fellow"],
-        "favoriteService": "Any time I am able to coach soccer in my hometown Buffalo, New York. There is something so special to me giving back to a community that has shaped me into the person I am today.",
-        "role": "Director of Partnerships"
       }
   ]
