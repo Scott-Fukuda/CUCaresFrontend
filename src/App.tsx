@@ -19,8 +19,9 @@ import GroupDetailPage from './pages/GroupDetailPage';
 import CreateOpportunityPage from './pages/CreateOpportunityPage';
 import MyOpportunitiesPage from './pages/MyOpportunitiesPage';
 import AdminPage from './pages/AdminPage';
+import AboutUsPage from './pages/AboutUs';
 
-export type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity';
+export type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity' | 'aboutUs';
 export type PageState = {
   page: Page;
   [key: string]: any;
@@ -843,6 +844,8 @@ const App: React.FC = () => {
               setPageState={setPageState}
               clonedOpportunityData={pageState.clonedOpportunityData}
             />;
+        case 'aboutUs':
+            return <AboutUsPage setPageState={setPageState} />;
         default:
             return <OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} setPageState={setPageState} currentUserSignupsSet={currentUserSignupsSet} />;
     }

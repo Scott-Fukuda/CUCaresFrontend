@@ -24,7 +24,13 @@ const Sidebar: React.FC<SidebarProps> = ({ toggleSideBar, setToggleSideBar, setP
                 />
             </div>
             <div className="nav">
-                {/* <p>About Us</p> */}
+                <div className="nav-opt" 
+                    onClick={() => {
+                        setToggleSideBar(false);
+                        setPageState({ page: 'aboutUs' });
+                    }}>
+                    <p>About Us</p>
+                </div>
                 <div className="nav-opt" 
                     onClick={() => {
                         setToggleSideBar(false);
