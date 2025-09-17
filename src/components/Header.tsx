@@ -6,7 +6,7 @@ import { getProfilePictureUrl } from '../api';
 import SearchBar from './SearchBar';
 import Sidebar from './Sidebar';
 
-type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity' | 'aboutUs';
+type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity' | 'aboutUs' | 'postRegistrationSetup';
 
 interface HeaderProps {
   user: User;

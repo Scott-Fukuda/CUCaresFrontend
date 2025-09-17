@@ -85,9 +85,7 @@ const AboutUsPage: React.FC<AboutUsPageProps> = ({ setPageState }) => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">About CampusCares</h1>
-            <p className="text-xl md:text-2xl text-red-100 max-w-3xl mx-auto">
-              Connecting Cornell students with meaningful service opportunities in the Ithaca community
-            </p>
+            
           </div>
         </div>
       </div>
@@ -101,20 +99,23 @@ const AboutUsPage: React.FC<AboutUsPageProps> = ({ setPageState }) => {
           </div>
           
           <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
-            <div className="text-center">
-              <div className="mb-8">
-                <div className="w-20 h-20 bg-cornell-red/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="text-left">
+              <div className="mb-8 flex items-start space-x-6">
+                <div className="w-20 h-20 bg-cornell-red/10 rounded-full flex items-center justify-center flex-shrink-0">
                   <svg className="w-10 h-10 text-cornell-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Serving Ithaca</h3>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Serving Ithaca</h3>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                Our mission is to catalyze change by connecting Cornell students with service opportunities to build a community we are proud of, demonstrating that our campus cares.
+              </p>
+                </div>
               </div>
               
-              <p className="text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto">
-                Mission statement
-              </p>
+    
             
             </div>
           </div>
@@ -168,13 +169,10 @@ const AboutUsPage: React.FC<AboutUsPageProps> = ({ setPageState }) => {
         <section className="text-center">
           <div className="bg-cornell-red rounded-2xl shadow-lg p-8 md:p-12 text-white">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Make a Difference?</h2>
-            <p className="text-xl text-red-100 mb-8 max-w-2xl mx-auto">
-              Join thousands of Cornell students who are already making an impact in the Ithaca community.
-            </p>
+          
             <button
               onClick={() => setPageState({ page: 'opportunities' })}
-              className="bg-white text-cornell-red px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors duration-300"
-            >
+              className="bg-white text-cornell-red px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors duration-300">
               Explore Opportunities
             </button>
           </div>
