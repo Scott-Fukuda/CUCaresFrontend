@@ -21,6 +21,13 @@ const AdminPage: React.FC<AdminPageProps> = ({
   setOrganizations,
   allUsers
 }) => {
+  
+  // Helper function to get user name by ID
+  const getUserNameById = (userId?: number): string => {
+    if (!userId) return 'Unknown';
+    const user = allUsers.find(u => u.id === userId);
+    return user ? user.name : 'Unknown';
+  };
   const [selectedOpportunities, setSelectedOpportunities] = useState<Set<number>>(new Set());
   const [selectedOrganizations, setSelectedOrganizations] = useState<Set<number>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -372,6 +379,9 @@ const AdminPage: React.FC<AdminPageProps> = ({
                       Organization
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Creator
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -401,7 +411,9 @@ const AdminPage: React.FC<AdminPageProps> = ({
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {opp.nonprofit}
                       </td>
-
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {getUserNameById(opp.host_id)}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatDate(opp.date)}
                       </td>
@@ -448,6 +460,9 @@ const AdminPage: React.FC<AdminPageProps> = ({
                       Type
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Creator
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Description
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -471,6 +486,9 @@ const AdminPage: React.FC<AdminPageProps> = ({
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {org.type}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {getUserNameById(org.host_user_id)}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <div className="max-w-xs truncate">

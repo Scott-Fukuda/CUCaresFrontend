@@ -191,7 +191,8 @@ export const initialBadges: Badge[] = [
         "major": "Industrial and Labor Relations",
         "class": "2028",
         "campusOrgs": ["Cru", "Club Hockey", "SEGC", "180DC"],
-        "favoriteService": "working at a summer camp in Clay County, KY"
+        "favoriteService": "working at a summer camp in Clay County, KY",
+        "role": "Chief Executive Officer"
       },
       {
         "id": "benjamin-chen",
@@ -201,7 +202,8 @@ export const initialBadges: Badge[] = [
         "major": "Biology - Computational Biology",
         "class": "2027",
         "campusOrgs": ["TASA", "KDSAP", "HEART"],
-        "favoriteService": "Volunteering with HEART to teach elementary school students about health has been one of my most meaningful experiences. Introducing concepts like nutrition, exercise, and wellness at an early age showed me how education can empower young people to make informed choices and build healthier futures."
+        "favoriteService": "Volunteering with HEART to teach elementary school students about health has been one of my most meaningful experiences. Introducing concepts like nutrition, exercise, and wellness at an early age showed me how education can empower young people to make informed choices and build healthier futures.",
+        "role": "Director of Growth"
       },
       {
         "id": "lee-brown",
@@ -211,7 +213,8 @@ export const initialBadges: Badge[] = [
         "major": "Industrial and Labor Relations",
         "class": "2028",
         "campusOrgs": ["Cornell Business Review", "Cornell Votes", "Housing and Res Life"],
-        "favoriteService": "I had the wonderful opportunity to help clean trails at the Adirondacks."
+        "favoriteService": "I had the wonderful opportunity to help clean trails at the Adirondacks.",
+        "role": "Chief Operating Officer"
       },
       {
         "id": "william-mullins",
@@ -226,7 +229,8 @@ export const initialBadges: Badge[] = [
           "Cornell American Cancer Society",
           "Intramural Sports"
         ],
-        "favoriteService": "My favorite community service experience was volunteering at my town's public library. Over the summer, I helped organize events and worked with children on a variety of activities. I particularly enjoyed playing games with them, such as chess, checkers, ping pong. I was even able to improve my own arts and crafts skills while assisting with creative sessions. Volunteering at my town's library was an especially rewarding experience because it gave me the opportunity to engage with the youth in my community. Witnessing their passion and enthusiasm for learning new skills made me optimistic about the bright future of my town!"
+        "favoriteService": "My favorite community service experience was volunteering at my town's public library. Over the summer, I helped organize events and worked with children on a variety of activities. I particularly enjoyed playing games with them, such as chess, checkers, ping pong. I was even able to improve my own arts and crafts skills while assisting with creative sessions. Volunteering at my town's library was an especially rewarding experience because it gave me the opportunity to engage with the youth in my community. Witnessing their passion and enthusiasm for learning new skills made me optimistic about the bright future of my town!",
+        "role": "Director of Strategy and Development"
       },
       {
         "id": "scott-fukuda",
@@ -236,7 +240,9 @@ export const initialBadges: Badge[] = [
         "major": "Computer Science",
         "class": "2028",
         "campusOrgs": ["Cru", "CUAir"],
-        "favoriteService": "Moving couches with the boys in Tyveks suits in the rain 😤"
+        "favoriteService": "Moving couches with the boys in Tyvek suits in the rain 😤",
+        "role": "Chief Technology Officer"
+
       },
       {
         "id": "ailin-chen",
@@ -246,7 +252,8 @@ export const initialBadges: Badge[] = [
         "major": "Industrial and Labor Relations",
         "class": "2027",
         "campusOrgs": ["AAIV", "Cornell Political Union", "Prep"],
-        "favoriteService": "Through Prison Express, I was able to view artwork created by incarcerated youth and write letters in response. It’s a powerful way to connect with them, offer encouragement, and create a sense of shared humanity through art and words."
+        "favoriteService": "Through Prison Express, I was able to view artwork created by incarcerated youth and write letters in response. It’s a powerful way to connect with them, offer encouragement, and create a sense of shared humanity through art and words.",
+        "role": "Director of Marketing"
       },
       {
         "id": "leslie-baker",
@@ -255,8 +262,9 @@ export const initialBadges: Badge[] = [
         "hometown": "Franklin, MA",
         "major": "Biomedical Engineering",
         "class": "2028",
-        "campusOrgs": ["CRU", "Big Red Buddies", "Perfect Pair", "Society of Women Engineers", "CU Empower"],
-        "favoriteService": "My favorite service experience was coaching 3rd and 4th grade girls’ soccer. All through high school, I was very involved in my town’s soccer program, including volunteer coaching. Over seven seasons, I had the privilege of watching each girl grow in skill and confidence while also learning to love the game. Building connections with every player and giving them the same fun and educational soccer experience I had as a child was incredibly rewarding. Last year, I even got to see two of the girls I once coached compete in the state semifinals. Watching their growth and continued passion for soccer was one of the most fulfilling moments of my coaching experience."
+        "campusOrgs": ["Cru", "Big Red Buddies", "Perfect Pair", "Society of Women Engineers", "CU Empower"],
+        "favoriteService": "My favorite service experience was coaching 3rd and 4th grade girls’ soccer. All through high school, I was very involved in my town’s soccer program, including volunteer coaching. Over seven seasons, I had the privilege of watching each girl grow in skill and confidence while also learning to love the game. Building connections with every player and giving them the same fun and educational soccer experience I had as a child was incredibly rewarding. Last year, I even got to see two of the girls I once coached compete in the state semifinals. Watching their growth and continued passion for soccer was one of the most fulfilling moments of my coaching experience.",
+        "role": "Outreach Manager"
       },
       {
         "id": "grace-matsuoka",
@@ -266,7 +274,8 @@ export const initialBadges: Badge[] = [
         "major": "Computer Science",
         "class": "2028",
         "campusOrgs": ["Cru", "Hack4Impact"],
-        "favoriteService": "Helping clean local trails to make them more accessible to the public back in Washington!"
+        "favoriteService": "Helping clean local trails to make them more accessible to the public back in Washington!",
+        "role": "Director of Technical Development"
       },
       {
         "id": "riley-smith",
@@ -276,6 +285,7 @@ export const initialBadges: Badge[] = [
         "major": "Industrial and Labor Relations",
         "class": "2028",
         "campusOrgs": ["Outdoor Odyssey Guide", "Tradition Fellow"],
-        "favoriteService": "Any time I am able to coach soccer in my hometown Buffalo, New York. There is something so special to me giving back to a community that has shaped me into the person I am today."
+        "favoriteService": "Any time I am able to coach soccer in my hometown Buffalo, New York. There is something so special to me giving back to a community that has shaped me into the person I am today.",
+        "role": "Director of Partnerships"
       }
   ]

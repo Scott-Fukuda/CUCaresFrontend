@@ -170,4 +170,5 @@ export interface Member {
   class: string;
   campusOrgs: string[];
   favoriteService: string;
+  role: string;
 }

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import { PageState } from '../App';
-import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp, getOpportunities, uploadProfilePicture } from '../api';
+import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp, getOpportunities, uploadProfilePicture, getOpportunityAttendance } from '../api';
 import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 import { upload } from '@testing-library/user-event/dist/upload';
@@ -91,9 +91,42 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     }
   };
 
-  const handleAttendanceSubmitted = () => {
-    // You can add a success message or redirect here
-    alert('Attendance submitted successfully!');
+  const handleAttendanceSubmitted = async () => {
+    try {
+      // Fetch updated attendance data from the API
+      const attendanceData = await getOpportunityAttendance(opportunity.id);
+      
+      // Update the opportunity's involved_users with the attendance data
+      if (attendanceData.users && opportunity.involved_users) {
+        const updatedInvolvedUsers = opportunity.involved_users.map(user => {
+          const attendanceUser = attendanceData.users.find((au: any) => au.user_id === user.id);
+          if (attendanceUser) {
+            return {
+              ...user,
+              attended: attendanceUser.attended
+            };
+          }
+          return user;
+        });
+        
+        // Update the opportunity object
+        const updatedOpportunity = {
+          ...opportunity,
+          involved_users: updatedInvolvedUsers,
+          attendance_marked: true
+        };
+        
+        // Update the opportunities in the parent component
+        setOpportunities(prev => prev.map(opp => 
+          opp.id === opportunity.id ? updatedOpportunity : opp
+        ));
+      }
+      
+      alert('Attendance submitted successfully!');
+    } catch (error: any) {
+      console.error('Error updating attendance data:', error);
+      alert('Attendance submitted, but failed to update display. Please refresh the page.');
+    }
   };
 
   // Admin functions for user management
@@ -694,7 +727,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                             ))}
                         </div>
                     ) : (
-                         <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up!</div>
+                         <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up! +5 bonus points</div>
                     )}
                     
                     {/* Admin User Registration Section */}
