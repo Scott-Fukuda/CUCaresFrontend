@@ -745,6 +745,11 @@ export const markAttendance = async (data: { user_ids: number[]; opportunity_id:
   });
 };
 
+// GET /api/opps/<opp_id>/attendance for getting attendance data
+export const getOpportunityAttendance = async (opportunityId: number) => {
+  return authenticatedRequest(`/opps/${opportunityId}/attendance`);
+};
+
 // --- Email Approval Check ---
 // GET /api/approved-emails/check/{email} for checking if email is approved
 export const checkEmailApproval = async (email: string) => {

@@ -38,7 +38,8 @@ const TeamMemberCard: React.FC<{ member: Member }> = ({ member }) => {
         </div>
         
         <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
-        <p className="text-cornell-red font-semibold mb-1">{member.major}</p>
+        <p className="text-cornell-red font-semibold mb-1">{member.role}</p>
+        <p className="text-gray-600 font-medium mb-1">{member.major}</p>
         <p className="text-gray-600 text-sm mb-2">Class of {member.class}</p>
         <p className="text-gray-500 text-sm mb-3">📍 {member.hometown}</p>
         
@@ -108,10 +109,26 @@ const AboutUsPage: React.FC<AboutUsPageProps> = ({ setPageState }) => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Serving Ithaca</h3>
+                  {/* <h3 className="text-2xl font-bold text-gray-900 mb-4">About CampusCares</h3> */}
                   <p className="text-lg text-gray-700 leading-relaxed">
-                Our mission is to catalyze change by connecting Cornell students with service opportunities to build a community we are proud of, demonstrating that our campus cares.
-              </p>
+                  We believe in the power of service to transform communities, build friendships, and cultivate unity. 
+                  We seek to catalyze change by equipping students with service opportunities to build a community we are proud of, demonstrating that our campus cares.
+                  </p>
+                  <br />
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                  We began as a group of Christian students looking for ways to build community around volunteering. 
+                  Driven by faith-based values of love and kindness, we wanted to unite our campus in serving our community. 
+                  That’s why we started CampusCares, an online platform to mobilize Cornell students to create genuine social impact. 
+                  </p>
+                
+                  <br />
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                  CampusCares connects you with a wide range of nonprofit partners—all in one simple, free platform. 
+                  You can discover causes you care about, help your student organizations climb the leaderboard, and meet new friends through volunteering. 
+                  We open doors to new opportunities, motivate you to stay involved, and help bridge the Cornell and Ithaca communities. 
+                  We seek to support the bold missions of local organizations while empowering students to make a real difference.
+                </p>
+                
                 </div>
               </div>
               
@@ -121,32 +138,6 @@ const AboutUsPage: React.FC<AboutUsPageProps> = ({ setPageState }) => {
           </div>
         </section>
 
-        {/* Our Motivation Section */}
-        {/* <section className="mb-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Motivation</h2>
-            <div className="w-24 h-1 bg-cornell-red mx-auto mb-8"></div>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
-            <div className="text-center">
-              <div className="mb-8">
-                <div className="w-20 h-20 bg-cornell-red/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-10 h-10 text-cornell-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Love others as God loved us</h3>
-              </div>
-              
-              <p className="text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto mb-8">
-                Our motivation comes from a deep belief in the power of love and service. We are inspired by the 
-                call to love others as God has loved us - unconditionally, sacrificially, and with purpose. This 
-                foundational principle drives everything we do at CU Cares.
-              </p>
-            </div>
-          </div>
-        </section> */}
 
         {/* Our Team Section */}
         <section className="mb-20">

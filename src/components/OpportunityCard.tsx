@@ -271,7 +271,7 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
                 {signedUpStudents.length > 10 && <div className="h-8 w-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-semibold ring-2 ring-white">+{signedUpStudents.length - 10}</div>}
              </div>
         ) : (
-            <div className="text-center h-8 mb-4 rounded-lg text-sm text-gray-500">Be the first to sign up!</div>
+            <div className="text-center h-8 mb-4 rounded-lg text-sm text-gray-500">Be the first to sign up! +5 bonus points</div>
         )}
         
         {topOrgs.length > 0 && (
