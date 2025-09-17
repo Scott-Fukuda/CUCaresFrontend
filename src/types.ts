@@ -160,3 +160,14 @@ export const academicLevelOptions = [
   'Graduate',
   'Faculty'
 ];
+
+export interface Member {
+  id: string;
+  name: string;
+  picture: string;
+  hometown: string;
+  major: string;
+  class: string;
+  campusOrgs: string[];
+  favoriteService: string;
+}
