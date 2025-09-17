@@ -28,7 +28,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
     e.preventDefault();
     
     // Validate required fields
-    if (!firstName.trim() || !lastName.trim() || !phone.trim() || !academicLevel.trim() || !birthday.trim()) {
+    if (!firstName.trim() || !lastName.trim() || !phone.trim() || !birthday.trim()) {
       return; // Form validation will show required messages
     }
     
@@ -111,9 +111,9 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
           value={academicLevel}
           onChange={(e) => setAcademicLevel(e.target.value)}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:outline-none transition"
-          required
+    
         >
-          <option value="">Select Academic Level *</option>
+          <option value="">Select Academic Level</option>
           {academicLevelOptions.map(option => (
             <option key={option} value={option}>{option}</option>
           ))}
