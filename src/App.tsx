@@ -20,8 +20,9 @@ import CreateOpportunityPage from './pages/CreateOpportunityPage';
 import MyOpportunitiesPage from './pages/MyOpportunitiesPage';
 import AdminPage from './pages/AdminPage';
 import AboutUsPage from './pages/AboutUs';
+import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
 
-export type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity' | 'aboutUs';
+export type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity' | 'aboutUs' | 'postRegistrationSetup';
 export type PageState = {
   page: Page;
   [key: string]: any;
@@ -64,6 +65,9 @@ const App: React.FC = () => {
     message: '',
     type: 'info'
   });
+
+  // Add state for tracking first-time registration
+  const [showPostRegistrationSetup, setShowPostRegistrationSetup] = useState(false);
 
   // Load all app data after user is logged in
   useEffect(() => {
@@ -236,7 +240,8 @@ const App: React.FC = () => {
 
         setStudents(prev => [...prev, finalNewUser]);
         setCurrentUser(finalNewUser);
-    setPageState({ page: 'profile' }); // Redirect to profile page after registration
+    setPageState({ page: 'postRegistrationSetup' }); // Change from 'profile' to 'postRegistrationSetup'
+    setShowPostRegistrationSetup(true);
     } catch (e: any) {
         setAuthError(e.message || 'Registration failed.');
     } finally {
@@ -843,9 +848,21 @@ const App: React.FC = () => {
               organizations={organizations} 
               setPageState={setPageState}
               clonedOpportunityData={pageState.clonedOpportunityData}
+              opportunities={opportunities}
+              setOpportunities={setOpportunities}
             />;
         case 'aboutUs':
             return <AboutUsPage setPageState={setPageState} />;
+        case 'postRegistrationSetup':
+            return <PostRegistrationOrgSetup 
+              currentUser={currentUser}
+              allOrgs={organizations}
+              joinOrg={joinOrg}
+              createOrg={createOrg}
+              onContinue={() => {
+                setPageState({ page: 'opportunities' });
+              }}
+            />;
         default:
             return <OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} setPageState={setPageState} currentUserSignupsSet={currentUserSignupsSet} />;
     }
