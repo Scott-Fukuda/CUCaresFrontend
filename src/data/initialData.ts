@@ -203,7 +203,7 @@ export const initialBadges: Badge[] = [
         "class": "2027",
         "campusOrgs": ["TASA", "KDSAP", "HEART"],
         "favoriteService": "Volunteering with HEART to teach elementary school students about health has been one of my most meaningful experiences. Introducing concepts like nutrition, exercise, and wellness at an early age showed me how education can empower young people to make informed choices and build healthier futures.",
-        "role": "Director of Growth"
+        "role": "Chief Growth Officer"
       },
       {
         "id": "lee-brown",

@@ -558,7 +558,7 @@ export const getOpportunity = (id: number): Promise<Opportunity> => authenticate
 
 export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
     try {
-        const response = await authenticatedRequest('/opps/unapproved');
+    const response = await authenticatedRequest('/opps/unapproved');
         
         // Transform backend data to match frontend expectations (same logic as getOpportunities)
         const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
