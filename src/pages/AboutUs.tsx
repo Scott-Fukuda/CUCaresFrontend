@@ -110,19 +110,19 @@ const AboutUsPage: React.FC<AboutUsPageProps> = ({ setPageState }) => {
                 </div>
                 <div>
                   {/* <h3 className="text-2xl font-bold text-gray-900 mb-4">About CampusCares</h3> */}
-                  <p className="text-lg text-gray-700 leading-relaxed">
+                  <p className="text-base md:text-lg text-gray-700 leading-relaxed">
                   We believe in the power of service to transform communities, build friendships, and cultivate unity. 
                   We seek to catalyze change by equipping students with service opportunities to build a community we are proud of, demonstrating that our campus cares.
                   </p>
                   <br />
-                  <p className="text-lg text-gray-700 leading-relaxed">
+                  <p className="text-base md:text-lg text-gray-700 leading-relaxed">
                   We began as a group of Christian students looking for ways to build community around volunteering. 
                   Driven by faith-based values of love and kindness, we wanted to unite our campus in serving our community. 
-                  That’s why we started CampusCares, an online platform to mobilize Cornell students to create genuine social impact. 
+                  That's why we started CampusCares, an online platform to mobilize Cornell students to create genuine social impact. 
                   </p>
                 
                   <br />
-                  <p className="text-lg text-gray-700 leading-relaxed">
+                  <p className="text-base md:text-lg text-gray-700 leading-relaxed">
                   CampusCares connects you with a wide range of nonprofit partners—all in one simple, free platform. 
                   You can discover causes you care about, help your student organizations climb the leaderboard, and meet new friends through volunteering. 
                   We open doors to new opportunities, motivate you to stay involved, and help bridge the Cornell and Ithaca communities. 
