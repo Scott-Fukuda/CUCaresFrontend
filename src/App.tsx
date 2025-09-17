@@ -693,7 +693,7 @@ const App: React.FC = () => {
       setCurrentUser(updatedUser);
       setStudents(prev => prev.map(s => s.id === currentUser.id ? updatedUser : s));
       
-      alert(`Successfully joined ${orgName}!`);
+      // alert(`Successfully joined ${orgName}!`);
     } catch (e: any) {
       alert(`Error joining organization: ${e.message}`);
     }
@@ -723,7 +723,7 @@ const App: React.FC = () => {
     setCurrentUser(updatedUser);
     setStudents(prev => prev.map(s => s.id === currentUser.id ? updatedUser : s));
       
-      alert(`Successfully left ${orgName}.`);
+      // alert(`Successfully left ${orgName}.`);
     } catch (e: any) {
       alert(`Error leaving organization: ${e.message}`);
     }

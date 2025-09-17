@@ -64,12 +64,12 @@ const PostRegistrationOrgSetup: React.FC<PostRegistrationOrgSetupProps> = ({
               Let's get you connected with your organizations to maximize your impact.
             </p>
           </div>
-          <button
+          {/* <button
             onClick={onContinue}
             className="bg-cornell-red text-white px-6 py-2 rounded-lg hover:bg-red-800 transition-colors font-semibold"
           >
             Continue
-          </button>
+          </button> */}
         </div>
 
         {/* Search Section */}

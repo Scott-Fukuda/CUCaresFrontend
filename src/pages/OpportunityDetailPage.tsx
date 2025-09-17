@@ -156,7 +156,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       // Refresh opportunities data to get updated involved_users
       const updatedOpps = await getOpportunities();
       setOpportunities(updatedOpps);
-      alert('User registered successfully!');
+      // alert('User registered successfully!');
     } catch (error) {
       console.error('Error registering user:', error);
       alert('Failed to register user. They may already be registered.');
