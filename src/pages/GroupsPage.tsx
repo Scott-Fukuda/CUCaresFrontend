@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Organization, User, OrganizationType, organizationTypes } from '../types';
-import { PageState } from '../App';
+import { useNavigate } from 'react-router-dom';
 
 interface GroupsPageProps {
   currentUser: User;
@@ -9,10 +9,10 @@ interface GroupsPageProps {
   joinOrg: (orgId: number) => void;
   leaveOrg: (orgId: number) => void;
   createOrg: (orgName: string, type: OrganizationType, description?: string) => void;
-  setPageState: (state: PageState) => void;
 }
 
-const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, leaveOrg, createOrg, setPageState }) => {
+const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, leaveOrg, createOrg }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newOrgType, setNewOrgType] = useState<OrganizationType | ''>('');
@@ -93,7 +93,7 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
                     const isMember = currentUser.organizationIds?.includes(org.id);
               return (
                       <div key={org.id} className="flex items-center justify-between bg-white p-3 rounded-lg border">
-                  <div className="flex-grow cursor-pointer" onClick={() => setPageState({ page: 'groupDetail', id: org.id })}>
+                  <div className="flex-grow cursor-pointer" onClick={() => navigate(`/group/${org.id}`)}>
                     <span className="font-medium text-gray-800 hover:text-cornell-red">{org.name}</span>
                           <span className="block text-sm text-gray-500">{org.type}</span>
                   </div>
@@ -213,7 +213,7 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
               const isMember = currentUser.organizationIds?.includes(org.id);
               return (
                 <div key={org.id} className="flex items-center justify-between bg-white p-3 rounded-lg border">
-                  <div className="flex-grow cursor-pointer" onClick={() => setPageState({ page: 'groupDetail', id: org.id })}>
+                  <div className="flex-grow cursor-pointer" onClick={() => navigate(`/group/${org.id}`)}>
                     <span className="font-medium text-gray-800 hover:text-cornell-red">{org.name}</span>
                     <span className="block text-xs text-gray-500">{org.type}</span>
                   </div>

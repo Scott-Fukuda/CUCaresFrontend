@@ -1,19 +1,15 @@
 
 import React, { useState } from 'react';
 import { User, Organization, FriendshipsResponse } from '../types';
-import { PageState } from '../App';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getProfilePictureUrl } from '../api';
 import SearchBar from './SearchBar';
 import Sidebar from './Sidebar';
-
-type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity' | 'aboutUs' | 'postRegistrationSetup';
 
 interface HeaderProps {
   user: User;
   points: number;
   pendingRequestCount: number;
-  currentPage: Page;
-  setPageState: (state: PageState) => void;
   onLogout: () => void;
   allUsers: User[];
   allOrgs: Organization[];
@@ -24,11 +20,22 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = (props) => {
-  const { user, points, pendingRequestCount, currentPage, setPageState, onLogout } = props;
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { user, points, pendingRequestCount, onLogout } = props;
   const [toggleSideBar, setToggleSideBar] = useState<boolean>(false);
+
+  const isActive = (page: string): boolean => {
+    if (page === 'profile') {
+      return location.pathname === `/${page}/${user.id}`;
+    }
+
+    return location.pathname === `/${page}`;
+  }
   
-  const NavButton = ({ page, label }: { page: Page, label: string }) => (
-    <button onClick={() => setPageState({ page })} className={`font-semibold ${currentPage === page ? 'text-cornell-red' : 'text-gray-600 hover:text-cornell-red'}`}>{label}</button>
+  const NavButton = ({ page, label }: { page: string, label: string }) => (
+    <button onClick={() => navigate(page === 'profile' ? `/${page}/${user.id}` : `/${page}`)} className={`font-semibold ${isActive(page) ? 'text-cornell-red' : 'text-gray-600 hover:text-cornell-red'}`}>{label}</button>
   );
 
   return (
@@ -36,7 +43,7 @@ const Header: React.FC<HeaderProps> = (props) => {
       <div className="max-w-7xl mx-auto flex justify-between items-center gap-4">
         <div className="flex items-center gap-8">
             <button 
-              onClick={() => setPageState({ page: 'opportunities'})} 
+              onClick={() => navigate('/opportunities')} 
               className="hidden md:block"
             >
               <img 
@@ -59,7 +66,6 @@ const Header: React.FC<HeaderProps> = (props) => {
             {/* Mobile sidebar */}
             <div className="md:hidden">
               <Sidebar
-                setPageState={setPageState}
                 toggleSideBar={toggleSideBar}
                 setToggleSideBar={setToggleSideBar}
                 currentUser={user}
@@ -72,7 +78,7 @@ const Header: React.FC<HeaderProps> = (props) => {
               <NavButton page="groups" label="Groups" />
               {user.admin && <NavButton page="admin" label="Admin Page" />}
               <NavButton page="leaderboard" label="Leaderboard" />
-              <NavButton page="aboutUs" label="About Us" />
+              <NavButton page="about-Us" label="About Us" />
               <NavButton page="profile" label="Profile" />
             </nav>
         </div>
@@ -89,12 +95,11 @@ const Header: React.FC<HeaderProps> = (props) => {
                   joinOrg={props.joinOrg}
                   leaveOrg={props.leaveOrg}
                   handleFriendRequest={props.handleFriendRequest}
-                  setPageState={props.setPageState}
                 />
             </div>
 
             <div className="flex items-center gap-4">
-              <button onClick={() => setPageState({ page: 'notifications'})} className="relative text-gray-500 hover:text-cornell-red">
+              <button onClick={() => navigate('/notifications')} className="relative text-gray-500 hover:text-cornell-red">
                     <NotificationIcon />
                     {pendingRequestCount > 0 && (
                         <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-cornell-red text-white text-xs font-bold">
@@ -108,7 +113,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                   <span className="font-bold text-cornell-red">{points}</span> points earned ✨
                 </p>
               </div>
-              <img src={getProfilePictureUrl(user.profile_image)} alt={user.name} className="h-10 w-10 rounded-full object-cover cursor-pointer" onClick={() => setPageState({ page: 'profile' })} />
+              <img src={getProfilePictureUrl(user.profile_image)} alt={user.name} className="h-10 w-10 rounded-full object-cover cursor-pointer" onClick={() => navigate(`/profile/${user.id}`)} />
               {/* <button onClick={onLogout} className="text-sm bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors hidden sm:block">
                 Logout
               </button> */}

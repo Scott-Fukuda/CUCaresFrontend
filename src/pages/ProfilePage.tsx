@@ -1,19 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
-import { User, Badge, Organization, allInterests, FriendshipStatus, FriendshipsResponse } from '../types';
+import { User, SignUp, Badge, Organization, Opportunity, allInterests, FriendshipStatus, FriendshipsResponse } from '../types';
 import BadgeIcon from '../components/BadgeIcon';
-import { PageState } from '../App';
 import { getProfilePictureUrl, updateUser } from '../api';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface ProfilePageProps {
-  user: User; // The user whose profile is being viewed
-  isCurrentUser: boolean;
+  students: User[];
+  signups: SignUp[];
+  organizations: Organization[];
+  opportunities: Opportunity[];
+  initialBadges: Badge[];
   currentUser: User;
-  earnedBadges: Badge[];
-  userOrgs: Organization[]; // Orgs of the user being viewed
-  hoursVolunteered: number;
-  userFriends: User[]; // Friends of the user being viewed (legacy, will be replaced)
-  setPageState: (state: PageState) => void;
   updateInterests: (interests: string[]) => void;
   updateProfilePicture: (file: File) => void;
   handleFriendRequest: (toUserId: number) => void;
@@ -25,12 +23,32 @@ interface ProfilePageProps {
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = (props) => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  
   const { 
-    user, isCurrentUser, currentUser, earnedBadges, userOrgs, 
-    hoursVolunteered, userFriends, setPageState, updateInterests, 
+    students, signups, organizations, opportunities, initialBadges,
+    currentUser, updateInterests, 
     updateProfilePicture, handleFriendRequest, handleRemoveFriend, 
     friendshipsData, checkFriendshipStatus, getFriendsForUser, setCurrentUser
   } = props;
+  const user = id ? students.find(s => s.id === parseInt(id!)) : currentUser;
+  if(!user) return <p>User not found</p>;
+  
+  const key =`${user.id}-${user._lastUpdate || 'no-update'}`;
+  const isCurrentUser = user.id === currentUser.id;
+  const profileUserSignups = signups.filter(s => s.userId === user.id);
+  const userOrgs = organizations.filter(g => user.organizationIds && user.organizationIds.includes(g.id));
+  
+  const profileUserPoints = user?.points || 0;
+  const hoursVolunteered = profileUserSignups.reduce((total, signup) => {
+    const opportunity = opportunities.find(o => o.id === signup.opportunityId);
+    return total + (opportunity?.duration || 0);
+  }, 0);
+
+  const earnedBadges = initialBadges.filter(b => b.threshold({points: profileUserPoints, signUpCount: profileUserSignups.length, signups, opportunities, friendsCount: user.friendIds.length}));
+  // Note: getFriendsForUser is now async, so we'll need to handle this differently
+  // For now, we'll pass an empty array and handle the async loading in ProfilePage
   
   const [selectedInterests, setSelectedInterests] = useState(user.interests);
   const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>('add');
@@ -41,6 +59,10 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const [editingBio, setEditingBio] = useState(user.bio || '');
   const [savingBio, setSavingBio] = useState(false);
   const [localUser, setLocalUser] = useState(user); // Add local user state
+
+  React.useEffect(() => {
+    console.log('local user: ', localUser)
+  }, [localUser])
 
   // Update selectedInterests when user.interests changes
   React.useEffect(() => {
@@ -73,7 +95,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
       } catch (error) {
         console.error('Error loading friends:', error);
         setProfileUserFriends([]);
-      } finally {
+      } finally { 
         setLoadingFriends(false);
       }
     };
@@ -202,7 +224,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
         </div>
         {isCurrentUser && (
         <button 
-          onClick={() => setPageState({ page: 'myOpportunities'})} 
+          onClick={() => navigate("/my-opportunities")} 
           className={`w-full font-bold py-2 px-4 rounded-lg transition-colors`}>
           See my opportunities
         </button>
@@ -305,7 +327,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">{user.name}'s Organizations</h3>
               {isCurrentUser && (
-                <button onClick={() => setPageState({ page: 'groups'})} className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm">
+                <button onClick={() => navigate('/groups')} className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm">
                   Manage Orgs
                 </button>
               )}
@@ -313,7 +335,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
             {userOrgs.length > 0 ? (
                 <ul className="space-y-3">
                     {userOrgs.map(org => (
-                        <li key={org.id} onClick={() => setPageState({ page: 'groupDetail', id: org.id })} className="bg-light-gray p-3 rounded-lg font-medium text-gray-800 cursor-pointer hover:bg-gray-200 transition-colors">
+                        <li key={org.id} onClick={() => navigate(`/group-detail/${org.id}`)} className="bg-light-gray p-3 rounded-lg font-medium text-gray-800 cursor-pointer hover:bg-gray-200 transition-colors">
                             {org.name}
                         </li>
                     ))}
@@ -332,7 +354,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                     {profileUserFriends.map(friend => (
                         <div 
                             key={friend.id} 
-                            onClick={() => setPageState({ page: 'profile', userId: friend.id })}
+                            onClick={() => navigate(`/profile/${friend.id}`)}
                             className="flex flex-col items-center p-3 bg-light-gray rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
                         >
                             <img 

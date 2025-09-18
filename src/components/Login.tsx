@@ -1,14 +1,16 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginProps {
   onGoogleSignIn: () => void;
   error: string | null;
   isLoading: boolean;
-  onShowAboutUs: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, onShowAboutUs }) => {
+const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="w-full max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg text-center mt-10">
       <img 
@@ -64,7 +66,7 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, onShowA
         </button>
         
         <button
-          onClick={onShowAboutUs}
+          onClick={() => navigate('/about-us')}
           className="w-full bg-gray-100 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors mt-4"
         >
           About CampusCares

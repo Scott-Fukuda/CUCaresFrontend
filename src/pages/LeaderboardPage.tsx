@@ -1,8 +1,8 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { User, Organization, SignUp, Opportunity, OrganizationType, organizationTypes, FriendshipStatus, FriendshipsResponse } from '../types';
-import { PageState } from '../App';
 import { getProfilePictureUrl, getMonthlyPoints } from '../api';
+import { useNavigate } from 'react-router-dom';
 
 interface LeaderboardPageProps {
   allUsers: User[];
@@ -13,7 +13,6 @@ interface LeaderboardPageProps {
   handleFriendRequest: (toUserId: number) => void;
   handleAcceptFriendRequest: (otherUserId: number) => void;
   handleRejectFriendRequest: (otherUserId: number) => void;
-  setPageState: (state: PageState) => void;
   checkFriendshipStatus: (otherUserId: number) => Promise<FriendshipStatus>;
   friendshipsData: FriendshipsResponse | null;
   joinOrg: (orgId: number) => void; // Add joinOrg prop
@@ -24,7 +23,8 @@ type LeaderboardTab = 'Individuals' | 'All Organizations' | OrganizationType;
 
 const TABS: LeaderboardTab[] = ['Individuals', 'All Organizations', ...organizationTypes];
 
-const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, signups, opportunities, currentUser, handleFriendRequest, handleAcceptFriendRequest, handleRejectFriendRequest, setPageState, checkFriendshipStatus, friendshipsData, joinOrg, leaveOrg }) => {
+const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, signups, opportunities, currentUser, handleFriendRequest, handleAcceptFriendRequest, handleRejectFriendRequest, checkFriendshipStatus, friendshipsData, joinOrg, leaveOrg }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<LeaderboardTab>('Individuals');
   const [friendshipStatuses, setFriendshipStatuses] = useState<Map<number, FriendshipStatus>>(new Map());
   const [pointsView, setPointsView] = useState<'monthly' | 'alltime'>('monthly');
@@ -199,8 +199,8 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
         <li className={`flex items-center justify-between py-4 ${isCurrentUser ? 'bg-yellow-50 rounded-lg -mx-4 px-4' : ''}`}>
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <span className="font-bold text-lg text-gray-500 w-6 text-center flex-shrink-0">{rank}</span>
-              <img src={getProfilePictureUrl(user.profile_image)} alt={user.name} className="h-10 w-10 rounded-full object-cover cursor-pointer flex-shrink-0" onClick={() => setPageState({ page: 'profile', userId: user.id})}/>
-              <span className="font-medium text-gray-900 cursor-pointer truncate min-w-0" onClick={() => setPageState({ page: 'profile', userId: user.id})}>{user.name}</span>
+              <img src={getProfilePictureUrl(user.profile_image)} alt={user.name} className="h-10 w-10 rounded-full object-cover cursor-pointer flex-shrink-0" onClick={() => navigate(`/profile/${user.id}`)}/>
+              <span className="font-medium text-gray-900 cursor-pointer truncate min-w-0" onClick={() => navigate(`/profile/${user.id}`)}>{user.name}</span>
             </div>
             
             {/* Mobile layout: stacked vertically */}
@@ -360,7 +360,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
                 <li key={org.id} className="flex items-center justify-between py-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className="font-bold text-lg text-gray-500 w-6 text-center flex-shrink-0">{rank}</span>
-                    <div className="cursor-pointer flex-1 min-w-0" onClick={() => setPageState({ page: 'groupDetail', id: org.id})}>
+                    <div className="cursor-pointer flex-1 min-w-0" onClick={() => navigate(`/group-detail/${org.id}`)}>
                       <p className="font-medium text-gray-900 hover:text-cornell-red truncate">{org.name}</p>
                       <p className="text-sm text-gray-500">{memberCount} members &bull; {org.type}</p>
                     </div>

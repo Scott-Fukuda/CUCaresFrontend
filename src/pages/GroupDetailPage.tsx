@@ -1,17 +1,15 @@
 
 import React, { useMemo, useState } from 'react';
 import { Organization, User, Opportunity, SignUp } from '../types';
-import { PageState } from '../App';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getProfilePictureUrl, updateOrganization } from '../api';
 
 interface GroupDetailPageProps {
-  org: Organization;
   allUsers: User[];
   allOrgs: Organization[];
   opportunities: Opportunity[];
   signups: SignUp[];
   currentUser: User;
-  setPageState: (state: PageState) => void;
   joinOrg: (orgId: number) => void;
   leaveOrg: (orgId: number) => void;
 }
@@ -39,7 +37,12 @@ const LeaderboardIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 const CalendarIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M-4.5 12h22.5" /></svg>;
 
-const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrgs, opportunities, signups, currentUser, setPageState, joinOrg, leaveOrg }) => {
+const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ allUsers, allOrgs, opportunities, signups, currentUser, joinOrg, leaveOrg }) => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+
+  const org = allOrgs.find(g => g.id === parseInt(id!));
+  if (!org) return <p>Organization not found.</p>;
   const isMember = currentUser.organizationIds && currentUser.organizationIds.includes(org.id);
 
   const handleUnapproveOrganization = async () => {
@@ -246,7 +249,7 @@ const GroupDetailPage: React.FC<GroupDetailPageProps> = ({ org, allUsers, allOrg
                 <div className="flex flex-wrap gap-4">
                     {members.length > 0 ? (
                         members.sort((a,b) => a.name.localeCompare(b.name)).map(member => (
-                            <div key={member.id} onClick={() => setPageState({ page: 'profile', userId: member.id })} className="flex items-center gap-2 p-2 pr-4 bg-light-gray rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
+                            <div key={member.id} onClick={() => navigate(`/profile/${member.id}`)} className="flex items-center gap-2 p-2 pr-4 bg-light-gray rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
                                 <img 
                                     src={getProfilePictureUrl(member.profile_image)} 
                                     alt={member.name}

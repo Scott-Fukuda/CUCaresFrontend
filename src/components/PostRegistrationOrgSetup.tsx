@@ -1,21 +1,21 @@
 import React, { useState, useMemo } from 'react';
 import { Organization, User, OrganizationType, organizationTypes } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 interface PostRegistrationOrgSetupProps {
   currentUser: User;
   allOrgs: Organization[];
   joinOrg: (orgId: number) => void;
   createOrg: (orgName: string, type: OrganizationType, description?: string) => void;
-  onContinue: () => void;
 }
 
 const PostRegistrationOrgSetup: React.FC<PostRegistrationOrgSetupProps> = ({ 
   currentUser, 
   allOrgs, 
   joinOrg, 
-  createOrg, 
-  onContinue 
+  createOrg
 }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newOrgType, setNewOrgType] = useState<OrganizationType | ''>('');
@@ -236,7 +236,7 @@ const PostRegistrationOrgSetup: React.FC<PostRegistrationOrgSetupProps> = ({
             You can always manage your organizations later in the Groups section.
           </p>
           <button
-            onClick={onContinue}
+            onClick={() => navigate('/opportunities')}
             className="bg-cornell-red text-white px-8 py-3 rounded-lg hover:bg-red-800 transition-colors font-semibold text-lg"
           >
             Continue to CampusCares

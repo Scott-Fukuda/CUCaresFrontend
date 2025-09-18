@@ -1,26 +1,32 @@
 
 import React, { useState, useEffect } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
-import { PageState } from '../App';
 import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp, getOpportunities, uploadProfilePicture, getOpportunityAttendance } from '../api';
 import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 import { upload } from '@testing-library/user-event/dist/upload';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface OpportunityDetailPageProps {
-  opportunity: Opportunity;
+  opportunities: Opportunity[];
   students: User[];
   signups: SignUp[];
   currentUser: User;
   handleSignUp: (opportunityId: number) => void;
   handleUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
-  setPageState: (state: PageState) => void;
   allOrgs: Organization[];
   currentUserSignupsSet: Set<number>;
   setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
 }
 
-const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportunity, students, signups, currentUser, handleSignUp, handleUnSignUp, setPageState, allOrgs, currentUserSignupsSet, setOpportunities }) => {
+const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportunities, students, signups, currentUser, handleSignUp, handleUnSignUp, allOrgs, currentUserSignupsSet, setOpportunities }) => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+
+  const opportunity = opportunities.find(o => o.id === parseInt(id!));
+
+  if (!opportunity) return <p>Opportunity not found.</p>;
+
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: opportunity.name,
@@ -223,7 +229,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       
       alert('Opportunity has been deleted successfully!');
       // Navigate back to opportunities page
-      setPageState({ page: 'opportunities' });
+      navigate('/opportunities');
     } catch (error: any) {
       alert(`Error deleting opportunity: ${error.message}`);
     }
@@ -349,7 +355,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       alert('Announcement added successfully!');
       
       // Force a re-render by updating the opportunity object
-      setPageState({ page: 'opportunityDetail', id: opportunity.id });
+      navigate(`/opportunity/${opportunity.id}`);
     } catch (error: any) {
       alert(`Error adding announcement: ${error.message}`);
     } finally {
@@ -473,10 +479,11 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     };
 
     // Navigate to create opportunity page with cloned data
-    setPageState({
-      page: 'createOpportunity',
-      clonedOpportunityData: clonedOpportunityData
-    });
+    navigate('/create-opportunity', {
+      state: {
+        clonedOpportunityData: clonedOpportunityData
+      }
+    })
   };
 
   return (
@@ -709,7 +716,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             {signedUpStudents.map(student => (
                                 <div key={`${student.id}-${student._lastUpdate || 'no-update'}`} className="text-center group relative">
-                                    <div onClick={() => setPageState({ page: 'profile', userId: student.id})} className="cursor-pointer">
+                                    <div onClick={() => navigate(`/profile/${student.id}`)} className="cursor-pointer">
                                         <p className="font-semibold text-gray-800 group-hover:text-cornell-red transition">{student.name}</p>
                                     </div>
                                     {currentUser.admin && (
@@ -1162,7 +1169,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                            <div className="space-y-3">
                              <div 
                                className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                               onClick={() => setPageState({ page: 'profile', userId: hostUser.id })}
+                               onClick={() => navigate(`/profile/${hostUser.id}`)}
                              >
                                <div className="w-10 h-10 bg-cornell-red rounded-full flex items-center justify-center flex-shrink-0">
                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">

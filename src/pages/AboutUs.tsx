@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Member } from '../types';
 import { ourTeam } from '../data/initialData';
-
-interface AboutUsPageProps {
-  setPageState: (state: any) => void;
-}
+import { useNavigate } from 'react-router-dom';
 
 const TeamMemberCard: React.FC<{ member: Member }> = ({ member }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -76,8 +73,9 @@ const TeamMemberCard: React.FC<{ member: Member }> = ({ member }) => {
   );
 };
 
-const AboutUsPage: React.FC<AboutUsPageProps> = ({ setPageState }) => {
+const AboutUsPage: React.FC = () => {
   const teamMembers = ourTeam; // Get the team members array
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -159,7 +157,7 @@ const AboutUsPage: React.FC<AboutUsPageProps> = ({ setPageState }) => {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Make a Difference?</h2>
           
             <button
-              onClick={() => setPageState({ page: 'opportunities' })}
+              onClick={() => navigate('/opportunities')}
               className="bg-white text-cornell-red px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors duration-300">
               Explore Opportunities
             </button>

@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
-import { PageState } from '../App';
+import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl } from '../api';
 import { canUnregisterFromOpportunity, formatTimeUntilEvent, calculateEndTime } from '../utils/timeUtils';
 import { useState } from 'react';
@@ -14,7 +14,6 @@ interface OpportunityCardProps {
   onSignUp: (opportunityId: number) => void;
   onUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
   isUserSignedUp: boolean;
-  setPageState: (state: PageState) => void;
   onExternalSignup?: (opportunity: Opportunity) => void; // Add callback for external signup
   onExternalUnsignup?: (opportunity: Opportunity) => void; // Add callback for external unsignup
 }
@@ -41,10 +40,10 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   onSignUp, 
   onUnSignUp, 
   isUserSignedUp, 
-  setPageState,
   onExternalSignup,
   onExternalUnsignup 
 }) => {
+  const navigate = useNavigate();
   const [clickedStudentId, setClickedStudentId] = useState<number | null>(null);
 
   // Add click handler for profile pictures
@@ -75,7 +74,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
     if ((e.target as HTMLElement).closest('button, [data-clickable-org]')) {
       return;
     }
-    setPageState({ page: 'opportunityDetail', id: opportunity.id });
+    navigate(`/opportunity/${opportunity.id}`);
   };
   
   const handleButtonClick = () => {
@@ -285,7 +284,7 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
                         <span 
                             key={org.id} 
                             data-clickable-org="true"
-                            onClick={(e) => { e.stopPropagation(); setPageState({ page: 'groupDetail', id: org.id }); }}
+                            onClick={(e) => { e.stopPropagation(); navigate(`/group-detail/${org.id}`); }}
                             className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded-full cursor-pointer hover:bg-gray-300 transition-colors">
                             {org.name}
                         </span>
