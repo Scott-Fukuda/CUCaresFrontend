@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Opportunity, User, SignUp, allInterests, Organization } from '../types';
 import OpportunityCard from '../components/OpportunityCard';
-import { PageState } from '../App';
-
+import { useNavigate } from 'react-router-dom';
+ 
 interface OpportunitiesPageProps {
   opportunities: Opportunity[];
   students: User[];
@@ -10,7 +10,6 @@ interface OpportunitiesPageProps {
   currentUser: User;
   handleSignUp: (opportunityId: number) => void;
   handleUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
-  setPageState: (state: PageState) => void;
   allOrgs: Organization[];
   currentUserSignupsSet: Set<number>;
 }
@@ -22,10 +21,10 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   currentUser,
   handleSignUp,
   handleUnSignUp,
-  setPageState,
   allOrgs,
   currentUserSignupsSet
 }) => {
+  const navigate = useNavigate();
   // Filter functionality disabled
   // const [causeFilter, setCauseFilter] = useState<string>('All');
   // const [dateFilter, setDateFilter] = useState<string>('');
@@ -122,14 +121,8 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           <p className="text-gray-600">Find the perfect way to make an impact in the Ithaca community.</p>
         </div>
         <div className="flex gap-3">
-          {/* <button
-            onClick={() => setPageState({ page: 'groups' })}
-            className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors font-semibold"
-          >
-            Register Organization
-          </button> */}
           <button
-            onClick={() => setPageState({ page: 'createOpportunity' })}
+            onClick={() => navigate('/create-opportunity')}
             className="bg-cornell-red text-white px-6 py-2 rounded-lg hover:bg-red-800 transition-colors font-semibold"
           >
             Create Opportunity
@@ -202,7 +195,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               onSignUp={handleSignUp}
               onUnSignUp={handleUnSignUp}
               isUserSignedUp={isUserSignedUp}
-              setPageState={setPageState}
               allOrgs={allOrgs}
               onExternalSignup={handleExternalSignup} // Add the callback
               onExternalUnsignup={handleExternalUnsignup} // Add the callback

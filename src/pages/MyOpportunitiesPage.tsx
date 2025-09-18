@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Opportunity, User, Organization } from '../types';
 import OpportunityCard from '../components/OpportunityCard';
-import { PageState } from '../App';
 
 interface MyOpportunitiesPageProps {
   opportunities: Opportunity[];
@@ -10,7 +9,6 @@ interface MyOpportunitiesPageProps {
   currentUser: User;
   handleSignUp: (opportunityId: number) => void;
   handleUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
-  setPageState: (state: PageState) => void;
   currentUserSignupsSet: Set<number>;
 }
 
@@ -21,7 +19,6 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
   currentUser, 
   handleSignUp,
   handleUnSignUp,
-  setPageState,
   currentUserSignupsSet
 }) => {
   const [showPastHosted, setShowPastHosted] = useState(false);
@@ -183,7 +180,6 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
                   onSignUp={handleSignUp}
                   onUnSignUp={handleUnSignUp}
                   isUserSignedUp={isUserSignedUp}
-                  setPageState={setPageState}
                   onExternalSignup={handleExternalSignup}
                   onExternalUnsignup={handleExternalUnsignup}
                 />
@@ -216,7 +212,6 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
                     onSignUp={handleSignUp}
                     onUnSignUp={handleUnSignUp}
                     isUserSignedUp={isUserSignedUp}
-                    setPageState={setPageState}
                     onExternalSignup={handleExternalSignup}
                     onExternalUnsignup={handleExternalUnsignup}
                   />
@@ -275,7 +270,6 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
                   onSignUp={handleSignUp}
                   onUnSignUp={handleUnSignUp}
                   isUserSignedUp={isUserSignedUp}
-                  setPageState={setPageState}
                   onExternalSignup={handleExternalSignup}
                   onExternalUnsignup={handleExternalUnsignup}
                 />
@@ -304,7 +298,6 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
                     onSignUp={handleSignUp}
                     onUnSignUp={handleUnSignUp}
                     isUserSignedUp={isUserSignedUp}
-                    setPageState={setPageState}
                     onExternalSignup={handleExternalSignup}
                     onExternalUnsignup={handleExternalUnsignup}
                   />
@@ -356,7 +349,6 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
                     onSignUp={handleSignUp} 
                     onUnSignUp={handleUnSignUp} 
                     isUserSignedUp={isUserSignedUp} 
-                    setPageState={setPageState} 
                     onExternalSignup={handleExternalSignup} 
                     onExternalUnsignup={handleExternalUnsignup} 
                   />

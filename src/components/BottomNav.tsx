@@ -1,17 +1,14 @@
 
 import React from 'react';
-import { Page, PageState } from '../App';
 import GroupsIcon from '@mui/icons-material/Groups';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import PersonIcon from '@mui/icons-material/Person';
 import EventIcon from '@mui/icons-material/Event';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { User } from '../types';
 
 interface BottomNavProps {
-  currentPage: Page;
-  setPageState: (page: PageState) => void;
   currentUser: User;
 }
 
@@ -33,45 +30,42 @@ const NavItem: React.FC<{
   </button>
 );
 
-const BottomNav: React.FC<BottomNavProps> = ({ currentPage, setPageState, currentUser }) => {
-  // const navigate = useNavigate();
+const BottomNav: React.FC<BottomNavProps> = ({ currentUser }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white shadow-[0_-2px_5px_rgba(0,0,0,0.1)] flex md:hidden z-20">
       <NavItem
         label="Events"
         icon={<EventIcon />}
-        isActive={currentPage === 'opportunities'}
-        // onClick={() => navigate("/")}
-        onClick={() => setPageState({ page: 'opportunities'})}
+        isActive={location.pathname === '/opportunities'}
+        onClick={() => navigate('/')}
       />
        <NavItem
         label="Groups"
         icon={<GroupsIcon />}
-        isActive={currentPage === 'groups'}
-        // onClick={() => navigate("/groups")}
-        onClick={() => setPageState({ page: 'groups'})}
+        isActive={location.pathname === '/groups'}
+        onClick={() => navigate("/groups")}
       />
       <NavItem
         label="Leaderboard"
         icon={<LeaderboardIcon />}
-        isActive={currentPage === 'leaderboard'}
-        // onClick={() => navigate("/leaderboard")}
-        onClick={() => setPageState({ page: 'leaderboard'})}
+        isActive={location.pathname === '/leaderboard'}
+        onClick={() => navigate("/leaderboard")}
       />
       <NavItem
         label="Profile"
         icon={<PersonIcon />}
-        isActive={currentPage === 'profile'}
-        // onClick={() => navigate(`/profile/${currentUser.id}`)}
-        onClick={() => setPageState({ page: 'profile'})}
+        isActive={location.pathname === `/profile/${currentUser.id}`}
+        onClick={() => navigate(`/profile/${currentUser.id}`)}
       />
       <NavItem
         label="Admin"
         icon={<AdminPanelSettingsIcon />}
-        isActive={currentPage === 'admin'}
+        isActive={location.pathname === '/admin'}
         // onClick={() => navigate("/admin")}
-        onClick={() => setPageState({ page: 'admin'})}
+        onClick={() => navigate('/admin')}
       />
     </nav>
   );
