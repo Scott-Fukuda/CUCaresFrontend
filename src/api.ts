@@ -221,6 +221,17 @@ export const registerUser = (data: object): Promise<User> => authenticatedReques
   body: JSON.stringify(data),
 });
 
+// Get all user emails - returns array of email strings
+export const getUserEmails = async (): Promise<string[]> => {
+  const response = await authenticatedRequest('/users/emails');
+  console.log('getUserEmails response:', response);
+  // If the response is the array directly:
+  return response || [];
+
+  // OR if it's wrapped differently:
+  // return response.emails || response || [];
+};
+
 // --- Organizations (Groups) ---
 export const getOrgs = async (): Promise<Organization[]> => {
     const response = await authenticatedRequest('/orgs');
