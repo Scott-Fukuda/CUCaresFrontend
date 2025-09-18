@@ -1,18 +1,21 @@
-
 import React, { useState, useMemo } from 'react';
 import { Organization, User, OrganizationType, organizationTypes } from '../types';
-import { PageState } from '../App';
 
-interface GroupsPageProps {
+interface PostRegistrationOrgSetupProps {
   currentUser: User;
   allOrgs: Organization[];
   joinOrg: (orgId: number) => void;
-  leaveOrg: (orgId: number) => void;
   createOrg: (orgName: string, type: OrganizationType, description?: string) => void;
-  setPageState: (state: PageState) => void;
+  onContinue: () => void;
 }
 
-const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, leaveOrg, createOrg, setPageState }) => {
+const PostRegistrationOrgSetup: React.FC<PostRegistrationOrgSetupProps> = ({ 
+  currentUser, 
+  allOrgs, 
+  joinOrg, 
+  createOrg, 
+  onContinue 
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newOrgType, setNewOrgType] = useState<OrganizationType | ''>('');
@@ -37,8 +40,8 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
     if (searchTerm.trim() && newOrgType) {
       createOrg(searchTerm.trim(), newOrgType, newOrgDescription.trim() || undefined);
       setSearchTerm('');
-        setNewOrgType('');
-        setNewOrgDescription('');
+      setNewOrgType('');
+      setNewOrgDescription('');
       setShowCreateForm(false);
     }
   };
@@ -49,30 +52,38 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-6">
-      <div className="bg-white rounded-2xl shadow-lg p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-lg p-8">
         {/* Header */}
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Manage Organizations
-          </h1>
-          <p className="text-base md:text-lg text-gray-600">
-            Find and join organizations, or create new ones to expand your impact.
-          </p>
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Welcome to CampusCares, {currentUser.name.split(' ')[0]}! 🎉
+            </h1>
+            <p className="text-lg text-gray-600">
+              Let's get you connected with your organizations to maximize your impact.
+            </p>
+          </div>
+          {/* <button
+            onClick={onContinue}
+            className="bg-cornell-red text-white px-6 py-2 rounded-lg hover:bg-red-800 transition-colors font-semibold"
+          >
+            Continue
+          </button> */}
         </div>
 
         {/* Search Section */}
-        <div className="mb-6 md:mb-8">
-          <h2 className="text-lg md:text-xl font-semibold text-gray-900 mb-3 md:mb-4">
-            Search for organizations
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Search for your organizations
           </h2>
           <div className="relative">
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Type your organization name..."
-              className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:outline-none transition text-base md:text-lg"
+              placeholder="Type your org name..."
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:outline-none transition text-lg"
             />
             <svg className="absolute right-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -91,39 +102,25 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
                 <div className="space-y-2 max-h-60 overflow-y-auto">
                   {filteredOrgs.map(org => {
                     const isMember = currentUser.organizationIds?.includes(org.id);
-              return (
+                    return (
                       <div key={org.id} className="flex items-center justify-between bg-white p-3 rounded-lg border">
-                  <div className="flex-grow cursor-pointer" onClick={() => setPageState({ page: 'groupDetail', id: org.id })}>
-                    <span className="font-medium text-gray-800 hover:text-cornell-red">{org.name}</span>
+                        <div>
+                          <span className="font-medium text-gray-800">{org.name}</span>
                           <span className="block text-sm text-gray-500">{org.type}</span>
-                  </div>
-                  {isMember ? (
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-green-600 font-semibold">Joined ✓</span>
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                leaveOrg(org.id);
-                              }}
-                              className="text-sm text-red-600 font-semibold hover:text-red-800 px-2 py-1 rounded-md hover:bg-red-50 transition-colors"
-                            >
-                              Leave
-                            </button>
-                          </div>
+                        </div>
+                        {isMember ? (
+                          <span className="text-sm text-green-600 font-semibold">Joined ✓</span>
                         ) : (
                           <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              joinOrg(org.id);
-                            }}
+                            onClick={() => joinOrg(org.id)}
                             className="text-sm bg-cornell-red text-white px-4 py-2 rounded-md hover:bg-red-800 transition-colors font-semibold"
                           >
                             Join
                           </button>
                         )}
                       </div>
-              );
-            })}
+                    );
+                  })}
                 </div>
               </div>
             ) : (
@@ -141,7 +138,7 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
                 )}
               </div>
             )}
-        </div>
+          </div>
         )}
 
         {/* Create Organization Form */}
@@ -156,12 +153,12 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
                   Organization Type *
                 </label>
                 <select
-                    value={newOrgType}
-                    onChange={(e) => setNewOrgType(e.target.value as OrganizationType)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:outline-none transition bg-white"
-                    required
+                  value={newOrgType}
+                  onChange={(e) => setNewOrgType(e.target.value as OrganizationType)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:outline-none transition bg-white"
+                  required
                 >
-                    <option value="" disabled>Select a type...</option>
+                  <option value="" disabled>Select a type...</option>
                   {organizationTypes.map(type => (
                     <option key={type} value={type}>{type}</option>
                   ))}
@@ -172,16 +169,16 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
                   Description (optional)
                 </label>
                 <textarea
-                    value={newOrgDescription}
-                    onChange={(e) => setNewOrgDescription(e.target.value)}
+                  value={newOrgDescription}
+                  onChange={(e) => setNewOrgDescription(e.target.value)}
                   placeholder="Brief description of your organization..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:outline-none transition resize-none"
-                    rows={3}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:outline-none transition resize-none"
+                  rows={3}
                 />
               </div>
               <div className="flex space-x-3">
                 <button
-                    type="submit"
+                  type="submit"
                   disabled={!newOrgType}
                   className="bg-cornell-red text-white px-6 py-2 rounded-lg hover:bg-red-800 transition-colors disabled:bg-red-300 disabled:cursor-not-allowed font-semibold"
                 >
@@ -213,29 +210,15 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
               const isMember = currentUser.organizationIds?.includes(org.id);
               return (
                 <div key={org.id} className="flex items-center justify-between bg-white p-3 rounded-lg border">
-                  <div className="flex-grow cursor-pointer" onClick={() => setPageState({ page: 'groupDetail', id: org.id })}>
-                    <span className="font-medium text-gray-800 hover:text-cornell-red">{org.name}</span>
+                  <div className="flex-grow">
+                    <span className="font-medium text-gray-800">{org.name}</span>
                     <span className="block text-xs text-gray-500">{org.type}</span>
                   </div>
                   {isMember ? (
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-green-600 font-semibold">Joined ✓</span>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          leaveOrg(org.id);
-                        }}
-                        className="text-sm text-red-600 font-semibold hover:text-red-800 px-2 py-1 rounded-md hover:bg-red-50 transition-colors"
-                      >
-                        Leave
-                      </button>
-                    </div>
+                    <span className="text-sm text-green-600 font-semibold">Joined ✓</span>
                   ) : (
                     <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        joinOrg(org.id);
-                      }}
+                      onClick={() => joinOrg(org.id)}
                       className="text-sm bg-cornell-red text-white px-3 py-1 rounded-md hover:bg-red-800 transition-colors font-semibold"
                     >
                       Join
@@ -246,9 +229,22 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
             })}
           </div>
         </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-gray-600 mb-4">
+            You can always manage your organizations later in the Groups section.
+          </p>
+          <button
+            onClick={onContinue}
+            className="bg-cornell-red text-white px-8 py-3 rounded-lg hover:bg-red-800 transition-colors font-semibold text-lg"
+          >
+            Continue to CampusCares
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default GroupsPage;
+export default PostRegistrationOrgSetup;

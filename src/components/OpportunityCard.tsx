@@ -45,6 +45,16 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   onExternalSignup,
   onExternalUnsignup 
 }) => {
+  const [clickedStudentId, setClickedStudentId] = useState<number | null>(null);
+
+  // Add click handler for profile pictures
+  const handleProfileClick = (studentId: number) => {
+    if (clickedStudentId === studentId) {
+      setClickedStudentId(null); // Hide if already showing
+    } else {
+      setClickedStudentId(studentId); // Show name
+    }
+  };
 
   const availableSlots = opportunity.total_slots - signedUpStudents.length;
   const canSignUp = availableSlots > 0 && !isUserSignedUp;
@@ -212,7 +222,7 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
             </div>
             <span 
               className="text-white-50 text-xs font-bold py-1 rounded-full w-[80px] text-center inline-block flex-shrink-0 ml-2"
-              style={{backgroundColor: "#fda11c"}}
+              style={{backgroundColor: "#F5F5F5"}}
             >
                 {opportunity.points} PTS
             </span>
@@ -240,11 +250,17 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
                 {signedUpStudents.slice(0, 10).map(student => (
                     <div key={student.id} className="group relative hover:z-10">
                         <img 
-                            className="h-8 w-8 rounded-full object-cover ring-2 ring-white" 
-                                                          src={getProfilePictureUrl(student.profile_image)} 
+                            className="h-8 w-8 rounded-full object-cover ring-2 ring-white cursor-pointer" 
+                            src={getProfilePictureUrl(student.profile_image)} 
                             alt={student.name}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleProfileClick(student.id);
+                            }}
                         />
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded-md transition-opacity pointer-events-none ${
+                          clickedStudentId === student.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        }`}>
                             {student.name}
                             <svg className="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xmlSpace="preserve">
                                 <polygon className="fill-current" points="0,0 127.5,127.5 255,0"/>
@@ -255,7 +271,7 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
                 {signedUpStudents.length > 10 && <div className="h-8 w-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-semibold ring-2 ring-white">+{signedUpStudents.length - 10}</div>}
              </div>
         ) : (
-            <div className="text-center h-8 mb-4 rounded-lg text-sm text-gray-500">Be the first to sign up! +10 extra points</div>
+            <div className="text-center h-8 mb-4 rounded-lg text-sm text-gray-500">Be the first to sign up! +5 bonus points</div>
         )}
         
         {topOrgs.length > 0 && (
@@ -310,6 +326,17 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
               ⚠️ Unregistration closed within 7 hours of event. 
               Contact organizer if you need to cancel.
             </p>
+          </div>
+        )}
+
+        {/* Tags at bottom */}
+        {opportunity.tags && Array.isArray(opportunity.tags) && opportunity.tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1">
+            {opportunity.tags.map((tag, index) => (
+              <span key={index} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                {tag}
+              </span>
+            ))}
           </div>
         )}
       </div>

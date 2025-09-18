@@ -19,14 +19,16 @@ import GroupDetailPage from './pages/GroupDetailPage';
 import CreateOpportunityPage from './pages/CreateOpportunityPage';
 import MyOpportunitiesPage from './pages/MyOpportunitiesPage';
 import AdminPage from './pages/AdminPage';
+import AboutUsPage from './pages/AboutUs';
+import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
 
-export type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity';
+export type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity' | 'aboutUs' | 'postRegistrationSetup';
 export type PageState = {
   page: Page;
   [key: string]: any;
 };
 
-type AuthView = 'login' | 'register';
+type AuthView = 'login' | 'register' | 'aboutUs';
 
 const App: React.FC = () => {
   // Data state from API
@@ -63,6 +65,9 @@ const App: React.FC = () => {
     message: '',
     type: 'info'
   });
+
+  // Add state for tracking first-time registration
+  const [showPostRegistrationSetup, setShowPostRegistrationSetup] = useState(false);
 
   // Load all app data after user is logged in
   useEffect(() => {
@@ -235,7 +240,8 @@ const App: React.FC = () => {
 
         setStudents(prev => [...prev, finalNewUser]);
         setCurrentUser(finalNewUser);
-    setPageState({ page: 'profile' }); // Redirect to profile page after registration
+    setPageState({ page: 'postRegistrationSetup' }); // Change from 'profile' to 'postRegistrationSetup'
+    setShowPostRegistrationSetup(true);
     } catch (e: any) {
         setAuthError(e.message || 'Registration failed.');
     } finally {
@@ -250,6 +256,11 @@ const App: React.FC = () => {
 
   const handleBackToLogin = () => {
     setAuthView('login');
+    setAuthError(null);
+  };
+
+  const handleShowAboutUs = () => {
+    setAuthView('aboutUs');
     setAuthError(null);
   };
 
@@ -682,7 +693,7 @@ const App: React.FC = () => {
       setCurrentUser(updatedUser);
       setStudents(prev => prev.map(s => s.id === currentUser.id ? updatedUser : s));
       
-      alert(`Successfully joined ${orgName}!`);
+      // alert(`Successfully joined ${orgName}!`);
     } catch (e: any) {
       alert(`Error joining organization: ${e.message}`);
     }
@@ -712,19 +723,43 @@ const App: React.FC = () => {
     setCurrentUser(updatedUser);
     setStudents(prev => prev.map(s => s.id === currentUser.id ? updatedUser : s));
       
-      alert(`Successfully left ${orgName}.`);
+      // alert(`Successfully left ${orgName}.`);
     } catch (e: any) {
       alert(`Error leaving organization: ${e.message}`);
     }
   }, [currentUser, organizations]);
 
+  // Function to refresh organizations from backend
+  const refreshOrganizations = async () => {
+    try {
+      const orgsData = await api.getApprovedOrgs();
+      setOrganizations(orgsData);
+    } catch (error) {
+      console.error('Error refreshing organizations:', error);
+    }
+  };
+
   const createOrg = async (orgName: string, type: OrganizationType, description?: string) => {
     if (!currentUser) return;
     try {
-        // API takes `host_user_id`
-        const newOrg = await api.createOrg({ name: orgName, type, description, host_user_id: currentUser.id });
-        setOrganizations(prev => [...prev, newOrg]);
-        joinOrg(newOrg.id);
+        // API takes `host_user_id` and `date_created`
+        const newOrg = await api.createOrg({ 
+          name: orgName, 
+          type, 
+          description, 
+          host_user_id: currentUser.id,
+          date_created: api.formatRegistrationDate() // Add current date/time in YYYY-MM-DDTHH:MM:SS format
+        });
+        
+        // Refresh the organizations list from backend to get the most current approved organizations
+        await refreshOrganizations();
+        
+        // Try to join the organization (this might fail if it's not approved yet)
+        try {
+          await joinOrg(newOrg.id);
+        } catch (joinError) {
+          console.log('Could not auto-join organization (likely not approved yet):', joinError);
+        }
         
         // Show success popup
         showPopup(
@@ -759,6 +794,7 @@ const App: React.FC = () => {
               setOpportunities={setOpportunities}
               organizations={organizations}
               setOrganizations={setOrganizations}
+              allUsers={students}
             />;
         case 'opportunityDetail':
             const opp = opportunities.find(o => o.id === pageState.id);
@@ -836,7 +872,26 @@ const App: React.FC = () => {
         case 'groups':
             return <GroupsPage currentUser={currentUser} allOrgs={organizations} joinOrg={joinOrg} leaveOrg={leaveOrg} createOrg={createOrg} setPageState={setPageState} />;
         case 'createOpportunity':
-            return <CreateOpportunityPage currentUser={currentUser} organizations={organizations} setPageState={setPageState} />;
+            return <CreateOpportunityPage 
+              currentUser={currentUser} 
+              organizations={organizations} 
+              setPageState={setPageState}
+              clonedOpportunityData={pageState.clonedOpportunityData}
+              opportunities={opportunities}
+              setOpportunities={setOpportunities}
+            />;
+        case 'aboutUs':
+            return <AboutUsPage setPageState={setPageState} />;
+        case 'postRegistrationSetup':
+            return <PostRegistrationOrgSetup 
+              currentUser={currentUser}
+              allOrgs={organizations}
+              joinOrg={joinOrg}
+              createOrg={createOrg}
+              onContinue={() => {
+                setPageState({ page: 'opportunities' });
+              }}
+            />;
         default:
             return <OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} setPageState={setPageState} currentUserSignupsSet={currentUserSignupsSet} />;
     }
@@ -850,14 +905,28 @@ const App: React.FC = () => {
               onGoogleSignIn={handleGoogleSignIn} 
               error={authError} 
               isLoading={isLoading}
+              onShowAboutUs={handleShowAboutUs}
             />
-          ) : (
+          ) : authView === 'register' ? (
             <Register 
               onRegister={handleRegister} 
               onBackToLogin={handleBackToLogin} 
               error={authError} 
               isLoading={isLoading}
             />
+          ) : (
+            // About Us view from login
+            <div className="w-full max-w-6xl mx-auto">
+              <div className="mb-6">
+                <button
+                  onClick={handleBackToLogin}
+                  className="bg-cornell-red text-white px-4 py-2 rounded-lg hover:bg-red-800 transition-colors"
+                >
+                  ← Back to Login
+                </button>
+              </div>
+              <AboutUsPage setPageState={handleBackToLogin} />
+            </div>
           )}
           <PopupMessage
             isOpen={popupMessage.isOpen}
@@ -901,7 +970,7 @@ const App: React.FC = () => {
       
       {/* Report Bug Button */}
       <a
-        href="mailto:scott@campuscares.us?subject=Bug Report - CUCares Frontend&body=Please describe the bug you encountered:"
+        href="mailto:sdf72@cornell.edu?subject=Bug Report - CampusCares Frontend&body=Please describe the bug you encountered:"
         className="hidden md:flex fixed bottom-6 right-6 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-lg transition-colors duration-200 items-center gap-2 z-50 text-base"
         title="Report a Bug"
       >

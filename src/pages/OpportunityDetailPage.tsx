@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import { PageState } from '../App';
-import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp, getOpportunities, uploadProfilePicture } from '../api';
+import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp, getOpportunities, uploadProfilePicture, getOpportunityAttendance } from '../api';
 import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 import { upload } from '@testing-library/user-event/dist/upload';
@@ -91,9 +91,42 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     }
   };
 
-  const handleAttendanceSubmitted = () => {
-    // You can add a success message or redirect here
-    alert('Attendance submitted successfully!');
+  const handleAttendanceSubmitted = async () => {
+    try {
+      // Fetch updated attendance data from the API
+      const attendanceData = await getOpportunityAttendance(opportunity.id);
+      
+      // Update the opportunity's involved_users with the attendance data
+      if (attendanceData.users && opportunity.involved_users) {
+        const updatedInvolvedUsers = opportunity.involved_users.map(user => {
+          const attendanceUser = attendanceData.users.find((au: any) => au.user_id === user.id);
+          if (attendanceUser) {
+            return {
+              ...user,
+              attended: attendanceUser.attended
+            };
+          }
+          return user;
+        });
+        
+        // Update the opportunity object
+        const updatedOpportunity = {
+          ...opportunity,
+          involved_users: updatedInvolvedUsers,
+          attendance_marked: true
+        };
+        
+        // Update the opportunities in the parent component
+        setOpportunities(prev => prev.map(opp => 
+          opp.id === opportunity.id ? updatedOpportunity : opp
+        ));
+      }
+      
+      alert('Attendance submitted successfully!');
+    } catch (error: any) {
+      console.error('Error updating attendance data:', error);
+      alert('Attendance submitted, but failed to update display. Please refresh the page.');
+    }
   };
 
   // Admin functions for user management
@@ -123,7 +156,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       // Refresh opportunities data to get updated involved_users
       const updatedOpps = await getOpportunities();
       setOpportunities(updatedOpps);
-      alert('User registered successfully!');
+      // alert('User registered successfully!');
     } catch (error) {
       console.error('Error registering user:', error);
       alert('Failed to register user. They may already be registered.');
@@ -421,6 +454,31 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     });
   };
 
+  const handleCloneOpportunity = () => {
+    // Prepare the opportunity data for cloning
+    const clonedOpportunityData = {
+      name: opportunity.name,
+      description: opportunity.description,
+      address: opportunity.address,
+      date: opportunity.date,
+      time: opportunity.time,
+      duration: opportunity.duration,
+      total_slots: opportunity.total_slots,
+      nonprofit: opportunity.nonprofit || '',
+      host_org_id: opportunity.host_org_id || '',
+      causes: opportunity.causes || [],
+      tags: opportunity.tags || [],
+      redirect_url: opportunity.redirect_url || '',
+      imageUrl: opportunity.imageUrl
+    };
+
+    // Navigate to create opportunity page with cloned data
+    setPageState({
+      page: 'createOpportunity',
+      clonedOpportunityData: clonedOpportunityData
+    });
+  };
+
   return (
     <div>
         <div className="relative mb-8 rounded-2xl overflow-hidden">
@@ -438,14 +496,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             <div className="absolute bottom-0 left-0 p-8">
-                {opportunity.causes && opportunity.causes.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {opportunity.causes.map((cause, index) => (
-                      <span key={index} className="text-white bg-cornell-red/80 px-3 py-1 rounded-full text-sm font-semibold">{cause}</span>
-                    ))}
-                  </div>
-                )}
-                <h1 className="text-4xl lg:text-5xl font-bold text-white mt-2 drop-shadow-lg">{opportunity.name}</h1>
+                <h1 className="text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">{opportunity.name}</h1>
                 {opportunity.nonprofit && (
                   <h2 className="text-2xl font-semibold text-white/90 drop-shadow-lg">{opportunity.nonprofit}</h2>
                 )}
@@ -478,6 +529,12 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                                         className="bg-cornell-red text-white px-4 py-2 rounded-lg hover:bg-red-800 transition-colors"
                                     >
                                         Edit Details
+                                    </button>
+                                    <button
+                                        onClick={handleCloneOpportunity}
+                                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        Clone Opportunity
                                     </button>
                                     <button
                                         onClick={handleDeleteOpportunity}
@@ -670,7 +727,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                             ))}
                         </div>
                     ) : (
-                         <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up! +10 extra points</div>
+                         <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up! +5 bonus points</div>
                     )}
                     
                     {/* Admin User Registration Section */}
@@ -1059,6 +1116,39 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                     </div>
                     
                  </div>
+                 
+                 {/* Causes and Tags Section */}
+                 {(opportunity.causes && opportunity.causes.length > 0) || (opportunity.tags && opportunity.tags.length > 0) ? (
+                   <div className="bg-white p-6 rounded-2xl shadow-lg">
+                     <h4 className="text-lg font-bold mb-4">Categories & Tags</h4>
+                     <div className="space-y-3">
+                       {opportunity.causes && Array.isArray(opportunity.causes) && opportunity.causes.length > 0 && (
+                         <div>
+                           <h5 className="text-sm font-medium text-gray-700 mb-2">Causes</h5>
+                           <div className="flex flex-wrap gap-2">
+                             {opportunity.causes.map((cause, index) => (
+                               <span key={index} className="bg-cornell-red/10 text-cornell-red px-3 py-1 rounded-full text-sm font-medium">
+                                 {cause}
+                               </span>
+                             ))}
+                           </div>
+                         </div>
+                       )}
+                       {opportunity.tags && Array.isArray(opportunity.tags) && opportunity.tags.length > 0 && (
+                         <div>
+                           <h5 className="text-sm font-medium text-gray-700 mb-2">Tags</h5>
+                           <div className="flex flex-wrap gap-2">
+                             {opportunity.tags.map((tag, index) => (
+                               <span key={index} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                                 {tag}
+                               </span>
+                             ))}
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                 ) : null}
                  
                  {/* Contact Host Section - Available to all users */}
                  {opportunity.host_id && (

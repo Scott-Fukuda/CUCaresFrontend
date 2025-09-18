@@ -6,7 +6,7 @@ import { getProfilePictureUrl } from '../api';
 import SearchBar from './SearchBar';
 import Sidebar from './Sidebar';
 
-type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity';
+type Page = 'opportunities' | 'myOpportunities' | 'admin' | 'leaderboard' | 'profile' | 'groups' | 'notifications' | 'opportunityDetail' | 'groupDetail' | 'createOpportunity' | 'aboutUs' | 'postRegistrationSetup';
 
 interface HeaderProps {
   user: User;
@@ -71,6 +71,7 @@ const Header: React.FC<HeaderProps> = (props) => {
               <NavButton page="groups" label="Groups" />
               {user.admin && <NavButton page="admin" label="Admin Page" />}
               <NavButton page="leaderboard" label="Leaderboard" />
+              <NavButton page="aboutUs" label="About Us" />
               <NavButton page="profile" label="Profile" />
             </nav>
         </div>

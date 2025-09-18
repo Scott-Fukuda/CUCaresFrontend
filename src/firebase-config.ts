@@ -52,8 +52,21 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
 
     return firebaseUser;
   } catch (error: any) {
-    console.error('Firebase sign-in error:', error);
-    throw new Error(error.message || 'Google sign-in failed');
+    // Handle missing sessionStorage / initial state case
+    if (
+      error.message?.includes("Unable to process request due to missing initial state") ||
+      error.code === "auth/argument-error" || // sometimes Firebase throws this instead
+      error.code === "auth/no-auth-event"
+    ) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+      throw new Error("There was an error with your browser's session storage, please try logging in again.");
+    } else if (error.code === "auth/popup-closed-by-user") {
+      throw new Error("You closed the login popup. Please try logging in again.");
+    }
+    console.error("Firebase sign-in error:", error);
+    throw new Error(error.message|| "Google sign-in failed");
   }
 };
 
