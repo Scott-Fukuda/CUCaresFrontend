@@ -37,6 +37,9 @@ const AdminPage: React.FC<AdminPageProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [securityToken, setSecurityToken] = useState<string | null>(null);
   const [isLoadingToken, setIsLoadingToken] = useState(false);
+  const [userEmails, setUserEmails] = useState<string[]>([]);
+  const [isLoadingEmails, setIsLoadingEmails] = useState(false);
+  const [showEmails, setShowEmails] = useState(false);
 
   // Fetch unapproved opportunities and organizations
   useEffect(() => {
@@ -208,6 +211,22 @@ const AdminPage: React.FC<AdminPageProps> = ({
     }
   };
 
+  const handleGetUserEmails = async () => {
+    try {
+      setIsLoadingEmails(true);
+      setError(null);
+      
+      const emails = await api.getUserEmails();
+      setUserEmails(emails);
+      setShowEmails(true);
+    } catch (error: any) {
+      console.error('Error fetching user emails:', error);
+      setError(`Failed to fetch user emails: ${error.message}`);
+    } finally {
+      setIsLoadingEmails(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -315,6 +334,62 @@ const AdminPage: React.FC<AdminPageProps> = ({
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* User Emails Section */}
+      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">User Emails</h2>
+        <div className="flex flex-col space-y-4">
+          <button
+            onClick={handleGetUserEmails}
+            disabled={isLoadingEmails}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 w-fit"
+          >
+            {isLoadingEmails ? 'Loading Emails...' : 'Get All User Emails'}
+          </button>
+          
+          {showEmails && userEmails.length > 0 && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                User Emails ({userEmails.length} total):
+              </label>
+              <div className="bg-white border border-gray-300 rounded-lg p-3">
+                <textarea
+                  value={userEmails.join('\n')}
+                  readOnly
+                  className="w-full h-48 p-2 text-sm font-mono bg-gray-50 border border-gray-200 rounded resize-none"
+                  placeholder="Emails will appear here..."
+                />
+                <div className="mt-2 flex space-x-2">
+                  <button
+                    onClick={() => navigator.clipboard.writeText(userEmails.join('\n'))}
+                    className="text-sm bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 transition-colors"
+                  >
+                    Copy All Emails
+                  </button>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(userEmails.join(', '))}
+                    className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors"
+                  >
+                    Copy as Comma-Separated
+                  </button>
+                  <button
+                    onClick={() => setShowEmails(false)}
+                    className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors"
+                  >
+                    Hide Emails
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {showEmails && userEmails.length === 0 && (
+            <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
+              <p>No user emails found.</p>
             </div>
           )}
         </div>

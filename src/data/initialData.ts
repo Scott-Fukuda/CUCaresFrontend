@@ -225,7 +225,7 @@ export const initialBadges: Badge[] = [
         "class": "2027",
         "campusOrgs": ["AAIV", "Cornell Political Union", "Prep"],
         "favoriteService": "Through Prison Express, I was able to view artwork created by incarcerated youth and write letters in response. It’s a powerful way to connect with them, offer encouragement, and create a sense of shared humanity through art and words.",
-        "role": "Director of Marketing"
+        "role": "Chief Marketing Officer"
       },
       {
         "id": "benjamin-chen",
