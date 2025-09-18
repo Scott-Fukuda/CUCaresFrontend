@@ -42,7 +42,8 @@ export interface Opportunity {
   imageUrl: string;
   points: number;
   isPrivate?: boolean;
-  causes: string[]; // Changed from cause to causes as array
+  causes: string[]; 
+  tags: string[]; 
   host_id?: number; // ID of the user who created this opportunity
   host_org_id?: number; // ID of the organization hosting this opportunity
   host_org_name?: string; // Name of the organization hosting this opportunity
@@ -82,6 +83,7 @@ export interface Organization {
     host_user_id?: number;
     member_count?: number;
     users?: User[]; // Array of users who are members of this organization
+    date_created?: string;
 }
 
 export interface Friendship {
@@ -159,3 +161,15 @@ export const academicLevelOptions = [
   'Graduate',
   'Faculty'
 ];
+
+export interface Member {
+  id: string;
+  name: string;
+  picture: string;
+  hometown: string;
+  major: string;
+  class: string;
+  campusOrgs: string[];
+  favoriteService: string;
+  role: string;
+}

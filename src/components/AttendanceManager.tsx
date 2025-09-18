@@ -15,6 +15,21 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
   const [durationHours, setDurationHours] = useState(0);
   const [durationMinutes, setDurationMinutes] = useState(0);
 
+  // Initialize attendedUsers with actual attendance data from backend
+  useEffect(() => {
+    if (opportunity.attendance_marked && opportunity.involved_users) {
+      const attendedUserIds = new Set<number>();
+      
+      opportunity.involved_users.forEach(user => {
+        if (user.attended === true) {
+          attendedUserIds.add(user.id);
+        }
+      });
+      
+      setAttendedUsers(attendedUserIds);
+    }
+  }, [opportunity.attendance_marked, opportunity.involved_users]);
+
   const handleAttendanceToggle = (userId: number) => {
     setAttendedUsers(prev => {
       const newSet = new Set(prev);
@@ -140,7 +155,10 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
                   className="w-4 h-4 text-cornell-red border-gray-300 rounded focus:ring-cornell-red disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <span className={`text-sm font-medium ${isAttendanceMarked ? 'text-gray-400' : 'text-gray-700'}`}>
-                  Attended
+                  {isAttendanceMarked 
+                    ? (attendedUsers.has(participant.id) ? 'Attended' : 'Did not attend')
+                    : 'Attended'
+                  }
                 </span>
               </label>
             </div>

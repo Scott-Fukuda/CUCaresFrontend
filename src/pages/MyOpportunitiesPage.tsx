@@ -32,10 +32,11 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
   const [showExternalUnsignupModal, setShowExternalUnsignupModal] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
 
+  // Add this state variable with the other state declarations at the top
+  const [showAllOpportunities, setShowAllOpportunities] = useState(false);
+
   // Get current date for filtering
   const now = new Date();
-  const threeDaysAgo = new Date(now);
-  threeDaysAgo.setDate(now.getDate() - 3);
 
   // Filter opportunities based on user's role and date
   const { hostedOpportunities, registeredOpportunities } = useMemo(() => {
@@ -44,10 +45,10 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
 
     opportunities.forEach(opp => {
       const oppDate = new Date(`${opp.date}T${opp.time}`);
-      const isPast = oppDate < threeDaysAgo;
+      const isPast = oppDate < now;
       
-      // Check if user is the host or admin
-      if (opp.host_id === currentUser.id || currentUser.admin) {
+      // Check if user is the host
+      if (opp.host_id === currentUser.id) {
         if (!isPast) {
           hosted.push(opp);
         }
@@ -61,7 +62,7 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
     });
 
     return { hostedOpportunities: hosted, registeredOpportunities: registered };
-  }, [opportunities, currentUser.id, threeDaysAgo]);
+  }, [opportunities, currentUser.id, now]);
 
   // Get past opportunities
   const { pastHostedOpportunities, pastRegisteredOpportunities } = useMemo(() => {
@@ -70,11 +71,11 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
 
     opportunities.forEach(opp => {
       const oppDate = new Date(`${opp.date}T${opp.time}`);
-      const isPast = oppDate < threeDaysAgo;
+      const isPast = oppDate < now;
       
       if (isPast) {
-        // Check if user is the host or admin
-        if (opp.host_id === currentUser.id || currentUser.admin) {
+        // Check if user is the host
+        if (opp.host_id === currentUser.id) {
           pastHosted.push(opp);
         }
         // Check if user is registered but not the host
@@ -85,7 +86,7 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
     });
 
     return { pastHostedOpportunities: pastHosted, pastRegisteredOpportunities: pastRegistered };
-  }, [opportunities, currentUser.id, threeDaysAgo]);
+  }, [opportunities, currentUser.id, now]);
 
   // Add handlers for external signup/unsignup
   const handleExternalSignup = (opportunity: Opportunity) => {
@@ -319,6 +320,58 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
           </div>
         )}
       </div>
+
+      {/* All Opportunities Section (admin only) */}
+      {currentUser.admin && (
+        <div className="mb-12">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold text-gray-900">All Opportunities</h2>
+            <button
+              onClick={() => setShowAllOpportunities(!showAllOpportunities)}
+              className="text-cornell-red hover:text-red-800 font-medium"
+            >
+              {showAllOpportunities ? 'Hide All Opportunities' : 'View All Opportunities'}
+            </button>
+          </div>
+
+          {showAllOpportunities && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {opportunities.map(opp => {
+                // Determine signed-up students from backend data
+                let signedUpStudents: User[] = [];
+                if (opp.involved_users && opp.involved_users.length > 0) {
+                  signedUpStudents = opp.involved_users.filter(user => 
+                    user.registered === true || opp.host_id === user.id
+                  );
+                }
+                const isUserSignedUp = currentUserSignupsSet.has(opp.id);
+                
+                return (
+                  <OpportunityCard 
+                    key={opp.id} 
+                    opportunity={opp} 
+                    signedUpStudents={signedUpStudents} 
+                    allOrgs={allOrgs} 
+                    currentUser={currentUser} 
+                    onSignUp={handleSignUp} 
+                    onUnSignUp={handleUnSignUp} 
+                    isUserSignedUp={isUserSignedUp} 
+                    setPageState={setPageState} 
+                    onExternalSignup={handleExternalSignup} 
+                    onExternalUnsignup={handleExternalUnsignup} 
+                  />
+                );
+              })}
+            </div>
+          )}
+
+          {showAllOpportunities && opportunities.length === 0 && (
+            <div className="text-center py-4 text-gray-500">
+              <p>No opportunities available.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* External Signup Modal */}
       {showExternalSignupModal && selectedOpportunity && (

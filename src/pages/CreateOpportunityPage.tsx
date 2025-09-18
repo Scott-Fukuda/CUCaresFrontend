@@ -4,26 +4,127 @@ import { PageState } from '../App';
 import * as api from '../api';
 import { formatDateTimeForBackend } from '../utils/timeUtils';
 
+// Helper function to transform opportunity from backend format to frontend format
+const transformOpportunityFromBackend = (opp: any): Opportunity => {
+  // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
+  const dateObj = new Date(opp.date);
+  
+  // Extract date and time components
+  const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
+  
+  // Extract time in HH:MM:SS format
+  let timeOnly;
+  if (opp.date.includes('GMT')) {
+    // GMT format - convert to Eastern Time (UTC-4)
+    const gmtHours = dateObj.getUTCHours();
+    const easternHours = (gmtHours - 4 + 24) % 24; // Convert GMT to Eastern
+    const hours = easternHours.toString().padStart(2, '0');
+    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+    const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+    timeOnly = `${hours}:${minutes}:${seconds}`;
+  } else {
+    // Already Eastern Time - use as is
+    const hours = dateObj.getHours().toString().padStart(2, '0');
+    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+    const seconds = dateObj.getSeconds().toString().padStart(2, '0');
+    timeOnly = `${hours}:${minutes}:${seconds}`;
+  }
+  
+  // Transform involved users if they exist
+  const transformedInvolvedUsers = opp.involved_users ? opp.involved_users.map((involvedUser: any) => {
+    const user = involvedUser.user || involvedUser;
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      profile_image: user.profile_image,
+      interests: user.interests || [],
+      friendIds: user.friends || [],
+      organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
+      admin: user.admin || false,
+      gender: user.gender,
+      graduationYear: user.graduation_year,
+      academicLevel: user.academic_level,
+      major: user.major,
+      birthday: user.birthday,
+      points: user.points || 0,
+      registration_date: user.registration_date,
+      phone: user.phone,
+      car_seats: user.car_seats || 0,
+      bio: user.bio,
+      registered: involvedUser.registered || false,
+      attended: involvedUser.attended || false,
+    };
+  }) : [];
+  
+  // Use image URL directly from backend
+  const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
+  
+  return {
+    id: opp.id,
+    name: opp.name,
+    nonprofit: opp.nonprofit || null,
+    description: opp.description,
+    date: dateOnly,
+    time: timeOnly,
+    duration: opp.duration,
+    total_slots: opp.total_slots || 10,
+    imageUrl: resolvedImageUrl,
+    points: opp.duration || 0,
+    causes: opp.causes !== undefined ? opp.causes : [],
+    isPrivate: false,
+    host_id: opp.host_user_id || opp.host_org_id,
+    host_org_id: opp.host_org_id,
+    host_org_name: opp.host_org_name,
+    involved_users: transformedInvolvedUsers,
+    address: opp.address || '',
+    approved: opp.approved !== undefined ? opp.approved : true,
+    attendance_marked: opp.attendance_marked !== undefined ? opp.attendance_marked : false,
+    visibility: opp.visibility !== undefined ? opp.visibility : [],
+    comments: opp.comments !== undefined ? opp.comments : [],
+    qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
+    tags: opp.tags !== undefined ? opp.tags : [],
+    redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null
+  };
+};
+
 interface CreateOpportunityPageProps {
   currentUser: any;
   organizations: Organization[];
   setPageState: (state: PageState) => void;
+  clonedOpportunityData?: any; // Add this line
+  opportunities: Opportunity[];
+  setOpportunities: (opportunities: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])) => void;
 }
 
-const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUser, organizations, setPageState }) => {
+const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ 
+  currentUser, 
+  organizations, 
+  setPageState, 
+  clonedOpportunityData, // Add this parameter
+  opportunities,
+  setOpportunities
+}) => {
+  // Update the initial formData state to use cloned data
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    cause: [] as string[],
-    date: '',
-    time: '',
-    duration: 60, // Default 60 minutes
-    total_slots: 10,
-    nonprofit: '',
-    host_org_id: '',
-    address: '',
-    redirect_url: '' // Add redirect URL field
+    name: clonedOpportunityData?.name || '',
+    description: clonedOpportunityData?.description || '',
+    cause: clonedOpportunityData?.causes || [] as string[],
+    tags: clonedOpportunityData?.tags || [] as string[],
+    date: clonedOpportunityData?.date || '',
+    time: clonedOpportunityData?.time || '',
+    duration: clonedOpportunityData?.duration || 60,
+    total_slots: clonedOpportunityData?.total_slots || 10,
+    nonprofit: clonedOpportunityData?.nonprofit || '',
+    host_org_id: clonedOpportunityData?.host_org_id || '',
+    address: clonedOpportunityData?.address || '',
+    redirect_url: clonedOpportunityData?.redirect_url || ''
   });
+
+  // Add image preview state for cloned images
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    clonedOpportunityData?.imageUrl || null
+  );
   
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +145,14 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
     setFormData(prev => ({
       ...prev,
       cause: selectedCauses
+    }));
+  };
+
+  const handleTagsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedTags = Array.from(e.target.selectedOptions, option => option.value);
+    setFormData(prev => ({
+      ...prev,
+      tags: selectedTags
     }));
   };
 
@@ -114,8 +223,12 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
       // Add causes as array
-      formData.cause.forEach(cause => {
-        formDataToSend.append('cause', cause);
+      formData.cause.forEach((cause: string) => {
+        formDataToSend.append('causes', cause);
+      });
+      // Add tags as array
+      formData.tags.forEach((tag: string) => {
+        formDataToSend.append('tags', tag);
       });
       formDataToSend.append('date', formatDateTimeForBackend(formData.date, formData.time));
       formDataToSend.append('duration', formData.duration.toString());
@@ -139,7 +252,19 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
       }
 
       // Make the API call
-      await api.createOpportunity(formDataToSend);
+      const newOpp = await api.createOpportunity(formDataToSend);
+      console.log('Created opportunity (raw):', newOpp);
+
+      // Transform the opportunity to match the frontend format
+      const transformedOpp = transformOpportunityFromBackend(newOpp);
+      console.log('Transformed opportunity:', transformedOpp);
+
+      // If current user is admin, automatically approve the opportunity
+      if (currentUser.admin) {
+        const approvedOpp = { ...transformedOpp, approved: true };
+        console.log('Admin user - adding approved opportunity:', approvedOpp);
+        setOpportunities(prev => [approvedOpp, ...prev]);
+      }
 
       setSuccess(true);
       setTimeout(() => {
@@ -195,25 +320,6 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                 placeholder="Enter opportunity name"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Causes *
-              </label>
-              <select
-                name="cause"
-                multiple
-                value={formData.cause}
-                onChange={handleCausesChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-              >
-                {allInterests.map(cause => (
-                  <option key={cause} value={cause}>{cause}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple causes</p>
             </div>
 
             <div>
@@ -354,6 +460,42 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
             />
           </div>
 
+          {/* <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tags
+              </label>
+              <select
+                name="tags"
+                multiple
+                value={formData.tags}
+                onChange={handleTagsChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+              >
+                <option value="Rides Provided">Rides Provided</option>
+                <option value="Food Provided">Food Provided</option>
+                <option value="Fundraiser">Fundraiser</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple tags</p>
+            </div> */}
+
+          <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Causes
+              </label>
+              <select
+                name="cause"
+                multiple
+                value={formData.cause}
+                onChange={handleCausesChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+              >
+                {allInterests.map(cause => (
+                  <option key={cause} value={cause}>{cause}</option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple causes</p>
+            </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Opportunity Image
@@ -374,6 +516,16 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ currentUs
               {imageFile ? (
                 <div>
                   <p className="text-green-600 font-medium">✓ {imageFile.name} selected</p>
+                  <p className="text-sm text-gray-500 mt-1">Click to change or drag a new image</p>
+                </div>
+              ) : imagePreview ? (
+                <div>
+                  <img 
+                    src={imagePreview} 
+                    alt="Cloned opportunity preview" 
+                    className="max-h-32 mx-auto mb-2 rounded-lg"
+                  />
+                  <p className="text-blue-600 font-medium">✓ Using cloned image</p>
                   <p className="text-sm text-gray-500 mt-1">Click to change or drag a new image</p>
                 </div>
               ) : (
