@@ -1,14 +1,16 @@
 import "./index.scss";
 import { PageState } from '../../App';
+import { User } from '../../types';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 
 interface SidebarProps {
     toggleSideBar: boolean;
     setToggleSideBar: React.Dispatch<React.SetStateAction<boolean>>;
     setPageState: (page: PageState) => void;
+    currentUser: User;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ toggleSideBar, setToggleSideBar, setPageState }) => {
+const Sidebar: React.FC<SidebarProps> = ({ toggleSideBar, setToggleSideBar, setPageState, currentUser }) => {
 
     return (
         <div className={`sidebar ${toggleSideBar ? 'active' : ''}`}>
@@ -38,6 +40,16 @@ const Sidebar: React.FC<SidebarProps> = ({ toggleSideBar, setToggleSideBar, setP
                     }}>
                     <p>My Opportunities</p>
                 </div>
+                {/* Admin page - only show for admin users */}
+                {currentUser.admin && (
+                    <div className="nav-opt" 
+                        onClick={() => {
+                            setToggleSideBar(false);
+                            setPageState({ page: 'admin' });
+                        }}>
+                        <p>Admin Panel</p>
+                    </div>
+                )}
                 <div className="nav-opt" onClick={() => window.location.href = "mailto:sdf72@cornell.edu?subject=Bug Report - CUCares Frontend&body=Please describe the bug you encountered:"}>
                     <p>Report Bug</p>
                 </div>

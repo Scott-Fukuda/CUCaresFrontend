@@ -778,6 +778,15 @@ export const checkEmailApproval = async (email: string) => {
   return response.json();
 };
 
+// Add approved email - POST /api/approved-emails
+export const addApprovedEmail = async (email: string) => {
+  const response = await authenticatedRequest('/approved-emails', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+  return response;
+};
+
 // --- Monthly Points ---
 // GET /api/monthly-points for getting monthly points
 export const getMonthlyPoints = async (date: string): Promise<{users: Array<{id: number, points: number}>}> => {

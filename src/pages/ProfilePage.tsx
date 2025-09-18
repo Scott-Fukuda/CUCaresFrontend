@@ -61,7 +61,6 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   }, [isCurrentUser, currentUser, user.id, checkFriendshipStatus, friendshipsData]);
 
   useEffect(() => {
-    console.log('current user: ', currentUser)
   }, [currentUser])
 
   // Load friends when user changes

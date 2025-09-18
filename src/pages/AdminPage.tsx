@@ -40,6 +40,8 @@ const AdminPage: React.FC<AdminPageProps> = ({
   const [userEmails, setUserEmails] = useState<string[]>([]);
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
   const [showEmails, setShowEmails] = useState(false);
+  const [approvedEmail, setApprovedEmail] = useState<string>('');
+  const [isAddingEmail, setIsAddingEmail] = useState(false);
 
   // Fetch unapproved opportunities and organizations
   useEffect(() => {
@@ -227,6 +229,34 @@ const AdminPage: React.FC<AdminPageProps> = ({
     }
   };
 
+  const handleAddApprovedEmail = async () => {
+    if (!approvedEmail.trim()) {
+      setError('Please enter an email address');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(approvedEmail.trim())) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    try {
+      setIsAddingEmail(true);
+      setError(null);
+      
+      await api.addApprovedEmail(approvedEmail.trim());
+      setApprovedEmail(''); // Clear the input
+      alert(`Email "${approvedEmail.trim()}" has been added to the approved list successfully!`);
+    } catch (error: any) {
+      console.error('Error adding approved email:', error);
+      setError(`Failed to add approved email: ${error.message}`);
+    } finally {
+      setIsAddingEmail(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -392,6 +422,38 @@ const AdminPage: React.FC<AdminPageProps> = ({
               <p>No user emails found.</p>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Add Approved Email Section */}
+      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Add Approved Email</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Add email addresses to the approved list for non-Cornell users.
+        </p>
+        <div className="flex flex-col space-y-4">
+          <div className="flex gap-4">
+            <input
+              type="email"
+              value={approvedEmail}
+              onChange={(e) => setApprovedEmail(e.target.value)}
+              placeholder="Enter email address (e.g., user@example.com)"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+              disabled={isAddingEmail}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleAddApprovedEmail();
+                }
+              }}
+            />
+            <button
+              onClick={handleAddApprovedEmail}
+              disabled={isAddingEmail || !approvedEmail.trim()}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isAddingEmail ? 'Adding...' : 'Add Email'}
+            </button>
+          </div>
         </div>
       </div>
 
