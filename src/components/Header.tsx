@@ -51,7 +51,7 @@ const Header: React.FC<HeaderProps> = (props) => {
               <img 
                 src="/logo.png" 
                 alt="CampusCares Logo" 
-                className="h-11 w-12 object-contain cursor-pointer"
+                className="h-15 w-14 object-contain cursor-pointer"
                 onClick={() => setToggleSideBar(prev => !prev)}
               />
             </div>
