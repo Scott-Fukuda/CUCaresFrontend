@@ -31,12 +31,20 @@
 .nav {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 7px;
 
-    p {
+    .nav-opt {
         cursor: pointer;
+        padding: 3px 8px;
+        border-radius: 8px;
 
         &:hover {
+            background-color: #c9c9c936;
+        }
+    }
+
+    .nav-opt.active {
+        p {
             color: #cf1c25
         }
     }

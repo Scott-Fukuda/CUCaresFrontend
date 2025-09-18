@@ -5,7 +5,6 @@ import { auth } from '../firebase-config';
 
 interface AdminPageProps {
   currentUser: User;
-  setPageState: (state: any) => void;
   opportunities: Opportunity[];
   setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
   organizations: Organization[];

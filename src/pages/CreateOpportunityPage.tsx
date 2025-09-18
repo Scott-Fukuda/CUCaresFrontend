@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { allInterests, Opportunity, Organization } from '../types';
-import { PageState } from '../App';
+import { useNavigate, useLocation } from 'react-router-dom';
 import * as api from '../api';
 import { formatDateTimeForBackend } from '../utils/timeUtils';
 
@@ -91,20 +91,21 @@ const transformOpportunityFromBackend = (opp: any): Opportunity => {
 interface CreateOpportunityPageProps {
   currentUser: any;
   organizations: Organization[];
-  setPageState: (state: PageState) => void;
-  clonedOpportunityData?: any; // Add this line
   opportunities: Opportunity[];
   setOpportunities: (opportunities: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])) => void;
 }
 
 const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ 
   currentUser, 
-  organizations, 
-  setPageState, 
-  clonedOpportunityData, // Add this parameter
+  organizations,  // Add this parameter
   opportunities,
   setOpportunities
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const clonedOpportunityData = location.state?.clonedOpportunityData;
+
   // Update the initial formData state to use cloned data
   const [formData, setFormData] = useState({
     name: clonedOpportunityData?.name || '',
@@ -268,7 +269,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
       setSuccess(true);
       setTimeout(() => {
-        setPageState({ page: 'opportunities' });
+        navigate('/opportunities');
       }, 2000);
 
     } catch (err: any) {
@@ -286,7 +287,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Create New Opportunity</h1>
           <button
-            onClick={() => setPageState({ page: 'opportunities' })}
+            onClick={() => navigate('/opportunities')}
             className="text-gray-600 hover:text-gray-800 transition-colors"
           >
             ← Back to Opportunities
@@ -540,7 +541,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
           <div className="flex justify-end space-x-4 pt-6">
             <button
               type="button"
-              onClick={() => setPageState({ page: 'opportunities' })}
+              onClick={() => navigate('/opportunities')}
               className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancel

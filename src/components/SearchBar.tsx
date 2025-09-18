@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { User, Organization, FriendshipsResponse } from '../types';
-import { PageState } from '../App';
+import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl } from '../api';
 
 interface SearchBarProps {
@@ -12,7 +12,6 @@ interface SearchBarProps {
   joinOrg: (orgId: number) => void;
   leaveOrg: (orgId: number) => void;
   handleFriendRequest: (toUserId: number) => void;
-  setPageState: (state: PageState) => void;
 }
 
 const SearchIcon: React.FC<{className?: string}> = ({className}) => (
@@ -29,8 +28,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
   joinOrg,
   leaveOrg,
   handleFriendRequest,
-  setPageState,
 }) => {
+  const navigate = useNavigate();
+
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -107,7 +107,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                           <div
                             className="flex-grow cursor-pointer"
                             onClick={() => {
-                                setPageState({ page: 'groupDetail', id: org.id });
+                                navigate(`/group-detail/${org.id}`);
                                 handleResultClick();
                             }}
                           >
@@ -143,7 +143,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                            <div 
                               className="flex items-center gap-3 cursor-pointer flex-grow"
                               onClick={() => {
-                                setPageState({ page: 'profile', userId: user.id });
+                                navigate(`/profile/${user.id}`);
                                 handleResultClick();
                               }}
                             >

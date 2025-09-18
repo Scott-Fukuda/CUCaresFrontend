@@ -1,16 +1,17 @@
 import "./index.scss";
-import { PageState } from '../../App';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from '../../types';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 
 interface SidebarProps {
     toggleSideBar: boolean;
     setToggleSideBar: React.Dispatch<React.SetStateAction<boolean>>;
-    setPageState: (page: PageState) => void;
     currentUser: User;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ toggleSideBar, setToggleSideBar, setPageState, currentUser }) => {
+const Sidebar: React.FC<SidebarProps> = ({ toggleSideBar, setToggleSideBar, currentUser }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
 
     return (
         <div className={`sidebar ${toggleSideBar ? 'active' : ''}`}>
@@ -26,17 +27,17 @@ const Sidebar: React.FC<SidebarProps> = ({ toggleSideBar, setToggleSideBar, setP
                 />
             </div>
             <div className="nav">
-                <div className="nav-opt" 
+                <div className={`nav-opt ${location.pathname === '/about-us' ? 'active' : ''}`}
                     onClick={() => {
                         setToggleSideBar(false);
-                        setPageState({ page: 'aboutUs' });
+                        navigate("/about-us");
                     }}>
                     <p>About Us</p>
                 </div>
-                <div className="nav-opt" 
+                <div className={`nav-opt ${location.pathname === '/my-opportunities' ? 'active' : ''}`}
                     onClick={() => {
                         setToggleSideBar(false);
-                        setPageState({ page: 'myOpportunities' });
+                        navigate('/my-opportunities');
                     }}>
                     <p>My Opportunities</p>
                 </div>
@@ -45,12 +46,12 @@ const Sidebar: React.FC<SidebarProps> = ({ toggleSideBar, setToggleSideBar, setP
                     <div className="nav-opt" 
                         onClick={() => {
                             setToggleSideBar(false);
-                            setPageState({ page: 'admin' });
+                            navigate('/admin');
                         }}>
                         <p>Admin Panel</p>
                     </div>
                 )}
-                <div className="nav-opt" onClick={() => window.location.href = "mailto:sdf72@cornell.edu?subject=Bug Report - CUCares Frontend&body=Please describe the bug you encountered:"}>
+                <div className="nav-opt" onClick={() => window.location.href = "mailto:sdf72@cornell.edu?subject=Bug Report - Campus Cares Frontend&body=Please describe the bug you encountered:"}>
                     <p>Report Bug</p>
                 </div>
             </div>
