@@ -5,6 +5,7 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import PersonIcon from '@mui/icons-material/Person';
 import EventIcon from '@mui/icons-material/Event';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useNavigate } from "react-router-dom";
 import { User } from '../types';
 
@@ -64,6 +65,13 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentPage, setPageState, curren
         isActive={currentPage === 'profile'}
         // onClick={() => navigate(`/profile/${currentUser.id}`)}
         onClick={() => setPageState({ page: 'profile'})}
+      />
+      <NavItem
+        label="Admin"
+        icon={<AdminPanelSettingsIcon />}
+        isActive={currentPage === 'admin'}
+        // onClick={() => navigate("/admin")}
+        onClick={() => setPageState({ page: 'admin'})}
       />
     </nav>
   );

@@ -3,7 +3,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { User, MinimalUser, Opportunity, SignUp, Organization, Badge, OrganizationType, Notification, Friendship, FriendshipStatus, FriendshipsResponse, UserWithFriendshipStatus } from './types';
 import * as api from './api';
 import { initialBadges } from './data/initialData'; // Using initial data for badges
-import { signInWithGoogle, FirebaseUser, auth } from './firebase-config';
+import { signInWithGoogle, FirebaseUser, auth, onAuthStateChanged, signOut } from './firebase-config';
 import Header from './components/Header';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -46,6 +46,46 @@ const App: React.FC = () => {
   
   // Track last loaded user to prevent infinite loops
   const lastLoadedUserId = useRef<number | null>(null);
+
+  // Subscribe to Firebase auth state on mount so users stay logged in across reloads
+  useEffect(() => {
+    let mounted = true;
+    const unsubscribe = onAuthStateChanged(async (firebaseUser) => {
+      if (!mounted) return;
+      if (!firebaseUser) {
+        setCurrentUser(null);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const token = await firebaseUser.getIdToken();
+        const authResult = await api.verifyFirebaseToken(token);
+        if (authResult.success) {
+          const existingUser = await api.getUserByEmail(firebaseUser.email);
+          if (existingUser) {
+            setCurrentUser(existingUser);
+            setPageState({ page: 'opportunities' });
+          } else {
+            // No account in our backend yet, show registration view
+            setAuthView('register');
+          }
+        } else {
+          setCurrentUser(null);
+        }
+      } catch (e: any) {
+        console.error('Error verifying auth state:', e);
+        setCurrentUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, []);
   
   // UI State
   const [authError, setAuthError] = useState<string | null>(null);
@@ -278,10 +318,18 @@ const App: React.FC = () => {
   };
 
   const handleLogout = () => {
-    setCurrentUser(null);
-    setAuthError(null);
-    setAuthView('login');
-    setPageState({ page: 'opportunities' });
+    // Sign out from Firebase and clear app state
+    (async () => {
+      try {
+        await signOut();
+      } catch (e: any) {
+        console.error('Error signing out:', e.message || e);
+      }
+      setCurrentUser(null);
+      setAuthError(null);
+      setAuthView('login');
+      setPageState({ page: 'opportunities' });
+    })();
   };
 
   // Data Handlers
