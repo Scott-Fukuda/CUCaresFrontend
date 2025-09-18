@@ -62,6 +62,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                 setPageState={setPageState}
                 toggleSideBar={toggleSideBar}
                 setToggleSideBar={setToggleSideBar}
+                currentUser={user}
               />
             </div>
             

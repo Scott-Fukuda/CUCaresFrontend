@@ -81,14 +81,13 @@ const AboutUsPage: React.FC<AboutUsPageProps> = ({ setPageState }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-cornell-red text-white py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">About CampusCares</h1>
-            
-          </div>
-        </div>
+            {/* Header Banner */}
+            <div className="relative">
+        <img 
+          src="/banner.jpeg" 
+          alt="CampusCares Banner" 
+          className="w-full h-48 md:h-64 lg:h-80 object-cover"
+        />
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

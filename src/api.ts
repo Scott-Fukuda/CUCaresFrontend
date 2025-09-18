@@ -221,6 +221,17 @@ export const registerUser = (data: object): Promise<User> => authenticatedReques
   body: JSON.stringify(data),
 });
 
+// Get all user emails - returns array of email strings
+export const getUserEmails = async (): Promise<string[]> => {
+  const response = await authenticatedRequest('/users/emails');
+  console.log('getUserEmails response:', response);
+  // If the response is the array directly:
+  return response || [];
+
+  // OR if it's wrapped differently:
+  // return response.emails || response || [];
+};
+
 // --- Organizations (Groups) ---
 export const getOrgs = async (): Promise<Organization[]> => {
     const response = await authenticatedRequest('/orgs');
@@ -765,6 +776,15 @@ export const checkEmailApproval = async (email: string) => {
   }
 
   return response.json();
+};
+
+// Add approved email - POST /api/approved-emails
+export const addApprovedEmail = async (email: string) => {
+  const response = await authenticatedRequest('/approved-emails', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+  return response;
 };
 
 // --- Monthly Points ---
