@@ -82,7 +82,7 @@ const AboutUsPage: React.FC = () => {
             {/* Header Banner */}
             <div className="relative">
         <img 
-          src="/banner.jpeg" 
+          src="/banner3.jpeg" 
           alt="CampusCares Banner" 
           className="w-full h-48 md:h-64 lg:h-80 object-cover"
         />
