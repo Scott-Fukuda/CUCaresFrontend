@@ -142,7 +142,7 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
         "The sign-in popup was blocked by your browser. Please try again. " +
         "If pop-ups continue to be blocked, allow pop-ups for this site in your browser settings, or try signing in using a different browser."
       );
-    } 
+    }
     console.error("Firebase sign-in error:", error);
     throw new Error("Sign-in failed. Please try again.");
   }

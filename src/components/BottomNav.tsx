@@ -64,9 +64,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentUser }) => {
         <NavItem
           label="Admin"
           icon={<AdminPanelSettingsIcon />}
-          isActive={currentPage === 'admin'}
-          // onClick={() => navigate("/admin")}
-          onClick={() => setPageState({ page: 'admin'})}
+          isActive={location.pathname === '/admin'}
+          onClick={() => navigate("/admin")}
+          // onClick={() => setPageState({ page: 'admin'})}
         />
       }
     </nav>
