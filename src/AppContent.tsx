@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { User, MinimalUser, Opportunity, SignUp, Organization, Badge, OrganizationType, Notification, Friendship, FriendshipStatus, FriendshipsResponse, UserWithFriendshipStatus } from './types';
 import * as api from './api';
-import { signInWithGoogle, FirebaseUser, auth, onAuthStateChanged, signOut } from './firebase-config';
+import { signInWithGoogle, FirebaseUser, auth, onAuthStateChanged, signOut, initializeFirebase } from './firebase-config';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import AuthFlow from "./AuthFlow";
 import AppRouter from "./AppRouter";
@@ -16,6 +16,9 @@ const AppContent: React.FC = () => {
   // Subscribe to Firebase auth state on mount so users stay logged in across reloads
   useEffect(() => {
     let mounted = true;
+    // Ensure persistence is configured before subscribing
+    initializeFirebase().catch(err => console.warn('initializeFirebase failed', err));
+
     const unsubscribe = onAuthStateChanged(async (firebaseUser) => {
       if (!mounted) return;
       if (!firebaseUser) {
@@ -27,14 +30,23 @@ const AppContent: React.FC = () => {
       try {
         const token = await firebaseUser.getIdToken();
         const authResult = await api.verifyFirebaseToken(token);
+
         if (authResult.success) {
-          const existingUser = await api.getUserByEmail(firebaseUser.email);
-          if (existingUser) {
+          console.log('Firebase auth state changed, user is authenticated:', firebaseUser.email);
+          const response = await api.checkUserExists(firebaseUser.email);
+
+          if (response.success && response.exists) {
+            console.log('User exists in backend, fetching user data...');
+            const existingUser = await api.getUserByEmail(firebaseUser.email, token);
             setCurrentUser(existingUser);
             navigate('/opportunities');
           } else {
+            console.log('User does NOT exist in backend, sending to register page');
+
+            setCurrentUser(null);
             // No account in our backend yet, show registration view
             setAuthView('register');
+            navigate('/register');
           }
         } else {
           setCurrentUser(null);
@@ -186,16 +198,19 @@ const AppContent: React.FC = () => {
       if (authResult.success) {
         // User is authenticated, check if they exist in our database
         //console.log('Checking if user exists in database...');
-        const existingUser = await api.getUserByEmail(firebaseUser.email);
-        
-        if (existingUser) {
+        const response = await api.checkUserExists(firebaseUser.email);
+        const exists = response.exists
+
+        if (exists) {
           // User exists, log them in
-          // //console.log('User found, logging in:', existingUser);
+          const existingUser = await api.getUserByEmail(firebaseUser.email, token);
+                    console.log('User found, logging in:', existingUser);
+
           setCurrentUser(existingUser);
           navigate("/");
         } else {
           // User doesn't exist, redirect to registration
-          //console.log('User not found, redirecting to registration');
+          console.log('User not found, redirecting to registration');
           setAuthView('register');
         }
       }

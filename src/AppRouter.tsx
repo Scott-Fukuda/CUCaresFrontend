@@ -123,6 +123,12 @@ const AppRouter: React.FC<AppRouterProps> = ({
                     <Routes>
                         <Route path="/opportunities" element={<OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />}/>;
                         <Route path="/my-opportunities" element={<MyOpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />}/>
+                        <Route path="/account-setup" element = {<PostRegistrationOrgSetup
+                            currentUser={currentUser}
+                            allOrgs={organizations}
+                            joinOrg={joinOrg}
+                            createOrg={createOrg}
+                        />}/>
                         <Route 
                             path="/admin" 
                             element={
