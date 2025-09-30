@@ -158,7 +158,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                             />}
                         />
                         <Route 
-                            path="/group/:id" 
+                            path="/group-detail/:id" 
                             element={
                             <GroupDetailPage 
                                 allUsers={students}
