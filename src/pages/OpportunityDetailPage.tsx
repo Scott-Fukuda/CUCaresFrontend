@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
-import { getProfilePictureUrl, updateOpportunity, getUserByEmail, deleteOpportunity, registerForOpp, unregisterForOpp, getOpportunities, uploadProfilePicture, getOpportunityAttendance } from '../api';
+import { getProfilePictureUrl, updateOpportunity, deleteOpportunity, registerForOpp, unregisterForOpp, getOpportunities, uploadProfilePicture, getOpportunityAttendance } from '../api';
 import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 import { upload } from '@testing-library/user-event/dist/upload';
