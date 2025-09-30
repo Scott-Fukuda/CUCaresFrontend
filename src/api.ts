@@ -1,4 +1,3 @@
-
 import { User, MinimalUser, Opportunity, Organization, SignUp, Friendship, FriendshipStatus, FriendshipsResponse } from './types';
 import { auth } from './firebase-config';
 import { canUnregisterFromOpportunity } from './utils/timeUtils';
@@ -125,40 +124,43 @@ export const getUsers = async (): Promise<User[]> => {
 };
 
 // Get user by email for login - new endpoint
-export const getUserByEmail = async (email: string): Promise<User | null> => {
-    try {
-        const response = await authenticatedRequest(`/users/email/${encodeURIComponent(email)}`);
-        
-        if (response.exists && response.user) {
-            // Transform the user data to match our User interface
-            return {
-                id: response.user.id,
-                name: response.user.name,
-                email: response.user.email,
-                profile_image: response.user.profile_image,
-                interests: [],
-                friendIds: [],
-                organizationIds: [],
-                admin: response.user.admin || false,
-                points: 0,
-                car_seats: 0,
-                // These will be filled when we load full user data
-                gender: undefined,
-                graduationYear: undefined,
-                academicLevel: undefined,
-                major: undefined,
-                birthday: undefined,
-                registration_date: undefined,
-                phone: undefined,
-                bio: undefined,
-            };
-        } else {
-            return null;
+export const getUserByEmail = async (
+  email: string,
+  token?: string
+): Promise<User | null> => {
+  try {
+    if (token) {
+      const res = await fetch(
+        `${ENDPOINT_URL}/api/users/email/${encodeURIComponent(email)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
         }
-    } catch (error) {
-        console.error('Error fetching user by email:', error);
+      );
+
+      if (!res.ok) {
         return null;
+      }
+
+      const response: User = await res.json();
+      return response;
     }
+
+    // --- Fallback: no token provided ---
+    // Here you can clear auth state if needed
+    // Example: Firebase => await signOut(auth);
+    // Example: Local => localStorage.removeItem('jwt');
+    // Or just avoid sending Authorization header at all
+
+    return null;
+  } catch (error) {
+    console.error('Error fetching user by email:', error);
+    return null;
+  }
 };
 
 // Get detailed user data for a specific user
@@ -216,10 +218,33 @@ export const uploadProfilePicture = async (file: File): Promise<string> => {
   const result = await response.json();
   return result.url; // Return the S3 URL
 };
-export const registerUser = (data: object): Promise<User> => authenticatedRequest('/users', {
-  method: 'POST',
-  body: JSON.stringify(data),
-});
+export const registerUser = async (data: object, token?: string): Promise<User> => {
+  // If caller provides a Firebase ID token, use it directly so registration is authenticated
+  if (token) {
+    const res = await fetch(`${ENDPOINT_URL}/api/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+      mode: 'cors',
+      credentials: 'omit',
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ message: res.statusText }));
+      throw new Error(err.message || 'Failed to register user');
+    }
+    return res.json();
+  }
+
+  // Fallback: use existing authenticatedRequest (reads token from auth.currentUser)
+  return authenticatedRequest('/users', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }) as Promise<User>;
+};
 
 // Get all user emails - returns array of email strings
 export const getUserEmails = async (): Promise<string[]> => {
@@ -778,6 +803,35 @@ export const checkEmailApproval = async (email: string) => {
   return response.json();
 };
 
+export const checkUserExists = async (email: string, token?: string) => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    const t = await getFirebaseToken();
+    if (t) headers['Authorization'] = `Bearer ${t}`;
+  }
+
+  const encodedEmail = encodeURIComponent(email);
+  const response = await fetch(`${ENDPOINT_URL}/api/users/check/${encodedEmail}`, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => response.statusText);
+    throw new Error(`Failed to check user existence: ${text}`);
+  }
+  const data = await response.json().catch(() => ({}));
+  if (data && data.exists) {
+    return { success: true, exists: true }; // User exists
+  }
+  return { success: true, data: false };
+};
+        
 // Add approved email - POST /api/approved-emails
 export const addApprovedEmail = async (email: string) => {
   const response = await authenticatedRequest('/approved-emails', {
