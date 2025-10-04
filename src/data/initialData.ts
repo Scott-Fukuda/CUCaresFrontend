@@ -287,5 +287,16 @@ export const initialBadges: Badge[] = [
         "campusOrgs": ["Cru", "Big Red Buddies", "Perfect Pair", "Society of Women Engineers", "CU Empower"],
         "favoriteService": "My favorite service experience was coaching 3rd and 4th grade girls’ soccer. All through high school, I was very involved in my town’s soccer program, including volunteer coaching. Over seven seasons, I had the privilege of watching each girl grow in skill and confidence while also learning to love the game. Building connections with every player and giving them the same fun and educational soccer experience I had as a child was incredibly rewarding. Last year, I even got to see two of the girls I once coached compete in the state semifinals. Watching their growth and continued passion for soccer was one of the most fulfilling moments of my coaching experience.",
         "role": "Outreach Manager"
+      },
+      {
+        "id": "kate-shum",
+        "name": "Kate Shum",
+        "picture": "./team_pic/kate.png",
+        "hometown": "Marlboro, NJ",
+        "major": "Computer Science",
+        "class": "2028",
+        "campusOrgs": ["Bethany CCC"],
+        "favoriteService": "Volunteering at my local elementary's after-school program!",
+        "role": ""
       }
   ]
