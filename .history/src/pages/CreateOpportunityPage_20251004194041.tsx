@@ -85,7 +85,7 @@ const transformOpportunityFromBackend = (opp: any): Opportunity => {
     qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
     tags: opp.tags !== undefined ? opp.tags : [],
     redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null
-  } as unknown as Opportunity;
+  };
 };
 
 interface CreateOpportunityPageProps {
@@ -277,14 +277,12 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
         //console.log('No image URL to add to form data');
       }
 
-      // If private, append visibility org ids as a single JSON field (numbers)
-      // This ensures the backend receives a JSON array of integers instead of
-      // multiple string entries (FormData always serializes values as strings).
+      // If private, append visibility org ids as a single JSON field
       if (formData.isPrivate && Array.isArray(formData.visibility)) {
         try {
-          formDataToSend.append('visibility', JSON.stringify(formData.visibility));
+          formDataToSend.append('visibility', formData.visibility);
         } catch (e) {
-          console.error('Failed to serialize visibility array', e);
+          console.error('Failed to stringify visibility array', e);
         }
       }
 

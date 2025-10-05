@@ -57,9 +57,8 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
 
         // Don't show past events - compare with actual date
         return opp.localDate.getTime() >= today.getTime();
-      }).filter(opp => {if (opp.visibility) {
+      }).filter(opp => {if (opp.visibility && opp.visibility.length > 0) {
         // If opportunity is private, check if user belongs to any allowed orgs
-        if (opp.visibility.length === 0 || currentUser.admin) return true; // public
         const userOrgIds = currentUser.organizationIds || [];
         return opp.visibility.some(orgId => userOrgIds.includes(orgId));
       }})

@@ -704,60 +704,58 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                         {formatDescription(opportunity.description)}
                     </div>
                 )}
+                {/* Visibility Section */}
+                  {visibilityOrgs && visibilityOrgs.length > 0 && (
+                    <div className="bg-white p-6 rounded-2xl shadow-lg mt-6">
+                      <h4 className="text-lg font-bold mb-3">Visible To</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {visibilityOrgs.map(org => (
+                          <button
+                            key={org.id}
+                            onClick={() => navigate(`/group-detail/${org.id}`)}
+                            className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
+                          >
+                            {org.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 
-                <div className="mt-8 bg-white p-6 rounded-2xl shadow-lg">
-  <div className="flex justify-between items-center mb-4">
-    <h3 className="text-2xl font-bold">
-      Participants ({signedUpStudents.length}/{opportunity.total_slots})
-    </h3>
-    <div className="text-right">
-      <p className="text-sm text-gray-600">Available Slot</p>
-      <p
-        className={`text-lg font-semibold ${
-          availableSlots > 0 ? 'text-green-600' : 'text-red-600'
-        }`}
-      >
-        {availableSlots}
-      </p>
-    </div>
-  </div>
-
-  {signedUpStudents.length > 0 ? (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
-      {signedUpStudents.map((student) => (
-        <div
-          key={`${student.id}-${student._lastUpdate || 'no-update'}`}
-          className="text-center group relative"
-        >
-          <div
-            onClick={() => navigate(`/profile/${student.id}`)}
-            className="cursor-pointer"
-          >
-            <p className="font-semibold text-gray-800 group-hover:text-cornell-red transition">
-              {student.name}
-            </p>
-          </div>
-          {currentUser.admin && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUnregisterUser(student.id);
-              }}
-              className="mt-1 text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors"
-            >
-              Unregister
-            </button>
-          )}
-        </div>
-      ))}
-    </div>
-  ) : (
-    <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500 mb-6">
-      Be the first to sign up! +5 bonus points
-    </div>
-  )}
-
-  {/* Visible To Section */}
+                <div className="mt-8">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-2xl font-bold">Participants ({signedUpStudents.length}/{opportunity.total_slots})</h3>
+                        <div className="text-right">
+                            <p className="text-sm text-gray-600">Available Slot</p>
+                            <p className={`text-lg font-semibold ${availableSlots > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {availableSlots}
+                            </p>
+                        </div>
+                    </div>
+                    {signedUpStudents.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {signedUpStudents.map(student => (
+                                <div key={`${student.id}-${student._lastUpdate || 'no-update'}`} className="text-center group relative">
+                                    <div onClick={() => navigate(`/profile/${student.id}`)} className="cursor-pointer">
+                                        <p className="font-semibold text-gray-800 group-hover:text-cornell-red transition">{student.name}</p>
+                                    </div>
+                                    {currentUser.admin && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleUnregisterUser(student.id);
+                                            }}
+                                            className="mt-1 text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors"
+                                        >
+                                            Unregister
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                         <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up! +5 bonus points</div>
+                    )}  {/* Visible To Section */}
   {visibilityOrgs && visibilityOrgs.length > 0 && (
     <div>
       <h4 className="text-lg font-bold mb-3">Visible To</h4>
@@ -775,7 +773,91 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     </div>
   )}
 </div>
-
+                    
+                    {/* Admin User Registration Section */}
+                    {currentUser.admin && (
+                        <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                            <h4 className="text-lg font-bold text-purple-800 mb-4">Admin: Register Users</h4>
+                            
+                            {!showUserLookup ? (
+                                <button
+                                    onClick={() => setShowUserLookup(true)}
+                                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                                >
+                                    Register User by Name
+                                </button>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Type user name to search..."
+                                            value={userLookupName}
+                                            onChange={(e) => setUserLookupName(e.target.value)}
+                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            autoFocus
+                                        />
+                                        <button
+                                            onClick={() => {
+                                                setShowUserLookup(false);
+                                                setUserLookupName('');
+                                                setUserLookupResults([]);
+                                            }}
+                                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    
+                                    {/* Show results as you type */}
+                                    {userLookupName.trim() && (
+                                        <div className="max-h-60 overflow-y-auto space-y-2">
+                                            {userLookupResults.length > 0 ? (
+                                                <>
+                                                    <p className="text-sm text-gray-600 font-medium">
+                                                        {userLookupResults.length} user{userLookupResults.length !== 1 ? 's' : ''} found:
+                                                    </p>
+                                                    {userLookupResults.map(user => {
+                                                        const isAlreadyRegistered = signedUpStudents.some(s => s.id === user.id);
+                                                        return (
+                                                            <div key={user.id} className="p-3 bg-white border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors">
+                                                                <div className="flex justify-between items-center">
+                                                                    <div>
+                                                                        <p className="font-semibold">{user.name}</p>
+                                                                        <p className="text-sm text-gray-600">{user.email}</p>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() => handleRegisterUser(user.id)}
+                                                                        disabled={isRegisteringUser || isAlreadyRegistered}
+                                                                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                                                    >
+                                                                        {isRegisteringUser ? 'Registering...' : 
+                                                                         isAlreadyRegistered ? 'Already Registered' : 
+                                                                         'Register'}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </>
+                                            ) : (
+                                                <p className="text-sm text-gray-500 text-center py-4">
+                                                    No users found matching "{userLookupName}"
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+                                    
+                                    {/* Show hint when input is empty */}
+                                    {!userLookupName.trim() && (
+                                        <p className="text-sm text-gray-500 text-center py-2">
+                                            Start typing a name to search for users...
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                     
                     {/* Slot limit warning for hosts */}
                     {canManageOpportunity && availableSlots <= 0 && (
@@ -1209,6 +1291,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                  )}
             </div>
         </div>
+    </div>
   );
 };
 

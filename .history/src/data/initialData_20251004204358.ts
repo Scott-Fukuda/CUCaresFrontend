@@ -3,6 +3,7 @@ import { User, Opportunity, SignUp, Badge, Organization, Member } from '../types
 
 
 
+
 const countSignupsForCause = (cause: string, data: { signups: SignUp[]; opportunities: Opportunity[] }) => {
     return data.signups.filter(su => {
         const opp = data.opportunities.find(o => o.id === su.opportunityId);
@@ -17,7 +18,7 @@ const countSignupsForCause = (cause: string, data: { signups: SignUp[]; opportun
  */
 export const findRank = (data: { points: number; users?: User[] }): number => {
     // If users array is provided, use it; otherwise use initialStudents
-    const allUsers = data.users || [];
+    const allUsers = data.users || initialStudents;
     
     // Sort users by points in descending order
     const sortedUsers = [...allUsers].sort((a, b) => b.points - a.points);

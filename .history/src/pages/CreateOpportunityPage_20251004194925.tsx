@@ -277,14 +277,12 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
         //console.log('No image URL to add to form data');
       }
 
-      // If private, append visibility org ids as a single JSON field (numbers)
-      // This ensures the backend receives a JSON array of integers instead of
-      // multiple string entries (FormData always serializes values as strings).
+      // If private, append visibility org ids as a single JSON field
       if (formData.isPrivate && Array.isArray(formData.visibility)) {
         try {
           formDataToSend.append('visibility', JSON.stringify(formData.visibility));
         } catch (e) {
-          console.error('Failed to serialize visibility array', e);
+          console.error('Failed to stringify visibility array', e);
         }
       }
 

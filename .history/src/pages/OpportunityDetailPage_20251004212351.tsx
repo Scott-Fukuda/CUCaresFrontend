@@ -1209,6 +1209,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
                  )}
             </div>
         </div>
+    </div>
   );
 };
 
