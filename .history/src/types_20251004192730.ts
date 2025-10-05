@@ -53,7 +53,7 @@ export interface Opportunity {
   comments: string[]; // Comments on the opportunity
   qualifications: string[]; // Qualifications for the opportunity
   attendance_marked?: boolean; // Whether the attendance has been marked by the host
-  visibility: number[]; // empty list means public, otherwise list of organization IDs that can see it
+  svisibility: number[]; // empty list means public, otherwise list of organization IDs that can see it
   redirect_url?: string | null; // External URL for signup, null means normal signup
 }
 

@@ -282,7 +282,8 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       // multiple string entries (FormData always serializes values as strings).
       if (formData.isPrivate && Array.isArray(formData.visibility)) {
         try {
-          formDataToSend.append('visibility', JSON.stringify(formData.visibility));
+          const formData = new FormData();
+visibility.forEach(id => formData.append('visibility', id));
         } catch (e) {
           console.error('Failed to serialize visibility array', e);
         }

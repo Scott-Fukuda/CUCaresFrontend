@@ -242,54 +242,31 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
         }
       }
 
-      // Create FormData for multipart/form-data
-      const formDataToSend = new FormData();
-      
-      // Add all the form fields
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('description', formData.description);
-      // Add causes as array
-      formData.cause.forEach((cause: string) => {
-        formDataToSend.append('causes', cause);
-      });
-      // Add tags as array
-      formData.tags.forEach((tag: string) => {
-        formDataToSend.append('tags', tag);
-      });
-      formDataToSend.append('date', formatDateTimeForBackend(formData.date, formData.time));
-      formDataToSend.append('duration', formData.duration.toString());
-      formDataToSend.append('total_slots', formData.total_slots.toString());
-      formDataToSend.append('nonprofit', formData.nonprofit);
-      formDataToSend.append('host_org_id', formData.host_org_id);
-      formDataToSend.append('host_user_id', currentUser.id.toString());
-      formDataToSend.append('address', formData.address);
-      
-      // Add redirect URL if provided
-      if (formData.redirect_url.trim()) {
-        formDataToSend.append('redirect_url', formData.redirect_url.trim());
-      }
+      // Build JSON payload (backend expects JSON). We uploaded image earlier and have imageUrl if any.
+      const payload: any = {
+        name: formData.name,
+        description: formData.description,
+        causes: Array.isArray(formData.cause) ? formData.cause : [],
+        tags: Array.isArray(formData.tags) ? formData.tags : [],
+        date: formatDateTimeForBackend(formData.date, formData.time),
+        duration: formData.duration,
+        total_slots: formData.total_slots,
+        nonprofit: formData.nonprofit || null,
+        host_org_id: formData.host_org_id || null,
+        host_user_id: currentUser.id,
+        address: formData.address || '',
+        redirect_url: formData.redirect_url?.trim() || null,
+        image: imageUrl || null,
+      };
 
-      // Add image URL if uploaded
-      if (imageUrl) {
-        //console.log('Adding image URL to form data:', imageUrl);
-        formDataToSend.append('image', imageUrl);
-      } else {
-        //console.log('No image URL to add to form data');
-      }
-
-      // If private, append visibility org ids as a single JSON field (numbers)
-      // This ensures the backend receives a JSON array of integers instead of
-      // multiple string entries (FormData always serializes values as strings).
       if (formData.isPrivate && Array.isArray(formData.visibility)) {
-        try {
-          formDataToSend.append('visibility', JSON.stringify(formData.visibility));
-        } catch (e) {
-          console.error('Failed to serialize visibility array', e);
-        }
+        payload.visibility = formData.visibility;
+      } else {
+        payload.visibility = [];
       }
 
-      // Make the API call
-      const newOpp = await api.createOpportunity(formDataToSend);
+      // Make the API call with JSON
+      const newOpp = await api.createOpportunity(payload);
       console.log('Created opportunity (raw):', newOpp);
 
       // Transform the opportunity to match the frontend format
