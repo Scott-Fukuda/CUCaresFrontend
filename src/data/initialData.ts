@@ -158,6 +158,6 @@ export const initialBadges: Badge[] = [
         "class": "2028",
         "campusOrgs": ["Bethany CCC"],
         "favoriteService": "Volunteering at my local elementary's after-school program!",
-        "role": ""
+        "role": "Frontend Developer"
       }
   ]
