@@ -28,6 +28,7 @@ export interface User {
   _lastUpdate?: number; // Internal timestamp for forcing re-renders
   car_seats: number; // Number of car seats available
   bio?: string; // bio
+  carpool_waiver_signed?: boolean;
 }
 
 export interface Opportunity {
@@ -42,8 +43,8 @@ export interface Opportunity {
   imageUrl: string;
   points: number;
   isPrivate?: boolean;
-  causes: string[]; 
-  tags: string[]; 
+  causes: string[];
+  tags: string[];
   host_id?: number; // ID of the user who created this opportunity
   host_org_id?: number; // ID of the organization hosting this opportunity
   host_org_name?: string; // Name of the organization hosting this opportunity
@@ -69,21 +70,21 @@ export type OrganizationType = 'Fraternity' | 'Sorority' | 'Professional Club' |
 export const organizationTypes: OrganizationType[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team', 'Cultural', 'Community Service', 'Religious', 'Other'];
 
 export interface StudentGroup {
-    id: number;
-    name: string;
-    category: StudentGroupCategory;
+  id: number;
+  name: string;
+  category: StudentGroupCategory;
 }
 
 export interface Organization {
-    id: number;
-    name: string;
-    type: string;
-    description?: string;
-    approved?: boolean;
-    host_user_id?: number;
-    member_count?: number;
-    users?: User[]; // Array of users who are members of this organization
-    date_created?: string;
+  id: number;
+  name: string;
+  type: string;
+  description?: string;
+  approved?: boolean;
+  host_user_id?: number;
+  member_count?: number;
+  users?: User[]; // Array of users who are members of this organization
+  date_created?: string;
 }
 
 export interface Friendship {
@@ -113,19 +114,19 @@ export interface FriendshipsResponse {
 }
 
 export interface BadgeThresholdData {
-    points: number;
-    signUpCount: number;
-    signups: SignUp[];
-    opportunities: Opportunity[];
-    friendsCount: number;
+  points: number;
+  signUpCount: number;
+  signups: SignUp[];
+  opportunities: Opportunity[];
+  friendsCount: number;
 }
 
 export interface Badge {
-    id: string;
-    name: string;
-    description: string;
-    icon: string; // emoji
-    threshold: (data: BadgeThresholdData) => boolean;
+  id: string;
+  name: string;
+  description: string;
+  icon: string; // emoji
+  threshold: (data: BadgeThresholdData) => boolean;
 }
 
 export interface Notification {
@@ -152,7 +153,7 @@ export const allInterests = [
 
 export const genderOptions = [
   'Male',
-  'Female', 
+  'Female',
   'Prefer not to say'
 ];
 
@@ -172,4 +173,14 @@ export interface Member {
   campusOrgs: string[];
   favoriteService: string;
   role: string;
+}
+
+export interface Waiver {
+  id: string;
+  typed_name: string;
+  type: string;
+  content: string;
+  checked_consent: boolean;
+  user_id: number;
+  organization_id?: number;
 }

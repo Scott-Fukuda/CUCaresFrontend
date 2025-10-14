@@ -17,6 +17,9 @@ import PopupMessage from './components/PopupMessage';
 import { initialBadges } from './data/initialData'; // Using initial data for badges
 import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
+import WaiverPopup from './components/WaiverPopup';
+import Waiver from './pages/Waiver';
+import { useState } from "react";
 
 interface AppRouterProps {
     currentUser: User;
@@ -92,10 +95,10 @@ const AppRouter: React.FC<AppRouterProps> = ({
 }) => {
     if (!currentUser) return null;
     if (isLoading) {
-      return <div className="text-center p-10 font-semibold text-lg">Loading...</div>;
+        return <div className="text-center p-10 font-semibold text-lg">Loading...</div>;
     }
     if (appError) {
-      return <div className="text-center p-10 font-semibold text-lg text-red-600 bg-red-100 rounded-lg">{appError}</div>;
+        return <div className="text-center p-10 font-semibold text-lg text-red-600 bg-red-100 rounded-lg">{appError}</div>;
     }
 
     const userPoints = currentUser?.points || 0;
@@ -103,14 +106,16 @@ const AppRouter: React.FC<AppRouterProps> = ({
     // Legacy function names for compatibility with existing components
     const handleFriendRequest = handleSendFriendRequest;
     const handleAddFriend = handleSendFriendRequest;
-    
+    // const [showWaiverPopup, setShowWaiverPopup] = useState(true);
+    const [showWaiverPopup, setShowWaiverPopup] = useState(currentUser.carpool_waiver_signed ? false : true);
+
     return (
         <div className="min-h-screen bg-light-gray pb-20 md:pb-0">
-            <Header 
+            <Header
                 key={`header-${currentUser.id}-${currentUser._lastUpdate || 'no-update'}`}
-                user={currentUser} 
-                points={userPoints} 
-                pendingRequestCount={pendingRequestCount} 
+                user={currentUser}
+                points={userPoints}
+                pendingRequestCount={pendingRequestCount}
                 onLogout={handleLogout}
                 allUsers={students}
                 allOrgs={organizations}
@@ -120,47 +125,47 @@ const AppRouter: React.FC<AppRouterProps> = ({
                 handleFriendRequest={handleFriendRequest}
             />
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-                    <Routes>
-                        <Route path="/opportunities" element={<OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />}/>;
-                        <Route path="/my-opportunities" element={<MyOpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />}/>
-                        <Route path="/account-setup" element = {<PostRegistrationOrgSetup
-                            currentUser={currentUser}
-                            allOrgs={organizations}
-                            joinOrg={joinOrg}
-                            createOrg={createOrg}
-                        />}/>
-                        <Route 
-                            path="/admin" 
-                            element={
-                                <AdminPage 
-                                    currentUser={currentUser} 
-                                    opportunities={opportunities}
-                                    setOpportunities={setOpportunities}
-                                    organizations={organizations}
-                                    setOrganizations={setOrganizations}
-                                    allUsers={students}
-                                />
-                            }
-                        />
-                        <Route 
-                            path="/opportunity/:id"
-                            element={
-                                <OpportunityDetailPage 
-                                    opportunities={opportunities} 
-                                    students={students} 
-                                    signups={signups} 
-                                    currentUser={currentUser} 
-                                    handleSignUp={handleSignUp} 
-                                    handleUnSignUp={handleUnSignUp} 
-                                    allOrgs={organizations} 
-                                    currentUserSignupsSet={currentUserSignupsSet} 
-                                    setOpportunities={setOpportunities} 
+                <Routes>
+                    <Route path="/opportunities" element={<OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />} />;
+                    <Route path="/my-opportunities" element={<MyOpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />} />
+                    <Route path="/account-setup" element={<PostRegistrationOrgSetup
+                        currentUser={currentUser}
+                        allOrgs={organizations}
+                        joinOrg={joinOrg}
+                        createOrg={createOrg}
+                    />} />
+                    <Route
+                        path="/admin"
+                        element={
+                            <AdminPage
+                                currentUser={currentUser}
+                                opportunities={opportunities}
+                                setOpportunities={setOpportunities}
+                                organizations={organizations}
+                                setOrganizations={setOrganizations}
+                                allUsers={students}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/opportunity/:id"
+                        element={
+                            <OpportunityDetailPage
+                                opportunities={opportunities}
+                                students={students}
+                                signups={signups}
+                                currentUser={currentUser}
+                                handleSignUp={handleSignUp}
+                                handleUnSignUp={handleUnSignUp}
+                                allOrgs={organizations}
+                                currentUserSignupsSet={currentUserSignupsSet}
+                                setOpportunities={setOpportunities}
                             />}
-                        />
-                        <Route 
-                            path="/group-detail/:id" 
-                            element={
-                            <GroupDetailPage 
+                    />
+                    <Route
+                        path="/group-detail/:id"
+                        element={
+                            <GroupDetailPage
                                 allUsers={students}
                                 allOrgs={organizations}
                                 opportunities={opportunities}
@@ -169,29 +174,29 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 joinOrg={joinOrg}
                                 leaveOrg={leaveOrg}
                             />}
-                            />
-                        <Route 
-                            path="/leaderboard"
-                            element={
-                            <LeaderboardPage 
-                                allUsers={leaderboardUsers} 
-                                allOrgs={organizations} 
-                                signups={signups} 
-                                opportunities={opportunities} 
-                                currentUser={currentUser} 
-                                handleFriendRequest={handleFriendRequest} 
-                                handleAcceptFriendRequest={handleAcceptFriendRequest} 
-                                handleRejectFriendRequest={handleRejectFriendRequest} 
-                                checkFriendshipStatus={checkFriendshipStatus} 
+                    />
+                    <Route
+                        path="/leaderboard"
+                        element={
+                            <LeaderboardPage
+                                allUsers={leaderboardUsers}
+                                allOrgs={organizations}
+                                signups={signups}
+                                opportunities={opportunities}
+                                currentUser={currentUser}
+                                handleFriendRequest={handleFriendRequest}
+                                handleAcceptFriendRequest={handleAcceptFriendRequest}
+                                handleRejectFriendRequest={handleRejectFriendRequest}
+                                checkFriendshipStatus={checkFriendshipStatus}
                                 friendshipsData={friendshipsData}
                                 joinOrg={joinOrg}
                                 leaveOrg={leaveOrg}
                             />}
-                        />
-                        <Route 
-                            path="/profile/:id" 
-                            element={
-                            <ProfilePage 
+                    />
+                    <Route
+                        path="/profile/:id"
+                        element={
+                            <ProfilePage
                                 students={students}
                                 signups={signups}
                                 organizations={organizations}
@@ -207,90 +212,96 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 getFriendsForUser={getFriendsForUser}
                                 setCurrentUser={setCurrentUser}
                             />}
-                        />
-                        <Route 
-                            path="/notifications"
-                            element={
-                            <NotificationsPage 
-                                friendshipsData={friendshipsData} 
-                                allUsers={students} 
-                                handleRequestResponse={handleRequestResponse} 
+                    />
+                    <Route
+                        path="/notifications"
+                        element={
+                            <NotificationsPage
+                                friendshipsData={friendshipsData}
+                                allUsers={students}
+                                handleRequestResponse={handleRequestResponse}
                                 currentUser={currentUser}
                             />}
-                        />
-                        <Route 
-                            path="/groups"
-                            element={
-                            <GroupsPage 
-                                currentUser={currentUser} 
-                                allOrgs={organizations} 
-                                joinOrg={joinOrg} 
-                                leaveOrg={leaveOrg} 
-                                createOrg={createOrg} 
+                    />
+                    <Route
+                        path="/groups"
+                        element={
+                            <GroupsPage
+                                currentUser={currentUser}
+                                allOrgs={organizations}
+                                joinOrg={joinOrg}
+                                leaveOrg={leaveOrg}
+                                createOrg={createOrg}
                             />}
-                        />
-                        <Route
-                            path="/create-opportunity"
-                            element={
-                            <CreateOpportunityPage 
-                                currentUser={currentUser} 
-                                organizations={organizations} 
+                    />
+                    <Route
+                        path="/create-opportunity"
+                        element={
+                            <CreateOpportunityPage
+                                currentUser={currentUser}
+                                organizations={organizations}
                                 opportunities={opportunities}
                                 setOpportunities={setOpportunities}
                             />}
-                        />
-                        <Route 
-                            path="/about-us"
-                            element={
-                                <AboutUsPage/>
-                            }
-                        />
-                        <Route 
-                            path="/org-setup"
-                            element={
-                                <PostRegistrationOrgSetup
-                                    currentUser={currentUser}
-                                    allOrgs={organizations}
-                                    joinOrg={joinOrg}
-                                    createOrg={createOrg}
-                                />
-                            }
-                        />
-                        {/* <Route path="/" element={<OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />}/> */}
-                        <Route path="/" element={<Navigate to="/opportunities" replace/>}/>
-                    </Routes>
+                    />
+                    <Route
+                        path="/about-us"
+                        element={
+                            <AboutUsPage />
+                        }
+                    />
+                    <Route
+                        path="/org-setup"
+                        element={
+                            <PostRegistrationOrgSetup
+                                currentUser={currentUser}
+                                allOrgs={organizations}
+                                joinOrg={joinOrg}
+                                createOrg={createOrg}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/sign-waiver"
+                        element={
+                            <Waiver
+                                type="carpool"
+                                currentUser={currentUser}
+                            />
+                        }
+                    />
+                    {/* <Route path="/" element={<OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />}/> */}
+                    <Route path="/" element={<Navigate to="/opportunities" replace />} />
+                </Routes>
             </main>
             <BottomNav currentUser={currentUser} />
-            {/* <PopupMessage
-                isOpen={popupMessage.isOpen}
-                onClose={closePopup}
-                title={popupMessage.title}
-                message={popupMessage.message}
-                type={popupMessage.type}
-            /> */}
-            
-            {/* Report Bug Button */}
+            {showWaiverPopup &&
+                <WaiverPopup
+                    showWaiverPopup={showWaiverPopup}
+                    setShowWaiverPopup={setShowWaiverPopup}
+                />
+            }
             <a
-            href="mailto:sdf72@cornell.edu?subject=Bug Report - CampusCares Frontend&body=Please describe the bug you encountered:"
-            className="hidden md:flex fixed bottom-6 right-6 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-lg transition-colors duration-200 items-center gap-2 z-50 text-base"
-            title="Report a Bug"
+                href="mailto:sdf72@cornell.edu?subject=Bug Report - CampusCares Frontend&body=Please describe the bug you encountered:"
+                className="hidden md:flex fixed bottom-6 right-6 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-lg transition-colors duration-200 items-center gap-2 z-50 text-base"
+                title="Report a Bug"
             >
-            <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-4 w-4 md:h-5 md:w-5" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-            >
-            <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" 
-            />
-            </svg>
-            <span className="hidden sm:inline">Report Bug</span>
-            <span className="sm:hidden">Report Bug</span>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 md:h-5 md:w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
+                </svg>
+                <span className="hidden sm:inline">Report Bug</span>
+                <span className="sm:hidden">Report Bug</span>
             </a>
         </div>
     );

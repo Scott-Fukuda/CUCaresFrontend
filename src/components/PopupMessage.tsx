@@ -8,12 +8,12 @@ interface PopupMessageProps {
   type?: 'success' | 'info' | 'warning' | 'error';
 }
 
-const PopupMessage: React.FC<PopupMessageProps> = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  message, 
-  type = 'info' 
+const PopupMessage: React.FC<PopupMessageProps> = ({
+  isOpen,
+  onClose,
+  title,
+  message,
+  type = 'info'
 }) => {
   if (!isOpen) return null;
 
