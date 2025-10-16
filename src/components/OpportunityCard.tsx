@@ -57,6 +57,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
 
   const availableSlots = opportunity.total_slots - signedUpStudents.length;
   const canSignUp = availableSlots > 0 && !isUserSignedUp;
+  const eventStarted = new Date() >= new Date(`${opportunity.date}T${opportunity.time}`);
   const isUserHost = opportunity.host_id === currentUser.id;
   const canManageOpportunity = isUserHost || currentUser.admin;
   
@@ -321,27 +322,34 @@ const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, oppo
         )}
 
         <button
-          onClick={handleButtonClick}
-          disabled={(!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister)}
-          className={`w-full mt-auto font-bold py-3 px-4 rounded-lg transition-colors text-white ${
-            isUserSignedUp
-              ? canUnregister
-                ? 'bg-green-600 hover:bg-green-700'
-                : 'bg-orange-500 cursor-not-allowed'
-              : canSignUp
-              ? 'bg-cornell-red hover:bg-red-800'
-              : 'bg-gray-400 cursor-not-allowed'
-          }`}
-        >
-          {isUserSignedUp 
-            ? canUnregister 
-              ? 'Signed Up ✓' 
-              : `Unregistration Closed (${formatTimeUntilEvent(timeUntilEvent)})`
-            : canSignUp 
-              ? (opportunity.redirect_url ? 'Sign Up Externally' : 'Sign Up')
-              : 'No Slots Available'
-          }
-        </button>
+  onClick={!eventStarted ? handleButtonClick : undefined}
+  disabled={
+    eventStarted ||
+    ((!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister))
+  }
+  className={`w-full mt-auto font-bold py-3 px-4 rounded-lg transition-colors text-white ${
+    eventStarted
+      ? 'bg-gray-500 cursor-not-allowed'
+      : isUserSignedUp
+      ? canUnregister
+        ? 'bg-green-600 hover:bg-green-700'
+        : 'bg-orange-500 cursor-not-allowed'
+      : canSignUp
+      ? 'bg-cornell-red hover:bg-red-800'
+      : 'bg-gray-400 cursor-not-allowed'
+  }`}
+>
+  {eventStarted
+    ? 'Event Already Started'
+    : isUserSignedUp
+    ? canUnregister
+      ? 'Signed Up ✓'
+      : `Unregistration Closed (${formatTimeUntilEvent(timeUntilEvent)})`
+    : canSignUp
+    ? (opportunity.redirect_url ? 'Sign Up Externally' : 'Sign Up')
+    : 'No Slots Available'}
+</button>
+
 
         {/* Remove the modal from here - it will be handled at page level */}
 
