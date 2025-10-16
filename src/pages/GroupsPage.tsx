@@ -93,7 +93,7 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
                     const isMember = currentUser.organizationIds?.includes(org.id);
               return (
                       <div key={org.id} className="flex items-center justify-between bg-white p-3 rounded-lg border">
-                  <div className="flex-grow cursor-pointer" onClick={() => navigate(`/group/${org.id}`)}>
+                  <div className="flex-grow cursor-pointer" onClick={() => navigate(`/group-detail/${org.id}`)}>
                     <span className="font-medium text-gray-800 hover:text-cornell-red">{org.name}</span>
                           <span className="block text-sm text-gray-500">{org.type}</span>
                   </div>
@@ -213,7 +213,7 @@ const GroupsPage: React.FC<GroupsPageProps> = ({ currentUser, allOrgs, joinOrg, 
               const isMember = currentUser.organizationIds?.includes(org.id);
               return (
                 <div key={org.id} className="flex items-center justify-between bg-white p-3 rounded-lg border">
-                  <div className="flex-grow cursor-pointer" onClick={() => navigate(`/group/${org.id}`)}>
+                  <div className="flex-grow cursor-pointer" onClick={() => navigate(`/group-detail/${org.id}`)}>
                     <span className="font-medium text-gray-800 hover:text-cornell-red">{org.name}</span>
                     <span className="block text-xs text-gray-500">{org.type}</span>
                   </div>
