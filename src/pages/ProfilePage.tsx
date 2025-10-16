@@ -61,7 +61,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const [localUser, setLocalUser] = useState(user); // Add local user state
 
   React.useEffect(() => {
-    console.log('local user: ', localUser)
+    // console.log('local user: ', localUser)
   }, [localUser])
 
   // Update selectedInterests when user.interests changes

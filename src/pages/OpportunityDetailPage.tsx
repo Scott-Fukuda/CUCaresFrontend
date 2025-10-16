@@ -478,7 +478,9 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
       causes: opportunity.causes || [],
       tags: opportunity.tags || [],
       redirect_url: opportunity.redirect_url || '',
-      imageUrl: opportunity.imageUrl
+      imageUrl: opportunity.imageUrl || '',
+      visibility: opportunity.visibility || [],
+      isPrivate: opportunity.isPrivate || false
     };
 
     // Navigate to create opportunity page with cloned data

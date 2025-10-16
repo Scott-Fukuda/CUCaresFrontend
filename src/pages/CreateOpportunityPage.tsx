@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { allInterests, Opportunity, Organization } from '../types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import * as api from '../api';
@@ -119,12 +119,25 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
     nonprofit: clonedOpportunityData?.nonprofit || '',
     host_org_id: clonedOpportunityData?.host_org_id || '',
     address: clonedOpportunityData?.address || '',
-    redirect_url: clonedOpportunityData?.redirect_url || ''
-    ,
+    redirect_url: clonedOpportunityData?.redirect_url || '',
+    imageUrl: clonedOpportunityData?.imageUrl || '',
+
     // New fields for private events and visibility (list of org ids)
     isPrivate: clonedOpportunityData?.isPrivate || false,
     visibility: clonedOpportunityData?.visibility || [] as number[],
   });
+  
+  
+  // set isPrivate and visibility if cloning a private event for form UI
+  useEffect(() => {
+        if (clonedOpportunityData?.visibility?.length > 0) {
+          setFormData(prev => ({
+            ...prev,
+            isPrivate: true,
+            visibility: clonedOpportunityData.visibility,
+          }));
+        }
+      }, [clonedOpportunityData]);
 
   // Add image preview state for cloned images
   const [imagePreview, setImagePreview] = useState<string | null>(
@@ -207,33 +220,30 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
     setError(null);
 
     try {
-      let imageUrl = '';
       
       // Upload image first if selected
+      let imageUrl = clonedOpportunityData?.imageUrl || ''; // ✅ default to cloned image if present
+
+      // Upload image first if user selected a new one
       if (imageFile) {
-        //console.log('Uploading image file:', imageFile.name, imageFile.type, imageFile.size);
         const imageFormData = new FormData();
         imageFormData.append('file', imageFile);
         
         try {
-          //console.log('Sending image upload request to /upload');
           const uploadResponse = await fetch('https://cucaresbackend.onrender.com/upload', {
             method: 'POST',
             body: imageFormData,
           });
-          
-          //console.log('Upload response status:', uploadResponse.status);
-          
+
           if (!uploadResponse.ok) {
             const errorText = await uploadResponse.text();
             console.error('Upload error response:', errorText);
             throw new Error(`Failed to upload image: ${uploadResponse.status} ${uploadResponse.statusText}`);
           }
-          
+
           const uploadResult = await uploadResponse.json();
-          //console.log('Upload result:', uploadResult);
-          imageUrl = uploadResult.url; // Assuming the response contains the S3 URL
-          //console.log('Extracted image URL:', imageUrl);
+          imageUrl = uploadResult.url; // Replace cloned image with new uploaded one
+          console.log('Uploaded new image URL:', imageUrl);
         } catch (uploadError: any) {
           console.error('Image upload error:', uploadError);
           setError(`Image upload failed: ${uploadError.message}`);
@@ -241,6 +251,9 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
           return;
         }
       }
+
+console.log('Final image URL to send:', imageUrl);
+
 
       // Create FormData for multipart/form-data
       const formDataToSend = new FormData();
@@ -263,6 +276,9 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       formDataToSend.append('host_org_id', formData.host_org_id);
       formDataToSend.append('host_user_id', currentUser.id.toString());
       formDataToSend.append('address', formData.address);
+      formDataToSend.append('points', formData.duration.toString());
+      formDataToSend.append('approved', currentUser.admin ? 'true' : 'false');
+      
       
       // Add redirect URL if provided
       if (formData.redirect_url.trim()) {
@@ -271,15 +287,16 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
       // Add image URL if uploaded
       if (imageUrl) {
-        //console.log('Adding image URL to form data:', imageUrl);
+        console.log('Adding image URL to form data:', imageUrl);
         formDataToSend.append('image', imageUrl);
       } else {
-        //console.log('No image URL to add to form data');
+        console.log('No image URL to add to form data');
       }
 
       // If private, append visibility org ids as a single JSON field (numbers)
       // This ensures the backend receives a JSON array of integers instead of
       // multiple string entries (FormData always serializes values as strings).
+      
       if (formData.isPrivate && Array.isArray(formData.visibility)) {
         try {
           formDataToSend.append('visibility', JSON.stringify(formData.visibility));
@@ -290,16 +307,16 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
       // Make the API call
       const newOpp = await api.createOpportunity(formDataToSend);
-      console.log('Created opportunity (raw):', newOpp);
+      // console.log('Created opportunity (raw):', newOpp);
 
       // Transform the opportunity to match the frontend format
       const transformedOpp = transformOpportunityFromBackend(newOpp);
-      console.log('Transformed opportunity:', transformedOpp);
+      // console.log('Transformed opportunity:', transformedOpp);
 
       // If current user is admin, automatically approve the opportunity
       if (currentUser.admin) {
         const approvedOpp = { ...transformedOpp, approved: true };
-        console.log('Admin user - adding approved opportunity:', approvedOpp);
+        // console.log('Admin user - adding approved opportunity:', approvedOpp);
         setOpportunities(prev => [approvedOpp, ...prev]);
       }
 

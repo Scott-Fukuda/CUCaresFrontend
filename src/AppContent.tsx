@@ -32,16 +32,16 @@ const AppContent: React.FC = () => {
         const authResult = await api.verifyFirebaseToken(token);
 
         if (authResult.success) {
-          console.log('Firebase auth state changed, user is authenticated:', firebaseUser.email);
+          // console.log('Firebase auth state changed, user is authenticated:', firebaseUser.email);
           const response = await api.checkUserExists(firebaseUser.email);
 
           if (response.success && response.exists) {
-            console.log('User exists in backend, fetching user data...');
+            // console.log('User exists in backend, fetching user data...');
             const existingUser = await api.getUserByEmail(firebaseUser.email, token);
             setCurrentUser(existingUser);
             navigate('/opportunities');
           } else {
-            console.log('User does NOT exist in backend, sending to register page');
+            // console.log('User does NOT exist in backend, sending to register page');
 
             setCurrentUser(null);
             // No account in our backend yet, show registration view
@@ -204,13 +204,13 @@ const AppContent: React.FC = () => {
         if (exists) {
           // User exists, log them in
           const existingUser = await api.getUserByEmail(firebaseUser.email, token);
-                    console.log('User found, logging in:', existingUser);
+                    // console.log('User found, logging in:', existingUser);
 
           setCurrentUser(existingUser);
           navigate("/");
         } else {
           // User doesn't exist, redirect to registration
-          console.log('User not found, redirecting to registration');
+          // console.log('User not found, redirecting to registration');
           setAuthView('register');
         }
       }
@@ -774,7 +774,7 @@ const AppContent: React.FC = () => {
         try {
           await joinOrg(newOrg.id);
         } catch (joinError) {
-          console.log('Could not auto-join organization (likely not approved yet):', joinError);
+          // console.log('Could not auto-join organization (likely not approved yet):', joinError);
         }
         
         // Show success popup

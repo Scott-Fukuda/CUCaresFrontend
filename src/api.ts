@@ -249,7 +249,7 @@ export const registerUser = async (data: object, token?: string): Promise<User> 
 // Get all user emails - returns array of email strings
 export const getUserEmails = async (): Promise<string[]> => {
   const response = await authenticatedRequest('/users/emails');
-  console.log('getUserEmails response:', response);
+  // console.log('getUserEmails response:', response);
   // If the response is the array directly:
   return response || [];
 
