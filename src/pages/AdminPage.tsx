@@ -41,6 +41,16 @@ const AdminPage: React.FC<AdminPageProps> = ({
   const [showEmails, setShowEmails] = useState(false);
   const [approvedEmail, setApprovedEmail] = useState<string>('');
   const [isAddingEmail, setIsAddingEmail] = useState(false);
+  const [csvData, setCsvData] = useState<any[]>([]);
+  const [isLoadingCsv, setIsLoadingCsv] = useState(false);
+  const [showCsv, setShowCsv] = useState(false);
+  const [csvError, setCsvError] = useState<string | null>(null);
+  // CSV data management
+const [userCsv, setUserCsv] = useState<string | null>(null);
+const [oppCsv, setOppCsv] = useState<string | null>(null);
+const [activeCsv, setActiveCsv] = useState<'users' | 'opps' | null>(null);
+
+
 
   // Fetch unapproved opportunities and organizations
   useEffect(() => {
@@ -266,6 +276,37 @@ const AdminPage: React.FC<AdminPageProps> = ({
     });
   };
 
+  const handleDownloadUsersCsv = async () => {
+  try {
+    const csvText = await api.getUserCsv();
+    const blob = new Blob([csvText], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'users.csv';
+    link.click();
+  } catch (err) {
+    console.error('Error downloading user CSV:', err);
+    alert('Failed to download user CSV.');
+  }
+};
+
+const handleDownloadOppsCsv = async () => {
+  try {
+    const csvText = await api.getOpportunityCsv();
+    const blob = new Blob([csvText], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'opportunities.csv';
+    link.click();
+  } catch (err) {
+    console.error('Error downloading opportunity CSV:', err);
+    alert('Failed to download opportunity CSV.');
+  }
+};
+
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -367,6 +408,31 @@ const AdminPage: React.FC<AdminPageProps> = ({
           )}
         </div>
       </div>
+      {/* CSV Export Section */}
+      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">CSV Data Export</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Download complete user or opportunity data in CSV format.
+        </p>
+
+        <div className="flex flex-wrap gap-4">
+          <button
+            onClick={handleDownloadUsersCsv}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          >
+            Download User CSV
+          </button>
+
+          <button
+            onClick={handleDownloadOppsCsv}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+          >
+            Download Opportunity CSV
+          </button>
+        </div>
+      </div>
+
+
 
       {/* User Emails Section */}
       <div className="mb-8 p-6 bg-gray-50 rounded-lg border">

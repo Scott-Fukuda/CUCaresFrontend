@@ -860,4 +860,52 @@ export const getMonthlyPoints = async (date: string): Promise<{users: Array<{id:
   }
 
   return response.json();
+
+};
+// api.ts
+const BASE_URL = 'https://cucaresbackend.onrender.com'; // adjust if you store it elsewhere
+
+/**
+ * Fetches user CSV data from the backend.
+ * @returns CSV text as a string
+ */
+export const getUserCsv = async (): Promise<string> => {
+  const token = await getFirebaseToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetch(`${BASE_URL}/api/users/csv`, {
+    method: 'GET',
+    headers
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch user CSV: ${response.statusText}`);
+  }
+
+  // Return raw text since it's CSV format
+  return response.text();
+};
+
+/**
+ * Fetches opportunity CSV data from the backend.
+ * @returns CSV text as a string
+ */
+export const getOpportunityCsv = async (): Promise<string> => {
+  const token = await getFirebaseToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetch(`${BASE_URL}/api/opps/csv`, {
+    method: 'GET',
+    headers
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch opportunity CSV: ${response.statusText}`);
+  }
+
+  return response.text();
 };
