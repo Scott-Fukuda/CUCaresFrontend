@@ -777,6 +777,90 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({ opportuni
     </div>
   )}
 </div>
+{/* Admin User Registration Section */}
+                    {currentUser.admin && (
+                        <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                            <h4 className="text-lg font-bold text-purple-800 mb-4">Admin: Register Users</h4>
+                            
+                            {!showUserLookup ? (
+                                <button
+                                    onClick={() => setShowUserLookup(true)}
+                                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                                >
+                                    Register User by Name
+                                </button>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Type user name to search..."
+                                            value={userLookupName}
+                                            onChange={(e) => setUserLookupName(e.target.value)}
+                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            autoFocus
+                                        />
+                                        <button
+                                            onClick={() => {
+                                                setShowUserLookup(false);
+                                                setUserLookupName('');
+                                                setUserLookupResults([]);
+                                            }}
+                                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    
+                                    {/* Show results as you type */}
+                                    {userLookupName.trim() && (
+                                        <div className="max-h-60 overflow-y-auto space-y-2">
+                                            {userLookupResults.length > 0 ? (
+                                                <>
+                                                    <p className="text-sm text-gray-600 font-medium">
+                                                        {userLookupResults.length} user{userLookupResults.length !== 1 ? 's' : ''} found:
+                                                    </p>
+                                                    {userLookupResults.map(user => {
+                                                        const isAlreadyRegistered = signedUpStudents.some(s => s.id === user.id);
+                                                        return (
+                                                            <div key={user.id} className="p-3 bg-white border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors">
+                                                                <div className="flex justify-between items-center">
+                                                                    <div>
+                                                                        <p className="font-semibold">{user.name}</p>
+                                                                        <p className="text-sm text-gray-600">{user.email}</p>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() => handleRegisterUser(user.id)}
+                                                                        disabled={isRegisteringUser || isAlreadyRegistered}
+                                                                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                                                    >
+                                                                        {isRegisteringUser ? 'Registering...' : 
+                                                                         isAlreadyRegistered ? 'Already Registered' : 
+                                                                         'Register'}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </>
+                                            ) : (
+                                                <p className="text-sm text-gray-500 text-center py-4">
+                                                    No users found matching "{userLookupName}"
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+                                    
+                                    {/* Show hint when input is empty */}
+                                    {!userLookupName.trim() && (
+                                        <p className="text-sm text-gray-500 text-center py-2">
+                                            Start typing a name to search for users...
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     
                     {/* Slot limit warning for hosts */}
