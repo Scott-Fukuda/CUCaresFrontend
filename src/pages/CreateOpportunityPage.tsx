@@ -8,10 +8,10 @@ import { formatDateTimeForBackend } from '../utils/timeUtils';
 const transformOpportunityFromBackend = (opp: any): Opportunity => {
   // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
   const dateObj = new Date(opp.date);
-  
+
   // Extract date and time components
   const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
-  
+
   // Extract time in HH:MM:SS format
   let timeOnly;
   if (opp.date.includes('GMT')) {
@@ -29,37 +29,40 @@ const transformOpportunityFromBackend = (opp: any): Opportunity => {
     const seconds = dateObj.getSeconds().toString().padStart(2, '0');
     timeOnly = `${hours}:${minutes}:${seconds}`;
   }
-  
+
   // Transform involved users if they exist
-  const transformedInvolvedUsers = opp.involved_users ? opp.involved_users.map((involvedUser: any) => {
-    const user = involvedUser.user || involvedUser;
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      profile_image: user.profile_image,
-      interests: user.interests || [],
-      friendIds: user.friends || [],
-      organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
-      admin: user.admin || false,
-      gender: user.gender,
-      graduationYear: user.graduation_year,
-      academicLevel: user.academic_level,
-      major: user.major,
-      birthday: user.birthday,
-      points: user.points || 0,
-      registration_date: user.registration_date,
-      phone: user.phone,
-      car_seats: user.car_seats || 0,
-      bio: user.bio,
-      registered: involvedUser.registered || false,
-      attended: involvedUser.attended || false,
-    };
-  }) : [];
-  
+  const transformedInvolvedUsers = opp.involved_users
+    ? opp.involved_users.map((involvedUser: any) => {
+        const user = involvedUser.user || involvedUser;
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          profile_image: user.profile_image,
+          interests: user.interests || [],
+          friendIds: user.friends || [],
+          organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
+          admin: user.admin || false,
+          gender: user.gender,
+          graduationYear: user.graduation_year,
+          academicLevel: user.academic_level,
+          major: user.major,
+          birthday: user.birthday,
+          points: user.points || 0,
+          registration_date: user.registration_date,
+          phone: user.phone,
+          car_seats: user.car_seats || 0,
+          bio: user.bio,
+          registered: involvedUser.registered || false,
+          attended: involvedUser.attended || false,
+        };
+      })
+    : [];
+
   // Use image URL directly from backend
-  const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
-  
+  const resolvedImageUrl =
+    opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
+
   return {
     id: opp.id,
     name: opp.name,
@@ -84,7 +87,7 @@ const transformOpportunityFromBackend = (opp: any): Opportunity => {
     comments: opp.comments !== undefined ? opp.comments : [],
     qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
     tags: opp.tags !== undefined ? opp.tags : [],
-    redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null
+    redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
   } as unknown as Opportunity;
 };
 
@@ -92,26 +95,28 @@ interface CreateOpportunityPageProps {
   currentUser: any;
   organizations: Organization[];
   opportunities: Opportunity[];
-  setOpportunities: (opportunities: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])) => void;
+  setOpportunities: (
+    opportunities: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])
+  ) => void;
 }
 
-const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ 
-  currentUser, 
-  organizations,  // Add this parameter
+const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
+  currentUser,
+  organizations, // Add this parameter
   opportunities,
-  setOpportunities
+  setOpportunities,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const clonedOpportunityData = location.state?.clonedOpportunityData;
 
   // Update the initial formData state to use cloned data
   const [formData, setFormData] = useState({
     name: clonedOpportunityData?.name || '',
     description: clonedOpportunityData?.description || '',
-    cause: clonedOpportunityData?.causes || [] as string[],
-    tags: clonedOpportunityData?.tags || [] as string[],
+    cause: clonedOpportunityData?.causes || ([] as string[]),
+    tags: clonedOpportunityData?.tags || ([] as string[]),
     date: clonedOpportunityData?.date || '',
     time: clonedOpportunityData?.time || '',
     duration: clonedOpportunityData?.duration || 60,
@@ -124,26 +129,25 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
     // New fields for private events and visibility (list of org ids)
     isPrivate: clonedOpportunityData?.isPrivate || false,
-    visibility: clonedOpportunityData?.visibility || [] as number[],
+    visibility: clonedOpportunityData?.visibility || ([] as number[]),
   });
-  
-  
+
   // set isPrivate and visibility if cloning a private event for form UI
   useEffect(() => {
-        if (clonedOpportunityData?.visibility?.length > 0) {
-          setFormData(prev => ({
-            ...prev,
-            isPrivate: true,
-            visibility: clonedOpportunityData.visibility,
-          }));
-        }
-      }, [clonedOpportunityData]);
+    if (clonedOpportunityData?.visibility?.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        isPrivate: true,
+        visibility: clonedOpportunityData.visibility,
+      }));
+    }
+  }, [clonedOpportunityData]);
 
   // Add image preview state for cloned images
   const [imagePreview, setImagePreview] = useState<string | null>(
     clonedOpportunityData?.imageUrl || null
   );
-  
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -155,14 +159,14 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
   // Filtered + alphabetically sorted organizations for the checklist
   const filteredOrgs = organizations
-    .filter(org => org.name.toLowerCase().includes(orgFilter.toLowerCase()))
+    .filter((org) => org.name.toLowerCase().includes(orgFilter.toLowerCase()))
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const toggleOrgSelection = (orgId: number) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const current: number[] = Array.isArray(prev.visibility) ? prev.visibility : [];
       const exists = current.includes(orgId);
-      const next = exists ? current.filter(id => id !== orgId) : [...current, orgId];
+      const next = exists ? current.filter((id) => id !== orgId) : [...current, orgId];
       return { ...prev, visibility: next } as typeof prev;
     });
   };
@@ -171,27 +175,29 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
     return Array.isArray(formData.visibility) && (formData.visibility as number[]).includes(orgId);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleCausesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedCauses = Array.from(e.target.selectedOptions, option => option.value);
-    setFormData(prev => ({
+    const selectedCauses = Array.from(e.target.selectedOptions, (option) => option.value);
+    setFormData((prev) => ({
       ...prev,
-      cause: selectedCauses
+      cause: selectedCauses,
     }));
   };
 
   const handleTagsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedTags = Array.from(e.target.selectedOptions, option => option.value);
-    setFormData(prev => ({
+    const selectedTags = Array.from(e.target.selectedOptions, (option) => option.value);
+    setFormData((prev) => ({
       ...prev,
-      tags: selectedTags
+      tags: selectedTags,
     }));
   };
 
@@ -220,7 +226,6 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
     setError(null);
 
     try {
-      
       // Upload image first if selected
       let imageUrl = clonedOpportunityData?.imageUrl || ''; // ✅ default to cloned image if present
 
@@ -228,7 +233,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       if (imageFile) {
         const imageFormData = new FormData();
         imageFormData.append('file', imageFile);
-        
+
         try {
           const uploadResponse = await fetch('https://cucaresbackend.onrender.com/upload', {
             method: 'POST',
@@ -238,7 +243,9 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
           if (!uploadResponse.ok) {
             const errorText = await uploadResponse.text();
             console.error('Upload error response:', errorText);
-            throw new Error(`Failed to upload image: ${uploadResponse.status} ${uploadResponse.statusText}`);
+            throw new Error(
+              `Failed to upload image: ${uploadResponse.status} ${uploadResponse.statusText}`
+            );
           }
 
           const uploadResult = await uploadResponse.json();
@@ -252,12 +259,11 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
         }
       }
 
-console.log('Final image URL to send:', imageUrl);
-
+      console.log('Final image URL to send:', imageUrl);
 
       // Create FormData for multipart/form-data
       const formDataToSend = new FormData();
-      
+
       // Add all the form fields
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
@@ -278,8 +284,7 @@ console.log('Final image URL to send:', imageUrl);
       formDataToSend.append('address', formData.address);
       formDataToSend.append('points', formData.duration.toString());
       formDataToSend.append('approved', currentUser.admin ? 'true' : 'false');
-      
-      
+
       // Add redirect URL if provided
       if (formData.redirect_url.trim()) {
         formDataToSend.append('redirect_url', formData.redirect_url.trim());
@@ -296,7 +301,7 @@ console.log('Final image URL to send:', imageUrl);
       // If private, append visibility org ids as a single JSON field (numbers)
       // This ensures the backend receives a JSON array of integers instead of
       // multiple string entries (FormData always serializes values as strings).
-      
+
       if (formData.isPrivate && Array.isArray(formData.visibility)) {
         try {
           formDataToSend.append('visibility', JSON.stringify(formData.visibility));
@@ -317,22 +322,19 @@ console.log('Final image URL to send:', imageUrl);
       if (currentUser.admin) {
         const approvedOpp = { ...transformedOpp, approved: true };
         // console.log('Admin user - adding approved opportunity:', approvedOpp);
-        setOpportunities(prev => [approvedOpp, ...prev]);
+        setOpportunities((prev) => [approvedOpp, ...prev]);
       }
 
       setSuccess(true);
       setTimeout(() => {
         navigate('/opportunities');
       }, 2000);
-
     } catch (err: any) {
       setError(err.message || 'An error occurred while creating the opportunity');
     } finally {
       setIsSubmitting(false);
     }
   };
-
-
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -377,9 +379,7 @@ console.log('Final image URL to send:', imageUrl);
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Date *</label>
               <input
                 type="date"
                 name="date"
@@ -391,9 +391,7 @@ console.log('Final image URL to send:', imageUrl);
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Time *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Time *</label>
               <input
                 type="time"
                 name="time"
@@ -421,9 +419,7 @@ console.log('Final image URL to send:', imageUrl);
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Total Slots *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Total Slots *</label>
               <input
                 type="number"
                 name="total_slots"
@@ -461,8 +457,10 @@ console.log('Final image URL to send:', imageUrl);
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
               >
                 <option value="">Select an organization</option>
-                {organizations.map(org => (
-                  <option key={org.id} value={org.id}>{org.name}</option>
+                {organizations.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -494,15 +492,14 @@ console.log('Final image URL to send:', imageUrl);
                 placeholder="https://example.com/register"
               />
               <p className="text-xs text-gray-500 mt-1">
-                If you would like this opportunity to redirect to an external registration, enter the link here.
+                If you would like this opportunity to redirect to an external registration, enter
+                the link here.
               </p>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
             <textarea
               name="description"
               value={formData.description}
@@ -533,22 +530,22 @@ console.log('Final image URL to send:', imageUrl);
             </div> */}
 
           <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Causes
-              </label>
-              <select
-                name="cause"
-                multiple
-                value={formData.cause}
-                onChange={handleCausesChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-              >
-                {allInterests.map(cause => (
-                  <option key={cause} value={cause}>{cause}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple causes</p>
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Causes</label>
+            <select
+              name="cause"
+              multiple
+              value={formData.cause}
+              onChange={handleCausesChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+            >
+              {allInterests.map((cause) => (
+                <option key={cause} value={cause}>
+                  {cause}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple causes</p>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -557,7 +554,9 @@ console.log('Final image URL to send:', imageUrl);
             <select
               name="isPrivate"
               value={formData.isPrivate ? 'yes' : 'no'}
-              onChange={(e) => setFormData(prev => ({ ...prev, isPrivate: e.target.value === 'yes' }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, isPrivate: e.target.value === 'yes' }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
             >
               <option value="no">No</option>
@@ -565,12 +564,15 @@ console.log('Final image URL to send:', imageUrl);
             </select>
 
             <p className="text-xs text-gray-500 mt-1">
-              Private events are only visible to members of the host organization and any other selected organizations.
+              Private events are only visible to members of the host organization and any other
+              selected organizations.
             </p>
 
             {formData.isPrivate && (
               <div className="mt-3">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Select organizations allowed to see this event</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select organizations allowed to see this event
+                </label>
                 <input
                   type="text"
                   placeholder="Filter organizations..."
@@ -579,7 +581,7 @@ console.log('Final image URL to send:', imageUrl);
                   className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                 />
                 <div className="max-h-40 overflow-auto border rounded-lg p-2">
-                  {filteredOrgs.map(org => (
+                  {filteredOrgs.map((org) => (
                     <label key={org.id} className="flex items-center space-x-2 py-1">
                       <input
                         type="checkbox"
@@ -622,9 +624,9 @@ console.log('Final image URL to send:', imageUrl);
                 </div>
               ) : imagePreview ? (
                 <div>
-                  <img 
-                    src={imagePreview} 
-                    alt="Cloned opportunity preview" 
+                  <img
+                    src={imagePreview}
+                    alt="Cloned opportunity preview"
                     className="max-h-32 mx-auto mb-2 rounded-lg"
                   />
                   <p className="text-blue-600 font-medium">✓ Using cloned image</p>
