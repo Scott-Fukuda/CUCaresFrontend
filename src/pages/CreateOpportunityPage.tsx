@@ -235,22 +235,16 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
         imageFormData.append('file', imageFile);
 
         try {
-          const uploadResponse = await fetch('https://cucaresbackend.onrender.com/upload', {
-            method: 'POST',
-            body: imageFormData,
-          });
+          const file = imageFormData.get('file') as File;
+          const uploadResponse = await api.uploadProfilePicture(file);
 
-          if (!uploadResponse.ok) {
-            const errorText = await uploadResponse.text();
-            console.error('Upload error response:', errorText);
-            throw new Error(
-              `Failed to upload image: ${uploadResponse.status} ${uploadResponse.statusText}`
-            );
+          try {
+            imageUrl = await api.uploadProfilePicture(file);
+            console.log('Uploaded new image URL:', imageUrl);
+            // Replace cloned image with new uploaded one
+          } catch (error) {
+            console.error('Failed to upload image:', error);
           }
-
-          const uploadResult = await uploadResponse.json();
-          imageUrl = uploadResult.url; // Replace cloned image with new uploaded one
-          console.log('Uploaded new image URL:', imageUrl);
         } catch (uploadError: any) {
           console.error('Image upload error:', uploadError);
           setError(`Image upload failed: ${uploadError.message}`);
@@ -267,10 +261,10 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       // Add all the form fields
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
-      // Add causes as array
-      formData.cause.forEach((cause: string) => {
-        formDataToSend.append('causes', cause);
-      });
+      // // Add causes as array
+      // formData.cause.forEach((cause: string) => {
+      //   formDataToSend.append('causes', cause);
+      // });
       // Add tags as array
       formData.tags.forEach((tag: string) => {
         formDataToSend.append('tags', tag);
@@ -529,7 +523,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
               <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple tags</p>
             </div> */}
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Causes</label>
             <select
               name="cause"
@@ -545,7 +539,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
               ))}
             </select>
             <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple causes</p>
-          </div>
+          </div> */}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
