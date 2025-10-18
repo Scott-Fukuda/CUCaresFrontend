@@ -255,7 +255,8 @@ const AppContent: React.FC = () => {
         major,
         birthday,
         car_seats, // Add car_seats from registration
-        registration_date: api.formatRegistrationDate() // Format: YYYY-MM-DDTHH:MM:SS
+        registration_date: api.formatRegistrationDate(), // Format: YYYY-MM-DDTHH:MM:SS
+        carpool_waiver_signed: false
       };
 
       // API takes `name`, so we combine first and last, and include phone
@@ -269,7 +270,8 @@ const AppContent: React.FC = () => {
         major,
         birthday,
         car_seats, // Include car_seats in the API call
-        registration_date: api.formatRegistrationDate() // Format: YYYY-MM-DDTHH:MM:SS
+        registration_date: api.formatRegistrationDate(), // Format: YYYY-MM-DDTHH:MM:SS
+        carpool_waiver_signed: false
       });
 
       const finalNewUser = { ...newUser, ...responseUser };
@@ -850,8 +852,6 @@ const AppContent: React.FC = () => {
         message={popupMessage.message}
         type={popupMessage.type}
       />
-
-
     </>
   );
 };

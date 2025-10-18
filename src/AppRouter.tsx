@@ -19,6 +19,7 @@ import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
 import WaiverPopup from './components/WaiverPopup';
 import Waiver from './pages/Waiver';
+import CarpoolPage from './pages/CarpoolPage';
 import { useState } from "react";
 
 interface AppRouterProps {
@@ -270,17 +271,23 @@ const AppRouter: React.FC<AppRouterProps> = ({
                             />
                         }
                     />
+                    <Route
+                        path="/carpool" // ADD ID
+                        element={
+                            <CarpoolPage />
+                        }
+                    />
                     {/* <Route path="/" element={<OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />}/> */}
                     <Route path="/" element={<Navigate to="/opportunities" replace />} />
                 </Routes>
             </main>
             <BottomNav currentUser={currentUser} />
-            {showWaiverPopup &&
+            {/* {showWaiverPopup &&
                 <WaiverPopup
                     showWaiverPopup={showWaiverPopup}
                     setShowWaiverPopup={setShowWaiverPopup}
                 />
-            }
+            } */}
             <a
                 href="mailto:sdf72@cornell.edu?subject=Bug Report - CampusCares Frontend&body=Please describe the bug you encountered:"
                 className="hidden md:flex fixed bottom-6 right-6 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-lg transition-colors duration-200 items-center gap-2 z-50 text-base"

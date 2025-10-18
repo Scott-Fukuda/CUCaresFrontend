@@ -39,3 +39,10 @@
         font-size: 14px;
     }
 }
+
+input[type="text"] {
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #B31B1B;
+    }
+}

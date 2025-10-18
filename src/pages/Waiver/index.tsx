@@ -30,11 +30,13 @@ loss, liability, damage, or costs due to my child(ren) traveling to and or from 
 5. In signing this release, I acknowledge and represent that I have read the foregoing Waiver of Liability and Hold Harmless Agreement, understand it, and sign it voluntarily as my own free act and deed.`
 
     const handleSubmit = async () => {
-        if (!name || name !== currentUser.name) {
-            setError("You must enter your full name as registered on CampusCares")
+        if (!name || name.replace(/\s+/g, "") !== currentUser.name.replace(/\s+/g, "")) {
+            setError("You must enter your full name as registered on CampusCares");
+            return;
         }
         if (!consentChecked) {
             setError("You must check the box above to consent to the terms of the waiver");
+            return;
         }
 
         try {
@@ -43,8 +45,7 @@ loss, liability, damage, or costs due to my child(ren) traveling to and or from 
                 type: type,
                 content: type == "carpool" ? carpool_waiver : "",
                 checked_consent: consentChecked,
-                user_id: currentUser.id,
-                // organization_id: ""
+                user_id: currentUser.id
             });
             navigate('/opportunities');
         } catch (err) {
@@ -72,6 +73,7 @@ loss, liability, damage, or costs due to my child(ren) traveling to and or from 
             <div className="name-input-wrapper">
                 <label htmlFor="name">Type your full name *</label>
                 <input id="name"
+                    type="text"
                     value={name}
                     onChange={e => {
                         setName(e.target.value);
@@ -81,7 +83,7 @@ loss, liability, damage, or costs due to my child(ren) traveling to and or from 
             </div>
             <div className="checkbox-wrapper">
                 <input type="checkbox" id="consent" checked={consentChecked} onChange={e => setConsentChecked(e.target.checked)} />
-                <label htmlFor="consent">I have read and agree to the terms of the waiver and understand that this constitutes my electronic signature.</label>
+                <label htmlFor="consent">I have read and agree to the terms of the waiver and understand that this constitutes my electronic signature. *</label>
             </div>
             {error &&
                 <div className="error-text">
