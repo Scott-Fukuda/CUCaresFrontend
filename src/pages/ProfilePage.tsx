@@ -12,6 +12,8 @@ import {
 import BadgeIcon from '../components/BadgeIcon';
 import { getProfilePictureUrl, updateUser } from '../api';
 import { useNavigate, useParams } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase-config';
 
 interface ProfilePageProps {
   students: User[];
@@ -156,6 +158,18 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setCurrentUser(null);
+      sessionStorage.clear();
+      localStorage.clear();
+      navigate('/login'); // or your landing page
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   const isFriend = friendshipStatus === 'friends';
   const requestPending = friendshipStatus === 'sent' || friendshipStatus === 'received';
 
@@ -261,13 +275,24 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
             </div>
           )}
         </div>
+
         {isCurrentUser && (
-          <button
-            onClick={() => navigate('/my-opportunities')}
-            className={`w-full font-bold py-2 px-4 rounded-lg transition-colors`}
-          >
-            See my opportunities
-          </button>
+          <div className="space-y-4">
+            <button
+              onClick={() => navigate('/my-opportunities')}
+              className="w-full font-bold py-2 px-4 rounded-lg transition-colors"
+            >
+              See my opportunities
+            </button>
+
+            {/* 🔴 Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="w-full bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              Log out
+            </button>
+          </div>
         )}
 
         {/* <div className="bg-white p-6 rounded-2xl shadow-lg">
