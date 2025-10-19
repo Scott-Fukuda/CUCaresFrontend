@@ -184,7 +184,7 @@ export const initialBadges: Badge[] = [
 
   export const ourTeam: Member[] = [
       {
-        "id": "ezra-min",
+        "id": "2",
         "name": "Ezra Min",
         "picture": "./team_pic/ezra.jpeg",
         "hometown": "Ann Arbor, MI",
@@ -195,7 +195,7 @@ export const initialBadges: Badge[] = [
         "role": "Chief Executive Officer"
       },
       {
-        "id": "lee-brown",
+        "id": "12",
         "name": "Lee Brown",
         "picture":"./team_pic/lee.png",
         "hometown": "Chapin, SC",
@@ -206,7 +206,7 @@ export const initialBadges: Badge[] = [
         "role": "Chief Operating Officer"
       },
       {
-        "id": "scott-fukuda",
+        "id": "15",
         "name": "Scott Fukuda",
         "picture": "./team_pic/scott.png",
         "hometown": "El Segundo, CA",
@@ -217,7 +217,7 @@ export const initialBadges: Badge[] = [
         "role": "Chief Technology Officer"
       },
       {
-        "id": "ailin-chen",
+        "id": "14",
         "name": "Ailin Chen",
         "picture": "./team_pic/ailin.png",
         "hometown": "Bay Area, CA",
@@ -228,7 +228,7 @@ export const initialBadges: Badge[] = [
         "role": "Chief Marketing Officer"
       },
       {
-        "id": "benjamin-chen",
+        "id": "3",
         "name": "Benjamin Chen",
         "picture": "./team_pic/ben.png",
         "hometown": "Long Beach, CA",
@@ -240,7 +240,7 @@ export const initialBadges: Badge[] = [
       },
     
       {
-        "id": "grace-matsuoka",
+        "id": "129",
         "name": "Grace Matsuoka",
         "picture": "./team_pic/grace.jpeg",
         "hometown": "Olympia, WA",
@@ -251,7 +251,7 @@ export const initialBadges: Badge[] = [
         "role": "Director of Technical Development"
       },
       {
-        "id": "william-mullins",
+        "id": "17",
         "name": "William Mullins",
         "picture": "./team_pic/will.png",
         "hometown": "Kearny, NJ",
@@ -267,7 +267,7 @@ export const initialBadges: Badge[] = [
         "role": "Director of Strategy and Development"
       },
       {
-        "id": "riley-smith",
+        "id": "142",
         "name": "Riley Smith",
         "picture": "./team_pic/riley.png",
         "hometown": "Buffalo, New York",
@@ -278,7 +278,7 @@ export const initialBadges: Badge[] = [
         "role": "Director of Partnerships"
       },
       {
-        "id": "leslie-baker",
+        "id": "106",
         "name": "Leslie Baker",
         "picture": "./team_pic/leslie.png",
         "hometown": "Franklin, MA",
@@ -289,7 +289,7 @@ export const initialBadges: Badge[] = [
         "role": "Outreach Manager"
       },
       {
-        "id": "kate-shum",
+        "id": "168",
         "name": "Kate Shum",
         "picture": "./team_pic/kate.png",
         "hometown": "Marlboro, NJ",

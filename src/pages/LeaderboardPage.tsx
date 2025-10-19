@@ -401,6 +401,18 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ allUsers, allOrgs, si
           </ul>
         )}
       </div>
+      <p className="mt-6 text-xs text-gray-500 text-center">
+            Click here to see our{" "}
+            <a
+              href="/terms_of_service.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-gray-700"
+            >
+              Terms of Service and Privacy Policy
+            </a>
+            .
+          </p>
     </div>
   );
 };

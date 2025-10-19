@@ -61,6 +61,10 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const [localUser, setLocalUser] = useState(user); // Add local user state
 
   React.useEffect(() => {
+    window.scrollTo(0,0);
+  }, []);
+
+  React.useEffect(() => {
     console.log('local user: ', localUser)
   }, [localUser])
 
@@ -146,6 +150,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   // });
 
   return (
+    <div>
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left Column */}
       <div className="lg:col-span-1 space-y-8">
@@ -241,7 +246,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
              )}
         </div> */}
       </div>
-      
+
       {/* Right Column */}
       <div className="lg:col-span-2 space-y-8">
         <div className="bg-white p-6 rounded-2xl shadow-lg">
@@ -300,6 +305,8 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                 </>
             )}
         </div>
+
+
          <div className="bg-white p-6 rounded-2xl shadow-lg">
             <h3 className="text-xl font-bold mb-4">{user.name}'s Passions</h3>
             <div className="flex flex-wrap gap-3">
@@ -371,10 +378,25 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
             ) : (
                 <p className="text-gray-500 text-center">{user.name} hasn't added any friends yet.</p>
             )}
+            </div>
         </div>
       </div>
-    </div>
-  );
-};
+      <div className="w-full flex justify-center mt-6">
+        <p className="text-xs text-gray-500 text-center">
+          Click here to see our{" "}
+          <a
+            href="/terms_of_service.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-700"
+          >
+            Terms of Service and Privacy Policy
+          </a>
+          .
+        </p>
+      </div>
+      </div>
+      );
+    }
 
 export default ProfilePage;
