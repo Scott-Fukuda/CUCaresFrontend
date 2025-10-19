@@ -6,7 +6,6 @@ interface LoginProps {
   error: string | null;
   isLoading: boolean;
 }
-
 const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading }) => {
   const navigate = useNavigate();
 

@@ -64,8 +64,14 @@ const AppContent: React.FC = () => {
 
             setCurrentUser(null);
             // No account in our backend yet, show registration view
-            setAuthView('register');
-            navigate('/register');
+            const response = await api.checkUserExists(firebaseUser.email);
+
+            if (response.exists) {
+              setAuthView('register');
+              navigate('/register');
+            } else {
+              navigate('/login');
+            }
           }
         } else {
           setCurrentUser(null);
@@ -185,19 +191,22 @@ const AppContent: React.FC = () => {
       // Trigger Firebase Google sign-in popup
       //console.log('Triggering Firebase sign-in...');
       const firebaseUser = await signInWithGoogle();
+      console.log('Firebase user after sign-in:', firebaseUser.email);
       //console.log('Firebase sign-in successful:', firebaseUser.email);
+      const approvalCheck = await api.checkEmailApproval(firebaseUser.email);
 
       // Check if email is @cornell.edu
       if (!firebaseUser.email.toLowerCase().endsWith('@cornell.edu')) {
         // For non-Cornell emails, check if they're in the approved list
         try {
-          const approvalCheck = await api.checkEmailApproval(firebaseUser.email);
           if (!approvalCheck.is_approved) {
             setAuthError(
               'Your email is not approved for this platform. Please contact team@campuscares.us for access.'
             );
             setIsLoading(false);
-            return;
+            await signOut();
+            // navigate('/login');
+            return 'non approved';
           }
           // Email is approved, continue with the process
         } catch (error) {
@@ -206,7 +215,9 @@ const AppContent: React.FC = () => {
             'Unable to verify email approval. Please try again or contact team@campuscares.us.'
           );
           setIsLoading(false);
-          return;
+          await signOut();
+          // navigate('/login');
+          return 'non approved';
         }
       }
 
@@ -234,7 +245,13 @@ const AppContent: React.FC = () => {
         } else {
           // User doesn't exist, redirect to registration
           // console.log('User not found, redirecting to registration');
-          setAuthView('register');
+          if (approvalCheck.is_approved) {
+            console.log('Approved user, redirecting to registration');
+            setAuthView('register');
+            navigate('/register');
+          } else {
+            navigate('/login');
+          }
         }
       }
     } catch (e: any) {
@@ -263,6 +280,7 @@ const AppContent: React.FC = () => {
     const firebaseUser = auth.currentUser;
     if (!firebaseUser || !firebaseUser.email) {
       setAuthError('No authenticated user found. Please sign in with Google first.');
+      navigate('/login');
       return;
     }
 

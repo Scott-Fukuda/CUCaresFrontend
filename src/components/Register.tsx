@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { auth } from '../firebase-config';
 import { genderOptions, academicLevelOptions } from '../types';
 
