@@ -184,7 +184,7 @@ export const genderOptions = ['Male', 'Female', 'Prefer not to say'];
 export const academicLevelOptions = ['Undergraduate', 'Graduate', 'Faculty'];
 
 export interface Member {
-  id: string;
+  id: number;
   name: string;
   picture: string;
   hometown: string;
