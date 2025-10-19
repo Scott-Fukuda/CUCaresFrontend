@@ -308,7 +308,7 @@ const AppContent: React.FC = () => {
 
       setStudents((prev) => [...prev, finalNewUser]);
       setCurrentUser(finalNewUser);
-      navigate('/account-setup');
+      navigate('/opportunities');
       setShowPostRegistrationSetup(true);
       // navigate(`/profile/${currentUser?.id}`) // Redirect to profile page after registration
     } catch (e: any) {

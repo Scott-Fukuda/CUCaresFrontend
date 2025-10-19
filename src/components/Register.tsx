@@ -38,7 +38,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
     e.preventDefault();
 
     // Validate required fields
-    if (!firstName.trim() || !lastName.trim() || !phone.trim() || !birthday.trim()) {
+    if (!firstName.trim() || !lastName.trim() || !phone.trim()) {
       return; // Form validation will show required messages
     }
 
@@ -106,7 +106,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
           title="Please enter a valid phone number (10+ digits)"
         />
 
-        <select
+        {/* <select
           value={gender}
           onChange={(e) => setGender(e.target.value)}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:outline-none transition"
@@ -162,7 +162,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
             required
             title="Please enter your birth date"
           />
-        </div>
+        </div> */}
 
         {/* Car Ownership Question */}
         <div>
