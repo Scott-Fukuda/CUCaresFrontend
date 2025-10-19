@@ -8,22 +8,26 @@ interface MyOpportunitiesPageProps {
   allOrgs: Organization[];
   currentUser: User;
   handleSignUp: (opportunityId: number) => void;
-  handleUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
+  handleUnSignUp: (
+    opportunityId: number,
+    opportunityDate?: string,
+    opportunityTime?: string
+  ) => void;
   currentUserSignupsSet: Set<number>;
 }
 
-const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({ 
-  opportunities, 
+const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
+  opportunities,
   students,
   allOrgs,
-  currentUser, 
+  currentUser,
   handleSignUp,
   handleUnSignUp,
-  currentUserSignupsSet
+  currentUserSignupsSet,
 }) => {
   const [showPastHosted, setShowPastHosted] = useState(false);
   const [showPastRegistered, setShowPastRegistered] = useState(false);
-  
+
   // Add modal states for external signup/unsignup
   const [showExternalSignupModal, setShowExternalSignupModal] = useState(false);
   const [showExternalUnsignupModal, setShowExternalUnsignupModal] = useState(false);
@@ -40,10 +44,10 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
     const hosted: Opportunity[] = [];
     const registered: Opportunity[] = [];
 
-    opportunities.forEach(opp => {
+    opportunities.forEach((opp) => {
       const oppDate = new Date(`${opp.date}T${opp.time}`);
       const isPast = oppDate < now;
-      
+
       // Check if user is the host
       if (opp.host_id === currentUser.id) {
         if (!isPast) {
@@ -51,7 +55,7 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
         }
       }
       // Check if user is registered but not the host
-      else if (opp.involved_users?.some(user => user.id === currentUser.id && user.registered)) {
+      else if (opp.involved_users?.some((user) => user.id === currentUser.id && user.registered)) {
         if (!isPast) {
           registered.push(opp);
         }
@@ -66,17 +70,19 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
     const pastHosted: Opportunity[] = [];
     const pastRegistered: Opportunity[] = [];
 
-    opportunities.forEach(opp => {
+    opportunities.forEach((opp) => {
       const oppDate = new Date(`${opp.date}T${opp.time}`);
       const isPast = oppDate < now;
-      
+
       if (isPast) {
         // Check if user is the host
         if (opp.host_id === currentUser.id) {
           pastHosted.push(opp);
         }
         // Check if user is registered but not the host
-        else if (opp.involved_users?.some(user => user.id === currentUser.id && user.registered)) {
+        else if (
+          opp.involved_users?.some((user) => user.id === currentUser.id && user.registered)
+        ) {
           pastRegistered.push(opp);
         }
       }
@@ -100,10 +106,10 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
     if (selectedOpportunity) {
       // Open the external URL in a new tab
       window.open(selectedOpportunity.redirect_url!, '_blank');
-      
+
       // Still register the user locally
       handleSignUp(selectedOpportunity.id);
-      
+
       // Close the modal
       setShowExternalSignupModal(false);
       setSelectedOpportunity(null);
@@ -114,7 +120,7 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
     if (selectedOpportunity) {
       // Proceed with local unregistration
       handleUnSignUp(selectedOpportunity.id, selectedOpportunity.date, selectedOpportunity.time);
-      
+
       // Close the modal
       setShowExternalUnsignupModal(false);
       setSelectedOpportunity(null);
@@ -160,16 +166,16 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
 
         {hostedOpportunities.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            {hostedOpportunities.map(opp => {
+            {hostedOpportunities.map((opp) => {
               // Determine signed-up students from backend data
               let signedUpStudents: User[] = [];
               if (opp.involved_users && opp.involved_users.length > 0) {
-                signedUpStudents = opp.involved_users.filter(user => 
-                  user.registered === true || opp.host_id === user.id
+                signedUpStudents = opp.involved_users.filter(
+                  (user) => user.registered === true || opp.host_id === user.id
                 );
               }
               const isUserSignedUp = currentUserSignupsSet.has(opp.id);
-              
+
               return (
                 <OpportunityCard
                   key={opp.id}
@@ -192,16 +198,16 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
           <div className="mt-6">
             <h3 className="text-lg font-medium text-gray-700 mb-4">Past Hosted Opportunities</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pastHostedOpportunities.map(opp => {
+              {pastHostedOpportunities.map((opp) => {
                 // Determine signed-up students from backend data
                 let signedUpStudents: User[] = [];
                 if (opp.involved_users && opp.involved_users.length > 0) {
-                  signedUpStudents = opp.involved_users.filter(user => 
-                    user.registered === true || opp.host_id === user.id
+                  signedUpStudents = opp.involved_users.filter(
+                    (user) => user.registered === true || opp.host_id === user.id
                   );
                 }
                 const isUserSignedUp = currentUserSignupsSet.has(opp.id);
-                
+
                 return (
                   <OpportunityCard
                     key={opp.id}
@@ -231,7 +237,9 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
       {/* Registered Opportunities Section */}
       <div className="mb-12">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900">Other Opportunities I'm Registered For</h2>
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Other Opportunities I'm Registered For
+          </h2>
           {pastRegisteredOpportunities.length > 0 && (
             <button
               onClick={() => setShowPastRegistered(!showPastRegistered)}
@@ -250,16 +258,16 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
 
         {registeredOpportunities.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                          {registeredOpportunities.map(opp => {
-                // Determine signed-up students from backend data
-                let signedUpStudents: User[] = [];
-                if (opp.involved_users && opp.involved_users.length > 0) {
-                  signedUpStudents = opp.involved_users.filter(user => 
-                    user.registered === true || opp.host_id === user.id
-                  );
-                }
-                const isUserSignedUp = currentUserSignupsSet.has(opp.id);
-              
+            {registeredOpportunities.map((opp) => {
+              // Determine signed-up students from backend data
+              let signedUpStudents: User[] = [];
+              if (opp.involved_users && opp.involved_users.length > 0) {
+                signedUpStudents = opp.involved_users.filter(
+                  (user) => user.registered === true || opp.host_id === user.id
+                );
+              }
+              const isUserSignedUp = currentUserSignupsSet.has(opp.id);
+
               return (
                 <OpportunityCard
                   key={opp.id}
@@ -280,14 +288,16 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
 
         {showPastRegistered && pastRegisteredOpportunities.length > 0 && (
           <div className="mt-6">
-            <h3 className="text-lg font-medium text-gray-700 mb-4">Past Registered Opportunities</h3>
+            <h3 className="text-lg font-medium text-gray-700 mb-4">
+              Past Registered Opportunities
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pastRegisteredOpportunities.map(opp => {
-                const signedUpStudents = students.filter(student => 
-                  opp.involved_users?.some(user => user.id === student.id && user.registered)
+              {pastRegisteredOpportunities.map((opp) => {
+                const signedUpStudents = students.filter((student) =>
+                  opp.involved_users?.some((user) => user.id === student.id && user.registered)
                 );
                 const isUserSignedUp = currentUserSignupsSet.has(opp.id);
-                
+
                 return (
                   <OpportunityCard
                     key={opp.id}
@@ -329,28 +339,28 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
 
           {showAllOpportunities && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {opportunities.map(opp => {
+              {opportunities.map((opp) => {
                 // Determine signed-up students from backend data
                 let signedUpStudents: User[] = [];
                 if (opp.involved_users && opp.involved_users.length > 0) {
-                  signedUpStudents = opp.involved_users.filter(user => 
-                    user.registered === true || opp.host_id === user.id
+                  signedUpStudents = opp.involved_users.filter(
+                    (user) => user.registered === true || opp.host_id === user.id
                   );
                 }
                 const isUserSignedUp = currentUserSignupsSet.has(opp.id);
-                
+
                 return (
-                  <OpportunityCard 
-                    key={opp.id} 
-                    opportunity={opp} 
-                    signedUpStudents={signedUpStudents} 
-                    allOrgs={allOrgs} 
-                    currentUser={currentUser} 
-                    onSignUp={handleSignUp} 
-                    onUnSignUp={handleUnSignUp} 
-                    isUserSignedUp={isUserSignedUp} 
-                    onExternalSignup={handleExternalSignup} 
-                    onExternalUnsignup={handleExternalUnsignup} 
+                  <OpportunityCard
+                    key={opp.id}
+                    opportunity={opp}
+                    signedUpStudents={signedUpStudents}
+                    allOrgs={allOrgs}
+                    currentUser={currentUser}
+                    onSignUp={handleSignUp}
+                    onUnSignUp={handleUnSignUp}
+                    isUserSignedUp={isUserSignedUp}
+                    onExternalSignup={handleExternalSignup}
+                    onExternalUnsignup={handleExternalUnsignup}
                   />
                 );
               })}
@@ -400,7 +410,8 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
           <div className="bg-white rounded-lg p-6 max-w-md mx-4">
             <h3 className="text-lg font-bold text-gray-900 mb-4">External Application Notice</h3>
             <p className="text-gray-600 mb-4">
-              This opportunity required an external application. Please notify the host non-profit that you no longer are able to participate in this opportunity.
+              This opportunity required an external application. Please notify the host non-profit
+              that you no longer are able to participate in this opportunity.
             </p>
             <p className="text-sm text-gray-500 mb-6">
               You will still be unregistered from our local system.

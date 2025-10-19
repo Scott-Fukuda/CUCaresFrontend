@@ -1,4 +1,3 @@
-
 // Minimal user data returned by GET /api/users
 export interface MinimalUser {
   id: number;
@@ -42,8 +41,8 @@ export interface Opportunity {
   imageUrl: string;
   points: number;
   isPrivate?: boolean;
-  causes: string[]; 
-  tags: string[]; 
+  causes: string[];
+  tags: string[];
   host_id?: number; // ID of the user who created this opportunity
   host_org_id?: number; // ID of the organization hosting this opportunity
   host_org_name?: string; // Name of the organization hosting this opportunity
@@ -53,7 +52,7 @@ export interface Opportunity {
   comments: string[]; // Comments on the opportunity
   qualifications: string[]; // Qualifications for the opportunity
   attendance_marked?: boolean; // Whether the attendance has been marked by the host
-  visibility: string[];
+  visibility: number[]; // empty list means public, otherwise list of organization IDs that can see it
   redirect_url?: string | null; // External URL for signup, null means normal signup
 }
 
@@ -62,28 +61,62 @@ export interface SignUp {
   opportunityId: number;
 }
 
-export type StudentGroupCategory = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team';
-export const studentGroupCategories: StudentGroupCategory[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team'];
+export type StudentGroupCategory =
+  | 'Fraternity'
+  | 'Sorority'
+  | 'Professional Club'
+  | 'Sports Team'
+  | 'Performing Arts Group'
+  | 'Project Team';
+export const studentGroupCategories: StudentGroupCategory[] = [
+  'Fraternity',
+  'Sorority',
+  'Professional Club',
+  'Sports Team',
+  'Performing Arts Group',
+  'Project Team',
+];
 
-export type OrganizationType = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team' | 'Cultural' | 'Community Service' | 'Religious' | 'Other';
-export const organizationTypes: OrganizationType[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team', 'Cultural', 'Community Service', 'Religious', 'Other'];
+export type OrganizationType =
+  | 'Fraternity'
+  | 'Sorority'
+  | 'Professional Club'
+  | 'Sports Team'
+  | 'Performing Arts Group'
+  | 'Project Team'
+  | 'Cultural'
+  | 'Community Service'
+  | 'Religious'
+  | 'Other';
+export const organizationTypes: OrganizationType[] = [
+  'Fraternity',
+  'Sorority',
+  'Professional Club',
+  'Sports Team',
+  'Performing Arts Group',
+  'Project Team',
+  'Cultural',
+  'Community Service',
+  'Religious',
+  'Other',
+];
 
 export interface StudentGroup {
-    id: number;
-    name: string;
-    category: StudentGroupCategory;
+  id: number;
+  name: string;
+  category: StudentGroupCategory;
 }
 
 export interface Organization {
-    id: number;
-    name: string;
-    type: string;
-    description?: string;
-    approved?: boolean;
-    host_user_id?: number;
-    member_count?: number;
-    users?: User[]; // Array of users who are members of this organization
-    date_created?: string;
+  id: number;
+  name: string;
+  type: string;
+  description?: string;
+  approved?: boolean;
+  host_user_id?: number;
+  member_count?: number;
+  users?: User[]; // Array of users who are members of this organization
+  date_created?: string;
 }
 
 export interface Friendship {
@@ -92,8 +125,6 @@ export interface Friendship {
   requester_name: string;
   accepted: boolean;
 }
-
-
 
 export type FriendshipStatus = 'friends' | 'sent' | 'received' | 'add';
 
@@ -113,19 +144,19 @@ export interface FriendshipsResponse {
 }
 
 export interface BadgeThresholdData {
-    points: number;
-    signUpCount: number;
-    signups: SignUp[];
-    opportunities: Opportunity[];
-    friendsCount: number;
+  points: number;
+  signUpCount: number;
+  signups: SignUp[];
+  opportunities: Opportunity[];
+  friendsCount: number;
 }
 
 export interface Badge {
-    id: string;
-    name: string;
-    description: string;
-    icon: string; // emoji
-    threshold: (data: BadgeThresholdData) => boolean;
+  id: string;
+  name: string;
+  description: string;
+  icon: string; // emoji
+  threshold: (data: BadgeThresholdData) => boolean;
 }
 
 export interface Notification {
@@ -138,8 +169,6 @@ export interface Notification {
   createdAt: string; // ISO string
 }
 
-
-
 export const allInterests = [
   'Environment & Sustainability',
   'Homelessness Relief',
@@ -147,20 +176,12 @@ export const allInterests = [
   'Health and Wellness',
   'Education',
   'Religious',
-  'Other'
+  'Other',
 ];
 
-export const genderOptions = [
-  'Male',
-  'Female', 
-  'Prefer not to say'
-];
+export const genderOptions = ['Male', 'Female', 'Prefer not to say'];
 
-export const academicLevelOptions = [
-  'Undergraduate',
-  'Graduate',
-  'Faculty'
-];
+export const academicLevelOptions = ['Undergraduate', 'Graduate', 'Faculty'];
 
 export interface Member {
   id: string;

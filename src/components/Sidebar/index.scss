@@ -1,51 +1,53 @@
 .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 35vw;
-    height: 100vh;
-    z-index: 50;
-    background-color: white;
-    border-radius: 15px;
-    padding: 15px 25px;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 35vw;
+  height: 100vh;
+  z-index: 50;
+  background-color: white;
+  border-radius: 15px;
+  padding: 15px 25px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 
-    &.active {
-        transform: translateX(0);
-    }
+  &.active {
+    transform: translateX(0);
+  }
 }
 
 .header {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .nav {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 
-    .nav-opt {
-        cursor: pointer;
-        padding: 3px 8px;
-        border-radius: 8px;
+  .nav-opt {
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 8px;
 
-        &:hover {
-            background-color: #c9c9c936;
-        }
+    &:hover {
+      background-color: #c9c9c936;
     }
+  }
 
-    .nav-opt.active {
-        p {
-            color: #cf1c25
-        }
+  .nav-opt.active {
+    p {
+      color: #cf1c25;
     }
+  }
 }

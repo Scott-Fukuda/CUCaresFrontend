@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { User, Organization, FriendshipsResponse } from '../types';
 import { useNavigate } from 'react-router-dom';
@@ -14,10 +13,21 @@ interface SearchBarProps {
   handleFriendRequest: (toUserId: number) => void;
 }
 
-const SearchIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
+const SearchIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    />
+  </svg>
 );
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -48,43 +58,40 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const { filteredUsers, filteredOrgs } = useMemo(() => {
     if (!query) return { filteredUsers: [], filteredOrgs: [] };
     const lowerCaseQuery = query.toLowerCase();
-    
-    const users = allUsers.filter(u => 
-        u.name.toLowerCase().includes(lowerCaseQuery) &&
-        u.id !== currentUser.id
-    ).slice(0, 4); 
-    
-    const orgs = allOrgs.filter(g => 
-        g.name.toLowerCase().includes(lowerCaseQuery)
-    ).slice(0, 4);
+
+    const users = allUsers
+      .filter((u) => u.name.toLowerCase().includes(lowerCaseQuery) && u.id !== currentUser.id)
+      .slice(0, 4);
+
+    const orgs = allOrgs.filter((g) => g.name.toLowerCase().includes(lowerCaseQuery)).slice(0, 4);
 
     return { filteredUsers: users, filteredOrgs: orgs };
   }, [query, allUsers, allOrgs, currentUser.id]);
 
   const getFriendStatus = (userId: number) => {
     if (friendshipsData) {
-      const userData = friendshipsData.users.find(user => user.user_id === userId);
+      const userData = friendshipsData.users.find((user) => user.user_id === userId);
       if (userData) {
         return userData.friendship_status;
       }
     }
     return 'add';
   };
-  
+
   const handleResultClick = () => {
-      setQuery('');
-      setIsFocused(false);
-  }
+    setQuery('');
+    setIsFocused(false);
+  };
 
   return (
     <div className="relative" ref={searchRef}>
       <div className="relative">
         <SearchIcon className="h-5 w-5 text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2" />
-        <input 
-          type="text" 
-          placeholder="Search students & orgs..." 
+        <input
+          type="text"
+          placeholder="Search students & orgs..."
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:outline-none transition"
         />
@@ -92,34 +99,40 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       {isFocused && query.length > 0 && (
         <div className="absolute top-full mt-2 w-full max-h-96 overflow-y-auto bg-white rounded-lg shadow-lg z-30">
-          {(filteredUsers.length === 0 && filteredOrgs.length === 0) ? (
+          {filteredUsers.length === 0 && filteredOrgs.length === 0 ? (
             <p className="text-gray-500 text-center py-4 px-2">No results found for "{query}"</p>
           ) : (
             <ul className="divide-y divide-gray-100">
               {filteredOrgs.length > 0 && (
                 <li>
-                  <h3 className="px-4 py-2 text-xs font-bold text-gray-500 uppercase bg-light-gray">Organizations</h3>
+                  <h3 className="px-4 py-2 text-xs font-bold text-gray-500 uppercase bg-light-gray">
+                    Organizations
+                  </h3>
                   <ul>
-                    {filteredOrgs.map(org => {
-                      const isMember = currentUser.organizationIds && currentUser.organizationIds.includes(org.id);
+                    {filteredOrgs.map((org) => {
+                      const isMember =
+                        currentUser.organizationIds && currentUser.organizationIds.includes(org.id);
                       return (
-                        <li key={org.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+                        <li
+                          key={org.id}
+                          className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"
+                        >
                           <div
                             className="flex-grow cursor-pointer"
                             onClick={() => {
-                                navigate(`/group-detail/${org.id}`);
-                                handleResultClick();
+                              navigate(`/group-detail/${org.id}`);
+                              handleResultClick();
                             }}
                           >
                             <p className="font-semibold text-gray-800">{org.name}</p>
                             <p className="text-sm text-gray-500">{org.type}</p>
                           </div>
-                          <button 
+                          <button
                             onClick={() => {
-                                isMember ? leaveOrg(org.id) : joinOrg(org.id);
+                              isMember ? leaveOrg(org.id) : joinOrg(org.id);
                             }}
                             className={`text-sm font-semibold py-1 px-3 rounded-full transition-colors ml-4 ${
-                                isMember 
+                              isMember
                                 ? 'bg-red-100 text-red-700 hover:bg-red-200'
                                 : 'bg-green-100 text-green-700 hover:bg-green-200'
                             }`}
@@ -133,28 +146,51 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 </li>
               )}
               {filteredUsers.length > 0 && (
-                 <li>
-                  <h3 className="px-4 py-2 text-xs font-bold text-gray-500 uppercase bg-light-gray">Students</h3>
+                <li>
+                  <h3 className="px-4 py-2 text-xs font-bold text-gray-500 uppercase bg-light-gray">
+                    Students
+                  </h3>
                   <ul>
-                    {filteredUsers.map(user => {
+                    {filteredUsers.map((user) => {
                       const friendStatus = getFriendStatus(user.id);
                       return (
-                        <li key={user.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-                           <div 
-                              className="flex items-center gap-3 cursor-pointer flex-grow"
-                              onClick={() => {
-                                navigate(`/profile/${user.id}`);
-                                handleResultClick();
-                              }}
-                            >
-                                <img src={getProfilePictureUrl(user.profile_image)} alt="" className="h-9 w-9 rounded-full object-cover" />
-                                <p className="font-semibold text-gray-800">{user.name}</p>
-                           </div>
-                           <div className="pl-2">
-                            {friendStatus === 'add' && <button onClick={() => { handleFriendRequest(user.id); handleResultClick(); }} className="text-sm bg-gray-200 text-gray-700 font-semibold py-1 px-3 rounded-full hover:bg-gray-300 transition-colors whitespace-nowrap">Add Friend</button>}
+                        <li
+                          key={user.id}
+                          className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"
+                        >
+                          <div
+                            className="flex items-center gap-3 cursor-pointer flex-grow"
+                            onClick={() => {
+                              navigate(`/profile/${user.id}`);
+                              handleResultClick();
+                            }}
+                          >
+                            <img
+                              src={getProfilePictureUrl(user.profile_image)}
+                              alt=""
+                              className="h-9 w-9 rounded-full object-cover"
+                            />
+                            <p className="font-semibold text-gray-800">{user.name}</p>
+                          </div>
+                          <div className="pl-2">
+                            {friendStatus === 'add' && (
+                              <button
+                                onClick={() => {
+                                  handleFriendRequest(user.id);
+                                  handleResultClick();
+                                }}
+                                className="text-sm bg-gray-200 text-gray-700 font-semibold py-1 px-3 rounded-full hover:bg-gray-300 transition-colors whitespace-nowrap"
+                              >
+                                Add Friend
+                              </button>
+                            )}
                             {/* Pending status not available with new API structure */}
-                            {friendStatus === 'friends' && <span className="text-sm text-green-600 font-semibold">Friends ✓</span>}
-                           </div>
+                            {friendStatus === 'friends' && (
+                              <span className="text-sm text-green-600 font-semibold">
+                                Friends ✓
+                              </span>
+                            )}
+                          </div>
                         </li>
                       );
                     })}

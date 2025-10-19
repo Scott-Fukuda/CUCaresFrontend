@@ -1,11 +1,10 @@
-
 import React from 'react';
 import GroupsIcon from '@mui/icons-material/Groups';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import PersonIcon from '@mui/icons-material/Person';
 import EventIcon from '@mui/icons-material/Event';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from '../types';
 
 interface BottomNavProps {
@@ -42,17 +41,17 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentUser }) => {
         isActive={location.pathname === '/opportunities'}
         onClick={() => navigate('/')}
       />
-       <NavItem
+      <NavItem
         label="Groups"
         icon={<GroupsIcon />}
         isActive={location.pathname === '/groups'}
-        onClick={() => navigate("/groups")}
+        onClick={() => navigate('/groups')}
       />
       <NavItem
         label="Leaderboard"
         icon={<LeaderboardIcon />}
         isActive={location.pathname === '/leaderboard'}
-        onClick={() => navigate("/leaderboard")}
+        onClick={() => navigate('/leaderboard')}
       />
       <NavItem
         label="Profile"
@@ -60,14 +59,14 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentUser }) => {
         isActive={location.pathname === `/profile/${currentUser.id}`}
         onClick={() => navigate(`/profile/${currentUser.id}`)}
       />
-      {currentUser.admin &&
+      {currentUser.admin && (
         <NavItem
           label="Admin"
           icon={<AdminPanelSettingsIcon />}
           isActive={location.pathname === '/admin'}
-          onClick={() => navigate("/admin")}
+          onClick={() => navigate('/admin')}
         />
-      }
+      )}
     </nav>
   );
 };
