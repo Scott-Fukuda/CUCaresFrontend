@@ -163,7 +163,13 @@ const AboutUsPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {teamMembers.map((member) => (
-              <TeamMemberCard key={member.id} member={member} />
+              <button
+              key={member.id}
+              className = "clickable-card"
+              onClick = {() => navigate(`/profile/${member.id}`)}
+              >
+              <TeamMemberCard member={member} />
+              </button>
             ))}
           </div>
         </section>
