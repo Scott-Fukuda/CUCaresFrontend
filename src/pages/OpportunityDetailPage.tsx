@@ -57,6 +57,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
     date: opportunity.date,
     time: opportunity.time,
     duration: opportunity.duration,
+    nonprofit: opportunity.nonprofit || '',
     redirect_url: opportunity.redirect_url || '', // Add redirect_url to form state
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -290,6 +291,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
         address: editForm.address,
         date: formattedDateTime,
         duration: editForm.duration,
+        nonprofit: editForm.nonprofit,
         redirect_url: editForm.redirect_url.trim() || null, // Send null if empty
       };
 
@@ -307,6 +309,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
                 date: editForm.date,
                 time: editForm.time,
                 duration: editForm.duration,
+                nonprofit: editForm.nonprofit,
                 redirect_url: editForm.redirect_url.trim() || null,
               }
             : opp
@@ -342,6 +345,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       time: opportunity.time,
       duration: opportunity.duration,
       redirect_url: opportunity.redirect_url || '', // Reset redirect_url
+      nonprofit: opportunity.nonprofit || '',
     });
     setSelectedImage(null);
     setImagePreview(null);
@@ -698,6 +702,15 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
                   onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                   rows={4}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nonprofit</label>
+                <input
+                  type="text"
+                  value={editForm.nonprofit}
+                  onChange={(e) => setEditForm({ ...editForm, nonprofit: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                 />
               </div>
               <div>

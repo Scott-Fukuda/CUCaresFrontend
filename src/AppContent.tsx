@@ -795,7 +795,6 @@ const AppContent: React.FC = () => {
     },
     [currentUser, organizations]
   );
-
   const leaveOrg = useCallback(
     async (orgId: number) => {
       if (
