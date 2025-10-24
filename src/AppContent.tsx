@@ -64,9 +64,9 @@ const AppContent: React.FC = () => {
 
             setCurrentUser(null);
             // No account in our backend yet, show registration view
-            const response = await api.checkUserExists(firebaseUser.email);
+            const response = await api.checkEmailApproval(firebaseUser.email);
 
-            if (response.exists) {
+            if (response.is_approved) {
               setAuthView('register');
               navigate('/register');
             } else {
@@ -220,32 +220,33 @@ const AppContent: React.FC = () => {
           return 'non approved';
         }
       }
+      console.log('Email approval check passed for:', firebaseUser.email);
 
       // Get the ID token from Firebase
       const token = await firebaseUser.getIdToken();
 
       // Verify token with backend
-      //console.log('Verifying Firebase token with backend...');
+      console.log('Verifying Firebase token with backend...');
       const authResult = await api.verifyFirebaseToken(token);
-      //console.log('Token verification result:', authResult);
+      console.log('Token verification result:', authResult);
 
       if (authResult.success) {
         // User is authenticated, check if they exist in our database
-        //console.log('Checking if user exists in database...');
+        console.log('Checking if user exists in database...');
         const response = await api.checkUserExists(firebaseUser.email);
         const exists = response.exists;
 
         if (exists) {
           // User exists, log them in
           const existingUser = await api.getUserByEmail(firebaseUser.email, token);
-          // console.log('User found, logging in:', existingUser);
+          console.log('User found, logging in:', existingUser);
 
           setCurrentUser(existingUser);
           navigate('/');
         } else {
           // User doesn't exist, redirect to registration
-          // console.log('User not found, redirecting to registration');
-          if (approvalCheck.is_approved) {
+          console.log('User not found, redirecting to registration');
+          if (approvalCheck.is_approved || firebaseUser.email.toLowerCase().endsWith('@cornell.edu')) {
             console.log('Approved user, redirecting to registration');
             setAuthView('register');
             navigate('/register');
