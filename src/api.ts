@@ -951,3 +951,34 @@ export const getOpportunityCsv = async (): Promise<string> => {
 
   return response.text();
 };
+
+export const getServiceDataCsv = async (
+  startDate: string,
+  endDate: string
+): Promise<Response> => {
+  const token = await getFirebaseToken();
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${BASE_URL}/api/service-data/org/`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      start_date: startDate,
+      end_date: endDate,
+    }),
+  }); 
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch opportunity CSV: ${response.statusText}`);
+  }
+
+  return await response;
+};
+

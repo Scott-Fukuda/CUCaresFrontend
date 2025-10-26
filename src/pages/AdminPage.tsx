@@ -313,6 +313,40 @@ const AdminPage: React.FC<AdminPageProps> = ({
       alert('Failed to download opportunity CSV.');
     }
   };
+  const handleDownloadServiceDataCsv = async (startDate: string, endDate: string) => {
+  try {
+    const response = await api.getServiceDataCsv(startDate, endDate);
+ 
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `service_data_${startDate}_to_${endDate}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Error downloading CSV:", err);
+    alert("Failed to download service data. Please try again.");
+  }
+};
+
+const promptAndDownloadCsv = async () => {
+  const today = new Date();
+  const twoMonthsAgo = new Date();
+  twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+  const defaultStart = twoMonthsAgo.toISOString().split("T")[0];
+  const defaultEnd = today.toISOString().split("T")[0];
+
+  const startDate = window.prompt("Enter start date (YYYY-MM-DD):", defaultStart);
+  if (!startDate) return;
+
+  const endDate = window.prompt("Enter end date (YYYY-MM-DD):", defaultEnd);
+  if (!endDate) return;
+
+  await handleDownloadServiceDataCsv(startDate, endDate);
+};
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -469,6 +503,13 @@ const AdminPage: React.FC<AdminPageProps> = ({
             className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
           >
             Download Opportunity CSV
+          </button>
+
+          <button
+            onClick={promptAndDownloadCsv}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+          >
+            Download Service Data CSV
           </button>
         </div>
       </div>
