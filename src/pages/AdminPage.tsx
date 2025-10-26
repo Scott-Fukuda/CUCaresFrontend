@@ -507,7 +507,7 @@ const promptAndDownloadCsv = async () => {
 
           <button
             onClick={promptAndDownloadCsv}
-            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors font-medium"
           >
             Download Service Data CSV
           </button>
