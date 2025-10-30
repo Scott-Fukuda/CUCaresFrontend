@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginTest } from '../api';
@@ -99,11 +98,24 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
         </button>
 
         <p className="text-xs text-gray-500 mt-6">
-          By signing in, you agree to our Terms of Service and Privacy Policy.
+          By signing in, you agree to our{' '}
+          <a
+            href="/terms_of_service.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-700"
+          >
+            Terms of Service and Privacy Policy
+          </a>
+          .
         </p>
 
         <p className="text-sm text-gray-600 mt-4">
-          Not a student? Reach out to <a href="mailto:team@campuscares.us" className="text-cornell-red hover:underline">team@campuscares.us</a>.
+          Not a student? Reach out to{' '}
+          <a href="mailto:team@campuscares.us" className="text-cornell-red hover:underline">
+            team@campuscares.us
+          </a>
+          .
         </p>
       </div>
     </div>

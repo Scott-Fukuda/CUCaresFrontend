@@ -12,19 +12,18 @@ interface AdminPageProps {
   allUsers: User[];
 }
 
-const AdminPage: React.FC<AdminPageProps> = ({ 
+const AdminPage: React.FC<AdminPageProps> = ({
   currentUser,
   opportunities,
   setOpportunities,
   organizations,
   setOrganizations,
-  allUsers
+  allUsers,
 }) => {
-  
   // Helper function to get user name by ID
   const getUserNameById = (userId?: number): string => {
     if (!userId) return 'Unknown';
-    const user = allUsers.find(u => u.id === userId);
+    const user = allUsers.find((u) => u.id === userId);
     return user ? user.name : 'Unknown';
   };
   const [selectedOpportunities, setSelectedOpportunities] = useState<Set<number>>(new Set());
@@ -41,6 +40,14 @@ const AdminPage: React.FC<AdminPageProps> = ({
   const [showEmails, setShowEmails] = useState(false);
   const [approvedEmail, setApprovedEmail] = useState<string>('');
   const [isAddingEmail, setIsAddingEmail] = useState(false);
+  const [csvData, setCsvData] = useState<any[]>([]);
+  const [isLoadingCsv, setIsLoadingCsv] = useState(false);
+  const [showCsv, setShowCsv] = useState(false);
+  const [csvError, setCsvError] = useState<string | null>(null);
+  // CSV data management
+  const [userCsv, setUserCsv] = useState<string | null>(null);
+  const [oppCsv, setOppCsv] = useState<string | null>(null);
+  const [activeCsv, setActiveCsv] = useState<'users' | 'opps' | null>(null);
 
   // Fetch unapproved opportunities and organizations
   useEffect(() => {
@@ -48,12 +55,12 @@ const AdminPage: React.FC<AdminPageProps> = ({
       try {
         setLoading(true);
         setError(null);
-        
+
         const [opportunities, organizations] = await Promise.all([
           api.getUnapprovedOpportunities(),
-          api.getUnapprovedOrgs()
+          api.getUnapprovedOrgs(),
         ]);
-        
+
         setUnapprovedOpportunities(opportunities);
         setUnapprovedOrganizations(organizations);
       } catch (err: any) {
@@ -88,7 +95,9 @@ const AdminPage: React.FC<AdminPageProps> = ({
   };
 
   const handleDeleteOpportunity = async (oppId: number, oppName: string) => {
-    const confirmed = window.confirm(`Are you sure you want to delete the opportunity "${oppName}"? This action cannot be undone.`);
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the opportunity "${oppName}"? This action cannot be undone.`
+    );
     if (!confirmed) return;
 
     // Store original state for potential rollback
@@ -96,8 +105,8 @@ const AdminPage: React.FC<AdminPageProps> = ({
 
     try {
       // Immediately remove from frontend (optimistic update)
-      setUnapprovedOpportunities(prev => prev.filter(opp => opp.id !== oppId));
-      
+      setUnapprovedOpportunities((prev) => prev.filter((opp) => opp.id !== oppId));
+
       // Make API call to backend
       await api.deleteOpportunity(oppId);
     } catch (error: any) {
@@ -108,7 +117,9 @@ const AdminPage: React.FC<AdminPageProps> = ({
   };
 
   const handleDeleteOrganization = async (orgId: number, orgName: string) => {
-    const confirmed = window.confirm(`Are you sure you want to delete the organization "${orgName}"? This action cannot be undone.`);
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the organization "${orgName}"? This action cannot be undone.`
+    );
     if (!confirmed) return;
 
     // Store original state for potential rollback
@@ -116,8 +127,8 @@ const AdminPage: React.FC<AdminPageProps> = ({
 
     try {
       // Immediately remove from frontend (optimistic update)
-      setUnapprovedOrganizations(prev => prev.filter(org => org.id !== orgId));
-      
+      setUnapprovedOrganizations((prev) => prev.filter((org) => org.id !== orgId));
+
       // Make API call to backend
       await api.deleteOrganization(orgId);
     } catch (error: any) {
@@ -134,56 +145,63 @@ const AdminPage: React.FC<AdminPageProps> = ({
     }
 
     setIsSubmitting(true);
-    
+
     // Store original state for potential rollback
     const originalOpportunities = [...opportunities];
     const originalOrganizations = [...organizations];
     const originalUnapprovedOpportunities = [...unapprovedOpportunities];
     const originalUnapprovedOrganizations = [...unapprovedOrganizations];
-    
+
     try {
       // Immediately update frontend state (optimistic update)
-      
+
       // Get the selected opportunities and organizations
-      const selectedOpps = unapprovedOpportunities.filter(opp => selectedOpportunities.has(opp.id));
-      const selectedOrgs = unapprovedOrganizations.filter(org => selectedOrganizations.has(org.id));
-      
+      const selectedOpps = unapprovedOpportunities.filter((opp) =>
+        selectedOpportunities.has(opp.id)
+      );
+      const selectedOrgs = unapprovedOrganizations.filter((org) =>
+        selectedOrganizations.has(org.id)
+      );
+
       // Add approved opportunities to the main opportunities list
-      const approvedOpps = selectedOpps.map(opp => ({ ...opp, approved: true }));
-      setOpportunities(prev => [...prev, ...approvedOpps]);
-      
+      const approvedOpps = selectedOpps.map((opp) => ({ ...opp, approved: true }));
+      setOpportunities((prev) => [...prev, ...approvedOpps]);
+
       // Add approved organizations to the main organizations list
-      const approvedOrgs = selectedOrgs.map(org => ({ ...org, approved: true }));
-      setOrganizations(prev => [...prev, ...approvedOrgs]);
-      
+      const approvedOrgs = selectedOrgs.map((org) => ({ ...org, approved: true }));
+      setOrganizations((prev) => [...prev, ...approvedOrgs]);
+
       // Remove from unapproved lists
-      setUnapprovedOpportunities(prev => prev.filter(opp => !selectedOpportunities.has(opp.id)));
-      setUnapprovedOrganizations(prev => prev.filter(org => !selectedOrganizations.has(org.id)));
-      
+      setUnapprovedOpportunities((prev) =>
+        prev.filter((opp) => !selectedOpportunities.has(opp.id))
+      );
+      setUnapprovedOrganizations((prev) =>
+        prev.filter((org) => !selectedOrganizations.has(org.id))
+      );
+
       // Clear selections
       setSelectedOpportunities(new Set());
       setSelectedOrganizations(new Set());
-      
+
       // Make API calls to backend
-      const opportunityPromises = Array.from(selectedOpportunities).map(oppId =>
+      const opportunityPromises = Array.from(selectedOpportunities).map((oppId) =>
         api.updateOpportunity(oppId, { approved: true })
       );
 
-      const organizationPromises = Array.from(selectedOrganizations).map(orgId =>
+      const organizationPromises = Array.from(selectedOrganizations).map((orgId) =>
         api.updateOrganization(orgId, { approved: true })
       );
 
       await Promise.all([...opportunityPromises, ...organizationPromises]);
-      
+
       alert('Selected items have been approved successfully!');
-      
     } catch (error: any) {
       // Revert frontend state if backend update failed
       setOpportunities(originalOpportunities);
       setOrganizations(originalOrganizations);
       setUnapprovedOpportunities(originalUnapprovedOpportunities);
       setUnapprovedOrganizations(originalUnapprovedOrganizations);
-      
+
       alert(`Error approving items: ${error.message}`);
     } finally {
       setIsSubmitting(false);
@@ -194,10 +212,10 @@ const AdminPage: React.FC<AdminPageProps> = ({
     try {
       setIsLoadingToken(true);
       setSecurityToken(null);
-      
+
       // Get the current Firebase user from auth
       const firebaseUser = auth.currentUser;
-      
+
       if (firebaseUser) {
         const token = await firebaseUser.getIdToken();
         setSecurityToken(token);
@@ -216,7 +234,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
     try {
       setIsLoadingEmails(true);
       setError(null);
-      
+
       const emails = await api.getUserEmails();
       setUserEmails(emails);
       setShowEmails(true);
@@ -244,7 +262,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
     try {
       setIsAddingEmail(true);
       setError(null);
-      
+
       await api.addApprovedEmail(approvedEmail.trim());
       setApprovedEmail(''); // Clear the input
       alert(`Email "${approvedEmail.trim()}" has been added to the approved list successfully!`);
@@ -262,9 +280,73 @@ const AdminPage: React.FC<AdminPageProps> = ({
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
+
+  const handleDownloadUsersCsv = async () => {
+    try {
+      const csvText = await api.getUserCsv();
+      const blob = new Blob([csvText], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'users.csv';
+      link.click();
+    } catch (err) {
+      console.error('Error downloading user CSV:', err);
+      alert('Failed to download user CSV.');
+    }
+  };
+
+  const handleDownloadOppsCsv = async () => {
+    try {
+      const csvText = await api.getOpportunityCsv();
+      const blob = new Blob([csvText], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'opportunities.csv';
+      link.click();
+    } catch (err) {
+      console.error('Error downloading opportunity CSV:', err);
+      alert('Failed to download opportunity CSV.');
+    }
+  };
+  const handleDownloadServiceDataCsv = async (startDate: string, endDate: string) => {
+  try {
+    const response = await api.getServiceDataCsv(startDate, endDate);
+ 
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `service_data_${startDate}_to_${endDate}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Error downloading CSV:", err);
+    alert("Failed to download service data. Please try again.");
+  }
+};
+
+const promptAndDownloadCsv = async () => {
+  const today = new Date();
+  const twoMonthsAgo = new Date();
+  twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+  const defaultStart = twoMonthsAgo.toISOString().split("T")[0];
+  const defaultEnd = today.toISOString().split("T")[0];
+
+  const startDate = window.prompt("Enter start date (YYYY-MM-DD):", defaultStart);
+  if (!startDate) return;
+
+  const endDate = window.prompt("Enter end date (YYYY-MM-DD):", defaultEnd);
+  if (!endDate) return;
+
+  await handleDownloadServiceDataCsv(startDate, endDate);
+};
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -279,8 +361,18 @@ const AdminPage: React.FC<AdminPageProps> = ({
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                <svg
+                  className="w-5 h-5 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                  />
                 </svg>
               </div>
             </div>
@@ -290,35 +382,59 @@ const AdminPage: React.FC<AdminPageProps> = ({
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow-lg border">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-5 h-5 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Approved Opportunities</p>
-              <p className="text-2xl font-semibold text-gray-900">{opportunities.filter(opp => opp.approved !== false).length}</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {opportunities.filter((opp) => opp.approved !== false).length}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow-lg border">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                <svg
+                  className="w-5 h-5 text-purple-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  />
                 </svg>
               </div>
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Approved Organizations</p>
-              <p className="text-2xl font-semibold text-gray-900">{organizations.filter(org => org.approved !== false).length}</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {organizations.filter((org) => org.approved !== false).length}
+              </p>
             </div>
           </div>
         </div>
@@ -335,7 +451,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
           >
             {isLoadingToken ? 'Getting Token...' : 'Get Security Token'}
           </button>
-          
+
           {securityToken && (
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -367,6 +483,36 @@ const AdminPage: React.FC<AdminPageProps> = ({
           )}
         </div>
       </div>
+      {/* CSV Export Section */}
+      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">CSV Data Export</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Download complete user or opportunity data in CSV format.
+        </p>
+
+        <div className="flex flex-wrap gap-4">
+          <button
+            onClick={handleDownloadUsersCsv}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          >
+            Download User CSV
+          </button>
+
+          <button
+            onClick={handleDownloadOppsCsv}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+          >
+            Download Opportunity CSV
+          </button>
+
+          <button
+            onClick={promptAndDownloadCsv}
+            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors font-medium"
+          >
+            Download Service Data CSV
+          </button>
+        </div>
+      </div>
 
       {/* User Emails Section */}
       <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
@@ -379,7 +525,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
           >
             {isLoadingEmails ? 'Loading Emails...' : 'Get All User Emails'}
           </button>
-          
+
           {showEmails && userEmails.length > 0 && (
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -415,7 +561,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
               </div>
             </div>
           )}
-          
+
           {showEmails && userEmails.length === 0 && (
             <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
               <p>No user emails found.</p>
@@ -475,178 +621,179 @@ const AdminPage: React.FC<AdminPageProps> = ({
       {/* Content - only show when not loading */}
       {!loading && (
         <>
-
-      {/* Submit Button */}
-      {(selectedOpportunities.size > 0 || selectedOrganizations.size > 0) && (
-        <div className="mb-6">
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50"
-          >
-            {isSubmitting ? 'Approving...' : `Approve Selected (${selectedOpportunities.size + selectedOrganizations.size})`}
-          </button>
-        </div>
-      )}
-
-      {/* Unapproved Opportunities */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-          Unapproved Opportunities ({unapprovedOpportunities.length})
-        </h2>
-        
-        {unapprovedOpportunities.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 bg-white rounded-lg border">
-            <p>No unapproved opportunities.</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Select
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Organization
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Creator
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {unapprovedOpportunities.map((opp) => (
-                    <tr key={opp.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <input
-                          type="checkbox"
-                          checked={selectedOpportunities.has(opp.id)}
-                          onChange={() => handleOpportunityToggle(opp.id)}
-                          className="h-4 w-4 text-cornell-red focus:ring-cornell-red border-gray-300 rounded"
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{opp.name}</div>
-                          <div className="break-words whitespace-pre-wrap">
-                            {opp.description ? opp.description : 'No description specified'}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {opp.nonprofit}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {getUserNameById(opp.host_id)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(opp.date)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => handleDeleteOpportunity(opp.id, opp.name)}
-                          className="text-red-600 hover:text-red-900 font-medium"
-                        >
-                          × Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* Submit Button */}
+          {(selectedOpportunities.size > 0 || selectedOrganizations.size > 0) && (
+            <div className="mb-6">
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50"
+              >
+                {isSubmitting
+                  ? 'Approving...'
+                  : `Approve Selected (${selectedOpportunities.size + selectedOrganizations.size})`}
+              </button>
             </div>
-          </div>
-        )}
-      </div>
+          )}
 
-      {/* Unapproved Organizations */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-          Unapproved Organizations ({unapprovedOrganizations.length})
-        </h2>
-        
-        {unapprovedOrganizations.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 bg-white rounded-lg border">
-            <p>No unapproved organizations.</p>
+          {/* Unapproved Opportunities */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+              Unapproved Opportunities ({unapprovedOpportunities.length})
+            </h2>
+
+            {unapprovedOpportunities.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 bg-white rounded-lg border">
+                <p>No unapproved opportunities.</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg border overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Select
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Organization
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Creator
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {unapprovedOpportunities.map((opp) => (
+                        <tr key={opp.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={selectedOpportunities.has(opp.id)}
+                              onChange={() => handleOpportunityToggle(opp.id)}
+                              className="h-4 w-4 text-cornell-red focus:ring-cornell-red border-gray-300 rounded"
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{opp.name}</div>
+                              <div className="break-words whitespace-pre-wrap">
+                                {opp.description ? opp.description : 'No description specified'}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {opp.nonprofit}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {getUserNameById(opp.host_id)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {formatDate(opp.date)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <button
+                              onClick={() => handleDeleteOpportunity(opp.id, opp.name)}
+                              className="text-red-600 hover:text-red-900 font-medium"
+                            >
+                              × Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="bg-white rounded-lg border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Select
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Creator
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {unapprovedOrganizations.map((org) => (
-                    <tr key={org.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <input
-                          type="checkbox"
-                          checked={selectedOrganizations.has(org.id)}
-                          onChange={() => handleOrganizationToggle(org.id)}
-                          className="h-4 w-4 text-cornell-red focus:ring-cornell-red border-gray-300 rounded"
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{org.name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {org.type}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {getUserNameById(org.host_user_id)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        <div className="max-w-xs truncate">
-                          {org.description || 'No description provided'}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => handleDeleteOrganization(org.id, org.name)}
-                          className="text-red-600 hover:text-red-900 font-medium"
-                        >
-                          × Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+
+          {/* Unapproved Organizations */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+              Unapproved Organizations ({unapprovedOrganizations.length})
+            </h2>
+
+            {unapprovedOrganizations.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 bg-white rounded-lg border">
+                <p>No unapproved organizations.</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg border overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Select
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Creator
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Description
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {unapprovedOrganizations.map((org) => (
+                        <tr key={org.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={selectedOrganizations.has(org.id)}
+                              onChange={() => handleOrganizationToggle(org.id)}
+                              className="h-4 w-4 text-cornell-red focus:ring-cornell-red border-gray-300 rounded"
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{org.name}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {org.type}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {getUserNameById(org.host_user_id)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            <div className="max-w-xs truncate">
+                              {org.description || 'No description provided'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <button
+                              onClick={() => handleDeleteOrganization(org.id, org.name)}
+                              className="text-red-600 hover:text-red-900 font-medium"
+                            >
+                              × Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
         </>
       )}
     </div>

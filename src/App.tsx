@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import AppContent from './AppContent';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { signInWithGoogle, FirebaseUser, auth, onAuthStateChanged, signOut, getCurrentUser } from './firebase-config';
+import {
+  signInWithGoogle,
+  FirebaseUser,
+  auth,
+  onAuthStateChanged,
+  signOut,
+  getCurrentUser,
+} from './firebase-config';
 import * as api from './api';
 import { User } from './types';
 
@@ -11,9 +18,19 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authView, setAuthView] = useState<'login' | 'register' | 'aboutUs'>('login');
 
-  const handleRegister = async (firstName: string, lastName: string, phone: string, gender: string, graduationYear: string, academicLevel: string, major: string, birthday: string, car_seats: number) => {
+  const handleRegister = async (
+    firstName: string,
+    lastName: string,
+    phone: string,
+    gender: string,
+    graduationYear: string,
+    academicLevel: string,
+    major: string,
+    birthday: string,
+    car_seats: number
+  ) => {
     setAuthError(null);
-    
+
     // Ensure we have a Firebase user (wait for auth init if necessary) and get an ID token
     try {
       setIsLoading(true);
@@ -58,11 +75,9 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <AppContent/>
+      <AppContent />
     </Router>
-  )
+  );
 }
 
 export default App;
-
-

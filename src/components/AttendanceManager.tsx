@@ -8,7 +8,11 @@ interface AttendanceManagerProps {
   onAttendanceSubmitted: () => void;
 }
 
-const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, participants, onAttendanceSubmitted }) => {
+const AttendanceManager: React.FC<AttendanceManagerProps> = ({
+  opportunity,
+  participants,
+  onAttendanceSubmitted,
+}) => {
   const [attendedUsers, setAttendedUsers] = useState<Set<number>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDurationPopup, setShowDurationPopup] = useState(false);
@@ -19,19 +23,19 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
   useEffect(() => {
     if (opportunity.attendance_marked && opportunity.involved_users) {
       const attendedUserIds = new Set<number>();
-      
-      opportunity.involved_users.forEach(user => {
+
+      opportunity.involved_users.forEach((user) => {
         if (user.attended === true) {
           attendedUserIds.add(user.id);
         }
       });
-      
+
       setAttendedUsers(attendedUserIds);
     }
   }, [opportunity.attendance_marked, opportunity.involved_users]);
 
   const handleAttendanceToggle = (userId: number) => {
-    setAttendedUsers(prev => {
+    setAttendedUsers((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(userId)) {
         newSet.delete(userId);
@@ -53,17 +57,17 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
     setIsSubmitting(true);
     try {
       // Convert hours and minutes to total minutes
-      const totalMinutes = (durationHours * 60) + durationMinutes;
-      
+      const totalMinutes = durationHours * 60 + durationMinutes;
+
       await api.markAttendance({
         user_ids: Array.from(attendedUsers),
         opportunity_id: opportunity.id,
-        duration: totalMinutes
+        duration: totalMinutes,
       });
-      
+
       // Update the local opportunity object to reflect attendance submission
       opportunity.attendance_marked = true;
-      
+
       setShowDurationPopup(false);
       onAttendanceSubmitted();
     } catch (error: any) {
@@ -82,24 +86,24 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
   // Create opportunity date/time - dates are already converted to Eastern Time by the API
   const [year, month, day] = opportunity.date.split('-').map(Number);
   const [hours, minutes] = opportunity.time.split(':').map(Number);
-  
+
   // Create the opportunity date/time string
   const opportunityDateString = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
   const opportunityDateTime = new Date(opportunityDateString);
-  
+
   // Display time without additional timezone conversion (already Eastern Time from API)
-  const displayTime = opportunityDateTime.toLocaleTimeString('en-US', { 
-    hour: 'numeric', 
-    minute: '2-digit', 
-    hour12: true
+  const displayTime = opportunityDateTime.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
   });
-  
+
   // Display date without additional timezone conversion (already Eastern Time from API)
   const displayDate = opportunityDateTime.toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
   });
 
   const isAttendanceMarked = opportunity.attendance_marked;
@@ -107,7 +111,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
   return (
     <div className="bg-white p-6 rounded-2xl shadow-lg">
       <h3 className="text-2xl font-bold mb-4">Attendance Management</h3>
-      
+
       <div className="mb-4 p-4 bg-blue-50 rounded-lg">
         <p className="text-sm text-blue-800">
           <strong>Event Start Date:</strong> {displayDate}
@@ -115,9 +119,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
         <p className="text-sm text-blue-800">
           <strong>Event Start Time (Eastern):</strong> {displayTime}
         </p>
-        <p className="text-sm text-blue-800 mt-1">
-          ✅ Attendance submission is always available
-        </p>
+        <p className="text-sm text-blue-800 mt-1">✅ Attendance submission is always available</p>
         {isAttendanceMarked && (
           <p className="text-sm text-green-800 mt-1 font-semibold">
             ✅ Attendance has been marked for this event
@@ -128,21 +130,19 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
       <div className="mb-6">
         <h4 className="text-lg font-semibold mb-3">Participants ({participants.length})</h4>
         <div className="space-y-3 max-h-96 overflow-y-auto">
-          {participants.map(participant => (
-            <div 
-              key={participant.id} 
+          {participants.map((participant) => (
+            <div
+              key={participant.id}
               className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
             >
               <div className="flex items-center space-x-3">
-                <img 
-                  src={api.getProfilePictureUrl(participant.profile_image)} 
+                <img
+                  src={api.getProfilePictureUrl(participant.profile_image)}
                   alt={participant.name}
                   className="w-10 h-10 rounded-full object-cover"
                 />
                 <div>
-                  <p className="font-medium text-gray-900">
-                    {participant.name}
-                  </p>
+                  <p className="font-medium text-gray-900">{participant.name}</p>
                   <p className="text-sm text-gray-500">{participant.email}</p>
                 </div>
               </div>
@@ -154,11 +154,14 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
                   disabled={isAttendanceMarked}
                   className="w-4 h-4 text-cornell-red border-gray-300 rounded focus:ring-cornell-red disabled:opacity-50 disabled:cursor-not-allowed"
                 />
-                <span className={`text-sm font-medium ${isAttendanceMarked ? 'text-gray-400' : 'text-gray-700'}`}>
-                  {isAttendanceMarked 
-                    ? (attendedUsers.has(participant.id) ? 'Attended' : 'Did not attend')
-                    : 'Attended'
-                  }
+                <span
+                  className={`text-sm font-medium ${isAttendanceMarked ? 'text-gray-400' : 'text-gray-700'}`}
+                >
+                  {isAttendanceMarked
+                    ? attendedUsers.has(participant.id)
+                      ? 'Attended'
+                      : 'Did not attend'
+                    : 'Attended'}
                 </span>
               </label>
             </div>
@@ -175,12 +178,11 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
             : 'bg-gray-400 cursor-not-allowed'
         }`}
       >
-        {isAttendanceMarked 
+        {isAttendanceMarked
           ? 'Attendance Already Submitted'
-          : isSubmitting 
-            ? 'Submitting...' 
-            : `Submit Attendance (${attendedUsers.size} marked)`
-        }
+          : isSubmitting
+            ? 'Submitting...'
+            : `Submit Attendance (${attendedUsers.size} marked)`}
       </button>
 
       {/* Duration Popup */}
@@ -189,7 +191,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
           <div className="bg-white p-6 rounded-2xl shadow-lg max-w-md w-full mx-4">
             <h3 className="text-xl font-bold mb-4">Event Duration</h3>
             <p className="text-gray-600 mb-4">How long did the event run for?</p>
-            
+
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
                 <div className="flex-1">
@@ -219,9 +221,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
                     placeholder="0-24"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Range: 0-24 hours
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Range: 0-24 hours</p>
                 </div>
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Minutes</label>
@@ -250,12 +250,10 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ opportunity, part
                     placeholder="0-59"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Range: 0-59 minutes
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Range: 0-59 minutes</p>
                 </div>
               </div>
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={handleDurationSubmit}

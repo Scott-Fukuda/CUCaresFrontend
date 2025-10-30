@@ -69,6 +69,6 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
       </Routes>
     </div>
   );
-}
+};
 
 export default AuthFlow;

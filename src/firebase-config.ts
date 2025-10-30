@@ -2,7 +2,18 @@
 // Real Firebase project configuration for CampusCares
 
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut, User as FirebaseAuthUser, onAuthStateChanged as fbOnAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence } from 'firebase/auth';
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut as firebaseSignOut,
+  User as FirebaseAuthUser,
+  onAuthStateChanged as fbOnAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  inMemoryPersistence,
+} from 'firebase/auth';
 
 export interface FirebaseUser {
   email: string;
@@ -12,13 +23,13 @@ export interface FirebaseUser {
 }
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC5UWjB0GTpC8WwvlWYCSRJIvzDUPgJjwc",
-  authDomain: "campuscares-94b93.firebaseapp.com",
-  projectId: "campuscares-94b93",
-  storageBucket: "campuscares-94b93.firebasestorage.app",
-  messagingSenderId: "640519159185",
-  appId: "1:640519159185:web:2ad46a1766ca7422aaee30",
-  measurementId: "G-3KL9VPX0Y4"
+  apiKey: 'AIzaSyC5UWjB0GTpC8WwvlWYCSRJIvzDUPgJjwc',
+  authDomain: 'campuscares-94b93.firebaseapp.com',
+  projectId: 'campuscares-94b93',
+  storageBucket: 'campuscares-94b93.firebasestorage.app',
+  messagingSenderId: '640519159185',
+  appId: '1:640519159185:web:2ad46a1766ca7422aaee30',
+  measurementId: 'G-3KL9VPX0Y4',
 };
 
 // Initialize Firebase
@@ -28,7 +39,7 @@ const provider = new GoogleAuthProvider();
 
 // Configure Google provider
 provider.setCustomParameters({
-  prompt: 'select_account'
+  prompt: 'select_account',
 });
 
 // Firebase authentication helper functions
@@ -46,7 +57,10 @@ export const initializeFirebase = async () => {
       //console.log('Firebase auth persistence set to browserSessionPersistence (sessionStorage)');
       return;
     } catch (sessionErr) {
-      console.warn('browserSessionPersistence failed, falling back to inMemoryPersistence', sessionErr);
+      console.warn(
+        'browserSessionPersistence failed, falling back to inMemoryPersistence',
+        sessionErr
+      );
       try {
         await setPersistence(auth, inMemoryPersistence);
         //console.log('Firebase auth persistence set to inMemoryPersistence (no persistence)');
@@ -67,7 +81,7 @@ const mapFirebaseUser = (user: FirebaseAuthUser | null): FirebaseUser | null => 
     email: user.email || '',
     displayName: user.displayName || '',
     uid: user.uid,
-    getIdToken: () => user.getIdToken()
+    getIdToken: () => user.getIdToken(),
   };
 };
 
@@ -106,29 +120,31 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
     //console.log('Signing in with Google');
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-    
+
     // Convert Firebase User to our FirebaseUser interface
     const firebaseUser: FirebaseUser = {
       email: user.email || '',
       displayName: user.displayName || '',
       uid: user.uid,
-      getIdToken: () => user.getIdToken()
+      getIdToken: () => user.getIdToken(),
     };
 
     return firebaseUser;
   } catch (error: any) {
     // Handle missing sessionStorage / initial state case
     if (
-      error.message?.includes("Unable to process request due to missing initial state") ||
-      error.code === "auth/argument-error" || // sometimes Firebase throws this instead
-      error.code === "auth/no-auth-event"
+      error.message?.includes('Unable to process request due to missing initial state') ||
+      error.code === 'auth/argument-error' || // sometimes Firebase throws this instead
+      error.code === 'auth/no-auth-event'
     ) {
       setTimeout(() => {
         window.location.reload();
       }, 1000);
-      throw new Error("There was an error with your browser's session storage, please try logging in again.");
-    } else if (error.code === "auth/popup-closed-by-user") {
-      throw new Error("You closed the login popup. Please try logging in again.");
+      throw new Error(
+        "There was an error with your browser's session storage, please try logging in again."
+      );
+    } else if (error.code === 'auth/popup-closed-by-user') {
+      throw new Error('You closed the login popup. Please try logging in again.');
     } else if (
       // Common Firebase/browser popup error codes/messages
       error.code === 'auth/popup-blocked' ||
@@ -139,12 +155,12 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
     ) {
       console.error('Popup blocked during sign-in:', error);
       throw new Error(
-        "The sign-in popup was blocked by your browser. Please try again. " +
-        "If pop-ups continue to be blocked, allow pop-ups for this site in your browser settings, or try signing in using a different browser."
+        'The sign-in popup was blocked by your browser. Please try again. ' +
+          'If pop-ups continue to be blocked, allow pop-ups for this site in your browser settings, or try signing in using a different browser.'
       );
     }
-    console.error("Firebase sign-in error:", error);
-    throw new Error("Sign-in failed. Please try again.");
+    console.error('Firebase sign-in error:', error);
+    throw new Error('Sign-in failed. Please try again.');
   }
 };
 
@@ -159,4 +175,4 @@ export const signOut = async () => {
 };
 
 // Export auth instance for other uses if needed
-export { auth }; 
+export { auth };
