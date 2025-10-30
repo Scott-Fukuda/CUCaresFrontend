@@ -1,4 +1,3 @@
-
 // Minimal user data returned by GET /api/users
 export interface MinimalUser {
   id: number;
@@ -64,11 +63,45 @@ export interface SignUp {
   opportunityId: number;
 }
 
-export type StudentGroupCategory = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team';
-export const studentGroupCategories: StudentGroupCategory[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team'];
+export type StudentGroupCategory =
+  | 'Fraternity'
+  | 'Sorority'
+  | 'Professional Club'
+  | 'Sports Team'
+  | 'Performing Arts Group'
+  | 'Project Team';
+export const studentGroupCategories: StudentGroupCategory[] = [
+  'Fraternity',
+  'Sorority',
+  'Professional Club',
+  'Sports Team',
+  'Performing Arts Group',
+  'Project Team',
+];
 
-export type OrganizationType = 'Fraternity' | 'Sorority' | 'Professional Club' | 'Sports Team' | 'Performing Arts Group' | 'Project Team' | 'Cultural' | 'Community Service' | 'Religious' | 'Other';
-export const organizationTypes: OrganizationType[] = ['Fraternity', 'Sorority', 'Professional Club', 'Sports Team', 'Performing Arts Group', 'Project Team', 'Cultural', 'Community Service', 'Religious', 'Other'];
+export type OrganizationType =
+  | 'Fraternity'
+  | 'Sorority'
+  | 'Professional Club'
+  | 'Sports Team'
+  | 'Performing Arts Group'
+  | 'Project Team'
+  | 'Cultural'
+  | 'Community Service'
+  | 'Religious'
+  | 'Other';
+export const organizationTypes: OrganizationType[] = [
+  'Fraternity',
+  'Sorority',
+  'Professional Club',
+  'Sports Team',
+  'Performing Arts Group',
+  'Project Team',
+  'Cultural',
+  'Community Service',
+  'Religious',
+  'Other',
+];
 
 export interface StudentGroup {
   id: number;
@@ -94,8 +127,6 @@ export interface Friendship {
   requester_name: string;
   accepted: boolean;
 }
-
-
 
 export type FriendshipStatus = 'friends' | 'sent' | 'received' | 'add';
 
@@ -140,8 +171,6 @@ export interface Notification {
   createdAt: string; // ISO string
 }
 
-
-
 export const allInterests = [
   'Environment & Sustainability',
   'Homelessness Relief',
@@ -149,7 +178,7 @@ export const allInterests = [
   'Health and Wellness',
   'Education',
   'Religious',
-  'Other'
+  'Other',
 ];
 
 export const genderOptions = [
@@ -158,14 +187,10 @@ export const genderOptions = [
   'Prefer not to say'
 ];
 
-export const academicLevelOptions = [
-  'Undergraduate',
-  'Graduate',
-  'Faculty'
-];
+export const academicLevelOptions = ['Undergraduate', 'Graduate', 'Faculty'];
 
 export interface Member {
-  id: string;
+  id: number;
   name: string;
   picture: string;
   hometown: string;

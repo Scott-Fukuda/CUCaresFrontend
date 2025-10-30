@@ -14,21 +14,21 @@ export const canUnregisterFromOpportunity = (
   // Create the event date/time string
   const eventDateTimeString = `${opportunityDate}T${opportunityTime}`;
   const eventDateTime = new Date(eventDateTimeString);
-  
+
   // Get current time
   const now = new Date();
-  
+
   // Calculate time difference in milliseconds
   const timeDifference = eventDateTime.getTime() - now.getTime();
   const hoursUntilEvent = timeDifference / (1000 * 60 * 60);
-  
+
   // Users can unregister if more than 7 hours before the event
   const canUnregister = hoursUntilEvent > 7;
-  
+
   return {
     canUnregister,
     timeUntilEvent: timeDifference,
-    hoursUntilEvent
+    hoursUntilEvent,
   };
 };
 
@@ -39,14 +39,14 @@ export const canUnregisterFromOpportunity = (
  */
 export const formatTimeUntilEvent = (hoursUntilEvent: number): string => {
   if (hoursUntilEvent <= 0) {
-    return "Event has started";
+    return 'Event has started';
   }
-  
+
   if (hoursUntilEvent < 1) {
     const minutes = Math.floor(hoursUntilEvent * 60);
     return `${minutes} minutes`;
   }
-  
+
   if (hoursUntilEvent < 24) {
     const hours = Math.floor(hoursUntilEvent);
     const minutes = Math.floor((hoursUntilEvent - hours) * 60);
@@ -55,10 +55,10 @@ export const formatTimeUntilEvent = (hoursUntilEvent: number): string => {
     }
     return `${hours} hours`;
   }
-  
+
   const days = Math.floor(hoursUntilEvent / 24);
   const remainingHours = Math.floor(hoursUntilEvent % 24);
-  
+
   if (remainingHours > 0) {
     return `${days} days, ${remainingHours} hours`;
   }
@@ -103,17 +103,17 @@ export const calculateEndTime = (date: string, time: string, duration: number): 
   // Parse the date and time
   const [year, month, day] = date.split('-').map(Number);
   const [hours, minutes] = time.split(':').map(Number);
-  
+
   // Create a date object with the start time
   const startDateTime = new Date(year, month - 1, day, hours, minutes);
-  
+
   // Add the duration in minutes
-  const endDateTime = new Date(startDateTime.getTime() + (duration * 60 * 1000));
-  
+  const endDateTime = new Date(startDateTime.getTime() + duration * 60 * 1000);
+
   // Format the end time
-  return endDateTime.toLocaleTimeString('en-US', { 
-    hour: 'numeric', 
-    minute: '2-digit', 
-    hour12: true 
+  return endDateTime.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
   });
 };

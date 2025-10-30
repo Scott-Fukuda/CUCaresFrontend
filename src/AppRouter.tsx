@@ -1,6 +1,19 @@
 import React from 'react';
 import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
-import { User, MinimalUser, Opportunity, SignUp, Organization, Badge, OrganizationType, Notification, Friendship, FriendshipStatus, FriendshipsResponse, UserWithFriendshipStatus } from './types';
+import {
+    User,
+    MinimalUser,
+    Opportunity,
+    SignUp,
+    Organization,
+    Badge,
+    OrganizationType,
+    Notification,
+    Friendship,
+    FriendshipStatus,
+    FriendshipsResponse,
+    UserWithFriendshipStatus,
+} from './types';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import OpportunitiesPage from './pages/OpportunitiesPage';
@@ -109,7 +122,11 @@ const AppRouter: React.FC<AppRouterProps> = ({
         return <div className="text-center p-10 font-semibold text-lg">Loading...</div>;
     }
     if (appError) {
-        return <div className="text-center p-10 font-semibold text-lg text-red-600 bg-red-100 rounded-lg">{appError}</div>;
+        return (
+            <div className="text-center p-10 font-semibold text-lg text-red-600 bg-red-100 rounded-lg">
+                {appError}
+            </div>
+        );
     }
 
     const userPoints = currentUser?.points || 0;

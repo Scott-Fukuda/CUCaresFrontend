@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { User, FriendshipsResponse } from '../types';
 
@@ -9,23 +8,29 @@ interface NotificationsPageProps {
   currentUser: User;
 }
 
-const NotificationsPage: React.FC<NotificationsPageProps> = ({ friendshipsData, allUsers, handleRequestResponse, currentUser }) => {
+const NotificationsPage: React.FC<NotificationsPageProps> = ({
+  friendshipsData,
+  allUsers,
+  handleRequestResponse,
+  currentUser,
+}) => {
   return (
     <div>
       <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-6">Notifications</h2>
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <h3 className="text-xl font-bold mb-4">Friend Requests</h3>
-        {friendshipsData && friendshipsData.users.filter(user => user.friendship_status === 'received').length > 0 ? (
+        {friendshipsData &&
+        friendshipsData.users.filter((user) => user.friendship_status === 'received').length > 0 ? (
           <ul className="divide-y divide-gray-200">
             {friendshipsData.users
-              .filter(user => user.friendship_status === 'received')
-              .map(user => (
+              .filter((user) => user.friendship_status === 'received')
+              .map((user) => (
                 <li key={user.user_id} className="flex items-center justify-between py-4">
                   <div className="flex items-center gap-3">
                     {user.profile_image ? (
-                      <img 
-                        src={user.profile_image} 
-                        alt={user.name} 
+                      <img
+                        src={user.profile_image}
+                        alt={user.name}
                         className="h-10 w-10 rounded-full object-cover"
                       />
                     ) : (
@@ -35,17 +40,19 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ friendshipsData, 
                         </span>
                       </div>
                     )}
-                    <p><span className="font-semibold">{user.name}</span> wants to be your friend.</p>
+                    <p>
+                      <span className="font-semibold">{user.name}</span> wants to be your friend.
+                    </p>
                   </div>
                   <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleRequestResponse(user.user_id, 'accepted')} 
+                    <button
+                      onClick={() => handleRequestResponse(user.user_id, 'accepted')}
                       className="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
                     >
                       Accept
                     </button>
-                    <button 
-                      onClick={() => handleRequestResponse(user.user_id, 'declined')} 
+                    <button
+                      onClick={() => handleRequestResponse(user.user_id, 'declined')}
                       className="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400 transition-colors"
                     >
                       Decline

@@ -1,9 +1,12 @@
-
 import React, { useMemo } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl } from '../api';
-import { canUnregisterFromOpportunity, formatTimeUntilEvent, calculateEndTime } from '../utils/timeUtils';
+import {
+  canUnregisterFromOpportunity,
+  formatTimeUntilEvent,
+  calculateEndTime,
+} from '../utils/timeUtils';
 import { useState } from 'react';
 
 interface OpportunityCardProps {
@@ -19,17 +22,18 @@ interface OpportunityCardProps {
 }
 
 const PeopleIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
   </svg>
 );
 
 const TrophyIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <img
-    src="/icons/points-icon.png"
-    alt="Points"
-    className={className || 'h-5 w-5'}
-  />
+  <img src="/icons/points-icon.png" alt="Points" className={className || 'h-5 w-5'} />
 );
 
 const OpportunityCard: React.FC<OpportunityCardProps> = ({
@@ -41,7 +45,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   onUnSignUp,
   isUserSignedUp,
   onExternalSignup,
-  onExternalUnsignup
+  onExternalUnsignup,
 }) => {
   const navigate = useNavigate();
   const [clickedStudentId, setClickedStudentId] = useState<number | null>(null);
@@ -57,6 +61,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
 
   const availableSlots = opportunity.total_slots - signedUpStudents.length;
   const canSignUp = availableSlots > 0 && !isUserSignedUp;
+  const eventStarted = new Date() >= new Date(`${opportunity.date}T${opportunity.time}`);
   const isUserHost = opportunity.host_id === currentUser.id;
   const canManageOpportunity = isUserHost || currentUser.admin;
 
@@ -152,8 +157,8 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
 
   const topOrgs = useMemo(() => {
     const orgCounts: { [key: number]: number } = {};
-    signedUpStudents.forEach(student => {
-      student.organizationIds.forEach(orgId => {
+    signedUpStudents.forEach((student) => {
+      student.organizationIds.forEach((orgId) => {
         orgCounts[orgId] = (orgCounts[orgId] || 0) + 1;
       });
     });
@@ -162,15 +167,15 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
       .filter(([, count]) => count >= 2) // Only include organizations with at least 2 people
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
-      .map(([orgId]) => allOrgs.find(g => g.id === parseInt(orgId)))
+      .map(([orgId]) => allOrgs.find((g) => g.id === parseInt(orgId)))
       .filter((g): g is Organization => !!g);
-
   }, [signedUpStudents, allOrgs]);
 
   const visibilityOrgs = useMemo(() => {
-    if (!Array.isArray(opportunity.visibility) || opportunity.visibility.length === 0) return [] as Organization[];
+    if (!Array.isArray(opportunity.visibility) || opportunity.visibility.length === 0)
+      return [] as Organization[];
     return allOrgs
-      .filter(org => opportunity.visibility.includes(org.id))
+      .filter((org) => opportunity.visibility.includes(org.id))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [opportunity.visibility, allOrgs]);
 
@@ -182,13 +187,13 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
     weekday: 'long',
     month: 'short',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
   });
 
   const displayTime = new Date(`1970-01-01T${opportunity.time}`).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
+    hour12: true,
   });
 
   const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, opportunity.duration);
@@ -196,7 +201,10 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   // const [showExternalSignupModal, setShowExternalSignupModal] = useState(false); // This state is removed
 
   return (
-    <div onClick={handleCardClick} className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105 duration-300 cursor-pointer">
+    <div
+      onClick={handleCardClick}
+      className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105 duration-300 cursor-pointer"
+    >
       <img
         src={opportunity.imageUrl || '/backup.jpeg'}
         alt={opportunity.name}
@@ -228,13 +236,15 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
           </div>
           <span
             className="text-white-50 text-xs font-bold py-1 rounded-full w-[80px] text-center inline-block flex-shrink-0 ml-2"
-            style={{ backgroundColor: "#F5F5F5" }}
+            style={{ backgroundColor: '#F5F5F5' }}
           >
             {opportunity.points} PTS
           </span>
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-2">{opportunity.name}</h3>
-        <p className="text-gray-500 text-sm mb-4">{displayDate} &bull; {displayTime} - {displayEndTime}</p>
+        <p className="text-gray-500 text-sm mb-4">
+          {displayDate} &bull; {displayTime} - {displayEndTime}
+        </p>
         {opportunity.address && (
           <p className="text-gray-600 text-sm mb-4">📍 {opportunity.address}</p>
         )}
@@ -242,18 +252,20 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
         <div className="flex justify-between items-center text-sm font-medium text-gray-600 mb-2">
           <div className="flex items-center gap-2">
             <PeopleIcon className="h-5 w-5 text-cornell-red" />
-            <span>Signed Up ({signedUpStudents.length}/{opportunity.total_slots})</span>
+            <span>
+              Signed Up ({signedUpStudents.length}/{opportunity.total_slots})
+            </span>
           </div>
-          <span className={`${availableSlots > 0 || isUserSignedUp ? 'text-green-600' : 'text-red-600'} font-bold`}>
+          <span
+            className={`${availableSlots > 0 || isUserSignedUp ? 'text-green-600' : 'text-red-600'} font-bold`}
+          >
             {availableSlots} slots left
           </span>
         </div>
 
-
-
         {signedUpStudents.length > 0 ? (
           <div className="flex items-center -space-x-2 mb-4">
-            {signedUpStudents.slice(0, 10).map(student => (
+            {signedUpStudents.slice(0, 10).map((student) => (
               <div key={student.id} className="group relative hover:z-10">
                 <img
                   className="h-8 w-8 rounded-full object-cover ring-2 ring-white cursor-pointer"
@@ -264,19 +276,35 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
                     handleProfileClick(student.id);
                   }}
                 />
-                <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded-md transition-opacity pointer-events-none ${clickedStudentId === student.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                  }`}>
+                <div
+                  className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded-md transition-opacity pointer-events-none ${clickedStudentId === student.id
+                      ? 'opacity-100'
+                      : 'opacity-0 group-hover:opacity-100'
+                    }`}
+                >
                   {student.name}
-                  <svg className="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xmlSpace="preserve">
+                  <svg
+                    className="absolute text-gray-800 h-2 w-full left-0 top-full"
+                    x="0px"
+                    y="0px"
+                    viewBox="0 0 255 255"
+                    xmlSpace="preserve"
+                  >
                     <polygon className="fill-current" points="0,0 127.5,127.5 255,0" />
                   </svg>
                 </div>
               </div>
             ))}
-            {signedUpStudents.length > 10 && <div className="h-8 w-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-semibold ring-2 ring-white">+{signedUpStudents.length - 10}</div>}
+            {signedUpStudents.length > 10 && (
+              <div className="h-8 w-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-semibold ring-2 ring-white">
+                +{signedUpStudents.length - 10}
+              </div>
+            )}
           </div>
         ) : (
-          <div className="text-center h-8 mb-4 rounded-lg text-sm text-gray-500">Be the first to sign up! +5 bonus points</div>
+          <div className="text-center h-8 mb-4 rounded-lg text-sm text-gray-500">
+            Be the first to sign up! +5 bonus points
+          </div>
         )}
 
         {topOrgs.length > 0 && (
@@ -286,12 +314,16 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
               <span>Top Organizations Attending</span>
             </div>
             <div className="flex flex-wrap gap-2 p-3 bg-light-gray rounded-lg">
-              {topOrgs.map(org => (
+              {topOrgs.map((org) => (
                 <span
                   key={org.id}
                   data-clickable-org="true"
-                  onClick={(e) => { e.stopPropagation(); navigate(`/group-detail/${org.id}`); }}
-                  className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded-full cursor-pointer hover:bg-gray-300 transition-colors">
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/group-detail/${org.id}`);
+                  }}
+                  className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded-full cursor-pointer hover:bg-gray-300 transition-colors"
+                >
                   {org.name}
                 </span>
               ))}
@@ -305,11 +337,14 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
               <span>Visible To</span>
             </div>
             <div className="flex flex-wrap gap-2 p-1">
-              {visibilityOrgs.map(org => (
+              {visibilityOrgs.map((org) => (
                 <span
                   key={org.id}
                   data-clickable-org="true"
-                  onClick={(e) => { e.stopPropagation(); navigate(`/group-detail/${org.id}`); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/group-detail/${org.id}`);
+                  }}
                   className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
                 >
                   {org.name}
@@ -320,25 +355,32 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
         )}
 
         <button
-          onClick={handleButtonClick}
-          disabled={(!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister)}
-          className={`w-full mt-auto font-bold py-3 px-4 rounded-lg transition-colors text-white ${isUserSignedUp
-            ? canUnregister
-              ? 'bg-green-600 hover:bg-green-700'
-              : 'bg-orange-500 cursor-not-allowed'
-            : canSignUp
-              ? 'bg-cornell-red hover:bg-red-800'
-              : 'bg-gray-400 cursor-not-allowed'
+          onClick={!eventStarted ? handleButtonClick : undefined}
+          disabled={
+            eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister)
+          }
+          className={`w-full mt-auto font-bold py-3 px-4 rounded-lg transition-colors text-white ${eventStarted
+              ? 'bg-gray-500 cursor-not-allowed'
+              : isUserSignedUp
+                ? canUnregister
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-orange-500 cursor-not-allowed'
+                : canSignUp
+                  ? 'bg-cornell-red hover:bg-red-800'
+                  : 'bg-gray-400 cursor-not-allowed'
             }`}
         >
-          {isUserSignedUp
-            ? canUnregister
-              ? 'Signed Up ✓'
-              : `Unregistration Closed (${formatTimeUntilEvent(timeUntilEvent)})`
-            : canSignUp
-              ? (opportunity.redirect_url ? 'Sign Up Externally' : 'Sign Up')
-              : 'No Slots Available'
-          }
+          {eventStarted
+            ? 'Event Already Started'
+            : isUserSignedUp
+              ? canUnregister
+                ? 'Signed Up ✓'
+                : `Unregistration Closed (${formatTimeUntilEvent(timeUntilEvent)})`
+              : canSignUp
+                ? opportunity.redirect_url
+                  ? 'Sign Up Externally'
+                  : 'Sign Up'
+                : 'No Slots Available'}
         </button>
 
         {/* Remove the modal from here - it will be handled at page level */}
@@ -347,8 +389,8 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
         {isUserSignedUp && !canUnregister && (
           <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded-lg">
             <p className="text-xs text-orange-800 text-center">
-              ⚠️ Unregistration closed within 7 hours of event.
-              Contact organizer if you need to cancel.
+              ⚠️ Unregistration closed within 7 hours of event. Contact organizer if you need to
+              cancel.
             </p>
           </div>
         )}
@@ -357,7 +399,10 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
         {opportunity.tags && Array.isArray(opportunity.tags) && opportunity.tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1">
             {opportunity.tags.map((tag, index) => (
-              <span key={index} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+              <span
+                key={index}
+                className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium"
+              >
                 {tag}
               </span>
             ))}

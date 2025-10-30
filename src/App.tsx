@@ -7,9 +7,7 @@ const App: React.FC = () => {
     <Router>
       <AppContent />
     </Router>
-  )
+  );
 }
 
 export default App;
-
-

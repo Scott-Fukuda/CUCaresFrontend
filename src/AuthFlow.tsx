@@ -12,6 +12,7 @@ interface AuthFlowProps {
   isLoading: boolean;
   handleRegister: (firstName: string, lastName: string, phone: string, gender: string, graduationYear: string, academicLevel: string, major: string, birthday: string, car_seats: number) => void;
   authError: string | null;
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const AuthFlow: React.FC<AuthFlowProps> = ({
@@ -19,6 +20,7 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
   handleRegister,
   authError,
   isLoading,
+  setCurrentUser
 }) => {
   const navigate = useNavigate();
 
@@ -38,6 +40,7 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
             onGoogleSignIn={handleGoogleSignIn}
             error={authError}
             isLoading={isLoading}
+            setCurrentUser={setCurrentUser}
           />}
         />
         <Route path="/register" element={
@@ -66,6 +69,6 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
       </Routes>
     </div>
   );
-}
+};
 
 export default AuthFlow;

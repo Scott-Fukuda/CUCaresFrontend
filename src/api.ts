@@ -8,7 +8,7 @@ export const getProfilePictureUrl = (profile_image?: string | null, userId?: num
   if (profile_image) {
     return profile_image;
   }
-  // Return a generic silhouette SVG 
+  // Return a generic silhouette SVG
   return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236B7280'%3E%3Ccircle cx='12' cy='12' r='12' fill='white'/%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
 };
 
@@ -21,8 +21,7 @@ export const formatRegistrationDate = (date: Date = new Date()): string => {
 // A helper for making Acucaresbackend.onrender.comPI requests.
 // const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
 
-// Testing endpoint
-const ENDPOINT_URL = 'http://127.0.0.1:5000'
+const ENDPOINT_URL = import.meta.env.VITE_ENDPOINT_URL;
 
 // Helper to get Firebase token
 const getFirebaseToken = async (): Promise<string | null> => {
@@ -47,7 +46,7 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
   const res = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...headers,
     },
     mode: 'cors',
@@ -62,8 +61,8 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
   }
 
   // For DELETE requests or other methods that might not return a body
-  const contentType = res.headers.get("content-type");
-  if (contentType && contentType.indexOf("application/json") !== -1) {
+  const contentType = res.headers.get('content-type');
+  if (contentType && contentType.indexOf('application/json') !== -1) {
     try {
       return await res.json();
     } catch (e) {
@@ -96,6 +95,20 @@ const authenticatedRequest = async (endpoint: string, options: RequestInit = {})
   });
 };
 
+// TEST LOGIN ENDPOINT
+export const loginTest = async (userId: number) => {
+  const response = await fetch(`${ENDPOINT_URL}/api/login-test/${userId}`, {
+    method: "GET",
+    credentials: "include"
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to log in test user")
+  }
+
+  console.log("Logged in test user!")
+  return response;
+}
 
 // --- Users ---
 // Get all users data - now requires authentication and returns full user data
@@ -128,23 +141,17 @@ export const getUsers = async (): Promise<User[]> => {
 };
 
 // Get user by email for login - new endpoint
-export const getUserByEmail = async (
-  email: string,
-  token?: string
-): Promise<User | null> => {
+export const getUserByEmail = async (email: string, token?: string): Promise<User | null> => {
   try {
     if (token) {
-      const res = await fetch(
-        `${ENDPOINT_URL}/api/users/email/${encodeURIComponent(email)}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await fetch(`${ENDPOINT_URL}/api/users/email/${encodeURIComponent(email)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!res.ok) {
         return null;
@@ -230,8 +237,8 @@ export const registerUser = async (data: object, token?: string): Promise<User> 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(data),
       mode: 'cors',
@@ -254,7 +261,7 @@ export const registerUser = async (data: object, token?: string): Promise<User> 
 // Get all user emails - returns array of email strings
 export const getUserEmails = async (): Promise<string[]> => {
   const response = await authenticatedRequest('/users/emails');
-  console.log('getUserEmails response:', response);
+  // console.log('getUserEmails response:', response);
   // If the response is the array directly:
   return response || [];
 
@@ -306,24 +313,27 @@ export const getApprovedOrgs = async (): Promise<Organization[]> => {
 };
 
 export const getOrg = (id: number): Promise<Organization> => authenticatedRequest(`/orgs/${id}`);
-export const createOrg = (data: object): Promise<Organization> => authenticatedRequest('/orgs', {
-  method: 'POST',
-  body: JSON.stringify(data)
-});
+export const createOrg = (data: object): Promise<Organization> =>
+  authenticatedRequest('/orgs', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 
 export const getUnapprovedOrgs = async (): Promise<Organization[]> => {
   const response = await authenticatedRequest('/orgs/unapproved');
   return response.organizations || [];
 };
 
-export const updateOrganization = (id: number, data: object): Promise<Organization> => authenticatedRequest(`/orgs/${id}`, {
-  method: 'PUT',
-  body: JSON.stringify(data)
-});
+export const updateOrganization = (id: number, data: object): Promise<Organization> =>
+  authenticatedRequest(`/orgs/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 
-export const deleteOrganization = (id: number): Promise<void> => authenticatedRequest(`/orgs/${id}`, {
-  method: 'DELETE'
-});
+export const deleteOrganization = (id: number): Promise<void> =>
+  authenticatedRequest(`/orgs/${id}`, {
+    method: 'DELETE',
+  });
 
 // --- Friend Management ---
 export const getAllFriendships = (): Promise<Friendship[]> => authenticatedRequest('/friendships');
@@ -350,7 +360,10 @@ export const getUserFriendships = async (userId: number): Promise<FriendshipsRes
 };
 
 // Get friendship ID between two users
-export const getFriendshipId = async (userId: number, otherUserId: number): Promise<number | null> => {
+export const getFriendshipId = async (
+  userId: number,
+  otherUserId: number
+): Promise<number | null> => {
   try {
     //console.log(`API: Getting friendship ID between user ${userId} and ${otherUserId}`);
     const result = await authenticatedRequest(`/users/${userId}/friendships/all`);
@@ -368,26 +381,31 @@ export const getFriendshipId = async (userId: number, otherUserId: number): Prom
   }
 };
 
+export const sendFriendRequest = (userId: number, friendId: number) =>
+  authenticatedRequest(`/users/${userId}/friends`, {
+    method: 'POST',
+    body: JSON.stringify({ receiver_id: friendId }),
+  });
 
+export const acceptFriendRequest = (friendshipId: number) =>
+  authenticatedRequest(`/friendships/${friendshipId}/accept`, {
+    method: 'PUT',
+  });
 
-export const sendFriendRequest = (userId: number, friendId: number) => authenticatedRequest(`/users/${userId}/friends`, {
-  method: 'POST',
-  body: JSON.stringify({ receiver_id: friendId }),
-});
+export const rejectFriendRequest = (friendshipId: number) =>
+  authenticatedRequest(`/friendships/${friendshipId}/reject`, {
+    method: 'PUT',
+  });
 
-export const acceptFriendRequest = (friendshipId: number) => authenticatedRequest(`/friendships/${friendshipId}/accept`, {
-  method: 'PUT',
-});
+export const removeFriend = (userId: number, friendId: number) =>
+  authenticatedRequest(`/users/${userId}/friends/${friendId}`, {
+    method: 'DELETE',
+  });
 
-export const rejectFriendRequest = (friendshipId: number) => authenticatedRequest(`/friendships/${friendshipId}/reject`, {
-  method: 'PUT',
-});
-
-export const removeFriend = (userId: number, friendId: number) => authenticatedRequest(`/users/${userId}/friends/${friendId}`, {
-  method: 'DELETE',
-});
-
-export const checkFriendshipStatus = async (userId: number, friendId: number): Promise<FriendshipStatus> => {
+export const checkFriendshipStatus = async (
+  userId: number,
+  friendId: number
+): Promise<FriendshipStatus> => {
   //console.log(`API: Checking friendship status between user ${userId} and friend ${friendId}`);
   const result = await authenticatedRequest(`/users/${userId}/friends/check/${friendId}`);
   //console.log(`API: Friendship status response:`, result);
@@ -416,7 +434,8 @@ export const getAcceptedFriendships = async (userId: number): Promise<User[]> =>
       friendsArray = result.user;
     }
 
-    if (friendsArray.length >= 0) { // Process even empty arrays
+    if (friendsArray.length >= 0) {
+      // Process even empty arrays
       return friendsArray.map((friendship: any) => ({
         id: friendship.other_user_id || friendship.id || friendship.user_id,
         name: friendship.other_user_name || friendship.name || 'Unknown User',
@@ -435,7 +454,7 @@ export const getAcceptedFriendships = async (userId: number): Promise<User[]> =>
         car_seats: 0, // Not provided in friendship response
         registration_date: '', // Not provided in friendship response
         registered: false, // Not provided in friendship response
-        attended: false // Not provided in friendship response
+        attended: false, // Not provided in friendship response
       }));
     }
     console.warn('Unexpected friends response structure:', result);
@@ -450,31 +469,35 @@ export const getAcceptedFriendships = async (userId: number): Promise<User[]> =>
 };
 
 // --- Organization Registration ---
-export const registerForOrg = (data: { user_id: number; organization_id: number }) => authenticatedRequest('/register-org', {
-  method: 'POST',
-  body: JSON.stringify(data),
-});
+export const registerForOrg = (data: { user_id: number; organization_id: number }) =>
+  authenticatedRequest('/register-org', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 
-export const unregisterFromOrg = (data: { user_id: number; organization_id: number }) => authenticatedRequest('/unregister-org', {
-  method: 'POST',
-  body: JSON.stringify(data),
-});
+export const unregisterFromOrg = (data: { user_id: number; organization_id: number }) =>
+  authenticatedRequest('/unregister-org', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 
 // --- Firebase Authentication ---
 export const verifyFirebaseToken = async (token: string) => {
   const response = await fetch(`${ENDPOINT_URL}/api/protected`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    }
+      Accept: 'application/json',
+    },
   });
 
   // Handle non-JSON responses (like HTML error pages)
   const contentType = response.headers.get('content-type');
   if (!contentType || !contentType.includes('application/json')) {
-    throw new Error(`Server returned ${response.status}: ${response.statusText}. Expected JSON response.`);
+    throw new Error(
+      `Server returned ${response.status}: ${response.statusText}. Expected JSON response.`
+    );
   }
 
   const responseData = await response.json();
@@ -493,10 +516,11 @@ export const verifyFirebaseToken = async (token: string) => {
   }
 };
 
-export const unregisterForOrg = (data: { user_id: number; organization_id: number }) => request('/unregister-org', {
-  method: 'POST',
-  body: JSON.stringify(data),
-});
+export const unregisterForOrg = (data: { user_id: number; organization_id: number }) =>
+  request('/unregister-org', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 
 // --- Opportunities ---
 export const getOpportunities = async (): Promise<Opportunity[]> => {
@@ -513,7 +537,6 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
       // Extract date and time components
       // Use the date as provided by the backend without manipulation
       const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
-
 
       // Extract time in HH:MM:SS format
       // If the original string contains GMT, convert GMT to Eastern Time (UTC-4)
@@ -534,6 +557,7 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
         const seconds = dateObj.getSeconds().toString().padStart(2, '0');
         timeOnly = `${hours}:${minutes}:${seconds}`;
       }
+
       // Transform involved_users from backend format to frontend User format
       const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => {
         //console.log('Transforming involved user:', involvedUser);
@@ -549,14 +573,18 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
           organizationIds: [],
           // Add attendance info if needed
           attended: involvedUser.attended,
-          registered: involvedUser.registered
+          registered: involvedUser.registered,
         };
 
         return transformedUser;
       });
 
       // Use image URL directly from backend (full URLs like "https://imgur.com/a/y0f0Geb")
-      const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
+      const resolvedImageUrl =
+        opp.image_url ||
+        opp.image ||
+        opp.imageUrl ||
+        'https://campus-cares.s3.us-east-2.amazonaws.com';
 
       return {
         id: opp.id,
@@ -584,7 +612,6 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
         causes: opp.causes !== undefined ? opp.causes : [],
         tags: opp.tags !== undefined ? opp.tags : [],
         redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
-        allow_carpool: opp.allow_carpool
       };
     });
 
@@ -594,7 +621,8 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
     throw error;
   }
 };
-export const getOpportunity = (id: number): Promise<Opportunity> => authenticatedRequest(`/opps/${id}`);
+export const getOpportunity = (id: number): Promise<Opportunity> =>
+  authenticatedRequest(`/opps/${id}`);
 
 export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
   try {
@@ -692,17 +720,21 @@ export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
   }
 };
 
-export const updateOpportunity = (id: number, data: object): Promise<Opportunity> => authenticatedRequest(`/opps/${id}`, {
-  method: 'PUT',
-  body: JSON.stringify(data)
-});
+export const updateOpportunity = (id: number, data: object): Promise<Opportunity> =>
+  authenticatedRequest(`/opps/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 
-export const deleteOpportunity = (id: number): Promise<void> => authenticatedRequest(`/opps/${id}`, {
-  method: 'DELETE'
-});
+export const deleteOpportunity = (id: number): Promise<void> =>
+  authenticatedRequest(`/opps/${id}`, {
+    method: 'DELETE',
+  });
 // --- SignUps (Registrations) ---
 // Check if opportunity is fully booked
-export const checkOpportunityAvailability = async (opportunityId: number): Promise<{ is_full: boolean }> => {
+export const checkOpportunityAvailability = async (
+  opportunityId: number
+): Promise<{ is_full: boolean }> => {
   //console.log('Checking availability for opportunity:', opportunityId);
   const result = await authenticatedRequest(`/opps/${opportunityId}/full`);
   //console.log('Opportunity availability response:', result);
@@ -729,7 +761,10 @@ export const unregisterForOpp = async (data: {
 }) => {
   // Validate 7-hour window only if user is not admin or host
   if (data.opportunityDate && data.opportunityTime && !data.isAdminOrHost) {
-    const { canUnregister } = canUnregisterFromOpportunity(data.opportunityDate, data.opportunityTime);
+    const { canUnregister } = canUnregisterFromOpportunity(
+      data.opportunityDate,
+      data.opportunityTime
+    );
     if (!canUnregister) {
       throw new Error('Cannot unregister within 7 hours of the event');
     }
@@ -739,7 +774,7 @@ export const unregisterForOpp = async (data: {
     method: 'POST',
     body: JSON.stringify({
       user_id: data.user_id,
-      opportunity_id: data.opportunity_id
+      opportunity_id: data.opportunity_id,
     }),
   });
 };
@@ -772,7 +807,11 @@ export const createOpportunity = async (formData: FormData): Promise<Opportunity
 
 // --- Attendance ---
 // PUT /api/attendance for marking attendance
-export const markAttendance = async (data: { user_ids: number[]; opportunity_id: number; duration: number }) => {
+export const markAttendance = async (data: {
+  user_ids: number[];
+  opportunity_id: number;
+  duration: number;
+}) => {
   return authenticatedRequest('/attendance', {
     method: 'PUT',
     body: JSON.stringify({
@@ -791,12 +830,15 @@ export const getOpportunityAttendance = async (opportunityId: number) => {
 // --- Email Approval Check ---
 // GET /api/approved-emails/check/{email} for checking if email is approved
 export const checkEmailApproval = async (email: string) => {
-  const response = await fetch(`${ENDPOINT_URL}/api/approved-emails/check/${encodeURIComponent(email)}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  const response = await fetch(
+    `${ENDPOINT_URL}/api/approved-emails/check/${encodeURIComponent(email)}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to check email approval: ${response.statusText}`);
@@ -808,7 +850,7 @@ export const checkEmailApproval = async (email: string) => {
 export const checkUserExists = async (email: string, token?: string) => {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -845,17 +887,22 @@ export const addApprovedEmail = async (email: string) => {
 
 // --- Monthly Points ---
 // GET /api/monthly-points for getting monthly points
-export const getMonthlyPoints = async (date: string): Promise<{ users: Array<{ id: number, points: number }> }> => {
+export const getMonthlyPoints = async (
+  date: string
+): Promise<{ users: Array<{ id: number; points: number }> }> => {
   const token = await getFirebaseToken();
   const headers: Record<string, string> = {};
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${ENDPOINT_URL}/api/monthly-points?date=${encodeURIComponent(date)}`, {
-    method: 'GET',
-    headers,
-  });
+  const response = await fetch(
+    `${ENDPOINT_URL}/api/monthly-points?date=${encodeURIComponent(date)}`,
+    {
+      method: 'GET',
+      headers,
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to get monthly points: ${response.statusText}`);
@@ -900,3 +947,81 @@ export const createWaiver = async (data: {
 
   return response.json();
 };
+// api.ts
+const BASE_URL = 'https://cucaresbackend.onrender.com'; // adjust if you store it elsewhere
+
+/**
+ * Fetches user CSV data from the backend.
+ * @returns CSV text as a string
+ */
+export const getUserCsv = async (): Promise<string> => {
+  const token = await getFirebaseToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetch(`${BASE_URL}/api/users/csv`, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch user CSV: ${response.statusText}`);
+  }
+
+  // Return raw text since it's CSV format
+  return response.text();
+};
+
+/**
+ * Fetches opportunity CSV data from the backend.
+ * @returns CSV text as a string
+ */
+export const getOpportunityCsv = async (): Promise<string> => {
+  const token = await getFirebaseToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetch(`${BASE_URL}/api/opps/csv`, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch opportunity CSV: ${response.statusText}`);
+  }
+
+  return response.text();
+};
+
+export const getServiceDataCsv = async (
+  startDate: string,
+  endDate: string
+): Promise<Response> => {
+  const token = await getFirebaseToken();
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${BASE_URL}/api/service-data/org/`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      start_date: startDate,
+      end_date: endDate,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch opportunity CSV: ${response.statusText}`);
+  }
+
+  return await response;
+};
+
