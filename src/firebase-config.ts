@@ -116,51 +116,85 @@ export const getCurrentUser = (): Promise<FirebaseUser | null> => {
 };
 
 export const signInWithGoogle = async (): Promise<FirebaseUser> => {
-  try {
-    //console.log('Signing in with Google');
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
+  const provider = new GoogleAuthProvider();
 
-    // Convert Firebase User to our FirebaseUser interface
+  // ✅ Step 1: Detect mobile browser (popup unreliable on iOS / Android)
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // ✅ Step 2: Check sessionStorage availability
+  const storageAvailable = (() => {
+    try {
+      const test = "__firebase_test__";
+      sessionStorage.setItem(test, test);
+      sessionStorage.removeItem(test);
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+
+  // ✅ If mobile or storage broken → skip popup, go straight to redirect
+  if (isMobile || !storageAvailable) {
+    console.warn("Using redirect sign-in (mobile or sessionStorage unavailable)");
+    await import("firebase/auth").then(({ signInWithRedirect }) =>
+      signInWithRedirect(auth, provider)
+    );
+    // This returns control after redirect, so we stop here
+    throw new Error("Redirecting to Google for sign-in...");
+  }
+
+  // ✅ Step 3: Safe popup with timeout
+  try {
+    const result = await Promise.race([
+      signInWithPopup(auth, provider),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Firebase popup timed out / missing initial state")),
+          5000
+        )
+      ),
+    ]);
+
+    const user = (result as any).user as FirebaseAuthUser;
+
     const firebaseUser: FirebaseUser = {
-      email: user.email || '',
-      displayName: user.displayName || '',
+      email: user.email || "",
+      displayName: user.displayName || "",
       uid: user.uid,
       getIdToken: () => user.getIdToken(),
     };
 
     return firebaseUser;
   } catch (error: any) {
-    // Handle missing sessionStorage / initial state case
+    // ✅ Step 4: Handle silent or known Firebase popup failures
     if (
-      error.message?.includes('Unable to process request due to missing initial state') ||
-      error.code === 'auth/argument-error' || // sometimes Firebase throws this instead
-      error.code === 'auth/no-auth-event'
+      error.message?.includes("missing initial state") ||
+      error.message?.includes("popup timed out") ||
+      error.code === "auth/no-auth-event" ||
+      error.code === "auth/argument-error"
     ) {
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-      throw new Error(
-        "There was an error with your browser's session storage, please try logging in again."
+      console.warn("Popup failed — falling back to redirect");
+      await import("firebase/auth").then(({ signInWithRedirect }) =>
+        signInWithRedirect(auth, provider)
       );
-    } else if (error.code === 'auth/popup-closed-by-user') {
-      throw new Error('You closed the login popup. Please try logging in again.');
+      throw new Error("Redirecting to Google for sign-in...");
+    } else if (error.code === "auth/popup-closed-by-user") {
+      throw new Error("You closed the login popup. Please try again.");
     } else if (
-      // Common Firebase/browser popup error codes/messages
-      error.code === 'auth/popup-blocked' ||
-      error.code === 'auth/popup-blocked-by-browser' ||
-      error.code === 'auth/popup-blocked-by-user' ||
-      (typeof error.message === 'string' && /popup(\s|-)?blocked/i.test(error.message)) ||
-      (typeof error.message === 'string' && /blocked a popup/i.test(error.message))
+      error.code === "auth/popup-blocked" ||
+      error.code === "auth/popup-blocked-by-browser" ||
+      error.code === "auth/popup-blocked-by-user" ||
+      (typeof error.message === "string" && /popup(\s|-)?blocked/i.test(error.message)) ||
+      (typeof error.message === "string" && /blocked a popup/i.test(error.message))
     ) {
-      console.error('Popup blocked during sign-in:', error);
+      console.error("Popup blocked during sign-in:", error);
       throw new Error(
-        'The sign-in popup was blocked by your browser. Please try again. ' +
-          'If pop-ups continue to be blocked, allow pop-ups for this site in your browser settings, or try signing in using a different browser.'
+        "The sign-in popup was blocked by your browser. Please allow pop-ups or try a different browser."
       );
     }
-    console.error('Firebase sign-in error:', error);
-    throw new Error('Sign-in failed. Please try again.');
+
+    console.error("Firebase sign-in error:", error);
+    throw new Error("Sign-in failed. Please try again.");
   }
 };
 
