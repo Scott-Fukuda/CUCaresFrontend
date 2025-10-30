@@ -534,7 +534,6 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
         const seconds = dateObj.getSeconds().toString().padStart(2, '0');
         timeOnly = `${hours}:${minutes}:${seconds}`;
       }
-
       // Transform involved_users from backend format to frontend User format
       const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => {
         //console.log('Transforming involved user:', involvedUser);
@@ -585,7 +584,7 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
         causes: opp.causes !== undefined ? opp.causes : [],
         tags: opp.tags !== undefined ? opp.tags : [],
         redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
-
+        allow_carpool: opp.allow_carpool
       };
     });
 
@@ -681,7 +680,8 @@ export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
         comments: opp.comments !== undefined ? opp.comments : [],
         qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
         tags: opp.tags !== undefined ? opp.tags : [],
-        redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null
+        redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
+        allow_carpool: opp.allow_carpool
       };
     });
 

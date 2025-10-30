@@ -1,11 +1,5 @@
-@import '../../variables';
-
-.icon {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    cursor: pointer;
-}
+@import '../../variables.scss';
+@import '../../global.scss';
 
 .car-icon {
     font-size: 80px !important;

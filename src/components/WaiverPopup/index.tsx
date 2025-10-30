@@ -20,7 +20,7 @@ const WaiverPopup: React.FC<WaiverPopupProps> = ({
     return (
         <div className="modal-backdrop">
             <div className="modal">
-                <CloseIcon className="icon" onClick={() => setShowWaiverPopup(false)} />
+                <CloseIcon className="close-icon" onClick={() => setShowWaiverPopup(false)} />
                 <div className="modal-content">
                     <div className="attention">
                         <p>🚨 Important Update!</p>

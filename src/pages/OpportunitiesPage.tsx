@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Opportunity, User, SignUp, allInterests, Organization } from '../types';
 import OpportunityCard from '../components/OpportunityCard';
 import { useNavigate } from 'react-router-dom';
- 
+
 interface OpportunitiesPageProps {
   opportunities: Opportunity[];
   students: User[];
@@ -12,6 +12,8 @@ interface OpportunitiesPageProps {
   handleUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
   allOrgs: Organization[];
   currentUserSignupsSet: Set<number>;
+  showCarpoolPopup: number | null;
+  setShowCarpoolPopup: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
@@ -22,7 +24,9 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   handleSignUp,
   handleUnSignUp,
   allOrgs,
-  currentUserSignupsSet
+  currentUserSignupsSet,
+  showCarpoolPopup,
+  setShowCarpoolPopup
 }) => {
   const navigate = useNavigate();
   // Filter functionality disabled
@@ -39,11 +43,11 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         // Use the date as provided by the API without manipulation
         const [year, month, day] = opp.date.split('-').map(Number);
         const actualDate = new Date(year, month - 1, day);
-        
+
         // Parse time and create a full datetime object
         const [hours, minutes] = opp.time.split(':').map(Number);
         const fullDateTime = new Date(year, month - 1, day, hours, minutes);
-        
+
         return {
           ...opp,
           localDate: actualDate,
@@ -57,12 +61,14 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
 
         // Don't show past events - compare with actual date
         return opp.localDate.getTime() >= today.getTime();
-      }).filter(opp => {if (opp.visibility) {
-        // If opportunity is private, check if user belongs to any allowed orgs
-        if (opp.visibility.length === 0 || currentUser.admin) return true; // public
-        const userOrgIds = currentUser.organizationIds || [];
-        return opp.visibility.some(orgId => userOrgIds.includes(orgId));
-      }})
+      }).filter(opp => {
+        if (opp.visibility) {
+          // If opportunity is private, check if user belongs to any allowed orgs
+          if (opp.visibility.length === 0 || currentUser.admin) return true; // public
+          const userOrgIds = currentUser.organizationIds || [];
+          return opp.visibility.some(orgId => userOrgIds.includes(orgId));
+        }
+      })
       .sort((a, b) => a.fullDateTime.getTime() - b.fullDateTime.getTime());
   }, [opportunities]);
 
@@ -84,10 +90,13 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     if (selectedOpportunity) {
       // Open the external URL in a new tab
       window.open(selectedOpportunity.redirect_url!, '_blank');
-      
+
       // Still register the user locally
       handleSignUp(selectedOpportunity.id);
-      
+      // if (selectedOpportunity.allow_carpool) {
+      //   setShowCarpoolPopup(true)
+      // }
+
       // Close the modal
       setShowExternalSignupModal(false);
       setSelectedOpportunity(null);
@@ -98,7 +107,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     if (selectedOpportunity) {
       // Proceed with local unregistration
       handleUnSignUp(selectedOpportunity.id, selectedOpportunity.date, selectedOpportunity.time);
-      
+
       // Close the modal
       setShowExternalUnsignupModal(false);
       setSelectedOpportunity(null);
@@ -172,10 +181,10 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         {filteredOpportunities.map(opp => {
           // Use backend data directly - it's more reliable than trying to combine sources
           let signedUpStudents: User[] = [];
-          
+
           if (opp.involved_users && opp.involved_users.length > 0) {
             // Use backend data directly - these are already transformed User objects
-            signedUpStudents = opp.involved_users.filter(user => 
+            signedUpStudents = opp.involved_users.filter(user =>
               user.registered === true || opp.host_id === user.id
             );
           } else {

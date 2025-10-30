@@ -102,6 +102,9 @@ const AppContent: React.FC = () => {
   // Add state for tracking first-time registration
   const [showPostRegistrationSetup, setShowPostRegistrationSetup] = useState(false);
 
+  const [showCarpoolPopup, setShowCarpoolPopup] = useState<number | null>(null);
+  const [showDriverPopup, setShowDriverPopup] = useState<boolean>(false);
+
   // Load all app data after user is logged in
   useEffect(() => {
     //console.log('App useEffect triggered:', { currentUser, isLoading, lastLoadedUserId: lastLoadedUserId.current });
@@ -359,12 +362,18 @@ const AppContent: React.FC = () => {
       //console.log('Updated opportunities received:', updatedOpps.length);
       setOpportunities(updatedOpps);
 
-      // Show success popup
-      showPopup(
-        'Thank you for signing up!',
-        'Thank you for signing up for this opportunity. The event host may reach out to you with further details (i.e. ride coordination). Otherwise, please arrive at the listed address at the designated time. Thank you for serving!',
-        'success'
-      );
+      const opportunity = await api.getOpportunity(opportunityId);
+      if (opportunity.allow_carpool) {
+        setShowCarpoolPopup(opportunity.id);
+      } else {
+        // Show success popup
+        showPopup(
+          'Thank you for signing up!',
+          'Thank you for signing up for this opportunity. The event host may reach out to you with further details (i.e. ride coordination). Otherwise, please arrive at the listed address at the designated time. Thank you for serving!',
+          'success'
+        );
+      }
+
     } catch (e: any) {
       console.error('Error in handleSignUp:', e);
       // Revert local state on error
@@ -835,6 +844,10 @@ const AppContent: React.FC = () => {
           leaderboardUsers={leaderboardUsers}
           popupMessage={popupMessage}
           closePopup={closePopup}
+          showCarpoolPopup={showCarpoolPopup}
+          setShowCarpoolPopup={setShowCarpoolPopup}
+          showDriverPopup={showDriverPopup}
+          setShowDriverPopup={setShowDriverPopup}
         />
       ) : (
         <AuthFlow

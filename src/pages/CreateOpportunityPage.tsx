@@ -8,10 +8,10 @@ import { formatDateTimeForBackend } from '../utils/timeUtils';
 const transformOpportunityFromBackend = (opp: any): Opportunity => {
   // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
   const dateObj = new Date(opp.date);
-  
+
   // Extract date and time components
   const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
-  
+
   // Extract time in HH:MM:SS format
   let timeOnly;
   if (opp.date.includes('GMT')) {
@@ -29,7 +29,7 @@ const transformOpportunityFromBackend = (opp: any): Opportunity => {
     const seconds = dateObj.getSeconds().toString().padStart(2, '0');
     timeOnly = `${hours}:${minutes}:${seconds}`;
   }
-  
+
   // Transform involved users if they exist
   const transformedInvolvedUsers = opp.involved_users ? opp.involved_users.map((involvedUser: any) => {
     const user = involvedUser.user || involvedUser;
@@ -56,10 +56,10 @@ const transformOpportunityFromBackend = (opp: any): Opportunity => {
       attended: involvedUser.attended || false,
     };
   }) : [];
-  
+
   // Use image URL directly from backend
   const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
-  
+
   return {
     id: opp.id,
     name: opp.name,
@@ -95,15 +95,15 @@ interface CreateOpportunityPageProps {
   setOpportunities: (opportunities: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])) => void;
 }
 
-const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({ 
-  currentUser, 
+const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
+  currentUser,
   organizations,  // Add this parameter
   opportunities,
   setOpportunities
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const clonedOpportunityData = location.state?.clonedOpportunityData;
 
   // Update the initial formData state to use cloned data
@@ -124,13 +124,14 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
     // New fields for private events and visibility (list of org ids)
     isPrivate: clonedOpportunityData?.isPrivate || false,
     visibility: clonedOpportunityData?.visibility || [] as number[],
+    allow_carpool: clonedOpportunityData?.allow_carpool || false
   });
 
   // Add image preview state for cloned images
   const [imagePreview, setImagePreview] = useState<string | null>(
     clonedOpportunityData?.imageUrl || null
   );
-  
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -208,28 +209,28 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
     try {
       let imageUrl = '';
-      
+
       // Upload image first if selected
       if (imageFile) {
         //console.log('Uploading image file:', imageFile.name, imageFile.type, imageFile.size);
         const imageFormData = new FormData();
         imageFormData.append('file', imageFile);
-        
+
         try {
           //console.log('Sending image upload request to /upload');
           const uploadResponse = await fetch('https://cucaresbackend.onrender.com/upload', {
             method: 'POST',
             body: imageFormData,
           });
-          
+
           //console.log('Upload response status:', uploadResponse.status);
-          
+
           if (!uploadResponse.ok) {
             const errorText = await uploadResponse.text();
             console.error('Upload error response:', errorText);
             throw new Error(`Failed to upload image: ${uploadResponse.status} ${uploadResponse.statusText}`);
           }
-          
+
           const uploadResult = await uploadResponse.json();
           //console.log('Upload result:', uploadResult);
           imageUrl = uploadResult.url; // Assuming the response contains the S3 URL
@@ -244,7 +245,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
       // Create FormData for multipart/form-data
       const formDataToSend = new FormData();
-      
+
       // Add all the form fields
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
@@ -263,7 +264,8 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       formDataToSend.append('host_org_id', formData.host_org_id);
       formDataToSend.append('host_user_id', currentUser.id.toString());
       formDataToSend.append('address', formData.address);
-      
+      formDataToSend.append('allow_carpool', formData.allow_carpool)
+
       // Add redirect URL if provided
       if (formData.redirect_url.trim()) {
         formDataToSend.append('redirect_url', formData.redirect_url.trim());
@@ -516,22 +518,22 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
             </div> */}
 
           <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Causes
-              </label>
-              <select
-                name="cause"
-                multiple
-                value={formData.cause}
-                onChange={handleCausesChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-              >
-                {allInterests.map(cause => (
-                  <option key={cause} value={cause}>{cause}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple causes</p>
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Causes
+            </label>
+            <select
+              name="cause"
+              multiple
+              value={formData.cause}
+              onChange={handleCausesChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+            >
+              {allInterests.map(cause => (
+                <option key={cause} value={cause}>{cause}</option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple causes</p>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -583,6 +585,25 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              Enable carpooling for this event?
+            </label>
+            <select
+              name="isPrivate"
+              value={formData.allow_carpool ? 'yes' : 'no'}
+              onChange={(e) => setFormData(prev => ({ ...prev, allow_carpool: e.target.value === 'yes' }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+            >
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+
+            <p className="text-xs text-gray-500 mt-1">
+              Volunteers can sign up to drive or request a ride through the system.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Opportunity Image
             </label>
             <div
@@ -605,9 +626,9 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
                 </div>
               ) : imagePreview ? (
                 <div>
-                  <img 
-                    src={imagePreview} 
-                    alt="Cloned opportunity preview" 
+                  <img
+                    src={imagePreview}
+                    alt="Cloned opportunity preview"
                     className="max-h-32 mx-auto mb-2 rounded-lg"
                   />
                   <p className="text-blue-600 font-medium">✓ Using cloned image</p>

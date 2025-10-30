@@ -56,6 +56,7 @@ export interface Opportunity {
   attendance_marked?: boolean; // Whether the attendance has been marked by the host
   visibility: number[]; // empty list means public, otherwise list of organization IDs that can see it
   redirect_url?: string | null; // External URL for signup, null means normal signup
+  allow_carpool: boolean;
 }
 
 export interface SignUp {
