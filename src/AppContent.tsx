@@ -937,6 +937,7 @@ const AppContent: React.FC = () => {
           handleRegister={handleRegister}
           authError={authError}
           isLoading={isLoading}
+          setCurrentUser={setCurrentUser}
         />
       )}
 

@@ -28,7 +28,9 @@ export const formatRegistrationDate = (date: Date = new Date()): string => {
 };
 
 // A helper for making Acucaresbackend.onrender.comPI requests.
-const ENDPOINT_URL = 'https://cucaresbackend.onrender.com';
+// const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
+
+const ENDPOINT_URL = import.meta.env.VITE_ENDPOINT_URL;
 
 // Helper to get Firebase token
 const getFirebaseToken = async (): Promise<string | null> => {
@@ -101,6 +103,21 @@ const authenticatedRequest = async (endpoint: string, options: RequestInit = {})
     },
   });
 };
+
+// TEST LOGIN ENDPOINT
+export const loginTest = async (userId: number) => {
+  const response = await fetch(`${ENDPOINT_URL}/api/login-test/${userId}`, {
+    method: "GET",
+    credentials: "include"
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to log in test user")
+  }
+
+  console.log("Logged in test user!")
+  return response;
+}
 
 // --- Users ---
 // Get all users data - now requires authentication and returns full user data
@@ -189,6 +206,7 @@ export const getUser = async (id: number): Promise<User> => {
   };
 };
 export const updateUser = (id: number, data: object): Promise<User> => {
+
   return authenticatedRequest(`/users/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
@@ -646,30 +664,30 @@ export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
       // Transform involved users if they exist
       const transformedInvolvedUsers = opp.involved_users
         ? opp.involved_users.map((involvedUser: any) => {
-            const user = involvedUser.user || involvedUser;
-            return {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              profile_image: user.profile_image,
-              interests: user.interests || [],
-              friendIds: user.friends || [],
-              organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
-              admin: user.admin || false,
-              gender: user.gender,
-              graduationYear: user.graduation_year,
-              academicLevel: user.academic_level,
-              major: user.major,
-              birthday: user.birthday,
-              points: user.points || 0,
-              registration_date: user.registration_date,
-              phone: user.phone,
-              car_seats: user.car_seats || 0,
-              bio: user.bio,
-              registered: involvedUser.registered || false,
-              attended: involvedUser.attended || false,
-            };
-          })
+          const user = involvedUser.user || involvedUser;
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            profile_image: user.profile_image,
+            interests: user.interests || [],
+            friendIds: user.friends || [],
+            organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
+            admin: user.admin || false,
+            gender: user.gender,
+            graduationYear: user.graduation_year,
+            academicLevel: user.academic_level,
+            major: user.major,
+            birthday: user.birthday,
+            points: user.points || 0,
+            registration_date: user.registration_date,
+            phone: user.phone,
+            car_seats: user.car_seats || 0,
+            bio: user.bio,
+            registered: involvedUser.registered || false,
+            attended: involvedUser.attended || false,
+          };
+        })
         : [];
 
       // Use image URL directly from backend
@@ -973,7 +991,7 @@ export const getServiceDataCsv = async (
       start_date: startDate,
       end_date: endDate,
     }),
-  }); 
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch opportunity CSV: ${response.statusText}`);
