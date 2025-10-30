@@ -223,9 +223,9 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       {filteredOpportunities.length === 0 && (
         <div className="col-span-full text-center py-12 px-6 bg-white rounded-2xl shadow-lg">
           <h3 className="text-xl font-semibold text-gray-800">
-            No opportunities match your filters.
+            There are currently no opportunities.
           </h3>
-          <p className="text-gray-500 mt-2">Try clearing the filters to see all upcoming events.</p>
+          <p className="text-gray-500 mt-2">Please click 'Create Opportunity' if you would like to propose an opportunity.</p>
         </div>
       )}
 
