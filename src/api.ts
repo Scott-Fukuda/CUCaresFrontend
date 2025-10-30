@@ -19,7 +19,9 @@ export const formatRegistrationDate = (date: Date = new Date()): string => {
 };
 
 // A helper for making Acucaresbackend.onrender.comPI requests.
-const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
+// const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
+
+const ENDPOINT_URL = import.meta.env.VITE_ENDPOINT_URL;
 
 // Helper to get Firebase token
 const getFirebaseToken = async (): Promise<string | null> => {
@@ -40,7 +42,7 @@ const getFirebaseToken = async (): Promise<string | null> => {
 const request = async (endpoint: string, options: RequestInit = {}) => {
   const { headers, ...restOptions } = options;
   const url = `${ENDPOINT_URL}/api${endpoint}`;
-  
+
   const res = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
@@ -57,15 +59,15 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
     console.error('API error:', errorInfo);
     throw new Error(errorInfo.message || 'An API error occurred');
   }
-  
+
   // For DELETE requests or other methods that might not return a body
   const contentType = res.headers.get("content-type");
   if (contentType && contentType.indexOf("application/json") !== -1) {
     try {
-        return await res.json();
-    } catch(e) {
-        console.error('Error parsing JSON response:', e);
-        return {};
+      return await res.json();
+    } catch (e) {
+      console.error('Error parsing JSON response:', e);
+      return {};
     }
   }
   return {}; // Return empty object if no JSON body
@@ -75,7 +77,7 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
 const authenticatedRequest = async (endpoint: string, options: RequestInit = {}) => {
   const token = await getFirebaseToken();
   const { headers, ...restOptions } = options;
-  
+
   const authHeaders: Record<string, string> = {};
   if (token) {
     authHeaders['Authorization'] = `Bearer ${token}`;
@@ -83,7 +85,7 @@ const authenticatedRequest = async (endpoint: string, options: RequestInit = {})
   } else {
     console.warn('No Firebase token available for authenticated request:', endpoint);
   }
-  
+
   return request(endpoint, {
     ...restOptions,
     headers: {
@@ -93,34 +95,48 @@ const authenticatedRequest = async (endpoint: string, options: RequestInit = {})
   });
 };
 
+// TEST LOGIN ENDPOINT
+export const loginTest = async (userId: number) => {
+  const response = await fetch(`${ENDPOINT_URL}/api/login-test/${userId}`, {
+    method: "GET",
+    credentials: "include"
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to log in test user")
+  }
+
+  console.log("Logged in test user!")
+  return response;
+}
 
 // --- Users ---
 // Get all users data - now requires authentication and returns full user data
 export const getUsers = async (): Promise<User[]> => {
-    const response = await authenticatedRequest('/users');
-    const users = response.users || [];
-    
-    // Transform each user to match our User interface
-    return users.map((user: any) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        profile_image: user.profile_image,
-        interests: user.interests || [],
-        friendIds: user.friends || [],
-        organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
-        admin: user.admin || false,
-        gender: user.gender,
-        graduationYear: user.graduation_year,
-        academicLevel: user.academic_level,
-        major: user.major,
-        birthday: user.birthday,
-        points: user.points || 0,
-        registration_date: user.registration_date,
-        phone: user.phone,
-        car_seats: user.car_seats || 0,
-        bio: user.bio,
-    }));
+  const response = await authenticatedRequest('/users');
+  const users = response.users || [];
+
+  // Transform each user to match our User interface
+  return users.map((user: any) => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    profile_image: user.profile_image,
+    interests: user.interests || [],
+    friendIds: user.friends || [],
+    organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
+    admin: user.admin || false,
+    gender: user.gender,
+    graduationYear: user.graduation_year,
+    academicLevel: user.academic_level,
+    major: user.major,
+    birthday: user.birthday,
+    points: user.points || 0,
+    registration_date: user.registration_date,
+    phone: user.phone,
+    car_seats: user.car_seats || 0,
+    bio: user.bio,
+  }));
 };
 
 // Get user by email for login - new endpoint
@@ -165,56 +181,56 @@ export const getUserByEmail = async (
 
 // Get detailed user data for a specific user
 export const getUser = async (id: number): Promise<User> => {
-    const response = await authenticatedRequest(`/users/${id}`);
-    return {
-        id: response.id,
-        name: response.name,
-        email: response.email,
-        profile_image: response.profile_image,
-        interests: response.interests || [],
-        friendIds: response.friends || [],
-        organizationIds: (response.organizations || []).map((org: any) => org.id) || [],
-        admin: response.admin || false,
-        gender: response.gender,
-        graduationYear: response.graduation_year,
-        academicLevel: response.academic_level,
-        major: response.major,
-        birthday: response.birthday,
-        points: response.points || 0,
-        registration_date: response.registration_date,
-        phone: response.phone,
-        car_seats: response.car_seats || 0,
-    };
+  const response = await authenticatedRequest(`/users/${id}`);
+  return {
+    id: response.id,
+    name: response.name,
+    email: response.email,
+    profile_image: response.profile_image,
+    interests: response.interests || [],
+    friendIds: response.friends || [],
+    organizationIds: (response.organizations || []).map((org: any) => org.id) || [],
+    admin: response.admin || false,
+    gender: response.gender,
+    graduationYear: response.graduation_year,
+    academicLevel: response.academic_level,
+    major: response.major,
+    birthday: response.birthday,
+    points: response.points || 0,
+    registration_date: response.registration_date,
+    phone: response.phone,
+    car_seats: response.car_seats || 0,
+  };
 };
 export const updateUser = (id: number, data: object): Promise<User> => {
-  
+
   return authenticatedRequest(`/users/${id}`, {
-  method: 'PUT',
-  body: JSON.stringify(data),
-});
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 };
 
 export const uploadProfilePicture = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', file);
-  
+
   const token = await getFirebaseToken();
   const headers: Record<string, string> = {};
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  
+
   const response = await fetch(`${ENDPOINT_URL}/upload`, {
     method: 'POST',
     headers,
     body: formData,
   });
-  
+
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`Failed to upload profile picture: ${response.status} ${response.statusText}`);
   }
-  
+
   const result = await response.json();
   return result.url; // Return the S3 URL
 };
@@ -259,65 +275,65 @@ export const getUserEmails = async (): Promise<string[]> => {
 
 // --- Organizations (Groups) ---
 export const getOrgs = async (): Promise<Organization[]> => {
-    const response = await authenticatedRequest('/orgs');
-    const orgs = response.organizations || [];
-    
-    // Transform backend data to match frontend expectations and define local state
-    return orgs.map((org: any) => ({
-        id: org.id,
-        name: org.name,
-        type: org.type || 'Other',
-        description: org.description || '',
-        approved: org.approved || false,
-        host_user_id: org.host_user_id || null,
-        member_count: org.member_count || 0,
-        users: org.users || [], // Ensure users array exists
-        // Add local state properties
-        _lastUpdate: Date.now(), // Track when this org data was last updated
-        _isLocal: false, // Mark as coming from backend
-        _isJoined: false, // Will be set by parent component based on currentUser.organizationIds
-    }));
+  const response = await authenticatedRequest('/orgs');
+  const orgs = response.organizations || [];
+
+  // Transform backend data to match frontend expectations and define local state
+  return orgs.map((org: any) => ({
+    id: org.id,
+    name: org.name,
+    type: org.type || 'Other',
+    description: org.description || '',
+    approved: org.approved || false,
+    host_user_id: org.host_user_id || null,
+    member_count: org.member_count || 0,
+    users: org.users || [], // Ensure users array exists
+    // Add local state properties
+    _lastUpdate: Date.now(), // Track when this org data was last updated
+    _isLocal: false, // Mark as coming from backend
+    _isJoined: false, // Will be set by parent component based on currentUser.organizationIds
+  }));
 };
 
 export const getApprovedOrgs = async (): Promise<Organization[]> => {
-    const response = await authenticatedRequest('/orgs/approved');
-    const orgs = response.organizations || [];
-    
-    // Transform backend data to match frontend expectations and define local state
-    return orgs.map((org: any) => ({
-        id: org.id,
-        name: org.name,
-        type: org.type || 'Other',
-        description: org.description || '',
-        approved: org.approved || false,
-        host_user_id: org.host_user_id || null,
-        member_count: org.member_count || 0,
-        users: org.users || [], // Ensure users array exists
-        // Add local state properties
-        _lastUpdate: Date.now(), // Track when this org data was last updated
-        _isLocal: false, // Mark as coming from backend
-        _isJoined: false, // Will be set by parent component based on currentUser.organizationIds
-    }));
+  const response = await authenticatedRequest('/orgs/approved');
+  const orgs = response.organizations || [];
+
+  // Transform backend data to match frontend expectations and define local state
+  return orgs.map((org: any) => ({
+    id: org.id,
+    name: org.name,
+    type: org.type || 'Other',
+    description: org.description || '',
+    approved: org.approved || false,
+    host_user_id: org.host_user_id || null,
+    member_count: org.member_count || 0,
+    users: org.users || [], // Ensure users array exists
+    // Add local state properties
+    _lastUpdate: Date.now(), // Track when this org data was last updated
+    _isLocal: false, // Mark as coming from backend
+    _isJoined: false, // Will be set by parent component based on currentUser.organizationIds
+  }));
 };
 
 export const getOrg = (id: number): Promise<Organization> => authenticatedRequest(`/orgs/${id}`);
 export const createOrg = (data: object): Promise<Organization> => authenticatedRequest('/orgs', {
-    method: 'POST',
-    body: JSON.stringify(data)
+  method: 'POST',
+  body: JSON.stringify(data)
 });
 
 export const getUnapprovedOrgs = async (): Promise<Organization[]> => {
-    const response = await authenticatedRequest('/orgs/unapproved');
-    return response.organizations || [];
+  const response = await authenticatedRequest('/orgs/unapproved');
+  return response.organizations || [];
 };
 
 export const updateOrganization = (id: number, data: object): Promise<Organization> => authenticatedRequest(`/orgs/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data)
+  method: 'PUT',
+  body: JSON.stringify(data)
 });
 
 export const deleteOrganization = (id: number): Promise<void> => authenticatedRequest(`/orgs/${id}`, {
-    method: 'DELETE'
+  method: 'DELETE'
 });
 
 // --- Friend Management ---
@@ -327,12 +343,12 @@ export const getUserFriends = async (userId: number): Promise<any> => {
   //console.log(`API: Fetching friends for user ${userId}`);
   const result = await authenticatedRequest(`/users/${userId}/friends`);
   //console.log(`API: Friends response:`, result);
-  
+
   // The backend returns { count: number, friendships: [...] }
   if (result && Array.isArray(result.friendships)) {
     return result; // Return the full response structure
   }
-  
+
   console.warn('Unexpected friends response structure:', result);
   return { count: 0, friendships: [] };
 };
@@ -349,7 +365,7 @@ export const getFriendshipId = async (userId: number, otherUserId: number): Prom
   try {
     //console.log(`API: Getting friendship ID between user ${userId} and ${otherUserId}`);
     const result = await authenticatedRequest(`/users/${userId}/friendships/all`);
-    
+
     // Find the friendship for the other user
     const userData = result.users?.find((user: any) => user.user_id === otherUserId);
     if (userData && userData.friendship_id) {
@@ -395,7 +411,7 @@ export const getAcceptedFriendships = async (userId: number): Promise<User[]> =>
   try {
     const result = await authenticatedRequest(`/users/${userId}/friends`);
     //console.log(`API: Friends response:`, result);
-    
+
     let friendsArray: any[] = [];
     if (Array.isArray(result)) {
       friendsArray = result;
@@ -410,7 +426,7 @@ export const getAcceptedFriendships = async (userId: number): Promise<User[]> =>
     } else if (result && result.user && Array.isArray(result.user)) {
       friendsArray = result.user;
     }
-    
+
     if (friendsArray.length >= 0) { // Process even empty arrays
       return friendsArray.map((friendship: any) => ({
         id: friendship.other_user_id || friendship.id || friendship.user_id,
@@ -465,15 +481,15 @@ export const verifyFirebaseToken = async (token: string) => {
       'Accept': 'application/json'
     }
   });
-  
+
   // Handle non-JSON responses (like HTML error pages)
   const contentType = response.headers.get('content-type');
   if (!contentType || !contentType.includes('application/json')) {
     throw new Error(`Server returned ${response.status}: ${response.statusText}. Expected JSON response.`);
   }
-  
+
   const responseData = await response.json();
-  
+
   if (response.ok && responseData.status === 'authenticated') {
     return { success: true, user: responseData.user };
   } else {
@@ -495,205 +511,205 @@ export const unregisterForOrg = (data: { user_id: number; organization_id: numbe
 
 // --- Opportunities ---
 export const getOpportunities = async (): Promise<Opportunity[]> => {
-    try {
-        const response = await authenticatedRequest('/opps');
-        //console.log('getOpportunities raw response:', response);
-        
-        // Transform backend data to match frontend expectations
-        const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
-            //console.log(`Processing opportunity ${opp.id} - ${opp.name}:`, opp);
-            // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
-            const dateObj = new Date(opp.date);
-            
-            // Extract date and time components
-            // Use the date as provided by the backend without manipulation
-            const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
-          
-            
-            // Extract time in HH:MM:SS format
-            // If the original string contains GMT, convert GMT to Eastern Time (UTC-4)
-            // Otherwise, assume it's already Eastern Time
-            let timeOnly;
-            if (opp.date.includes('GMT')) {
-                // GMT format - convert to Eastern Time (UTC-4)
-                const gmtHours = dateObj.getUTCHours();
-                const easternHours = (gmtHours - 4 + 24) % 24; // Convert GMT to Eastern
-                const hours = easternHours.toString().padStart(2, '0');
-                const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
-                const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
-                timeOnly = `${hours}:${minutes}:${seconds}`;
-            } else {
-                // Already Eastern Time - use as is
-                const hours = dateObj.getHours().toString().padStart(2, '0');
-                const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-                const seconds = dateObj.getSeconds().toString().padStart(2, '0');
-                timeOnly = `${hours}:${minutes}:${seconds}`;
-            }
-            
-            // Transform involved_users from backend format to frontend User format
-            const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => {
-                //console.log('Transforming involved user:', involvedUser);
-                
-                const transformedUser = {
-                    id: involvedUser.id,
-                    name: involvedUser.user || 'Unknown User', // Use full name from backend
-                    email: involvedUser.email || '', // Now provided by backend
-                    phone: involvedUser.phone || '',
-                    profile_image: involvedUser.profile_image,
-                    interests: [],
-                    friendIds: [],
-                    organizationIds: [],
-                    // Add attendance info if needed
-                    attended: involvedUser.attended,
-                    registered: involvedUser.registered
-                };
-                
-                return transformedUser;
-            });
-            
-            // Use image URL directly from backend (full URLs like "https://imgur.com/a/y0f0Geb")
-            const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
-            
-            return {
-                id: opp.id,
-                name: opp.name, // Use name directly from backend
-                nonprofit: opp.nonprofit || null, // Use nonprofit from backend, can be null
-                description: opp.description,
-                date: dateOnly,
-                time: timeOnly,
-                duration: opp.duration,
-                total_slots: opp.total_slots || 10, // Use total_slots from backend
-                imageUrl: resolvedImageUrl,
-                points: opp.duration || 0, // 1 minute = 1 point
-                cause: opp.cause || opp.cause ? [opp.cause] : [], // Handle both array and single cause
-                isPrivate: false, // Default
-                host_id: opp.host_user_id || opp.host_org_id, // Include host_id from backend
-                host_org_id: opp.host_org_id, // Include host organization ID
-                host_org_name: opp.host_org_name, // Include host organization name
-                involved_users: transformedInvolvedUsers, // Include transformed involved_users
-                address: opp.address || '', // Address is now required
-                approved: opp.approved !== undefined ? opp.approved : true, // Default to true if not specified
-                attendance_marked: opp.attendance_marked !== undefined ? opp.attendance_marked : false,
-                visibility: opp.visibility !== undefined ? opp.visibility : [],
-                comments: opp.comments !== undefined ? opp.comments : [],
-                qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
-                causes: opp.causes !== undefined ? opp.causes : [],
-                tags: opp.tags !== undefined ? opp.tags : [],
-                redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
-                
-            };
-        });
-        
-        return transformedOpportunities;
-    } catch (error) {
-        console.error('Error fetching opportunities:', error);
-        throw error;
-    }
+  try {
+    const response = await authenticatedRequest('/opps');
+    //console.log('getOpportunities raw response:', response);
+
+    // Transform backend data to match frontend expectations
+    const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
+      //console.log(`Processing opportunity ${opp.id} - ${opp.name}:`, opp);
+      // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
+      const dateObj = new Date(opp.date);
+
+      // Extract date and time components
+      // Use the date as provided by the backend without manipulation
+      const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+
+      // Extract time in HH:MM:SS format
+      // If the original string contains GMT, convert GMT to Eastern Time (UTC-4)
+      // Otherwise, assume it's already Eastern Time
+      let timeOnly;
+      if (opp.date.includes('GMT')) {
+        // GMT format - convert to Eastern Time (UTC-4)
+        const gmtHours = dateObj.getUTCHours();
+        const easternHours = (gmtHours - 4 + 24) % 24; // Convert GMT to Eastern
+        const hours = easternHours.toString().padStart(2, '0');
+        const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+        const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+        timeOnly = `${hours}:${minutes}:${seconds}`;
+      } else {
+        // Already Eastern Time - use as is
+        const hours = dateObj.getHours().toString().padStart(2, '0');
+        const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+        const seconds = dateObj.getSeconds().toString().padStart(2, '0');
+        timeOnly = `${hours}:${minutes}:${seconds}`;
+      }
+
+      // Transform involved_users from backend format to frontend User format
+      const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => {
+        //console.log('Transforming involved user:', involvedUser);
+
+        const transformedUser = {
+          id: involvedUser.id,
+          name: involvedUser.user || 'Unknown User', // Use full name from backend
+          email: involvedUser.email || '', // Now provided by backend
+          phone: involvedUser.phone || '',
+          profile_image: involvedUser.profile_image,
+          interests: [],
+          friendIds: [],
+          organizationIds: [],
+          // Add attendance info if needed
+          attended: involvedUser.attended,
+          registered: involvedUser.registered
+        };
+
+        return transformedUser;
+      });
+
+      // Use image URL directly from backend (full URLs like "https://imgur.com/a/y0f0Geb")
+      const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
+
+      return {
+        id: opp.id,
+        name: opp.name, // Use name directly from backend
+        nonprofit: opp.nonprofit || null, // Use nonprofit from backend, can be null
+        description: opp.description,
+        date: dateOnly,
+        time: timeOnly,
+        duration: opp.duration,
+        total_slots: opp.total_slots || 10, // Use total_slots from backend
+        imageUrl: resolvedImageUrl,
+        points: opp.duration || 0, // 1 minute = 1 point
+        cause: opp.cause || opp.cause ? [opp.cause] : [], // Handle both array and single cause
+        isPrivate: false, // Default
+        host_id: opp.host_user_id || opp.host_org_id, // Include host_id from backend
+        host_org_id: opp.host_org_id, // Include host organization ID
+        host_org_name: opp.host_org_name, // Include host organization name
+        involved_users: transformedInvolvedUsers, // Include transformed involved_users
+        address: opp.address || '', // Address is now required
+        approved: opp.approved !== undefined ? opp.approved : true, // Default to true if not specified
+        attendance_marked: opp.attendance_marked !== undefined ? opp.attendance_marked : false,
+        visibility: opp.visibility !== undefined ? opp.visibility : [],
+        comments: opp.comments !== undefined ? opp.comments : [],
+        qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
+        causes: opp.causes !== undefined ? opp.causes : [],
+        tags: opp.tags !== undefined ? opp.tags : [],
+        redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
+
+      };
+    });
+
+    return transformedOpportunities;
+  } catch (error) {
+    console.error('Error fetching opportunities:', error);
+    throw error;
+  }
 };
 export const getOpportunity = (id: number): Promise<Opportunity> => authenticatedRequest(`/opps/${id}`);
 
 export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
-    try {
+  try {
     const response = await authenticatedRequest('/opps/unapproved');
-        
-        // Transform backend data to match frontend expectations (same logic as getOpportunities)
-        const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
-            // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
-            const dateObj = new Date(opp.date);
-            
-            // Extract date and time components
-            const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
-            
-            // Extract time in HH:MM:SS format
-            let timeOnly;
-            if (opp.date.includes('GMT')) {
-                // GMT format - convert to Eastern Time (UTC-4)
-                const gmtHours = dateObj.getUTCHours();
-                const easternHours = (gmtHours - 4 + 24) % 24; // Convert GMT to Eastern
-                const hours = easternHours.toString().padStart(2, '0');
-                const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
-                const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
-                timeOnly = `${hours}:${minutes}:${seconds}`;
-            } else {
-                // Already Eastern Time - use as is
-                const hours = dateObj.getHours().toString().padStart(2, '0');
-                const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-                const seconds = dateObj.getSeconds().toString().padStart(2, '0');
-                timeOnly = `${hours}:${minutes}:${seconds}`;
-            }
-            
-            // Transform involved users if they exist
-            const transformedInvolvedUsers = opp.involved_users ? opp.involved_users.map((involvedUser: any) => {
-                const user = involvedUser.user || involvedUser;
-                return {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    profile_image: user.profile_image,
-                    interests: user.interests || [],
-                    friendIds: user.friends || [],
-                    organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
-                    admin: user.admin || false,
-                    gender: user.gender,
-                    graduationYear: user.graduation_year,
-                    academicLevel: user.academic_level,
-                    major: user.major,
-                    birthday: user.birthday,
-                    points: user.points || 0,
-                    registration_date: user.registration_date,
-                    phone: user.phone,
-                    car_seats: user.car_seats || 0,
-                    bio: user.bio,
-                    registered: involvedUser.registered || false,
-                    attended: involvedUser.attended || false,
-                };
-            }) : [];
-            
-            // Use image URL directly from backend
-            const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
-            
-            return {
-                id: opp.id,
-                name: opp.name,
-                nonprofit: opp.nonprofit || null,
-                description: opp.description,
-                date: dateOnly,
-                time: timeOnly,
-                duration: opp.duration,
-                total_slots: opp.total_slots || 10,
-                imageUrl: resolvedImageUrl,
-                points: opp.duration || 0,
-                causes: opp.causes !== undefined ? opp.causes : [],
-                isPrivate: false,
-                host_id: opp.host_user_id || opp.host_org_id,
-                host_org_id: opp.host_org_id,
-                host_org_name: opp.host_org_name,
-                involved_users: transformedInvolvedUsers,
-                address: opp.address || '',
-                approved: opp.approved !== undefined ? opp.approved : false, // Default to false for unapproved
-                attendance_marked: opp.attendance_marked !== undefined ? opp.attendance_marked : false,
-                visibility: opp.visibility !== undefined ? opp.visibility : [],
-                comments: opp.comments !== undefined ? opp.comments : [],
-                qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
-                tags: opp.tags !== undefined ? opp.tags : [],
-                redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null
-            };
-        });
-        
-        return transformedOpportunities;
-    } catch (error) {
-        console.error('Error fetching unapproved opportunities:', error);
-        throw error;
-    }
+
+    // Transform backend data to match frontend expectations (same logic as getOpportunities)
+    const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
+      // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
+      const dateObj = new Date(opp.date);
+
+      // Extract date and time components
+      const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+      // Extract time in HH:MM:SS format
+      let timeOnly;
+      if (opp.date.includes('GMT')) {
+        // GMT format - convert to Eastern Time (UTC-4)
+        const gmtHours = dateObj.getUTCHours();
+        const easternHours = (gmtHours - 4 + 24) % 24; // Convert GMT to Eastern
+        const hours = easternHours.toString().padStart(2, '0');
+        const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+        const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+        timeOnly = `${hours}:${minutes}:${seconds}`;
+      } else {
+        // Already Eastern Time - use as is
+        const hours = dateObj.getHours().toString().padStart(2, '0');
+        const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+        const seconds = dateObj.getSeconds().toString().padStart(2, '0');
+        timeOnly = `${hours}:${minutes}:${seconds}`;
+      }
+
+      // Transform involved users if they exist
+      const transformedInvolvedUsers = opp.involved_users ? opp.involved_users.map((involvedUser: any) => {
+        const user = involvedUser.user || involvedUser;
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          profile_image: user.profile_image,
+          interests: user.interests || [],
+          friendIds: user.friends || [],
+          organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
+          admin: user.admin || false,
+          gender: user.gender,
+          graduationYear: user.graduation_year,
+          academicLevel: user.academic_level,
+          major: user.major,
+          birthday: user.birthday,
+          points: user.points || 0,
+          registration_date: user.registration_date,
+          phone: user.phone,
+          car_seats: user.car_seats || 0,
+          bio: user.bio,
+          registered: involvedUser.registered || false,
+          attended: involvedUser.attended || false,
+        };
+      }) : [];
+
+      // Use image URL directly from backend
+      const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
+
+      return {
+        id: opp.id,
+        name: opp.name,
+        nonprofit: opp.nonprofit || null,
+        description: opp.description,
+        date: dateOnly,
+        time: timeOnly,
+        duration: opp.duration,
+        total_slots: opp.total_slots || 10,
+        imageUrl: resolvedImageUrl,
+        points: opp.duration || 0,
+        causes: opp.causes !== undefined ? opp.causes : [],
+        isPrivate: false,
+        host_id: opp.host_user_id || opp.host_org_id,
+        host_org_id: opp.host_org_id,
+        host_org_name: opp.host_org_name,
+        involved_users: transformedInvolvedUsers,
+        address: opp.address || '',
+        approved: opp.approved !== undefined ? opp.approved : false, // Default to false for unapproved
+        attendance_marked: opp.attendance_marked !== undefined ? opp.attendance_marked : false,
+        visibility: opp.visibility !== undefined ? opp.visibility : [],
+        comments: opp.comments !== undefined ? opp.comments : [],
+        qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
+        tags: opp.tags !== undefined ? opp.tags : [],
+        redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null
+      };
+    });
+
+    return transformedOpportunities;
+  } catch (error) {
+    console.error('Error fetching unapproved opportunities:', error);
+    throw error;
+  }
 };
 
 export const updateOpportunity = (id: number, data: object): Promise<Opportunity> => authenticatedRequest(`/opps/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data)
+  method: 'PUT',
+  body: JSON.stringify(data)
 });
 
 export const deleteOpportunity = (id: number): Promise<void> => authenticatedRequest(`/opps/${id}`, {
-    method: 'DELETE'
+  method: 'DELETE'
 });
 // --- SignUps (Registrations) ---
 // Check if opportunity is fully booked
@@ -708,17 +724,17 @@ export const checkOpportunityAvailability = async (opportunityId: number): Promi
 export const registerForOpp = async (data: { user_id: number; opportunity_id: number }) => {
   //console.log('Making registerForOpp API call with data:', data);
   const result = await authenticatedRequest('/register-opp', {
-  method: 'POST',
-  body: JSON.stringify(data),
-});
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
   //console.log('registerForOpp API response:', result);
   return result;
 };
 // POST /unregister-opp for un-registering.
-export const unregisterForOpp = async (data: { 
-  user_id: number; 
-  opportunity_id: number; 
-  opportunityDate?: string; 
+export const unregisterForOpp = async (data: {
+  user_id: number;
+  opportunity_id: number;
+  opportunityDate?: string;
   opportunityTime?: string;
   isAdminOrHost?: boolean; // New parameter to bypass 7-hour rule
 }) => {
@@ -729,9 +745,9 @@ export const unregisterForOpp = async (data: {
       throw new Error('Cannot unregister within 7 hours of the event');
     }
   }
-  
+
   return authenticatedRequest('/unregister-opp', {
-  method: 'POST',
+    method: 'POST',
     body: JSON.stringify({
       user_id: data.user_id,
       opportunity_id: data.opportunity_id
@@ -741,15 +757,15 @@ export const unregisterForOpp = async (data: {
 
 // --- Create Opportunity ---
 export const createOpportunity = async (formData: FormData): Promise<Opportunity> => {
-  
 
-  
+
+
   const token = await getFirebaseToken();
   const headers: Record<string, string> = {};
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  
+
   // For FormData, we need to let the browser set the Content-Type with boundary
   const response = await fetch(`${ENDPOINT_URL}/api/opps`, {
     method: 'POST',
@@ -772,12 +788,12 @@ export const createOpportunity = async (formData: FormData): Promise<Opportunity
 // PUT /api/attendance for marking attendance
 export const markAttendance = async (data: { user_ids: number[]; opportunity_id: number; duration: number }) => {
   return authenticatedRequest('/attendance', {
-      method: 'PUT',
-      body: JSON.stringify({
+    method: 'PUT',
+    body: JSON.stringify({
       user_ids: data.user_ids,
       opportunity_id: data.opportunity_id,
       duration: data.duration,
-      }),
+    }),
   });
 };
 
@@ -831,7 +847,7 @@ export const checkUserExists = async (email: string, token?: string) => {
   }
   return { success: true, data: false };
 };
-        
+
 // Add approved email - POST /api/approved-emails
 export const addApprovedEmail = async (email: string) => {
   const response = await authenticatedRequest('/approved-emails', {
@@ -843,13 +859,13 @@ export const addApprovedEmail = async (email: string) => {
 
 // --- Monthly Points ---
 // GET /api/monthly-points for getting monthly points
-export const getMonthlyPoints = async (date: string): Promise<{users: Array<{id: number, points: number}>}> => {
+export const getMonthlyPoints = async (date: string): Promise<{ users: Array<{ id: number, points: number }> }> => {
   const token = await getFirebaseToken();
   const headers: Record<string, string> = {};
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  
+
   const response = await fetch(`${ENDPOINT_URL}/api/monthly-points?date=${encodeURIComponent(date)}`, {
     method: 'GET',
     headers,

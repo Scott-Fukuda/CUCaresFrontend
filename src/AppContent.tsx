@@ -71,21 +71,21 @@ const AppContent: React.FC = () => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [signups, setSignups] = useState<SignUp[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  
+
   // Friendships data from backend
   const [friendshipsData, setFriendshipsData] = useState<FriendshipsResponse | null>(null);
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  
+
   // Track last loaded user to prevent infinite loops
   const lastLoadedUserId = useRef<number | null>(null);
-  
+
   // UI State
   const [authError, setAuthError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [appError, setAppError] = useState<string | null>(null);
   const [authView, setAuthView] = useState<AuthView>('login');
-  
+
   // Popup State
   const [popupMessage, setPopupMessage] = useState<{
     isOpen: boolean;
@@ -117,7 +117,7 @@ const AppContent: React.FC = () => {
             api.getOpportunities(),
             api.getApprovedOrgs(),
           ]);
-          
+
           //console.log('API calls completed:', {
           //   usersCount: usersData.length,
           //   opportunitiesCount: oppsData.length,
@@ -129,13 +129,13 @@ const AppContent: React.FC = () => {
           setOpportunities(oppsData);
           setOrganizations(orgsData);
           setSignups([]); // Initialize empty signups - we'll track this locally
-          
+
           // Update currentUser with full data if they exist in the usersData
           if (currentUser) {
             const fullCurrentUser = usersData.find(u => u.id === currentUser.id);
             if (fullCurrentUser) {
               //console.log('🔄 App: Updating currentUser with full data:', {
-                // before: { interests: currentUser.interests, organizationIds: currentUser.organizationIds },
+              // before: { interests: currentUser.interests, organizationIds: currentUser.organizationIds },
               //   after: { interests: fullCurrentUser.interests, organizationIds: fullCurrentUser.organizationIds }
               // });
               setCurrentUser(fullCurrentUser);
@@ -161,13 +161,13 @@ const AppContent: React.FC = () => {
     //console.log('handleGoogleSignIn called');
     setAuthError(null);
     setIsLoading(true);
-    
+
     try {
       // Trigger Firebase Google sign-in popup
       //console.log('Triggering Firebase sign-in...');
       const firebaseUser = await signInWithGoogle();
       //console.log('Firebase sign-in successful:', firebaseUser.email);
-      
+
       // Check if email is @cornell.edu
       if (!firebaseUser.email.toLowerCase().endsWith('@cornell.edu')) {
         // For non-Cornell emails, check if they're in the approved list
@@ -186,15 +186,15 @@ const AppContent: React.FC = () => {
           return;
         }
       }
-      
+
       // Get the ID token from Firebase
       const token = await firebaseUser.getIdToken();
-      
+
       // Verify token with backend
       //console.log('Verifying Firebase token with backend...');
       const authResult = await api.verifyFirebaseToken(token);
       //console.log('Token verification result:', authResult);
-      
+
       if (authResult.success) {
         // User is authenticated, check if they exist in our database
         //console.log('Checking if user exists in database...');
@@ -204,7 +204,7 @@ const AppContent: React.FC = () => {
         if (exists) {
           // User exists, log them in
           const existingUser = await api.getUserByEmail(firebaseUser.email, token);
-                    console.log('User found, logging in:', existingUser);
+          console.log('User found, logging in:', existingUser);
 
           setCurrentUser(existingUser);
           navigate("/");
@@ -214,54 +214,54 @@ const AppContent: React.FC = () => {
           setAuthView('register');
         }
       }
-      
+
     } catch (e: any) {
       console.error('Google sign-in error:', e);
       setAuthError(e.message || 'Google sign-in failed. Please try again.');
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
   // Registration Handler
   const handleRegister = async (firstName: string, lastName: string, phone: string, gender: string, graduationYear: string, academicLevel: string, major: string, birthday: string, car_seats: number) => {
     setAuthError(null);
-    
+
     // Get email from Firebase user (stored during Google sign-in)
     const firebaseUser = auth.currentUser;
     if (!firebaseUser || !firebaseUser.email) {
       setAuthError('No authenticated user found. Please sign in with Google first.');
       return;
     }
-    
+
     const email = firebaseUser.email;
-    
+
     setIsLoading(true);
     try {
-    const newUser: User = { 
-            id: 0, // Will be replaced by API response
+      const newUser: User = {
+        id: 0, // Will be replaced by API response
         name: `${firstName} ${lastName}`,
-        email, 
-            phone,
-        interests: [], 
+        email,
+        phone,
+        interests: [],
         points: 0,
-        friendIds: [], 
-            organizationIds: [], 
-            profile_image: '',
-            admin: false, // Default to false for new users
-            gender: gender || undefined,
-            graduationYear,
-            academicLevel,
-            major,
-            birthday,
-            car_seats, // Add car_seats from registration
-            registration_date: api.formatRegistrationDate() // Format: YYYY-MM-DDTHH:MM:SS
-        };
-      
+        friendIds: [],
+        organizationIds: [],
+        profile_image: '',
+        admin: false, // Default to false for new users
+        gender: gender || undefined,
+        graduationYear,
+        academicLevel,
+        major,
+        birthday,
+        car_seats, // Add car_seats from registration
+        registration_date: api.formatRegistrationDate() // Format: YYYY-MM-DDTHH:MM:SS
+      };
+
       // API takes `name`, so we combine first and last, and include phone
-      const responseUser = await api.registerUser({ 
-        name: `${firstName} ${lastName}`, 
-        email, 
+      const responseUser = await api.registerUser({
+        name: `${firstName} ${lastName}`,
+        email,
         phone,
         gender: gender || null,
         graduation_year: graduationYear,
@@ -271,18 +271,18 @@ const AppContent: React.FC = () => {
         car_seats, // Include car_seats in the API call
         registration_date: api.formatRegistrationDate() // Format: YYYY-MM-DDTHH:MM:SS
       });
-      
-        const finalNewUser = { ...newUser, ...responseUser };
 
-        setStudents(prev => [...prev, finalNewUser]);
-        setCurrentUser(finalNewUser);
-        navigate('/account-setup');
-        setShowPostRegistrationSetup(true);
-        // navigate(`/profile/${currentUser?.id}`) // Redirect to profile page after registration
+      const finalNewUser = { ...newUser, ...responseUser };
+
+      setStudents(prev => [...prev, finalNewUser]);
+      setCurrentUser(finalNewUser);
+      navigate('/account-setup');
+      setShowPostRegistrationSetup(true);
+      // navigate(`/profile/${currentUser?.id}`) // Redirect to profile page after registration
     } catch (e: any) {
-        setAuthError(e.message || 'Registration failed.');
+      setAuthError(e.message || 'Registration failed.');
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -318,13 +318,13 @@ const AppContent: React.FC = () => {
   const handleSignUp = useCallback(async (opportunityId: number) => {
     if (!currentUser) return;
     //console.log('handleSignUp called for opportunity:', opportunityId, 'user:', currentUser.id);
-    
+
     try {
       // Check if opportunity is fully booked before attempting registration
       //console.log('Checking opportunity availability...');
       const availabilityCheck = await api.checkOpportunityAvailability(opportunityId);
       //console.log('Availability check result:', availabilityCheck);
-      
+
       if (availabilityCheck.is_full) {
         // Show popup explaining the opportunity is full
         showPopup(
@@ -332,31 +332,31 @@ const AppContent: React.FC = () => {
           'This opportunity has recently filled up. We apologize for the inconvenience. Please check back later or look for other opportunities to get involved!',
           'warning'
         );
-        
+
         // Refresh opportunities to get updated state from backend
         //console.log('Refreshing opportunities data after finding opportunity is full...');
         const updatedOpps = await api.getOpportunities();
         //console.log('Updated opportunities received:', updatedOpps.length);
         setOpportunities(updatedOpps);
-        
+
         return; // Exit early, don't proceed with registration
       }
-      
+
       // If not full, proceed with registration
       //console.log('Opportunity has available slots, proceeding with registration...');
-      
+
       // Optimistically update local state immediately
       setSignups(prev => [...prev, { userId: currentUser.id, opportunityId }]);
-      
+
       await api.registerForOpp({ user_id: currentUser.id, opportunity_id: opportunityId });
       //console.log('API registerForOpp successful');
-      
+
       // Refresh opportunities to get updated involved_users from backend
       //console.log('Refreshing opportunities data...');
       const updatedOpps = await api.getOpportunities();
       //console.log('Updated opportunities received:', updatedOpps.length);
       setOpportunities(updatedOpps);
-      
+
       // Show success popup
       showPopup(
         'Thank you for signing up!',
@@ -373,65 +373,65 @@ const AppContent: React.FC = () => {
 
   const handleUnSignUp = useCallback(async (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => {
     if (!currentUser) return;
-    
+
     // Find the opportunity to check if user is host
     const opportunity = opportunities.find(opp => opp.id === opportunityId);
     const isAdminOrHost = currentUser.admin || (opportunity && opportunity.host_id === currentUser.id);
-    
+
     // Store original state for potential rollback
     const originalSignups = [...signups];
-    
+
     // Optimistically update local state
     setSignups(prev => prev.filter(s => !(s.userId === currentUser.id && s.opportunityId === opportunityId)));
-    
+
     try {
-        await api.unregisterForOpp({ 
-          user_id: currentUser.id, 
-          opportunity_id: opportunityId,
-          opportunityDate,
-          opportunityTime,
-          isAdminOrHost // Pass admin/host status
-        });
-        
-        // Refresh opportunities to get updated involved_users from backend
-        const updatedOpps = await api.getOpportunities();
-        setOpportunities(updatedOpps);
+      await api.unregisterForOpp({
+        user_id: currentUser.id,
+        opportunity_id: opportunityId,
+        opportunityDate,
+        opportunityTime,
+        isAdminOrHost // Pass admin/host status
+      });
+
+      // Refresh opportunities to get updated involved_users from backend
+      const updatedOpps = await api.getOpportunities();
+      setOpportunities(updatedOpps);
     } catch (e: any) {
-        console.error('Error in handleUnSignUp:', e);
-        // Revert local state on error
-        setSignups(originalSignups);
-        alert(`Error un-registering: ${e.message}`);
+      console.error('Error in handleUnSignUp:', e);
+      // Revert local state on error
+      setSignups(originalSignups);
+      alert(`Error un-registering: ${e.message}`);
     }
   }, [currentUser, opportunities, signups]);
-  
+
   const currentUserSignupsSet = useMemo(() => {
     if (!currentUser) return new Set<number>();
-    
+
     const userSignups = new Set<number>();
-    
+
     // First, check local signups state (immediate updates)
     signups.forEach(signup => {
       if (signup.userId === currentUser.id) {
         userSignups.add(signup.opportunityId);
       }
     });
-    
+
     // Then, check backend data (opportunities.involved_users) for any additional signups
     opportunities.forEach(opp => {
       // Check if user is in involved_users and registered
-      const isRegistered = opp.involved_users?.some(user => 
+      const isRegistered = opp.involved_users?.some(user =>
         user.id === currentUser.id && user.registered === true
       );
-      
+
       if (isRegistered) {
         userSignups.add(opp.id);
       }
     });
-    
+
     return userSignups;
   }, [currentUser, opportunities, signups]);
 
-  
+
   // New friend management system using backend endpoints
 
 
@@ -460,10 +460,10 @@ const AppContent: React.FC = () => {
     if (!currentUser || friendId === currentUser.id) return;
     try {
       await api.sendFriendRequest(currentUser.id, friendId);
-      
+
       // Show success message
       alert(`Friend request sent to ${students.find(s => s.id === friendId)?.name}!`);
-      
+
       // Refresh friendships to get the real data from backend
       await loadUserFriendships(currentUser.id);
     } catch (e: any) {
@@ -481,11 +481,11 @@ const AppContent: React.FC = () => {
         alert('Could not find friendship to accept');
         return;
       }
-      
+
       await api.acceptFriendRequest(friendshipId);
-      
+
       alert('Friend request accepted!');
-      
+
       // Refresh friendships to get the real data from backend
       await loadUserFriendships(currentUser.id);
     } catch (e: any) {
@@ -503,11 +503,11 @@ const AppContent: React.FC = () => {
         alert('Could not find friendship to reject');
         return;
       }
-      
+
       await api.rejectFriendRequest(friendshipId);
-      
+
       alert('Friend request rejected.');
-      
+
       // Refresh friendships to get the real data from backend
       await loadUserFriendships(currentUser.id);
     } catch (e: any) {
@@ -520,9 +520,9 @@ const AppContent: React.FC = () => {
     if (!currentUser) return;
     try {
       await api.removeFriend(currentUser.id, friendId);
-      
+
       alert('Friend removed successfully.');
-      
+
       // Refresh friendships to get the real data from backend
       await loadUserFriendships(currentUser.id);
     } catch (e: any) {
@@ -533,14 +533,14 @@ const AppContent: React.FC = () => {
   // Check friendship status with another user
   const checkFriendshipStatus = async (otherUserId: number): Promise<FriendshipStatus> => {
     if (!currentUser || !friendshipsData) return 'add';
-    
+
     // Find the user in friendships data
     const userData = friendshipsData.users.find(user => user.user_id === otherUserId);
-    
+
     if (userData) {
       return userData.friendship_status;
     }
-    
+
     return 'add';
   };
 
@@ -572,7 +572,7 @@ const AppContent: React.FC = () => {
   // Get friends for any user (for viewing other profiles)
   const getFriendsForUser = useCallback(async (userId: number): Promise<User[]> => {
     //console.log('Getting friends for user:', userId);
-    
+
     try {
       const friends = await api.getAcceptedFriendships(userId);
       //console.log('Friends response from API:', friends);
@@ -597,7 +597,7 @@ const AppContent: React.FC = () => {
 
   const handleRequestResponse = (requestId: number, response: 'accepted' | 'declined') => {
     if (!currentUser) return;
-    
+
     if (response === 'accepted') {
       handleAcceptFriendRequest(requestId);
     } else {
@@ -618,7 +618,7 @@ const AppContent: React.FC = () => {
       const updatedUser = await api.getUser(userId);
       setStudents(prev => prev.map(s => s.id === userId ? updatedUser : s));
       if (currentUser && currentUser.id === userId) {
-    setCurrentUser(updatedUser);
+        setCurrentUser(updatedUser);
       }
     } catch (e: any) {
       console.error('Error refreshing user data:', e.message);
@@ -632,61 +632,61 @@ const AppContent: React.FC = () => {
       return;
     }
     try {
-        // Prepare the complete user data for the API
-        const completeUserData = {
-            name: currentUser.name,
-            email: currentUser.email,
-            phone: currentUser.phone || '',
-            interests: currentUser.interests,
-            ...userData // Override with the new data
-        };
-        
-        //console.log('🔄 App: Complete user data being sent to backend:', completeUserData);
-        
-        const updatedUser = await api.updateUser(currentUser.id, completeUserData);
-        const finalUser = { ...currentUser, ...updatedUser };
-        setCurrentUser(finalUser);
-        setStudents(prev => prev.map(s => s.id === currentUser.id ? finalUser : s));
+      // Prepare the complete user data for the API
+      const completeUserData = {
+        name: currentUser.name,
+        email: currentUser.email,
+        phone: currentUser.phone || '',
+        interests: currentUser.interests,
+        ...userData // Override with the new data
+      };
+
+      //console.log('🔄 App: Complete user data being sent to backend:', completeUserData);
+
+      const updatedUser = await api.updateUser(currentUser.id, completeUserData);
+      const finalUser = { ...currentUser, ...updatedUser };
+      setCurrentUser(finalUser);
+      setStudents(prev => prev.map(s => s.id === currentUser.id ? finalUser : s));
     } catch (e: any) {
-        alert(`Error updating profile: ${e.message}`);
+      alert(`Error updating profile: ${e.message}`);
     }
   }, [currentUser]);
 
   const updateInterests = useCallback((interests: string[]) => updateUserProfile({ interests }), [updateUserProfile]);
   const updateProfilePicture = useCallback(async (file: File) => {
     if (!currentUser) return;
-    
+
     try {
       //console.log('Starting profile picture upload for file:', file.name, file.size, file.type);
-      
+
       // First upload the file to get the S3 URL
       const imageUrl = await api.uploadProfilePicture(file);
       //console.log('Upload successful, got S3 URL:', imageUrl);
-      
+
       // Immediately update frontend state with the new image URL
-      const updatedUser = { 
-        ...currentUser, 
-        profile_image: imageUrl, 
+      const updatedUser = {
+        ...currentUser,
+        profile_image: imageUrl,
         profilePictureUrl: imageUrl,
         // Add a timestamp to force React to detect the change
         _lastUpdate: Date.now()
       };
       //console.log('Updating profile picture - before:', currentUser.profile_image);
-              //console.log('Updating profile picture - after:', updatedUser.profile_image);
-    setCurrentUser(updatedUser);
-    setStudents(prev => prev.map(s => s.id === currentUser.id ? updatedUser : s));
-      
+      //console.log('Updating profile picture - after:', updatedUser.profile_image);
+      setCurrentUser(updatedUser);
+      setStudents(prev => prev.map(s => s.id === currentUser.id ? updatedUser : s));
+
       // Then update the backend (in background)
       //console.log('Updating backend with image URL:', imageUrl);
       await updateUserProfile({ profile_image: imageUrl });
       //console.log('Backend update successful');
-      
+
       // Show success message
       showPopup('Profile Picture Updated!', 'Your profile picture has been successfully updated! To see changes, reload the page.', 'success');
     } catch (error: any) {
       console.error('Error updating profile picture:', error);
       alert(`Error updating profile picture: ${error.message}`);
-      
+
       // Revert frontend state if backend update failed
       if (currentUser) {
         setCurrentUser(currentUser);
@@ -702,23 +702,23 @@ const AppContent: React.FC = () => {
 
   const joinOrg = useCallback(async (orgId: number) => {
     if (!currentUser || !currentUser.organizationIds || currentUser.organizationIds.includes(orgId)) return;
-    
+
     // Get organization name for feedback
     const org = organizations.find(o => o.id === orgId);
     const orgName = org?.name || 'this organization';
-    
+
     try {
       // Make API call to register for organization
-      await api.registerForOrg({ 
-        user_id: currentUser.id, 
-        organization_id: orgId 
+      await api.registerForOrg({
+        user_id: currentUser.id,
+        organization_id: orgId
       });
-      
+
       // Refresh current user data to get updated organizations
       const updatedUser = await api.getUser(currentUser.id);
       setCurrentUser(updatedUser);
       setStudents(prev => prev.map(s => s.id === currentUser.id ? updatedUser : s));
-      
+
       alert(`Successfully joined ${orgName}!`);
     } catch (e: any) {
       alert(`Error joining organization: ${e.message}`);
@@ -727,28 +727,28 @@ const AppContent: React.FC = () => {
 
   const leaveOrg = useCallback(async (orgId: number) => {
     if (!currentUser || !currentUser.organizationIds || !currentUser.organizationIds.includes(orgId)) return;
-    
+
     // Get organization name for confirmation
     const org = organizations.find(o => o.id === orgId);
     const orgName = org?.name || 'this organization';
-    
+
     // Show confirmation popup
     const confirmed = window.confirm(`Are you sure you want to leave ${orgName}?`);
-    
+
     if (!confirmed) return;
-    
+
     try {
       // Make API call to unregister from organization using the new endpoint
-      await api.unregisterFromOrg({ 
-        user_id: currentUser.id, 
-        organization_id: orgId 
+      await api.unregisterFromOrg({
+        user_id: currentUser.id,
+        organization_id: orgId
       });
-      
+
       // Refresh current user data to get updated organizations
       const updatedUser = await api.getUser(currentUser.id);
-    setCurrentUser(updatedUser);
-    setStudents(prev => prev.map(s => s.id === currentUser.id ? updatedUser : s));
-      
+      setCurrentUser(updatedUser);
+      setStudents(prev => prev.map(s => s.id === currentUser.id ? updatedUser : s));
+
       alert(`Successfully left ${orgName}.`);
     } catch (e: any) {
       alert(`Error leaving organization: ${e.message}`);
@@ -758,33 +758,33 @@ const AppContent: React.FC = () => {
   const createOrg = async (orgName: string, type: OrganizationType, description?: string) => {
     if (!currentUser) return;
     try {
-        // API takes `host_user_id` and `date_created`
-        const newOrg = await api.createOrg({ 
-          name: orgName, 
-          type, 
-          description, 
-          host_user_id: currentUser.id,
-          date_created: api.formatRegistrationDate() // Add current date/time in YYYY-MM-DDTHH:MM:SS format
-        });
-        
-        // Refresh the organizations list from backend to get the most current approved organizations
-        await refreshOrganizations();
-        
-        // Try to join the organization (this might fail if it's not approved yet)
-        try {
-          await joinOrg(newOrg.id);
-        } catch (joinError) {
-          console.log('Could not auto-join organization (likely not approved yet):', joinError);
-        }
-        
-        // Show success popup
-        showPopup(
-          'Organization Created Successfully!',
-          'Admins will verify your organization shortly. Once approved, you will be able to post events and opportunities.',
-          'success'
-        );
+      // API takes `host_user_id` and `date_created`
+      const newOrg = await api.createOrg({
+        name: orgName,
+        type,
+        description,
+        host_user_id: currentUser.id,
+        date_created: api.formatRegistrationDate() // Add current date/time in YYYY-MM-DDTHH:MM:SS format
+      });
+
+      // Refresh the organizations list from backend to get the most current approved organizations
+      await refreshOrganizations();
+
+      // Try to join the organization (this might fail if it's not approved yet)
+      try {
+        await joinOrg(newOrg.id);
+      } catch (joinError) {
+        console.log('Could not auto-join organization (likely not approved yet):', joinError);
+      }
+
+      // Show success popup
+      showPopup(
+        'Organization Created Successfully!',
+        'Admins will verify your organization shortly. Once approved, you will be able to post events and opportunities.',
+        'success'
+      );
     } catch (e: any) {
-        alert(`Error creating organization: ${e.message}`);
+      alert(`Error creating organization: ${e.message}`);
     }
   };
 
@@ -799,49 +799,50 @@ const AppContent: React.FC = () => {
   };
 
   return (
-      <>
-        {currentUser ? (
-          <AppRouter
-            currentUser={currentUser}
-            setCurrentUser={setCurrentUser}
-            isLoading={isLoading}
-            appError={appError}
-            pendingRequestCount={pendingRequestCount}
-            handleLogout={handleLogout}
-            students={students}
-            opportunities={opportunities}
-            setOpportunities={setOpportunities}
-            signups={signups}
-            organizations={organizations}
-            setOrganizations={setOrganizations}
-            joinOrg={joinOrg}
-            leaveOrg={leaveOrg}
-            handleSendFriendRequest={handleSendFriendRequest}
-            handleSignUp={handleSignUp}
-            handleUnSignUp={handleUnSignUp}
-            currentUserSignupsSet={currentUserSignupsSet}
-            handleAcceptFriendRequest={handleAcceptFriendRequest}
-            handleRejectFriendRequest={handleRejectFriendRequest}
-            checkFriendshipStatus={checkFriendshipStatus}
-            friendshipsData={friendshipsData}
-            updateInterests={updateInterests}
-            updateProfilePicture={updateProfilePicture}
-            handleRemoveFriend={handleRemoveFriend}
-            getFriendsForUser={getFriendsForUser}
-            handleRequestResponse={handleRequestResponse}
-            createOrg={createOrg}
-            leaderboardUsers={leaderboardUsers}   
-            popupMessage={popupMessage}
-            closePopup={closePopup}       
-          />
-        ) : (
-          <AuthFlow 
-            handleGoogleSignIn={handleGoogleSignIn}
-            handleRegister={handleRegister}
-            authError={authError}
-            isLoading={isLoading}
-          />
-        )}
+    <>
+      {currentUser ? (
+        <AppRouter
+          currentUser={currentUser}
+          setCurrentUser={setCurrentUser}
+          isLoading={isLoading}
+          appError={appError}
+          pendingRequestCount={pendingRequestCount}
+          handleLogout={handleLogout}
+          students={students}
+          opportunities={opportunities}
+          setOpportunities={setOpportunities}
+          signups={signups}
+          organizations={organizations}
+          setOrganizations={setOrganizations}
+          joinOrg={joinOrg}
+          leaveOrg={leaveOrg}
+          handleSendFriendRequest={handleSendFriendRequest}
+          handleSignUp={handleSignUp}
+          handleUnSignUp={handleUnSignUp}
+          currentUserSignupsSet={currentUserSignupsSet}
+          handleAcceptFriendRequest={handleAcceptFriendRequest}
+          handleRejectFriendRequest={handleRejectFriendRequest}
+          checkFriendshipStatus={checkFriendshipStatus}
+          friendshipsData={friendshipsData}
+          updateInterests={updateInterests}
+          updateProfilePicture={updateProfilePicture}
+          handleRemoveFriend={handleRemoveFriend}
+          getFriendsForUser={getFriendsForUser}
+          handleRequestResponse={handleRequestResponse}
+          createOrg={createOrg}
+          leaderboardUsers={leaderboardUsers}
+          popupMessage={popupMessage}
+          closePopup={closePopup}
+        />
+      ) : (
+        <AuthFlow
+          handleGoogleSignIn={handleGoogleSignIn}
+          handleRegister={handleRegister}
+          authError={authError}
+          isLoading={isLoading}
+          setCurrentUser={setCurrentUser}
+        />
+      )}
 
       <PopupMessage
         isOpen={popupMessage.isOpen}
@@ -850,8 +851,8 @@ const AppContent: React.FC = () => {
         message={popupMessage.message}
         type={popupMessage.type}
       />
-      </>
-    );
+    </>
+  );
 };
 
 export default AppContent;
