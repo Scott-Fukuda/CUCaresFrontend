@@ -32,6 +32,8 @@ import { initialBadges } from './data/initialData'; // Using initial data for ba
 import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
 import MultiOppPage from './pages/MultiOppPage';
+import ServiceJournal from './pages/ServiceJournal';
+
 
 interface AppRouterProps {
   currentUser: User;
@@ -387,6 +389,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
               />
             }
           />
+          <Route path="/service-journal/:userId" element={<ServiceJournal />} />
           {/* <Route path="/" element={<OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />}/> */}
           <Route path="/" element={<Navigate to="/opportunities" replace />} />
         </Routes>
