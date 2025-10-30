@@ -1,13 +1,32 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { loginTest } from '../api';
+import { User } from '../types';
 
 interface LoginProps {
   onGoogleSignIn: () => void;
   error: string | null;
   isLoading: boolean;
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
-const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading }) => {
+
+const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurrentUser }) => {
   const navigate = useNavigate();
+  const mode = import.meta.env.VITE_ENV;
+
+  const handleLoginTest = async () => {
+    try {
+      const res = await loginTest(41);
+
+      const data: User = await res.json();
+      console.log("Current test user:", data);
+      setCurrentUser(data);
+
+      navigate("/");
+    } catch (err) {
+      console.log('error', err)
+    }
+  }
 
   return (
     <div className="w-full max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg text-center mt-10">
@@ -39,7 +58,9 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading }) => {
               Signing in...
             </>
           ) : (
-            <>Sign in with Cornell email</>
+            <>
+              Sign in with Cornell email
+            </>
           )}
         </button>
 
@@ -59,6 +80,15 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading }) => {
         >
           Create New Account
         </button>
+
+        {mode == 'staging' &&
+          <button
+            className="w-full bg-cornell-red text-white font-bold py-3 px-4 rounded-lg hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleLoginTest}
+          >
+            *Dev testing only* <br /> Sign in with test user
+          </button>
+        }
 
         <button
           onClick={() => navigate('/about-us')}
