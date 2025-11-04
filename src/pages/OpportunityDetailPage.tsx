@@ -118,13 +118,40 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
 
   // Parse time correctly for display (assuming Eastern Time)
   const [hours, minutes] = opportunity.time.split(':');
-  const displayTime = new Date(2024, 0, 1, parseInt(hours), parseInt(minutes)).toLocaleTimeString(
-    'en-US',
-    { hour: 'numeric', minute: '2-digit', hour12: true }
-  );
+const displayTime = 
+  (() => {
+      // Handle normal opportunities (with `time` field)
+      const [hours, minutes] = opportunity.time.split(':');
+      const realHours = opportunity.multiopp? parseInt(hours) - 1: parseInt(hours); // convert GMT → Eastern (accounting for bug)
+      return new Date(2024, 0, 1, realHours, parseInt(minutes)).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      });
+    })();
 
   // Calculate and format end time
-  const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, opportunity.duration);
+  const displayEndTime = (() => {
+  // Split the time string
+  let [hours, minutes] = opportunity.time.split(':');
+
+  // Adjust for multiopp GMT issue
+  let realHours = opportunity.multiopp ? parseInt(hours) - 1 : parseInt(hours);
+
+  // Normalize and handle wraparound
+  if (realHours < 0) realHours += 24;
+
+  // Construct corrected time string
+  let realTime = realHours.toString().padStart(2, '0') + ':' + minutes;
+
+  // Return formatted end time using your utility
+  return calculateEndTime(opportunity.date, realTime, opportunity.duration);
+})();
+
+// convert GMT → Eastern (accounting for bug)
+
+
+
   // Organizations that can see this opportunity (visibility list)
   const visibilityOrgs = (allOrgs || [])
     .filter(
@@ -579,6 +606,19 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
               </span>
             </div>
           )}
+          <button
+            onClick={handleButtonClick}
+            disabled={!isUserSignedUp && !canSignUp}
+            className={`mt-6 inline-flex items-center justify-center rounded-lg px-5 py-3 text-base font-semibold shadow-lg transition-colors ${
+              isUserSignedUp
+                ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                : canSignUp
+                ? 'bg-cornell-red hover:bg-red-700 text-white'
+                : 'bg-gray-500/70 text-white/80 cursor-not-allowed'
+            }`}
+          >
+            {isUserSignedUp ? 'Signed Up ✓' : canSignUp ? 'Sign Up Now' : 'Event Full'}
+          </button>
         </div>
       </div>
 
@@ -586,6 +626,19 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
         <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-2xl font-bold">Event Details</h3>
+            {/* 🕒 Event Time Display */}
+            {!isEditing && (
+              <div className="mb-6 text-gray-700 text-lg">
+                <p>
+                  <span className="font-semibold">Date:</span>{' '}
+                  {displayDate}
+                </p>
+                <p>
+                  <span className="font-semibold">Time:</span>{' '}
+                  {displayTime} – {displayEndTime}
+                </p>
+              </div>
+            )}
             {canManageOpportunity && (
               <div className="flex gap-2">
                 {!isEditing ? (
@@ -627,6 +680,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
                   </>
                 )}
               </div>
+              
             )}
           </div>
 

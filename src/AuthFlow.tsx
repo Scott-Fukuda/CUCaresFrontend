@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
 import PopupMessage from './components/PopupMessage';
@@ -8,7 +8,7 @@ import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
 
 interface AuthFlowProps {
-  handleGoogleSignIn: () => void;
+  handleGoogleSignIn: (redirectTo?: string) => void;
   isLoading: boolean;
   handleRegister: (firstName: string, lastName: string, phone: string, gender: string, graduationYear: string, academicLevel: string, major: string, birthday: string, car_seats: number) => void;
   authError: string | null;
@@ -23,13 +23,14 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
   setCurrentUser
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleShowRegister = () => {
-    navigate('/register');
+    navigate('/register', { state: location.state });
   };
 
   const handleBackToLogin = () => {
-    navigate('/login');
+    navigate('/login', { state: location.state });
   };
 
   return (
