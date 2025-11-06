@@ -163,18 +163,19 @@ export const getUsersMinimal = async (): Promise<User[]> => {
     points: user.points || 0,
     profile_image: user.profile_image || null,
     organizationIds: user.organizationIds || [],
+    admin: user.admin || false,
+    car_seats: user.car_seats || 0,
+    bio: user.bio || '',
+
     // These remain empty for minimal payloads
     interests: [],
     friendIds: [],
-    admin: false,
     gender: null,
     graduationYear: null,
     academicLevel: null,
     major: null,
     birthday: null,
     registration_date: null,
-    car_seats: 0,
-    bio: '',
   }));
 };
 
@@ -763,8 +764,83 @@ export const getCurrentOpportunities = async (): Promise<Opportunity[]> => {
   }
 };
 
-export const getOpportunity = (id: number): Promise<Opportunity> =>
-  authenticatedRequest(`/opps/${id}`);
+export const getOpportunity = async (id: number): Promise<Opportunity> => {
+  try {
+    const opp = await authenticatedRequest(`/opps/${id}`);
+
+    // Parse date & time
+    const dateObj = new Date(opp.date);
+    const dateOnly = dateObj.toISOString().split('T')[0];
+    let timeOnly;
+    if (opp.date.includes('GMT')) {
+      const gmtHours = dateObj.getUTCHours();
+      const easternHours = (gmtHours - 4 + 24) % 24;
+      const hours = easternHours.toString().padStart(2, '0');
+      const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+      const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+      timeOnly = `${hours}:${minutes}:${seconds}`;
+    } else {
+      const hours = dateObj.getHours().toString().padStart(2, '0');
+      const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+      const seconds = dateObj.getSeconds().toString().padStart(2, '0');
+      timeOnly = `${hours}:${minutes}:${seconds}`;
+    }
+
+    // Transform involved users
+    const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => ({
+      id: involvedUser.id,
+      name: involvedUser.user || 'Unknown User',
+      email: involvedUser.email || '',
+      phone: involvedUser.phone || '',
+      profile_image: involvedUser.profile_image,
+      interests: [],
+      friendIds: [],
+      organizationIds: [],
+      attended: involvedUser.attended,
+      registered: involvedUser.registered,
+    }));
+
+    // Resolve image
+    const resolvedImageUrl =
+      opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
+
+    // Build unified Opportunity object
+    const transformedOpp: Opportunity = {
+      id: opp.id,
+      name: opp.name,
+      nonprofit: opp.nonprofit || null,
+      description: opp.description,
+      date: dateOnly,
+      time: timeOnly,
+      duration: opp.duration,
+      total_slots: opp.total_slots || 10,
+      imageUrl: resolvedImageUrl,
+      points: opp.duration || 0,
+      isPrivate: false,
+      host_id: opp.host_user_id || opp.host_org_id,
+      host_org_id: opp.host_org_id,
+      host_org_name: opp.host_org_name,
+      involved_users: transformedInvolvedUsers,
+      address: opp.address || '',
+      approved: opp.approved !== undefined ? opp.approved : true,
+      attendance_marked: opp.attendance_marked !== undefined ? opp.attendance_marked : false,
+      visibility: opp.visibility !== undefined ? opp.visibility : [],
+      comments: opp.comments !== undefined ? opp.comments : [],
+      qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
+      causes: opp.causes !== undefined ? opp.causes : [],
+      tags: opp.tags !== undefined ? opp.tags : [],
+      redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
+      multiopp: opp.multiopp || null,
+      multiopp_id: opp.multiopp_id || null,
+    };
+
+    return transformedOpp;
+  } catch (error) {
+    console.error(`Error fetching opportunity ${id}:`, error);
+    throw error;
+  }
+};
+
 
 export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
   try {

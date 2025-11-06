@@ -460,7 +460,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const filteredOpportunities = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // start of local day
-    console.log("Opportunities received in OpportunitiesPage:", opportunities);
 
     return opportunities
       .map((opp) => {

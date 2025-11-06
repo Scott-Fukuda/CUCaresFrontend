@@ -331,10 +331,12 @@ const AppRouter: React.FC<AppRouterProps> = ({
               path="/the-salvation-army"
               element={
                 <MultiOppPage
+                  users={students}
                   multiopps={multiopp}
                   currentUser={currentUser}
                   allOrgs={organizations}
                   setMultiOpps={setMultiopp}
+                  onSignUp={(id) => handleSignUp(id)}
                   staticId={4} // the backend ID for Salvation Army
                 />
               }
@@ -344,10 +346,12 @@ const AppRouter: React.FC<AppRouterProps> = ({
               path="/loaves-and-fishes"
               element={
                 <MultiOppPage
+                  users={students}
                   multiopps={multiopp}
                   currentUser={currentUser}
                   allOrgs={organizations}
                   setMultiOpps={setMultiopp}
+                  onSignUp={(id) => handleSignUp(id)}
                   staticId={6}
                 />
               }
@@ -356,10 +360,12 @@ const AppRouter: React.FC<AppRouterProps> = ({
               path="/ithaca-reuse"
               element={
                 <MultiOppPage
+                  users={students}
                   multiopps={multiopp}
                   currentUser={currentUser}
                   allOrgs={organizations}
                   setMultiOpps={setMultiopp}
+                  onSignUp={(id) => handleSignUp(id)}
                   staticId={5}
                 />
               }
@@ -368,10 +374,13 @@ const AppRouter: React.FC<AppRouterProps> = ({
             path="/multiopp/:id"
             element={
               <MultiOppPage
+            
+                users={students}
                 multiopps={multiopp}
                 currentUser={currentUser}
                 allOrgs={organizations}
                 setMultiOpps={setMultiopp}
+                onSignUp={(id) => handleSignUp(id)}
               />
             }
           />
