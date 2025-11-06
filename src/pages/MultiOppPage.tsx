@@ -114,9 +114,12 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
           {/* Weekly Opportunities */}
           <div>
             <h3 className="text-xl font-bold mb-3">Upcoming Dates</h3>
-            {multiopp.opportunities && multiopp.opportunities.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {multiopp.opportunities.map((opp) => {
+          {multiopp.opportunities && multiopp.opportunities.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[...multiopp.opportunities]
+                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                .map((opp) => {
+
                   const thisWeek = isThisWeek(opp.date);
                   return (
                     <div
