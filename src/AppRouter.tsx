@@ -348,7 +348,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                   currentUser={currentUser}
                   allOrgs={organizations}
                   setMultiOpps={setMultiopp}
-                  staticId={5}
+                  staticId={6}
                 />
               }
             />
@@ -360,7 +360,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                   currentUser={currentUser}
                   allOrgs={organizations}
                   setMultiOpps={setMultiopp}
-                  staticId={6}
+                  staticId={5}
                 />
               }
             />
