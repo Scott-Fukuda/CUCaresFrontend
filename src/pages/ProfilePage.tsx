@@ -283,12 +283,12 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
 
           {isCurrentUser && (
             <div className="space-y-4">
-              <button
+              {/* <button
                 onClick={() => navigate('/my-opportunities')}
                 className="w-full font-bold py-2 px-4 rounded-lg transition-colors"
               >
                 See my opportunities
-              </button>
+              </button> */}
 
               {/* 🔴 Logout Button */}
               <button
@@ -377,7 +377,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
               </>
             )}
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-lg">
+          {/* <div className="bg-white p-6 rounded-2xl shadow-lg">
             <h3 className="text-xl font-bold mb-4">{user.name}'s Passions</h3>
             <div className="flex flex-wrap gap-3">
               {allInterests.map((interest) => (
@@ -400,7 +400,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                 Select some interests to get personalized recommendations!
               </p>
             )}
-          </div>
+          </div> */}
 
           <div className="bg-white p-6 rounded-2xl shadow-lg">
             <div className="flex justify-between items-center mb-4">

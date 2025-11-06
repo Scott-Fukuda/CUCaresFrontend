@@ -6,7 +6,7 @@ import {
   deleteOpportunity,
   registerForOpp,
   unregisterForOpp,
-  getOpportunities,
+  getCurrentOpportunities,
   uploadProfilePicture,
   getOpportunityAttendance,
 } from '../api';
@@ -158,13 +158,50 @@ const displayTime =
       (org) => Array.isArray(opportunity.visibility) && opportunity.visibility.includes(org.id)
     )
     .sort((a, b) => a.name.localeCompare(b.name));
-  const handleButtonClick = () => {
+    
+  const handleButtonClick = async () => {
+  try {
+    // If user is already signed up, confirm unregistration
     if (isUserSignedUp) {
-      handleUnSignUp(opportunity.id, opportunity.date, opportunity.time);
-    } else {
-      handleSignUp(opportunity.id);
+      if (opportunity.redirect_url) {
+        alert(
+          "You are registered for this opportunity via an external site. To un-register, please visit that site as well."
+        );
+      }
+
+      const confirmed = window.confirm(
+        "Are you sure you want to un-register from this opportunity?"
+      );
+      if (confirmed) {
+        await handleUnSignUp(opportunity.id, opportunity.date, opportunity.time);
+        alert("You have been unregistered successfully.");
+      }
+      return; // stop here after un-sign-up
     }
-  };
+
+    // Otherwise, handle sign up
+    if (opportunity.redirect_url) {
+      // External registration link flow
+      const confirmed = window.confirm(
+        "This opportunity requires registration on an external site.\n\nClick OK to open the registration link in a new tab."
+      );
+      if (confirmed) {
+        window.open(opportunity.redirect_url, "_blank");
+        await handleSignUp(opportunity.id); // mark them registered in system
+        alert("You are now registered and redirected to the external site!");
+      }
+      return;
+    }
+
+    // Normal sign up
+    await handleSignUp(opportunity.id);
+    alert("You have successfully signed up!");
+  } catch (error) {
+    console.error("Error during sign up / un-sign up:", error);
+    alert("Something went wrong. Please try again.");
+  }
+};
+
 
   const handleAttendanceSubmitted = async () => {
     try {
@@ -229,7 +266,7 @@ const displayTime =
     try {
       await registerForOpp({ user_id: userId, opportunity_id: opportunity.id });
       // Refresh opportunities data to get updated involved_users
-      const updatedOpps = await getOpportunities();
+      const updatedOpps = await getCurrentOpportunities();
       setOpportunities(updatedOpps);
       // alert('User registered successfully!');
     } catch (error) {
@@ -250,7 +287,7 @@ const displayTime =
         isAdminOrHost: currentUser.admin || opportunity.host_id === currentUser.id, // Pass admin/host status
       });
       // Refresh opportunities data to get updated involved_users
-      const updatedOpps = await getOpportunities();
+      const updatedOpps = await getCurrentOpportunities();
       setOpportunities(updatedOpps);
       alert('User unregistered successfully!');
     } catch (error) {

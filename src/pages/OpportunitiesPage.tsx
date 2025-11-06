@@ -508,6 +508,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     setShowExternalSignupModal(true);
   };
 
+  console.log(currentUser);
   const handleExternalUnsignup = (opportunity: Opportunity) => {
     setSelectedOpportunity(opportunity);
     setShowExternalUnsignupModal(true);
