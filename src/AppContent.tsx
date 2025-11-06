@@ -12,6 +12,7 @@ import {
   FriendshipStatus,
   FriendshipsResponse,
   UserWithFriendshipStatus,
+  MultiOpp
 } from './types';
 import * as api from './api';
 import {
@@ -96,6 +97,8 @@ const AppContent: React.FC = () => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [signups, setSignups] = useState<SignUp[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [multiopp, setMultiopp] = useState<MultiOpp[]>([]);
+  const [allOpps, setAllOpps] = useState<(Opportunity | MultiOpp)[]>([]);
 
   // Friendships data from backend
   const [friendshipsData, setFriendshipsData] = useState<FriendshipsResponse | null>(null);
@@ -137,10 +140,11 @@ const AppContent: React.FC = () => {
         setAppError(null);
         try {
           //console.log('Making API calls...');
-          const [usersData, oppsData, orgsData] = await Promise.all([
+          const [usersData, oppsData, orgsData, mulitoppsData] = await Promise.all([
             api.getUsers(),
             api.getOpportunities(),
             api.getApprovedOrgs(),
+            api.getMultiOpps(),
           ]);
 
           //console.log('API calls completed:', {
@@ -153,6 +157,8 @@ const AppContent: React.FC = () => {
           setLeaderboardUsers(usersData); // Use the same data for leaderboard
           setOpportunities(oppsData);
           setOrganizations(orgsData);
+          setMultiopp(mulitoppsData);
+          setAllOpps([...oppsData, ...mulitoppsData]);
           setSignups([]); // Initialize empty signups - we'll track this locally
 
           // Update currentUser with full data if they exist in the usersData
@@ -374,7 +380,13 @@ const AppContent: React.FC = () => {
     async (opportunityId: number) => {
       if (!currentUser) return;
       //console.log('handleSignUp called for opportunity:', opportunityId, 'user:', currentUser.id);
-
+      // const isMultiOpp = allOpps?.some(
+      // (opp) => 'opportunities' in opp && opp.id === opportunityId
+      // );
+      // if (isMultiOpp) {
+      //   console.log('Skipping signup — this is a MultiOpp container, not an event.');
+      //   return;
+      // }
       try {
         // Check if opportunity is fully booked before attempting registration
         //console.log('Checking opportunity availability...');
@@ -434,6 +446,13 @@ const AppContent: React.FC = () => {
   const handleUnSignUp = useCallback(
     async (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => {
       if (!currentUser) return;
+      // const isMultiOpp = allOpps?.some(
+      //   (opp) => 'opportunities' in opp && opp.id === opportunityId
+      // );
+      // if (isMultiOpp) {
+      //   console.log('Skipping signup — this is a MultiOpp container, not an event.');
+      //   return;
+      // }
 
       // Find the opportunity to check if user is host
       const opportunity = opportunities.find((opp) => opp.id === opportunityId);
@@ -901,6 +920,10 @@ const AppContent: React.FC = () => {
         <AppRouter
           currentUser={currentUser}
           setCurrentUser={setCurrentUser}
+          multiopp={multiopp}
+          setAllOpps={setAllOpps}
+          allOpps={allOpps}
+          setMultiopp={setMultiopp}
           isLoading={isLoading}
           appError={appError}
           pendingRequestCount={pendingRequestCount}

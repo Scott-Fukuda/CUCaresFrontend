@@ -13,6 +13,7 @@ import {
   FriendshipStatus,
   FriendshipsResponse,
   UserWithFriendshipStatus,
+  MultiOpp,
 } from './types';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
@@ -30,6 +31,7 @@ import PopupMessage from './components/PopupMessage';
 import { initialBadges } from './data/initialData'; // Using initial data for badges
 import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
+import MultiOppPage from './pages/MultiOppPage';
 
 interface AppRouterProps {
   currentUser: User;
@@ -41,6 +43,10 @@ interface AppRouterProps {
   students: User[];
   opportunities: Opportunity[];
   setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[] | []>>;
+  multiopp: MultiOpp[];
+  setMultiopp: React.Dispatch<React.SetStateAction<MultiOpp[] | []>>;
+  allOpps: (Opportunity | MultiOpp)[];
+  setAllOpps: React.Dispatch<React.SetStateAction<(Opportunity | MultiOpp)[] | []>>;
   signups: SignUp[];
   organizations: Organization[];
   setOrganizations: React.Dispatch<React.SetStateAction<Organization[] | []>>;
@@ -80,6 +86,10 @@ const AppRouter: React.FC<AppRouterProps> = ({
   students,
   opportunities,
   setOpportunities,
+  multiopp,
+  setMultiopp,
+  allOpps,
+  setAllOpps,
   signups,
   organizations,
   setOrganizations,
@@ -142,6 +152,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
             path="/opportunities"
             element={
               <OpportunitiesPage
+                multiopps={multiopp}
                 opportunities={opportunities}
                 students={students}
                 allOrgs={organizations}
@@ -290,6 +301,8 @@ const AppRouter: React.FC<AppRouterProps> = ({
             element={
               <CreateOpportunityPage
                 currentUser={currentUser}
+                allOpps={allOpps}
+                setAllOpps={setAllOpps}
                 organizations={organizations}
                 opportunities={opportunities}
                 setOpportunities={setOpportunities}
@@ -305,6 +318,54 @@ const AppRouter: React.FC<AppRouterProps> = ({
                 allOrgs={organizations}
                 joinOrg={joinOrg}
                 createOrg={createOrg}
+              />
+            }
+          />
+          <Route
+              path="/the-salvation-army"
+              element={
+                <MultiOppPage
+                  multiopps={multiopp}
+                  currentUser={currentUser}
+                  allOrgs={organizations}
+                  setMultiOpps={setMultiopp}
+                  staticId={1} // the backend ID for Salvation Army
+                />
+              }
+            />
+
+            <Route
+              path="/loaves-and-fishes"
+              element={
+                <MultiOppPage
+                  multiopps={multiopp}
+                  currentUser={currentUser}
+                  allOrgs={organizations}
+                  setMultiOpps={setMultiopp}
+                  staticId={2}
+                />
+              }
+            />
+            <Route
+              path="/ithaca-reuse"
+              element={
+                <MultiOppPage
+                  multiopps={multiopp}
+                  currentUser={currentUser}
+                  allOrgs={organizations}
+                  setMultiOpps={setMultiopp}
+                  staticId={3}
+                />
+              }
+            />
+          <Route
+            path="/multiopp/:id"
+            element={
+              <MultiOppPage
+                multiopps={multiopp}
+                currentUser={currentUser}
+                allOrgs={organizations}
+                setMultiOpps={setMultiopp}
               />
             }
           />

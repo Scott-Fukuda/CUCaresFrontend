@@ -117,3 +117,17 @@ export const calculateEndTime = (date: string, time: string, duration: number): 
     hour12: true,
   });
 };
+
+
+export const formatMiniOppTime = (time: string, duration: string | number): string => {
+  const [hours, minutes] = time.split(':').map(Number);
+  const durationMinutes = parseInt(duration.toString(), 10);
+
+  const start = new Date(2024, 0, 1, hours, minutes);
+  const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+
+  const startStr = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  const endStr = end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+  return `${startStr} – ${endStr}`;
+};

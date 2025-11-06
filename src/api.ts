@@ -6,7 +6,7 @@ import {
   SignUp,
   Friendship,
   FriendshipStatus,
-  FriendshipsResponse,
+  FriendshipsResponse,MiniOpp, MultiOpp
 } from './types';
 import { auth } from './firebase-config';
 import { canUnregisterFromOpportunity } from './utils/timeUtils';
@@ -115,7 +115,7 @@ export const loginTest = async (userId: number) => {
     throw new Error("Failed to log in test user")
   }
 
-  console.log("Logged in test user!")
+  // console.log("Logged in test user!")
   return response;
 }
 
@@ -619,6 +619,8 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
         causes: opp.causes !== undefined ? opp.causes : [],
         tags: opp.tags !== undefined ? opp.tags : [],
         redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
+        multiopp: opp.multiopp || null,
+        multiopp_id: opp.multiopp_id || null,
       };
     });
 
@@ -1000,3 +1002,91 @@ export const getServiceDataCsv = async (
   return await response;
 };
 
+
+// MULTIOPP endpoints
+export const getMultiOpps = async (): Promise<MultiOpp[]> => {
+  try {
+    const response = await authenticatedRequest('/multiopps');
+    const rawMultiOpps = Array.isArray(response) ? response : response.multiopps || [];
+
+    return rawMultiOpps.map((multiopp: any) => {
+      // Normalize start_date
+      const startDate =
+        typeof multiopp.start_date === 'string'
+          ? multiopp.start_date
+          : multiopp.start_date
+          ? new Date(multiopp.start_date).toISOString()
+          : null;
+
+      // Map miniopps (individual opportunities)
+      const opportunities: MiniOpp[] = Array.isArray(multiopp.opportunities)
+        ? multiopp.opportunities.map((opp: any) => ({
+            id: opp.id,
+            date:
+              typeof opp.date === 'string'
+                ? opp.date
+                : new Date(opp.date).toISOString(),
+            duration: opp.duration ?? 0,
+          }))
+        : [];
+
+      // Extract a representative time from the first opportunity's ISO date
+      const time =
+        opportunities.length > 0
+          ? new Date(opportunities[0].date)
+              .toISOString()
+              .substring(11, 16) // "HH:MM" from ISO 8601
+          : null;
+
+      return {
+        id: multiopp.id,
+        name: multiopp.name,
+        description: multiopp.description ?? null,
+        causes: multiopp.causes ?? [],
+        tags: multiopp.tags ?? [],
+        address: multiopp.address ?? '',
+        nonprofit: multiopp.nonprofit ?? null,
+        image: multiopp.image ?? null,
+        approved: multiopp.approved ?? false,
+        host_org_name: multiopp.host_org_name ?? null,
+        host_org_id: multiopp.host_org_id ?? null,
+        host_user_id: multiopp.host_user_id ?? null,
+        qualifications: multiopp.qualifications ?? [],
+        visibility: multiopp.visibility ?? [],
+        date: startDate,
+        time, 
+        days_of_week: multiopp.days_of_week ?? [],
+        week_frequency: multiopp.week_frequency ?? null,
+        week_recurrences: multiopp.week_recurrences ?? 4,
+        opportunities,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching multiopps:', error);
+    throw error;
+  }
+};
+
+export const createMultiOpportunity = async (formData: FormData): Promise<any> => {
+  const token = await getFirebaseToken();
+
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${ENDPOINT_URL}/api/multiopps`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+  
+  if (!response.ok) {
+    console.error('Create multiopportunity failed with status:', response.status);
+    const errorInfo = await response.json().catch(() => ({ message: response.statusText }));
+    console.error('Error details:', errorInfo);
+    throw new Error(errorInfo.message || 'Failed to create multiopportunity');
+  }
+
+  return response.json(); // { multiopp, generated_opportunities }
+};

@@ -88,8 +88,18 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({
   const [hours, minutes] = opportunity.time.split(':').map(Number);
 
   // Create the opportunity date/time string
-  const opportunityDateString = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
-  const opportunityDateTime = new Date(opportunityDateString);
+  const opportunityDateString = (() => {
+  const realHours = opportunity.multiopp ? hours - 1 : hours;
+  return `${year}-${month.toString().padStart(2, '0')}-${day
+    .toString()
+    .padStart(2, '0')}T${realHours
+    .toString()
+    .padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}:00`;
+})();
+
+const opportunityDateTime = new Date(opportunityDateString);
 
   // Display time without additional timezone conversion (already Eastern Time from API)
   const displayTime = opportunityDateTime.toLocaleTimeString('en-US', {
