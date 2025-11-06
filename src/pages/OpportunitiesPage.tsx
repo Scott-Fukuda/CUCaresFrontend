@@ -395,7 +395,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         <p className="text-xs text-gray-500 mt-6 text-center">
           Click here to see our {" "}
           <a
-            href="/Terms of Service.pdf"
+            href="/terms_of_services.pdf"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-gray-700"
