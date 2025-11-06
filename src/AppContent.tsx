@@ -192,7 +192,7 @@ const AppContent: React.FC = () => {
           //console.log('Making API calls...');
           const [usersData, oppsData, orgsData, mulitoppsData] = await Promise.all([
             api.getUsers(),
-            api.getOpportunities(),
+            api.getCurrentOpportunities(),
             api.getApprovedOrgs(),
             api.getMultiOpps(),
           ]);
@@ -455,7 +455,7 @@ const AppContent: React.FC = () => {
 
           // Refresh opportunities to get updated state from backend
           //console.log('Refreshing opportunities data after finding opportunity is full...');
-          const updatedOpps = await api.getOpportunities();
+          const updatedOpps = await api.getCurrentOpportunities();
           //console.log('Updated opportunities received:', updatedOpps.length);
           setOpportunities(updatedOpps);
 
@@ -473,7 +473,7 @@ const AppContent: React.FC = () => {
 
         // Refresh opportunities to get updated involved_users from backend
         //console.log('Refreshing opportunities data...');
-        const updatedOpps = await api.getOpportunities();
+        const updatedOpps = await api.getCurrentOpportunities();
         //console.log('Updated opportunities received:', updatedOpps.length);
         setOpportunities(updatedOpps);
 
@@ -529,7 +529,7 @@ const AppContent: React.FC = () => {
         });
 
         // Refresh opportunities to get updated involved_users from backend
-        const updatedOpps = await api.getOpportunities();
+        const updatedOpps = await api.getCurrentOpportunities();
         setOpportunities(updatedOpps);
       } catch (e: any) {
         console.error('Error in handleUnSignUp:', e);

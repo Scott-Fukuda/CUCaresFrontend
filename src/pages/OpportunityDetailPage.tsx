@@ -6,7 +6,7 @@ import {
   deleteOpportunity,
   registerForOpp,
   unregisterForOpp,
-  getOpportunities,
+  getCurrentOpportunities,
   uploadProfilePicture,
   getOpportunityAttendance,
 } from '../api';
@@ -229,7 +229,7 @@ const displayTime =
     try {
       await registerForOpp({ user_id: userId, opportunity_id: opportunity.id });
       // Refresh opportunities data to get updated involved_users
-      const updatedOpps = await getOpportunities();
+      const updatedOpps = await getCurrentOpportunities();
       setOpportunities(updatedOpps);
       // alert('User registered successfully!');
     } catch (error) {
@@ -250,7 +250,7 @@ const displayTime =
         isAdminOrHost: currentUser.admin || opportunity.host_id === currentUser.id, // Pass admin/host status
       });
       // Refresh opportunities data to get updated involved_users
-      const updatedOpps = await getOpportunities();
+      const updatedOpps = await getCurrentOpportunities();
       setOpportunities(updatedOpps);
       alert('User unregistered successfully!');
     } catch (error) {

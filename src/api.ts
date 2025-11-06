@@ -630,6 +630,108 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
     throw error;
   }
 };
+
+export const getCurrentOpportunities = async (): Promise<Opportunity[]> => {
+  try {
+    const response = await authenticatedRequest('/opps/current');
+    //console.log('getOpportunities raw response:', response);
+
+    // Transform backend data to match frontend expectations
+    const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
+      //console.log(`Processing opportunity ${opp.id} - ${opp.name}:`, opp);
+      // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
+      const dateObj = new Date(opp.date);
+
+      // Extract date and time components
+      // Use the date as provided by the backend without manipulation
+      const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+      // Extract time in HH:MM:SS format
+      // If the original string contains GMT, convert GMT to Eastern Time (UTC-4)
+      // Otherwise, assume it's already Eastern Time
+      let timeOnly;
+      if (opp.date.includes('GMT')) {
+        // GMT format - convert to Eastern Time (UTC-4)
+        const gmtHours = dateObj.getUTCHours();
+        const easternHours = (gmtHours - 4 + 24) % 24; // Convert GMT to Eastern
+        const hours = easternHours.toString().padStart(2, '0');
+        const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+        const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+        timeOnly = `${hours}:${minutes}:${seconds}`;
+      } else {
+        // Already Eastern Time - use as is
+        const hours = dateObj.getHours().toString().padStart(2, '0');
+        const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+        const seconds = dateObj.getSeconds().toString().padStart(2, '0');
+        timeOnly = `${hours}:${minutes}:${seconds}`;
+      }
+
+      // Transform involved_users from backend format to frontend User format
+      const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => {
+        //console.log('Transforming involved user:', involvedUser);
+
+        const transformedUser = {
+          id: involvedUser.id,
+          name: involvedUser.user || 'Unknown User', // Use full name from backend
+          email: involvedUser.email || '', // Now provided by backend
+          phone: involvedUser.phone || '',
+          profile_image: involvedUser.profile_image,
+          interests: [],
+          friendIds: [],
+          organizationIds: [],
+          // Add attendance info if needed
+          attended: involvedUser.attended,
+          registered: involvedUser.registered,
+        };
+
+        return transformedUser;
+      });
+
+      // Use image URL directly from backend (full URLs like "https://imgur.com/a/y0f0Geb")
+      const resolvedImageUrl =
+        opp.image_url ||
+        opp.image ||
+        opp.imageUrl ||
+        'https://campus-cares.s3.us-east-2.amazonaws.com';
+
+      return {
+        id: opp.id,
+        name: opp.name, // Use name directly from backend
+        nonprofit: opp.nonprofit || null, // Use nonprofit from backend, can be null
+        description: opp.description,
+        date: dateOnly,
+        time: timeOnly,
+        duration: opp.duration,
+        total_slots: opp.total_slots || 10, // Use total_slots from backend
+        imageUrl: resolvedImageUrl,
+        points: opp.duration || 0, // 1 minute = 1 point
+        cause: opp.cause || opp.cause ? [opp.cause] : [], // Handle both array and single cause
+        isPrivate: false, // Default
+        host_id: opp.host_user_id || opp.host_org_id, // Include host_id from backend
+        host_org_id: opp.host_org_id, // Include host organization ID
+        host_org_name: opp.host_org_name, // Include host organization name
+        involved_users: transformedInvolvedUsers, // Include transformed involved_users
+        address: opp.address || '', // Address is now required
+        approved: opp.approved !== undefined ? opp.approved : true, // Default to true if not specified
+        attendance_marked: opp.attendance_marked !== undefined ? opp.attendance_marked : false,
+        visibility: opp.visibility !== undefined ? opp.visibility : [],
+        comments: opp.comments !== undefined ? opp.comments : [],
+        qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
+        causes: opp.causes !== undefined ? opp.causes : [],
+        tags: opp.tags !== undefined ? opp.tags : [],
+        redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
+        multiopp: opp.multiopp || null,
+        multiopp_id: opp.multiopp_id || null,
+      };
+    });
+
+    return transformedOpportunities;
+  } catch (error) {
+    console.error('Error fetching opportunities:', error);
+    throw error;
+  }
+};
+
 export const getOpportunity = (id: number): Promise<Opportunity> =>
   authenticatedRequest(`/opps/${id}`);
 
