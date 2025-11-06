@@ -1229,15 +1229,23 @@ export const getMultiOpps = async (): Promise<MultiOpp[]> => {
 
       // Map miniopps (individual opportunities)
       const opportunities: MiniOpp[] = Array.isArray(multiopp.opportunities)
-        ? multiopp.opportunities.map((opp: any) => ({
-            id: opp.id,
-            date:
-              typeof opp.date === 'string'
-                ? opp.date
-                : new Date(opp.date).toISOString(),
-            duration: opp.duration ?? 0,
+  ? multiopp.opportunities.map((opp: any) => ({
+      id: opp.id,
+      date:
+        typeof opp.date === 'string'
+          ? opp.date
+          : new Date(opp.date).toISOString(),
+      duration: opp.duration ?? 0,
+      involved_users: Array.isArray(opp.involved_users)
+        ? opp.involved_users.map((u: any) => ({
+            id: u.id,
+            name: u.name ?? 'Unknown',
+            profile_image: u.profile_image ?? null,
           }))
-        : [];
+        : [],
+    }))
+  : [];
+
 
       // Extract a representative time from the first opportunity's ISO date
       const time =
