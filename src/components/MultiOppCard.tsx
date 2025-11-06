@@ -80,6 +80,25 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
           <p className="text-gray-600 text-sm mb-4 line-clamp-3">{multiopp.description}</p>
         )}
 
+        {multiopp.visibility && multiopp.visibility.length > 0 && (
+          <div className="mt-auto mb-4">
+            <h4 className="text-sm font-semibold text-gray-800 mb-1">Visible to:</h4>
+            <div className="flex flex-wrap gap-2">
+              {multiopp.visibility.map((orgId) => {
+                const org = allOrgs.find((o) => o.id === orgId);
+                return org ? (
+                  <span
+                    key={org.id}
+                    className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full border"
+                  >
+                    {org.name}
+                  </span>
+                ) : null;
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="mt-auto">
           <button
             onClick={(e) => {
