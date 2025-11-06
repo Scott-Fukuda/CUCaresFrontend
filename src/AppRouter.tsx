@@ -335,7 +335,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                   currentUser={currentUser}
                   allOrgs={organizations}
                   setMultiOpps={setMultiopp}
-                  staticId={1} // the backend ID for Salvation Army
+                  staticId={4} // the backend ID for Salvation Army
                 />
               }
             />
@@ -348,7 +348,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                   currentUser={currentUser}
                   allOrgs={organizations}
                   setMultiOpps={setMultiopp}
-                  staticId={2}
+                  staticId={5}
                 />
               }
             />
@@ -360,7 +360,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                   currentUser={currentUser}
                   allOrgs={organizations}
                   setMultiOpps={setMultiopp}
-                  staticId={3}
+                  staticId={6}
                 />
               }
             />
