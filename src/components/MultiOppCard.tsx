@@ -1,8 +1,7 @@
-import React from 'react';
-import { MultiOpp, User, Organization } from '../types';
+import React, { useMemo } from 'react';
+import { MultiOpp, Organization, User } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl } from '../api';
-import { calculateEndTime } from '../utils/timeUtils';
 
 interface MultiOppCardProps {
   multiopp: MultiOpp;
@@ -11,6 +10,12 @@ interface MultiOppCardProps {
   onSignUp: (multiOppId: number) => void;
   onUnSignUp: (multiOppId: number) => void;
 }
+
+type ParticipantLite = {
+  id: number;
+  name: string;
+  profile_image: string | null;
+};
 
 const PeopleIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -27,16 +32,37 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
   onUnSignUp,
 }) => {
   const navigate = useNavigate();
+  console.log('Rendering MultiOppCard for:', multiopp);
 
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return;
     navigate(`/multiopp/${multiopp.id}`);
   };
 
-  // For display: use the first MiniOpp as a representative sample
-  const firstOpp = multiopp.opportunities?.[0];
+  // Aggregate all unique participants across nested opportunities
+  const { allParticipants } = useMemo(() => {
+    const seen = new Map<number, ParticipantLite>();
 
+    // Guard against missing/undefined arrays
+    const opps = Array.isArray(multiopp?.opportunities) ? multiopp.opportunities : [];
+    for (const opp of opps) {
+      const users = Array.isArray((opp as any).involved_users) ? (opp as any).involved_users : [];
+      for (const u of users) {
+        if (!u || typeof u.id !== 'number') continue;
+        // Normalize to the shape we actually render
+        const p: ParticipantLite = {
+          id: u.id,
+          name: u.name ?? 'Unknown',
+          profile_image: u.profile_image ?? null,
+        };
+        seen.set(p.id, p);
+      }
+    }
 
+    return { allParticipants: Array.from(seen.values()) };
+  }, [multiopp]); // re-run whenever the multiopp object changes
+
+  console.log(allParticipants)
   return (
     <div
       onClick={handleCardClick}
@@ -57,30 +83,32 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
           <span className="text-sm font-semibold text-cornell-red uppercase tracking-wider truncate">
             {multiopp.nonprofit || 'Community Organization'}
           </span>
-          {/* <span
-            className="text-white-50 text-xs font-bold py-1 rounded-full w-[80px] text-center inline-block flex-shrink-0 ml-2"
-            style={{ backgroundColor: '#F5F5F5' }}
-          >
-            Recurring
-          </span> */}
         </div>
 
         <h3 className="text-xl font-bold text-gray-900 mb-2">{multiopp.name}</h3>
-        
-        {multiopp.address && <p className="text-gray-600 text-sm mb-4">📍 {multiopp.address}</p>}
+
+        {!!multiopp.address && (
+          <p className="text-gray-600 text-sm mb-4">📍 {multiopp.address}</p>
+        )}
 
         <div className="text-sm text-gray-700 mb-4">
           <strong>Occurs on:</strong>{' '}
-          {multiopp.days_of_week?.length > 0
-            ? multiopp.days_of_week.map((d: any) => Object.keys(d)[0]).sort().join(", ")
+          {Array.isArray(multiopp.days_of_week) && multiopp.days_of_week.length > 0
+            ? multiopp.days_of_week
+                .map((d: any) => Object.keys(d)[0])
+                .filter(Boolean)
+                .sort()
+                .join(', ')
             : 'Flexible'}
         </div>
 
-        {multiopp.description && (
-          <p className="text-gray-600 text-sm mb-4 line-clamp-3">{multiopp.description}</p>
+        {!!multiopp.description && (
+          <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+            {multiopp.description}
+          </p>
         )}
 
-        {multiopp.visibility && multiopp.visibility.length > 0 && (
+        {Array.isArray(multiopp.visibility) && multiopp.visibility.length > 0 && (
           <div className="mt-auto mb-4">
             <h4 className="text-sm font-semibold text-gray-800 mb-1">Visible to:</h4>
             <div className="flex flex-wrap gap-2">
@@ -99,11 +127,51 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
           </div>
         )}
 
+        {/* Participants Section */}
+        
+        {allParticipants.length > 0 && (
+          <div className="mt-auto mb-4">
+            <div className="flex items-center mb-2">
+              <PeopleIcon className="w-5 h-5 mr-2 text-gray-500" />
+              <span className="text-sm font-semibold text-gray-800">
+                Participants
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {allParticipants.slice(0, 6).map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full"
+                >
+                  <img
+                    src={getProfilePictureUrl(p.profile_image || null)}
+                    alt={p.name}
+                    className="w-6 h-6 rounded-full border border-gray-300 object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (target.src !== '/backup.jpeg') target.src = '/backup.jpeg';
+                    }}
+                  />
+                  <span className="text-xs text-gray-700 truncate max-w-[70px]">
+                    {p.name?.split(' ')[0] ?? 'User'}
+                  </span>
+                </div>
+              ))}
+              {allParticipants.length > 6 && (
+                <span className="text-xs text-gray-500 self-center">
+                  +{allParticipants.length - 6} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="mt-auto">
           <button
             onClick={(e) => {
-              e.stopPropagation(); // prevent triggering the outer div’s click
-              navigate(`/multiopp/${multiopp.id}`); // go directly to the multiopp page
+              e.stopPropagation();
+              navigate(`/multiopp/${multiopp.id}`);
             }}
             className="w-full mt-auto font-bold py-3 px-4 rounded-lg transition-colors bg-cornell-red hover:bg-red-800 text-white"
           >

@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { MultiOpp, Organization, User, Opportunity as OppType } from '../types';
+import { MultiOpp, Organization, User, Opportunity as OppType, Opportunity } from '../types';
 import { useNavigate, useParams } from 'react-router-dom';
 import { formatMiniOppTime } from '../utils/timeUtils';
 import { getOpportunity, getProfilePictureUrl } from '../api';
 
 interface MultiOppDetailPageProps {
   multiopps: MultiOpp[];
+  opportunities: Opportunity[];
   currentUser: User;
   allOrgs: Organization[];
   setMultiOpps: React.Dispatch<React.SetStateAction<MultiOpp[]>>;
@@ -20,6 +21,7 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
   currentUser,
   allOrgs,
   setMultiOpps,
+  opportunities,
   users,
   staticId,
   onSignUp,
@@ -79,7 +81,7 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
         const map: Record<number, User[]> = {};
         for (const opp of upcomingOpps) {
           try {
-            const full = await getOpportunity(opp.id);
+            const full = opportunities.find((o) => o.id === opp.id);
             console.log("Loaded opportunity:", full);
             const participants =
               full?.involved_users
@@ -114,7 +116,20 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
 
   try {
     // 🔹 Fetch the full opportunity (includes redirect_url)
-    const full = await getOpportunity(opp.id);
+    let full = opportunities.find((o) => o.id === opp.id);
+    if (!full) {
+      try {
+        full = await getOpportunity(opp.id);
+      } catch (err) {
+        console.error("Failed to fetch remote opportunity:", err);
+      }
+      if (!full) {
+        console.warn(`Opportunity ${opp.id} not found locally or remotely.`);
+        return;
+  }
+   
+    }
+
     console.log("Fetched full opp:", full);
     const isUserSignedUp = full.involved_users?.some(
     (u: { id: number; registered?: boolean }) =>

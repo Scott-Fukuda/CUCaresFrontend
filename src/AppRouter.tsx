@@ -331,6 +331,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
               path="/the-salvation-army"
               element={
                 <MultiOppPage
+                  opportunities={opportunities}
                   users={students}
                   multiopps={multiopp}
                   currentUser={currentUser}
@@ -346,6 +347,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
               path="/loaves-and-fishes"
               element={
                 <MultiOppPage
+                  opportunities={opportunities}
                   users={students}
                   multiopps={multiopp}
                   currentUser={currentUser}
@@ -360,6 +362,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
               path="/ithaca-reuse"
               element={
                 <MultiOppPage
+                  opportunities={opportunities}
                   users={students}
                   multiopps={multiopp}
                   currentUser={currentUser}
@@ -374,7 +377,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
             path="/multiopp/:id"
             element={
               <MultiOppPage
-            
+                opportunities={opportunities}
                 users={students}
                 multiopps={multiopp}
                 currentUser={currentUser}
