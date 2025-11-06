@@ -23,15 +23,61 @@ import {
   signOut,
   initializeFirebase,
 } from './firebase-config';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AuthFlow from './AuthFlow';
 import AppRouter from './AppRouter';
 import PopupMessage from './components/PopupMessage';
 
 type AuthView = 'login' | 'register';
 
+type RedirectState = {
+  from?: {
+    pathname: string;
+    search?: string;
+    hash?: string;
+  };
+};
+
+const AUTH_ROUTES = new Set(['/login', '/register', '/about-us', '/']);
+
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const latestLocationRef = useRef(location);
+
+  useEffect(() => {
+    latestLocationRef.current = location;
+  }, [location]);
+
+  const getRedirectPath = () => {
+    const currentLocation = latestLocationRef.current;
+    const state = currentLocation.state as RedirectState | null;
+    const from = state?.from;
+    if (from?.pathname) {
+      if (AUTH_ROUTES.has(from.pathname)) {
+        return '/opportunities';
+      }
+      const search = from.search ?? '';
+      const hash = from.hash ?? '';
+      return `${from.pathname}${search}${hash}`;
+    }
+    return '/opportunities';
+  };
+
+  const getAuthRedirectState = (): RedirectState => {
+    const currentLocation = latestLocationRef.current;
+    const existingState = currentLocation.state as RedirectState | null;
+    if (existingState?.from) {
+      return existingState;
+    }
+    return {
+      from: {
+        pathname: currentLocation.pathname,
+        search: currentLocation.search,
+        hash: currentLocation.hash,
+      },
+    };
+  };
 
   // Subscribe to Firebase auth state on mount so users stay logged in across reloads
   useEffect(() => {
@@ -59,7 +105,11 @@ const AppContent: React.FC = () => {
             // console.log('User exists in backend, fetching user data...');
             const existingUser = await api.getUserByEmail(firebaseUser.email, token);
             setCurrentUser(existingUser);
-            navigate('/opportunities');
+            const currentLocation = latestLocationRef.current;
+            if (AUTH_ROUTES.has(currentLocation.pathname)) {
+              const redirectPath = getRedirectPath();
+              navigate(redirectPath, { replace: true, state: null });
+            }
           } else {
             // console.log('User does NOT exist in backend, sending to register page');
 
@@ -69,9 +119,9 @@ const AppContent: React.FC = () => {
 
             if (response.is_approved) {
               setAuthView('register');
-              navigate('/register');
+              navigate('/register', { state: getAuthRedirectState() });
             } else {
-              navigate('/login');
+              navigate('/login', { state: getAuthRedirectState() });
             }
           }
         } else {
@@ -248,16 +298,17 @@ const AppContent: React.FC = () => {
           console.log('User found, logging in:', existingUser);
 
           setCurrentUser(existingUser);
-          navigate('/');
+          const redirectPath = getRedirectPath();
+          navigate(redirectPath, { replace: true, state: null });
         } else {
           // User doesn't exist, redirect to registration
           console.log('User not found, redirecting to registration');
           if (approvalCheck.is_approved || firebaseUser.email.toLowerCase().endsWith('@cornell.edu')) {
             console.log('Approved user, redirecting to registration');
             setAuthView('register');
-            navigate('/register');
+            navigate('/register', { state: getAuthRedirectState() });
           } else {
-            navigate('/login');
+            navigate('/login', { state: getAuthRedirectState() });
           }
         }
       }
@@ -287,7 +338,7 @@ const AppContent: React.FC = () => {
     const firebaseUser = auth.currentUser;
     if (!firebaseUser || !firebaseUser.email) {
       setAuthError('No authenticated user found. Please sign in with Google first.');
-      navigate('/login');
+      navigate('/login', { state: getAuthRedirectState() });
       return;
     }
 
@@ -333,7 +384,8 @@ const AppContent: React.FC = () => {
 
       setStudents((prev) => [...prev, finalNewUser]);
       setCurrentUser(finalNewUser);
-      navigate('/opportunities');
+      const redirectPath = getRedirectPath();
+      navigate(redirectPath, { replace: true, state: null });
       setShowPostRegistrationSetup(true);
       // navigate(`/profile/${currentUser?.id}`) // Redirect to profile page after registration
     } catch (e: any) {

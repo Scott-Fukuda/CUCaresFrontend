@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import {
   User,
   MinimalUser,
@@ -113,6 +113,24 @@ const AppRouter: React.FC<AppRouterProps> = ({
   popupMessage,
   closePopup,
 }) => {
+  const AdminRoute: React.FC = () => {
+    const location = useLocation();
+    if (!currentUser.admin) {
+      return <Navigate to="/opportunities" state={{ from: location }} replace />;
+    }
+
+    return (
+      <AdminPage
+        currentUser={currentUser}
+        opportunities={opportunities}
+        setOpportunities={setOpportunities}
+        organizations={organizations}
+        setOrganizations={setOrganizations}
+        allUsers={students}
+      />
+    );
+  };
+
   if (!currentUser) return null;
   if (isLoading) {
     return <div className="text-center p-10 font-semibold text-lg">Loading...</div>;
@@ -190,19 +208,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
               />
             }
           />
-          <Route
-            path="/admin"
-            element={
-              <AdminPage
-                currentUser={currentUser}
-                opportunities={opportunities}
-                setOpportunities={setOpportunities}
-                organizations={organizations}
-                setOrganizations={setOrganizations}
-                allUsers={students}
-              />
-            }
-          />
+          <Route path="/admin" element={<AdminRoute />} />
           <Route
             path="/opportunity/:id"
             element={
