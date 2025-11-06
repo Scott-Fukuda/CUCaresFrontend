@@ -191,7 +191,7 @@ const AppContent: React.FC = () => {
         try {
           //console.log('Making API calls...');
           const [usersData, oppsData, orgsData, mulitoppsData] = await Promise.all([
-            api.getUsers(),
+            api.getUsersMinimal(),
             api.getCurrentOpportunities(),
             api.getApprovedOrgs(),
             api.getMultiOpps(),
@@ -855,6 +855,10 @@ const AppContent: React.FC = () => {
 
   const joinOrg = useCallback(
     async (orgId: number) => {
+      if (orgId === 15 && !currentUser?.admin) {
+        alert('CampusCares organization is only joinable to team members.');
+        return;
+      }
       if (
         !currentUser ||
         !currentUser.organizationIds ||

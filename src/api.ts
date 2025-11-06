@@ -148,6 +148,37 @@ export const getUsers = async (): Promise<User[]> => {
   }));
 };
 
+/**
+ * Fetch minimal user data (for global state like allUsers/sharedStudents)
+ */
+export const getUsersMinimal = async (): Promise<User[]> => {
+  const response = await authenticatedRequest('/users/minimal');
+  const users = response.users || [];
+
+  return users.map((user: any) => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    points: user.points || 0,
+    profile_image: user.profile_image || null,
+    organizationIds: user.organizationIds || [],
+    // These remain empty for minimal payloads
+    interests: [],
+    friendIds: [],
+    admin: false,
+    gender: null,
+    graduationYear: null,
+    academicLevel: null,
+    major: null,
+    birthday: null,
+    registration_date: null,
+    car_seats: 0,
+    bio: '',
+  }));
+};
+
+
 // Get user by email for login - new endpoint
 export const getUserByEmail = async (email: string, token?: string): Promise<User | null> => {
   try {
