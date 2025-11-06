@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { loginTest } from '../api';
 import { User } from '../types';
+import { sanitizeRedirectPath } from '../utils/authRedirect';
 
 interface LoginProps {
-  onGoogleSignIn: () => void;
+  onGoogleSignIn: (redirectTo?: string) => void;
   error: string | null;
   isLoading: boolean;
   setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
@@ -12,6 +13,9 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurrentUser }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as { from?: string } | null;
+  const redirectTarget = sanitizeRedirectPath(locationState?.from);
   const mode = import.meta.env.VITE_ENV;
 
   const handleLoginTest = async () => {
@@ -19,10 +23,10 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
       const res = await loginTest(41);
 
       const data: User = await res.json();
-      console.log("Current test user:", data);
+      // console.log("Current test user:", data);
       setCurrentUser(data);
 
-      navigate("/");
+      navigate(redirectTarget, { replace: true });
     } catch (err) {
       console.log('error', err)
     }
@@ -48,7 +52,7 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
         )}
 
         <button
-          onClick={onGoogleSignIn}
+          onClick={() => onGoogleSignIn(redirectTarget)}
           disabled={isLoading}
           className="w-full bg-white border-2 border-gray-300 text-cornell-red font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
         >
@@ -74,7 +78,7 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
         </div>
 
         <button
-          onClick={onGoogleSignIn}
+          onClick={() => onGoogleSignIn(redirectTarget)}
           disabled={isLoading}
           className="w-full bg-cornell-red text-white font-bold py-3 px-4 rounded-lg hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
