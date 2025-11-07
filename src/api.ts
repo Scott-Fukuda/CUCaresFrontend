@@ -1236,6 +1236,7 @@ export const getMultiOpps = async (): Promise<MultiOpp[]> => {
           ? opp.date
           : new Date(opp.date).toISOString(),
       duration: opp.duration ?? 0,
+      total_slots: opp.total_slots ?? 10,
       involved_users: Array.isArray(opp.involved_users)
         ? opp.involved_users.map((u: any) => ({
             id: u.id,

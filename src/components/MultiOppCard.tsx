@@ -1,72 +1,104 @@
 import React, { useMemo } from 'react';
-import { MultiOpp, Organization, User } from '../types';
+import { MultiOpp, Organization, Opportunity, User } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl } from '../api';
+import { canUnregisterFromOpportunity, formatTimeUntilEvent } from '../utils/timeUtils';
 
 interface MultiOppCardProps {
   multiopp: MultiOpp;
   currentUser: User;
   allOrgs: Organization[];
-  onSignUp: (multiOppId: number) => void;
-  onUnSignUp: (multiOppId: number) => void;
+  opportunitiesData?: Opportunity[];
+  onSignUp: (opportunityId: number) => void;
+  onUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
+  onExternalSignup?: (opportunity: Opportunity) => void;
+  onExternalUnsignup?: (opportunity: Opportunity) => void;
 }
 
-type ParticipantLite = {
-  id: number;
-  name: string;
-  profile_image: string | null;
+const pad = (value: number) => value.toString().padStart(2, '0');
+const formatLocalDate = (date: Date) =>
+  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+const formatLocalTime = (date: Date) =>
+  `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+const normalizeTimeInput = (time?: string | null) => {
+  if (!time) return undefined;
+  if (time.length === 5) return `${time}:00`;
+  return time;
 };
+const parseDateTime = (dateString?: string, timeString?: string) => {
+  if (!dateString) return null;
 
-const PeopleIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 
-    1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-  </svg>
-);
+  if (dateString.includes('T')) {
+    const parsed = new Date(dateString);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+  }
+
+  const [year, month, day] = dateString.split('-').map(Number);
+  if ([year, month, day].some((value) => Number.isNaN(value))) return null;
+
+  let hours = 0;
+  let minutes = 0;
+  let seconds = 0;
+  if (timeString) {
+    const parts = timeString.split(':').map(Number);
+    hours = parts[0] ?? 0;
+    minutes = parts[1] ?? 0;
+    seconds = parts[2] ?? 0;
+  }
+
+  return new Date(year, month - 1, day, hours, minutes, seconds);
+};
 
 const MultiOppCard: React.FC<MultiOppCardProps> = ({
   multiopp,
   currentUser,
   allOrgs,
+  opportunitiesData,
   onSignUp,
   onUnSignUp,
+  onExternalSignup,
+  onExternalUnsignup,
 }) => {
   const navigate = useNavigate();
-  console.log('Rendering MultiOppCard for:', multiopp);
+
+  // Combined memo for both map and display opportunities
+  const { displayOpportunities, opportunityMap } = useMemo(() => {
+    const map = new Map<number, Opportunity>();
+    if (!Array.isArray(opportunitiesData)) return { displayOpportunities: [], opportunityMap: map };
+
+    opportunitiesData.forEach((opp) => map.set(opp.id, opp));
+
+    if (!Array.isArray(multiopp?.opportunities)) return { displayOpportunities: [], opportunityMap: map };
+
+    // Step 1: derive full opportunity data
+    const ids = multiopp.opportunities.map((o) => o.id);
+    const fullOpps = opportunitiesData.filter((o) => ids.includes(o.id));
+
+    // Step 2: sort chronologically by date
+    const sorted = [...fullOpps].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Step 3: filter upcoming (after now)
+    const now = new Date();
+    const upcoming = sorted.filter((o) => new Date(o.date) > now);
+
+    // Step 4: fallback to earliest if none upcoming
+    const displayList = upcoming.length > 0 ? upcoming : sorted.length > 0 ? [sorted[0]] : [];
+
+    // Step 5: limit to next 2
+    const displayOpportunities = displayList.slice(0, 2);
+
+    return { displayOpportunities, opportunityMap: map };
+  }, [multiopp, opportunitiesData]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return;
     navigate(`/multiopp/${multiopp.id}`);
   };
 
-  // Aggregate all unique participants across nested opportunities
-  const { allParticipants } = useMemo(() => {
-    const seen = new Map<number, ParticipantLite>();
-
-    // Guard against missing/undefined arrays
-    const opps = Array.isArray(multiopp?.opportunities) ? multiopp.opportunities : [];
-    for (const opp of opps) {
-      const users = Array.isArray((opp as any).involved_users) ? (opp as any).involved_users : [];
-      for (const u of users) {
-        if (!u || typeof u.id !== 'number') continue;
-        // Normalize to the shape we actually render
-        const p: ParticipantLite = {
-          id: u.id,
-          name: u.name ?? 'Unknown',
-          profile_image: u.profile_image ?? null,
-        };
-        seen.set(p.id, p);
-      }
-    }
-
-    return { allParticipants: Array.from(seen.values()) };
-  }, [multiopp]); // re-run whenever the multiopp object changes
-
-  console.log(allParticipants)
   return (
     <div
       onClick={handleCardClick}
-      className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105 duration-300 cursor-pointer"
+      className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-[1.02] duration-300 cursor-pointer"
     >
       <img
         src={multiopp.image || '/backup.jpeg'}
@@ -88,25 +120,187 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
         <h3 className="text-xl font-bold text-gray-900 mb-2">{multiopp.name}</h3>
 
         {!!multiopp.address && (
-          <p className="text-gray-600 text-sm mb-4">📍 {multiopp.address}</p>
+          <p className="text-gray-600 text-sm mb-3">📍 {multiopp.address}</p>
         )}
 
-        <div className="text-sm text-gray-700 mb-4">
-          <strong>Occurs on:</strong>{' '}
-          {Array.isArray(multiopp.days_of_week) && multiopp.days_of_week.length > 0
-            ? multiopp.days_of_week
-                .map((d: any) => Object.keys(d)[0])
-                .filter(Boolean)
-                .sort()
-                .join(', ')
-            : 'Flexible'}
+        <div className="space-y-3 mb-4">
+          <h4 className="text-sm font-semibold text-gray-800 mb-2">Upcoming Opportunities</h4>
+          {displayOpportunities.length > 0 ? (
+            displayOpportunities.map((baseOpp: Opportunity & { max_volunteers?: number }) => {
+              const fullOpp = opportunityMap?.get(baseOpp.id);
+              const opp = { ...baseOpp, ...(fullOpp || {}) } as Opportunity & {
+                max_volunteers?: number;
+              };
+
+              const normalizedTime = normalizeTimeInput(opp.time);
+              const rawDateString = typeof opp.date === 'string' ? opp.date : '';
+              const oppDate = parseDateTime(rawDateString, normalizedTime);
+
+              const displayTime = (
+  gmtDate: string,
+  gmtTime?: string,
+  durationMinutes?: number
+) => {
+  if (!gmtDate) return { date: 'Date TBD', timeRange: '' };
+
+  const [y, m, d] = gmtDate.split('-').map(Number);
+  const [h = 0, min = 0, s = 0] = (gmtTime || '00:00:00').split(':').map(Number);
+  const start = new Date(Date.UTC(y, m - 1, d, h+4, min, s));
+  if (Number.isNaN(start.getTime())) return { date: 'Date TBD', timeRange: '' };
+
+  const end = new Date(start.getTime() + (durationMinutes ?? 0) * 60 * 1000);
+
+  const dateStr = start.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+  const timeFmt = { hour: 'numeric', minute: '2-digit', hour12: true } as const;
+  const timeRange = `${start.toLocaleTimeString('en-US', timeFmt)} – ${end.toLocaleTimeString('en-US', timeFmt)}`;
+
+  return { date: dateStr, timeRange };
+};
+
+
+
+
+
+              const participants = Array.isArray(opp.involved_users) ? opp.involved_users : [];
+              const isUserSignedUp = participants.some((u) => u.id === currentUser.id);
+              const totalSlots =
+                typeof opp.total_slots === 'number'
+                  ? opp.total_slots
+                  : typeof opp.max_volunteers === 'number'
+                    ? opp.max_volunteers
+                    : undefined;
+              const availableSlots =
+                typeof totalSlots === 'number' ? Math.max(totalSlots - participants.length, 0) : Infinity;
+              const slotsFull = typeof totalSlots === 'number' ? availableSlots <= 0 : false;
+              const canSignUp = !isUserSignedUp && (typeof totalSlots !== 'number' || availableSlots > 0);
+              const eventStarted = oppDate ? new Date() >= oppDate : false;
+
+              const derivedDateString =
+                oppDate || !rawDateString
+                  ? oppDate
+                    ? formatLocalDate(oppDate)
+                    : undefined
+                  : rawDateString.split('T')[0];
+              const derivedTimeString =
+                normalizedTime ?? (oppDate ? formatLocalTime(oppDate) : undefined);
+              const redirectUrl = opp.redirect_url;
+
+              const unregistrationInfo =
+                isUserSignedUp && derivedDateString && derivedTimeString
+                  ? canUnregisterFromOpportunity(derivedDateString, derivedTimeString)
+                  : null;
+              const canUnregister = unregistrationInfo?.canUnregister ?? true;
+              const hoursUntilEvent = unregistrationInfo?.hoursUntilEvent ?? 0;
+
+              const buttonDisabled =
+                eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister);
+              const buttonText = eventStarted
+                ? 'Event Already Started'
+                : isUserSignedUp
+                  ? canUnregister
+                    ? 'Signed Up ✓'
+                    : `Unregistration Closed (${formatTimeUntilEvent(hoursUntilEvent)})`
+                  : canSignUp
+                    ? redirectUrl
+                      ? 'Sign Up Externally'
+                      : 'Sign Up'
+                    : 'No Slots Available';
+
+              const handleButtonClick = (e: React.MouseEvent) => {
+                e.stopPropagation();
+                if (buttonDisabled) return;
+
+                if (isUserSignedUp) {
+                  if (redirectUrl && onExternalUnsignup) {
+                    onExternalUnsignup(opp);
+                  } else {
+                    onUnSignUp(opp.id, derivedDateString, derivedTimeString);
+                  }
+                } else {
+                  if (redirectUrl && onExternalSignup) {
+                    onExternalSignup(opp);
+                  } else {
+                    onSignUp(opp.id);
+                  }
+                }
+              };
+              return (
+                <div
+  key={opp.id}
+  className="flex justify-between items-start bg-gray-50 rounded-lg px-4 py-3 hover:bg-gray-100 transition"
+>
+  {/* LEFT: Date, Time, Volunteers */}
+  <div className="flex flex-col min-w-0">
+    <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+      {displayTime(opp.date, opp.time, opp.duration).date}
+    </span>
+    <span className="text-sm text-gray-900 whitespace-nowrap">
+      {displayTime(opp.date, opp.time, opp.duration).timeRange}
+    </span>
+    <span className="text-xs text-gray-500 mt-0.5">
+      {slotsFull
+        ? 'Slots full'
+        : `${participants.length}/${totalSlots ?? '∞'} volunteers`}
+    </span>
+  </div>
+
+  {/* RIGHT: Avatars above the button */}
+  <div className="flex flex-col items-center gap-2 flex-shrink-0">
+    <div className="flex -space-x-2">
+      {participants.slice(0, 4).map((u) => (
+        <img
+          key={u.id}
+          src={getProfilePictureUrl(u.profile_image || null)}
+          alt={u.name}
+          title={u.name}
+          className="w-6 h-6 rounded-full border-2 border-white object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            if (target.src !== '/backup.jpeg') target.src = '/backup.jpeg';
+          }}
+        />
+      ))}
+      {participants.length > 4 && (
+        <span className="text-xs text-gray-500 self-center ml-1">
+          +{participants.length - 4}
+        </span>
+      )}
+    </div>
+
+    <button
+      onClick={handleButtonClick}
+      disabled={buttonDisabled}
+      className={`text-xs font-semibold px-3 py-1 rounded-lg transition text-white whitespace-nowrap ${
+        eventStarted
+          ? 'bg-gray-400 cursor-not-allowed'
+          : isUserSignedUp
+            ? canUnregister
+              ? 'bg-green-600 hover:bg-green-700'
+              : 'bg-orange-500 cursor-not-allowed'
+            : canSignUp
+              ? redirectUrl
+                ? 'bg-cornell-red hover:bg-red-800'
+                : 'bg-cornell-red hover:bg-red-800'
+              : 'bg-gray-300 cursor-not-allowed'
+      }`}
+    >
+      {buttonText}
+    </button>
+  </div>
+</div>
+
+
+
+              );
+            })
+          ) : (
+            <p className="text-sm text-gray-500 italic">No upcoming opportunities.</p>
+          )}
         </div>
-
-        {!!multiopp.description && (
-          <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-            {multiopp.description}
-          </p>
-        )}
 
         {Array.isArray(multiopp.visibility) && multiopp.visibility.length > 0 && (
           <div className="mt-auto mb-4">
@@ -127,55 +321,15 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
           </div>
         )}
 
-        {/* Participants Section */}
-        
-        {allParticipants.length > 0 && (
-          <div className="mt-auto mb-4">
-            <div className="flex items-center mb-2">
-              <PeopleIcon className="w-5 h-5 mr-2 text-gray-500" />
-              <span className="text-sm font-semibold text-gray-800">
-                Participants
-              </span>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {allParticipants.slice(0, 6).map((p) => (
-                <div
-                  key={p.id}
-                  className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full"
-                >
-                  <img
-                    src={getProfilePictureUrl(p.profile_image || null)}
-                    alt={p.name}
-                    className="w-6 h-6 rounded-full border border-gray-300 object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      if (target.src !== '/backup.jpeg') target.src = '/backup.jpeg';
-                    }}
-                  />
-                  <span className="text-xs text-gray-700 truncate max-w-[70px]">
-                    {p.name?.split(' ')[0] ?? 'User'}
-                  </span>
-                </div>
-              ))}
-              {allParticipants.length > 6 && (
-                <span className="text-xs text-gray-500 self-center">
-                  +{allParticipants.length - 6} more
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
         <div className="mt-auto">
           <button
             onClick={(e) => {
               e.stopPropagation();
               navigate(`/multiopp/${multiopp.id}`);
             }}
-            className="w-full mt-auto font-bold py-3 px-4 rounded-lg transition-colors bg-cornell-red hover:bg-red-800 text-white"
+            className="w-full text-gray-600 text-sm font-semibold py-2 px-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors"
           >
-            View All Dates
+            View More Dates
           </button>
         </div>
       </div>

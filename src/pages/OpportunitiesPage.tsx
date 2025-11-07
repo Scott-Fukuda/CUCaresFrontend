@@ -621,8 +621,11 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               multiopp={multiopp}
               currentUser={currentUser}
               allOrgs={allOrgs}
+              opportunitiesData={opportunities}
               onSignUp={handleSignUp}
               onUnSignUp={handleUnSignUp}
+              onExternalSignup={handleExternalSignup}
+              onExternalUnsignup={handleExternalUnsignup}
             />
           ))}
 
