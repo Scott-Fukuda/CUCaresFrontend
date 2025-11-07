@@ -421,14 +421,16 @@
 // export default OpportunitiesPage;
 import React, { useState, useMemo } from 'react';
 import { Opportunity, User, SignUp, allInterests, Organization, MultiOpp } from '../types';
-import OpportunityCard from '../components/OpportunityCard';
-import MultiOppCard from '../components/MultiOppCard';
+import OpportunityCard  from '../components/OpportunityCard';
+import MultiOppCard  from '../components/MultiOppCard';
 import { useNavigate } from 'react-router-dom';
 
 interface OpportunitiesPageProps {
   opportunities: Opportunity[];
   students: User[];
   signups: SignUp[];
+  multiopps: MultiOpp[];
+  allOpps: (Opportunity | MultiOpp)[];
   currentUser: User;
   handleSignUp: (opportunityId: number) => void;
   handleUnSignUp: (
@@ -443,8 +445,10 @@ interface OpportunitiesPageProps {
 
 const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   opportunities,
+  multiopps,
   students,
   signups,
+  allOpps,
   currentUser,
   handleSignUp,
   handleUnSignUp,
@@ -460,25 +464,61 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const filteredOpportunities = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // start of local day
-
-    return opportunities
+        
+      // add a spread operator here for mulitopps. this should be the onluplace wehere mulitopps are 
+      // are considered alongside
+    
+    return allOpps
       .map((opp) => {
-        // Parse opp.date once as a local date
-        // Use the date as provided by the API without manipulation
-        const [year, month, day] = opp.date.split('-').map(Number);
-        const actualDate = new Date(year, month - 1, day);
+        const dateSegment = opp.date?.split('T')[0];
+        if (!dateSegment) {
+          return null;
+        }
 
-        // Parse time and create a full datetime object
-        const [hours, minutes] = opp.time.split(':').map(Number);
-        const fullDateTime = new Date(year, month - 1, day, hours, minutes);
+        const [yearStr, monthStr, dayStr] = dateSegment.split('-');
+        const year = Number(yearStr);
+        const month = Number(monthStr);
+        const day = Number(dayStr);
+        if (
+          !Number.isInteger(year) ||
+          !Number.isInteger(month) ||
+          !Number.isInteger(day)
+        ) {
+          return null;
+        }
+
+        const actualDate = new Date(year, month - 1, day);
+        if (Number.isNaN(actualDate.getTime())) {
+          return null;
+        }
+
+        const [hoursRaw, minutesRaw] = (opp.time ?? '00:00').split(':');
+        const hours = Number(hoursRaw);
+        const minutes = Number(minutesRaw);
+        const safeHours = Number.isInteger(hours) && hours >= 0 && hours < 24 ? hours : 0;
+        const safeMinutes =
+          Number.isInteger(minutes) && minutes >= 0 && minutes < 60 ? minutes : 0;
+        const fullDateTime = new Date(year, month - 1, day, safeHours, safeMinutes);
 
         return {
           ...opp,
           localDate: actualDate,
-          fullDateTime: fullDateTime,
-          actualDateString: actualDate.toISOString().split('T')[0], // YYYY-MM-DD format for comparison
+          fullDateTime,
+          actualDateString: `${yearStr}-${monthStr.padStart(2, '0')}-${dayStr.padStart(
+            2,
+            '0'
+          )}`, // YYYY-MM-DD
         };
       })
+      .filter(
+        (
+          opp
+        ): opp is Opportunity & {
+          localDate: Date;
+          fullDateTime: Date;
+          actualDateString: string;
+        } => opp !== null
+      )
       .filter((opp) => {
         // Only approved opportunities
         if (!opp.approved) return false;
@@ -494,10 +534,11 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           return opp.visibility.some((orgId) => userOrgIds.includes(orgId));
         }
       })
+      // filter out opportunities that exist under multiopps
       .filter((opp) => {return (!opp.multiopp)
       })
       .sort((a, b) => a.fullDateTime.getTime() - b.fullDateTime.getTime());
-  }, [opportunities]);
+  }, [allOpps, currentUser]);
 
   const [showExternalSignupModal, setShowExternalSignupModal] = useState(false);
   const [showExternalUnsignupModal, setShowExternalUnsignupModal] = useState(false);
@@ -548,6 +589,11 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     setShowExternalUnsignupModal(false);
     setSelectedOpportunity(null);
   };
+
+  function isMultiOpp(item: Opportunity | MultiOpp): item is MultiOpp {
+  return Array.isArray((item as MultiOpp).opportunities);
+}
+
 
   return (
     <>
@@ -603,7 +649,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         </button>
       </div> */}
 
-      {/* Opportunities Grid */}
+      {/* Opportunities Grid
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {/* Render MultiOpps with visibility filtering */}
         {multiopps
@@ -669,7 +715,63 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
             />
           );
         })}
+      </div> */}
+      {/* Opportunities Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {filteredOpportunities.map((opp) => {
+          // Use backend data directly
+          let signedUpStudents: User[] = [];
+
+          if (opp.involved_users && opp.involved_users.length > 0) {
+            signedUpStudents = opp.involved_users.filter(
+              (user) => user.registered === true || opp.host_id === user.id
+            );
+          } else {
+            const opportunitySignups = signups.filter((s) => s.opportunityId === opp.id);
+            signedUpStudents = students.filter((student) =>
+              opportunitySignups.some((s) => s.userId === student.id)
+            );
+          }
+
+          const isUserSignedUp = opp.involved_users
+            ? opp.involved_users.some(
+                (user) =>
+                  user.id === currentUser.id &&
+                  (user.registered || opp.host_id === currentUser.id)
+              )
+            : currentUserSignupsSet.has(opp.id);
+
+          // New logic: choose which card to render
+          if (isMultiOpp(opp)) {
+            return (
+              <MultiOppCard
+                key={`multi-${opp.id}`}
+                multiopp={opp}
+                currentUser={currentUser}
+                allOrgs={allOrgs}
+                onSignUp={handleSignUp}
+                onUnSignUp={handleUnSignUp}
+              />
+            );
+          }
+
+          return (
+            <OpportunityCard
+              key={`opp-${opp.id}`}
+              opportunity={opp}
+              signedUpStudents={signedUpStudents}
+              currentUser={currentUser}
+              onSignUp={handleSignUp}
+              onUnSignUp={handleUnSignUp}
+              isUserSignedUp={isUserSignedUp}
+              allOrgs={allOrgs}
+              onExternalSignup={handleExternalSignup}
+              onExternalUnsignup={handleExternalUnsignup}
+            />
+          );
+        })}
       </div>
+
 
       {filteredOpportunities.length === 0 && (
         <div className="col-span-full text-center py-12 px-6 bg-white rounded-2xl shadow-lg">
@@ -741,7 +843,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         <p className="text-xs text-gray-500 mt-6 text-center">
           Click here to see our {" "}
           <a
-            href="/Terms of Service.pdf"
+            href="/terms_of_services.pdf"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-gray-700"

@@ -8,7 +8,7 @@ import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
 
 interface AuthFlowProps {
-  handleGoogleSignIn: () => void;
+  handleGoogleSignIn: (redirectTo?: string) => void;
   isLoading: boolean;
   handleRegister: (firstName: string, lastName: string, phone: string, gender: string, graduationYear: string, academicLevel: string, major: string, birthday: string, car_seats: number) => void;
   authError: string | null;
@@ -25,26 +25,12 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const getRedirectState = () => {
-    const existingState = location.state as { from?: { pathname: string; search?: string; hash?: string } } | null;
-    if (existingState?.from) {
-      return existingState;
-    }
-    return {
-      from: {
-        pathname: location.pathname,
-        search: location.search,
-        hash: location.hash,
-      },
-    };
-  };
-
   const handleShowRegister = () => {
-    navigate('/register');
+    navigate('/register', { state: location.state });
   };
 
   const handleBackToLogin = () => {
-    navigate('/login');
+    navigate('/login', { state: location.state });
   };
 
   return (
