@@ -31,7 +31,7 @@ import PopupMessage from './components/PopupMessage';
 import { initialBadges } from './data/initialData'; // Using initial data for badges
 import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
-import MultiOppPage from './pages/MultiOppPage';
+import MultiOppDetailPage from './pages/MultiOppPage';
 
 interface AppRouterProps {
   currentUser: User;
@@ -88,8 +88,8 @@ const AppRouter: React.FC<AppRouterProps> = ({
   setOpportunities,
   multiopp,
   setMultiopp,
-  allOpps,
   setAllOpps,
+  allOpps,
   signups,
   organizations,
   setOrganizations,
@@ -172,6 +172,8 @@ const AppRouter: React.FC<AppRouterProps> = ({
               <OpportunitiesPage
                 multiopps={multiopp}
                 opportunities={opportunities}
+                multiopps={multiopp}
+                allOpps={allOpps}
                 students={students}
                 allOrgs={organizations}
                 signups={signups}
@@ -208,7 +210,23 @@ const AppRouter: React.FC<AppRouterProps> = ({
               />
             }
           />
-          <Route path="/admin" element={<AdminRoute />} />
+          <Route
+            path="/admin"
+            element={
+              currentUser.admin ? (
+                <AdminPage
+                  currentUser={currentUser}
+                  opportunities={opportunities}
+                  setOpportunities={setOpportunities}
+                  organizations={organizations}
+                  setOrganizations={setOrganizations}
+                  allUsers={students}
+                />
+              ) : (
+                <Navigate to="/opportunities" replace />
+              )
+            }
+          />
           <Route
             path="/opportunity/:id"
             element={
@@ -224,7 +242,55 @@ const AppRouter: React.FC<AppRouterProps> = ({
                 setOpportunities={setOpportunities}
               />
             }
+          /><Route
+              path="/the-salvation-army"
+              element={
+                <MultiOppDetailPage
+                  multiopps={multiopp}
+                  currentUser={currentUser}
+                  allOrgs={organizations}
+                  setMultiOpps={setMultiopp}
+                  staticId={1} // the backend ID for Salvation Army
+                />
+              }
+            />
+
+            <Route
+              path="/loaves-and-fishes"
+              element={
+                <MultiOppDetailPage
+                  multiopps={multiopp}
+                  currentUser={currentUser}
+                  allOrgs={organizations}
+                  setMultiOpps={setMultiopp}
+                  staticId={2}
+                />
+              }
+            />
+            <Route
+              path="/ithaca-reuse"
+              element={
+                <MultiOppDetailPage
+                  multiopps={multiopp}
+                  currentUser={currentUser}
+                  allOrgs={organizations}
+                  setMultiOpps={setMultiopp}
+                  staticId={3}
+                />
+              }
+            />
+          <Route
+            path="/multiopp/:id"
+            element={
+              <MultiOppDetailPage
+                multiopps={multiopp}
+                currentUser={currentUser}
+                allOrgs={organizations}
+                setMultiOpps={setMultiopp}
+              />
+            }
           />
+
           <Route
             path="/group-detail/:id"
             element={

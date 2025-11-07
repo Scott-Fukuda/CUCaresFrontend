@@ -27,6 +27,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import AuthFlow from './AuthFlow';
 import AppRouter from './AppRouter';
 import PopupMessage from './components/PopupMessage';
+import { buildRedirectPath, sanitizeRedirectPath, isAuthPublicPath } from './utils/authRedirect';
 
 type AuthView = 'login' | 'register';
 
@@ -43,41 +44,30 @@ const AUTH_ROUTES = new Set(['/login', '/register', '/about-us', '/']);
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const latestLocationRef = useRef(location);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const locationRef = useRef(location);
 
   useEffect(() => {
-    latestLocationRef.current = location;
+    locationRef.current = location;
   }, [location]);
 
-  const getRedirectPath = () => {
-    const currentLocation = latestLocationRef.current;
-    const state = currentLocation.state as RedirectState | null;
-    const from = state?.from;
-    if (from?.pathname) {
-      if (AUTH_ROUTES.has(from.pathname)) {
-        return '/opportunities';
+  const verifyFirebaseSession = useCallback(
+    async (firebaseUser: FirebaseUser) => {
+      let token = await firebaseUser.getIdToken();
+      try {
+        const authResult = await api.verifyFirebaseToken(token);
+        return { token, authResult };
+      } catch (error: any) {
+        if (error?.message?.includes('Token is invalid or expired')) {
+          token = await firebaseUser.getIdToken();
+          const authResult = await api.verifyFirebaseToken(token);
+          return { token, authResult };
+        }
+        throw error;
       }
-      const search = from.search ?? '';
-      const hash = from.hash ?? '';
-      return `${from.pathname}${search}${hash}`;
-    }
-    return '/opportunities';
-  };
-
-  const getAuthRedirectState = (): RedirectState => {
-    const currentLocation = latestLocationRef.current;
-    const existingState = currentLocation.state as RedirectState | null;
-    if (existingState?.from) {
-      return existingState;
-    }
-    return {
-      from: {
-        pathname: currentLocation.pathname,
-        search: currentLocation.search,
-        hash: currentLocation.hash,
-      },
-    };
-  };
+    },
+    []
+  );
 
   // Subscribe to Firebase auth state on mount so users stay logged in across reloads
   useEffect(() => {
@@ -94,34 +84,32 @@ const AppContent: React.FC = () => {
 
       setIsLoading(true);
       try {
-        const token = await firebaseUser.getIdToken();
-        const authResult = await api.verifyFirebaseToken(token);
+        const { token, authResult } = await verifyFirebaseSession(firebaseUser);
 
         if (authResult.success) {
-          // console.log('Firebase auth state changed, user is authenticated:', firebaseUser.email);
           const response = await api.checkUserExists(firebaseUser.email);
+          const currentLocation = locationRef.current;
+          const redirectTarget = sanitizeRedirectPath(
+            (currentLocation.state as { from?: string } | null)?.from
+          );
 
           if (response.success && response.exists) {
-            // console.log('User exists in backend, fetching user data...');
             const existingUser = await api.getUserByEmail(firebaseUser.email, token);
             setCurrentUser(existingUser);
-            const currentLocation = latestLocationRef.current;
-            if (AUTH_ROUTES.has(currentLocation.pathname)) {
-              const redirectPath = getRedirectPath();
-              navigate(redirectPath, { replace: true, state: null });
+
+            if (isAuthPublicPath(currentLocation.pathname)) {
+              navigate(redirectTarget, { replace: true });
             }
           } else {
-            // console.log('User does NOT exist in backend, sending to register page');
-
             setCurrentUser(null);
-            // No account in our backend yet, show registration view
-            const response = await api.checkEmailApproval(firebaseUser.email);
+            const approvalResponse = await api.checkEmailApproval(firebaseUser.email);
+            const normalizedEmail = firebaseUser.email.toLowerCase();
 
-            if (response.is_approved) {
+            if (approvalResponse.is_approved || normalizedEmail.endsWith('@cornell.edu')) {
               setAuthView('register');
-              navigate('/register', { state: getAuthRedirectState() });
+              navigate('/register', { state: { from: redirectTarget } });
             } else {
-              navigate('/login', { state: getAuthRedirectState() });
+              navigate('/login', { state: { from: redirectTarget } });
             }
           }
         } else {
@@ -139,12 +127,14 @@ const AppContent: React.FC = () => {
       mounted = false;
       unsubscribe();
     };
-  }, []);
+  }, [navigate, verifyFirebaseSession]);
 
   // Data state from API
   const [students, setStudents] = useState<User[]>([]);
   const [leaderboardUsers, setLeaderboardUsers] = useState<User[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [multiopp, setMultiopp] = useState<MultiOpp[]>([]);
+  const [allOpps, setAllOpps] = useState<(Opportunity | MultiOpp)[]>([]);
   const [signups, setSignups] = useState<SignUp[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [multiopp, setMultiopp] = useState<MultiOpp[]>([]);
@@ -152,8 +142,6 @@ const AppContent: React.FC = () => {
 
   // Friendships data from backend
   const [friendshipsData, setFriendshipsData] = useState<FriendshipsResponse | null>(null);
-
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Track last loaded user to prevent infinite loops
   const lastLoadedUserId = useRef<number | null>(null);
@@ -180,6 +168,17 @@ const AppContent: React.FC = () => {
   // Add state for tracking first-time registration
   const [showPostRegistrationSetup, setShowPostRegistrationSetup] = useState(false);
 
+  useEffect(() => {
+    if (currentUser) {
+      return;
+    }
+    if (isAuthPublicPath(location.pathname)) {
+      return;
+    }
+    const intendedPath = buildRedirectPath(location);
+    navigate('/login', { replace: true, state: { from: intendedPath } });
+  }, [currentUser, location, navigate]);
+
   // Load all app data after user is logged in
   useEffect(() => {
     //console.log('App useEffect triggered:', { currentUser, isLoading, lastLoadedUserId: lastLoadedUserId.current });
@@ -191,8 +190,8 @@ const AppContent: React.FC = () => {
         try {
           //console.log('Making API calls...');
           const [usersData, oppsData, orgsData, mulitoppsData] = await Promise.all([
-            api.getUsersMinimal(),
-            api.getCurrentOpportunities(),
+            api.getUsers(),
+            api.getOpportunities(),
             api.getApprovedOrgs(),
             api.getMultiOpps(),
           ]);
@@ -238,16 +237,18 @@ const AppContent: React.FC = () => {
   }, [currentUser]);
 
   // Google Sign-In Handler
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (redirectTo?: string) => {
     //console.log('handleGoogleSignIn called');
     setAuthError(null);
     setIsLoading(true);
+    const redirectTarget = sanitizeRedirectPath(
+      redirectTo ?? (location.state as { from?: string } | null)?.from
+    );
 
     try {
       // Trigger Firebase Google sign-in popup
       //console.log('Triggering Firebase sign-in...');
       const firebaseUser = await signInWithGoogle();
-      console.log('Firebase user after sign-in:', firebaseUser.email);
       //console.log('Firebase sign-in successful:', firebaseUser.email);
       const approvalCheck = await api.checkEmailApproval(firebaseUser.email);
 
@@ -261,7 +262,7 @@ const AppContent: React.FC = () => {
             );
             setIsLoading(false);
             await signOut();
-            // navigate('/login');
+            navigate('/login', { state: { from: redirectTarget } });
             return 'non approved';
           }
           // Email is approved, continue with the process
@@ -272,43 +273,36 @@ const AppContent: React.FC = () => {
           );
           setIsLoading(false);
           await signOut();
-          // navigate('/login');
+          navigate('/login', { state: { from: redirectTarget } });
           return 'non approved';
         }
       }
-      console.log('Email approval check passed for:', firebaseUser.email);
+      // console.log('Email approval check passed for:', firebaseUser.email);
 
-      // Get the ID token from Firebase
-      const token = await firebaseUser.getIdToken();
-
-      // Verify token with backend
-      console.log('Verifying Firebase token with backend...');
-      const authResult = await api.verifyFirebaseToken(token);
-      console.log('Token verification result:', authResult);
+      const { token, authResult } = await verifyFirebaseSession(firebaseUser);
 
       if (authResult.success) {
         // User is authenticated, check if they exist in our database
-        console.log('Checking if user exists in database...');
+        // console.log('Checking if user exists in database...');
         const response = await api.checkUserExists(firebaseUser.email);
         const exists = response.exists;
 
         if (exists) {
           // User exists, log them in
           const existingUser = await api.getUserByEmail(firebaseUser.email, token);
-          console.log('User found, logging in:', existingUser);
+          // console.log('User found, logging in:', existingUser);
 
           setCurrentUser(existingUser);
-          const redirectPath = getRedirectPath();
-          navigate(redirectPath, { replace: true, state: null });
+          navigate(redirectTarget, { replace: true });
         } else {
           // User doesn't exist, redirect to registration
-          console.log('User not found, redirecting to registration');
+          // console.log('User not found, redirecting to registration');
           if (approvalCheck.is_approved || firebaseUser.email.toLowerCase().endsWith('@cornell.edu')) {
-            console.log('Approved user, redirecting to registration');
+            // console.log('Approved user, redirecting to registration');
             setAuthView('register');
-            navigate('/register', { state: getAuthRedirectState() });
+            navigate('/register', { state: { from: redirectTarget } });
           } else {
-            navigate('/login', { state: getAuthRedirectState() });
+            navigate('/login', { state: { from: redirectTarget } });
           }
         }
       }
@@ -333,12 +327,15 @@ const AppContent: React.FC = () => {
     car_seats: number
   ) => {
     setAuthError(null);
+    const redirectTarget = sanitizeRedirectPath(
+      (location.state as { from?: string } | null)?.from
+    );
 
     // Get email from Firebase user (stored during Google sign-in)
     const firebaseUser = auth.currentUser;
     if (!firebaseUser || !firebaseUser.email) {
       setAuthError('No authenticated user found. Please sign in with Google first.');
-      navigate('/login', { state: getAuthRedirectState() });
+      navigate('/login', { state: { from: redirectTarget } });
       return;
     }
 
@@ -384,8 +381,7 @@ const AppContent: React.FC = () => {
 
       setStudents((prev) => [...prev, finalNewUser]);
       setCurrentUser(finalNewUser);
-      const redirectPath = getRedirectPath();
-      navigate(redirectPath, { replace: true, state: null });
+      navigate(redirectTarget, { replace: true });
       setShowPostRegistrationSetup(true);
       // navigate(`/profile/${currentUser?.id}`) // Redirect to profile page after registration
     } catch (e: any) {
