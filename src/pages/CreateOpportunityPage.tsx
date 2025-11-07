@@ -3,6 +3,7 @@ import { allInterests, Opportunity, Organization } from '../types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import * as api from '../api';
 import { formatDateTimeForBackend } from '../utils/timeUtils';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Helper function to transform opportunity from backend format to frontend format
 const transformOpportunityFromBackend = (opp: any): Opportunity => {
@@ -93,19 +94,20 @@ interface CreateOpportunityPageProps {
   currentUser: any;
   organizations: Organization[];
   opportunities: Opportunity[];
-  setOpportunities: (
-    opportunities: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])
-  ) => void;
+  // setOpportunities: (
+  //   opportunities: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])
+  // ) => void;
 }
 
 const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
   currentUser,
   organizations, // Add this parameter
   opportunities,
-  setOpportunities,
+  // setOpportunities,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   const clonedOpportunityData = location.state?.clonedOpportunityData;
 
@@ -318,7 +320,8 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       if (currentUser.admin) {
         const approvedOpp = { ...transformedOpp, approved: true };
         // console.log('Admin user - adding approved opportunity:', approvedOpp);
-        setOpportunities((prev) => [approvedOpp, ...prev]);
+        // setOpportunities((prev) => [approvedOpp, ...prev]);
+        queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       }
 
       setSuccess(true);

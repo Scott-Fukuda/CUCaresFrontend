@@ -11,6 +11,19 @@
     // font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 
+.back-btn {
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
 /* Main Heading */
 .carpool-header h1 {
     font-size: 2.5rem;
@@ -52,6 +65,10 @@
 .carpool-header .deadline-alert {
     font-size: 0.9rem;
     color: #555;
+    background-color: rgba(128, 128, 128, 0.241);
+    padding: 7px 12px;
+    border-radius: 7px;
+    display: inline-block;
 }
 
 /* Additional Info */
@@ -88,6 +105,7 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
+        justify-content: center;
     }
 
     .cp-card {
@@ -181,5 +199,10 @@
     &:focus {
         outline: none;
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); // focus:ring-blue-500 with ring-offset
+    }
+    
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
     }
 }

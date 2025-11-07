@@ -5,12 +5,14 @@ import { useNavigate } from 'react-router-dom';
 
 interface WaiverPopupProps {
     showWaiverPopup: boolean,
-    setShowWaiverPopup: React.Dispatch<React.SetStateAction<boolean>>
+    setShowWaiverPopup: React.Dispatch<React.SetStateAction<boolean>>,
+    opportunityId: string
 }
 
 const WaiverPopup: React.FC<WaiverPopupProps> = ({
     showWaiverPopup,
-    setShowWaiverPopup
+    setShowWaiverPopup,
+    opportunityId
 }) => {
 
     if (!showWaiverPopup) return;
@@ -20,27 +22,36 @@ const WaiverPopup: React.FC<WaiverPopupProps> = ({
     return (
         <div className="modal-backdrop">
             <div className="modal">
-                <CloseIcon className="close-icon" onClick={() => setShowWaiverPopup(false)} />
+                {/* <CloseIcon className="close-icon" onClick={() => setShowWaiverPopup(false)} /> */}
                 <div className="modal-content">
-                    <div className="attention">
+                    {/* <div className="attention">
                         <p>🚨 Important Update!</p>
-                    </div>
+                    </div> */}
                     <div className="popup-icon-header">
                         <DirectionsCarFilledIcon className="car-icon" />
                     </div>
                     <h3>Carpool Liability Waiver</h3>
-                    <p className="modal-message">For everyone’s safety, we need all participants to review and sign our Carpool Liability Waiver before joining a ride to future events.</p>
+                    <p className="modal-message">For everyone’s safety, we need all participants to review and sign our Carpool Liability Waiver before joining a ride or driving others to events.</p>
                     <div className="modal-actions">
                         <button
                             className="red-btn"
                             onClick={() => {
                                 setShowWaiverPopup(false);
-                                navigate('/sign-waiver');
+                                navigate('/sign-waiver', {
+                                    state: {
+                                        opportunityId: opportunityId
+                                    }
+                                });
                             }}
                         >
                             Sign Waiver
                         </button>
-                        <p onClick={() => setShowWaiverPopup(false)}>Maybe Later</p>
+                        <p onClick={() => {
+                            setShowWaiverPopup(false);
+                            navigate('/opportunities');
+                        }}>
+                            No thanks, I'll join a carpool later
+                        </p>
                     </div>
                 </div>
             </div>

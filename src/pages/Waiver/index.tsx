@@ -3,21 +3,25 @@ import { useState } from "react";
 import ErrorIcon from '@mui/icons-material/Error';
 import { User } from '../../types';
 import { createWaiver } from '../../api';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface WaiverProps {
     type: 'carpool' | 'org',
-    currentUser: User
+    currentUser: User,
+    setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>
 }
 
 const Waiver: React.FC<WaiverProps> = ({
     type,
-    currentUser
+    currentUser,
+    setCurrentUser
 }) => {
     const [name, setName] = useState("");
     const [consentChecked, setConsentChecked] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const location = useLocation();
+    const { opportunityId } = location.state;
 
     const carpool_waiver = `Waiver of Liability and Hold Harmless Transportation Agreement
 I understand that CampusCares LLC rules require that participants provide transportation of themselves to all opportunities listed on the CampusCares website. While CampusCares may facilitate the mechanisms that allow for carpooling agreements to take place between participants, all liability falls onto the individuals operating vehicles, who subject themselves to liability in the transportation of fellow participants. 
@@ -30,7 +34,7 @@ loss, liability, damage, or costs due to my child(ren) traveling to and or from 
 5. In signing this release, I acknowledge and represent that I have read the foregoing Waiver of Liability and Hold Harmless Agreement, understand it, and sign it voluntarily as my own free act and deed.`
 
     const handleSubmit = async () => {
-        if (!name || name.replace(/\s+/g, "") !== currentUser.name.replace(/\s+/g, "")) {
+        if (!name || name.replace(/\s+/g, "").toLowerCase() !== currentUser.name.replace(/\s+/g, "").toLowerCase()) {
             setError("You must enter your full name as registered on CampusCares");
             return;
         }
@@ -47,7 +51,9 @@ loss, liability, damage, or costs due to my child(ren) traveling to and or from 
                 checked_consent: consentChecked,
                 user_id: currentUser.id
             });
-            navigate('/opportunities');
+
+            setCurrentUser(prev => prev ? ({...prev, carpool_waiver_signed: true}) : null);
+            navigate(`/carpool/${opportunityId}`);
         } catch (err) {
             console.log("Failed to create waiver:", err);
             setError("Failed to submit waiver, please try again.");

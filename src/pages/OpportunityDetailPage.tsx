@@ -14,6 +14,7 @@ import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 import { upload } from '@testing-library/user-event/dist/upload';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface OpportunityDetailPageProps {
   opportunities: Opportunity[];
@@ -28,7 +29,7 @@ interface OpportunityDetailPageProps {
   ) => void;
   allOrgs: Organization[];
   currentUserSignupsSet: Set<number>;
-  setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
+  // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
 }
 
 const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
@@ -40,10 +41,11 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
   handleUnSignUp,
   allOrgs,
   currentUserSignupsSet,
-  setOpportunities,
+  // setOpportunities,
 }) => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const queryClient = useQueryClient();
 
   const opportunity = opportunities.find((o) => o.id === parseInt(id!));
 
@@ -106,6 +108,8 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
   const canManageOpportunity = isUserHost || currentUser.admin;
   const availableSlots = opportunity.total_slots - signedUpStudents.length;
   const canSignUp = availableSlots > 0 && !isUserSignedUp;
+  const allowCarpool = opportunity.allow_carpool;
+  console.log('allow', opportunity)
 
   // Parse date components manually to avoid timezone issues
   const [year, month, day] = opportunity.date.split('-').map(Number);
@@ -165,9 +169,10 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
         };
 
         // Update the opportunities in the parent component
-        setOpportunities((prev) =>
-          prev.map((opp) => (opp.id === opportunity.id ? updatedOpportunity : opp))
-        );
+        // setOpportunities((prev) =>
+        //   prev.map((opp) => (opp.id === opportunity.id ? updatedOpportunity : opp))
+        // );
+        queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       }
 
       alert('Attendance submitted successfully!');
@@ -203,7 +208,8 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       await registerForOpp({ user_id: userId, opportunity_id: opportunity.id });
       // Refresh opportunities data to get updated involved_users
       const updatedOpps = await getOpportunities();
-      setOpportunities(updatedOpps);
+      // setOpportunities(updatedOpps);
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       // alert('User registered successfully!');
     } catch (error) {
       console.error('Error registering user:', error);
@@ -224,7 +230,8 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       });
       // Refresh opportunities data to get updated involved_users
       const updatedOpps = await getOpportunities();
-      setOpportunities(updatedOpps);
+      // setOpportunities(updatedOpps);
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       alert('User unregistered successfully!');
     } catch (error) {
       console.error('Error unregistering user:', error);
@@ -245,11 +252,12 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       opportunity.approved = false;
 
       // Update the opportunities list in the parent component
-      setOpportunities((prevOpportunities) =>
-        prevOpportunities.map((opp) =>
-          opp.id === opportunity.id ? { ...opp, approved: false } : opp
-        )
-      );
+      // setOpportunities((prevOpportunities) =>
+      //   prevOpportunities.map((opp) =>
+      //     opp.id === opportunity.id ? { ...opp, approved: false } : opp
+      //   )
+      // );
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
       alert('Opportunity has been unapproved successfully!');
     } catch (error: any) {
@@ -267,9 +275,10 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       await deleteOpportunity(opportunity.id);
 
       // Remove the opportunity from the state
-      setOpportunities((prevOpportunities) =>
-        prevOpportunities.filter((opp) => opp.id !== opportunity.id)
-      );
+      // setOpportunities((prevOpportunities) =>
+      //   prevOpportunities.filter((opp) => opp.id !== opportunity.id)
+      // );
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
       alert('Opportunity has been deleted successfully!');
       // Navigate back to opportunities page
@@ -298,23 +307,24 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       await updateOpportunity(opportunity.id, updateData);
 
       // Update the opportunity in the state
-      setOpportunities((prevOpportunities) =>
-        prevOpportunities.map((opp) =>
-          opp.id === opportunity.id
-            ? {
-              ...opp,
-              name: editForm.name,
-              description: editForm.description,
-              address: editForm.address,
-              date: editForm.date,
-              time: editForm.time,
-              duration: editForm.duration,
-              nonprofit: editForm.nonprofit,
-              redirect_url: editForm.redirect_url.trim() || null,
-            }
-            : opp
-        )
-      );
+      // setOpportunities((prevOpportunities) =>
+      //   prevOpportunities.map((opp) =>
+      //     opp.id === opportunity.id
+      //       ? {
+      //         ...opp,
+      //         name: editForm.name,
+      //         description: editForm.description,
+      //         address: editForm.address,
+      //         date: editForm.date,
+      //         time: editForm.time,
+      //         duration: editForm.duration,
+      //         nonprofit: editForm.nonprofit,
+      //         redirect_url: editForm.redirect_url.trim() || null,
+      //       }
+      //       : opp
+      //   )
+      // );
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
       // Update the local opportunity object to reflect changes
       Object.assign(opportunity, {
@@ -442,11 +452,12 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
 
       // Update local state
       opportunity.imageUrl = imageUrl;
-      setOpportunities((prevOpportunities) =>
-        prevOpportunities.map((opp) =>
-          opp.id === opportunity.id ? { ...opp, imageUrl: imageUrl } : opp
-        )
-      );
+      // setOpportunities((prevOpportunities) =>
+      //   prevOpportunities.map((opp) =>
+      //     opp.id === opportunity.id ? { ...opp, imageUrl: imageUrl } : opp
+      //   )
+      // );
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
       // Clear the selected image and preview
       setSelectedImage(null);
@@ -968,6 +979,16 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
               </div>
             )}
           </div>
+
+
+          {allowCarpool && isUserSignedUp &&
+            <button className="w-full mt-6 font-bold py-4 px-4 rounded-lg bg-red-600 transition-colors text-white text-lg" 
+              onClick={() => {navigate(`/carpool/${opportunity.id}`)}} 
+              style={{cursor: "pointer"}}
+            >
+                View Carpool Rides
+            </button>
+          }
         </div>
         <div className="lg:col-span-1 space-y-8">
           {canManageOpportunity ? (

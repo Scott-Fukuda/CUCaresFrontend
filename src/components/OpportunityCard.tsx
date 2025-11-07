@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { getProfilePictureUrl } from '../api';
+import { getProfilePictureUrl, removeCarpoolUser } from '../api';
 import {
   canUnregisterFromOpportunity,
   formatTimeUntilEvent,
   calculateEndTime,
 } from '../utils/timeUtils';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -19,6 +20,11 @@ interface OpportunityCardProps {
   isUserSignedUp: boolean;
   onExternalSignup?: (opportunity: Opportunity) => void; // Add callback for external signup
   onExternalUnsignup?: (opportunity: Opportunity) => void; // Add callback for external unsignup
+  showPopup: (
+        title: string,
+        message: string,
+        type: 'success' | 'info' | 'warning' | 'error'
+    ) => void
 }
 
 const PeopleIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -46,7 +52,9 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   isUserSignedUp,
   onExternalSignup,
   onExternalUnsignup,
+  showPopup
 }) => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [clickedStudentId, setClickedStudentId] = useState<number | null>(null);
 
@@ -82,8 +90,28 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
     navigate(`/opportunity/${opportunity.id}`);
   };
 
-  const handleButtonClick = () => {
+  const handleButtonClick = async () => {
     if (isUserSignedUp) {
+      if (opportunity.allow_carpool) {
+        try {
+            const res = await removeCarpoolUser({
+                user_id: currentUser.id,
+                carpool_id: opportunity.carpool_id
+            });
+
+            if (!res.valid) {
+              showPopup(
+                'Failed to unregister',
+                'You have signed up to drive for this event and therefore cannot unregister.',
+                'error'
+              );
+              return;
+            }
+            queryClient.invalidateQueries({ queryKey: ['rides', opportunity.carpool_id] });
+        } catch (err) {
+            console.log('Failed to remove ride:', err);
+        }
+      }
       // Check if this is an external opportunity and user is trying to unregister
       if (opportunity.redirect_url && onExternalUnsignup) {
         onExternalUnsignup(opportunity);
@@ -180,6 +208,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   }, [opportunity.visibility, allOrgs]);
 
   // Create a Date object and add 1 day
+  console.log('card opp', opportunity)
   const dateObj = new Date(opportunity.date);
   dateObj.setDate(dateObj.getDate() + 1);
 

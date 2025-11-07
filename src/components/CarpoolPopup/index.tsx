@@ -24,13 +24,15 @@ const CarpoolPopup: React.FC<CarpoolPopupProps> = ({
                             <img src={CarpoolIcon} alt="carpool icon" className="carpool-icon" />
                         </div>
                         <h3>Carpool options are available for this opportunity!</h3>
-                        <p className="modal-message">Select whether you would like to get or give a ride.</p>
+                        {/* <p className="modal-message">Select whether you would like to get or give a ride.</p> */}
                         <div className="modal-actions">
                             <button
                                 className="red-btn"
                                 onClick={() => {
                                     setShowPopup(null);
-                                    navigate(`/carpool/${opportunityId}`);
+                                    navigate(`/carpool/${opportunityId}`, {
+                                        state: { mode: 'rider'}
+                                    });
                                 }}
                             >
                                 <p><b>GET</b> a ride</p>
@@ -38,8 +40,10 @@ const CarpoolPopup: React.FC<CarpoolPopupProps> = ({
                             <button
                                 className="red-btn"
                                 onClick={() => {
-                                    // setShowWaiverPopup(false);
-                                    // navigate('/sign-waiver');
+                                    setShowPopup(null);
+                                    navigate(`/carpool/${opportunityId}`, {
+                                        state: { mode: 'driver'}
+                                    });
                                 }}
                             >
                                 <p><b>GIVE</b> a ride</p>

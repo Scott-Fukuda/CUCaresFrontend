@@ -1,57 +1,122 @@
 import './index.scss';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { useState } from "react"
+import { useState, useMemo, useEffect } from "react"
 import CarpoolFormPopup from '../../components/CarpoolFormPopup';
-import { useParams } from 'react-router-dom';
-import { getOpportunity } from '../../api';
-import { useQuery } from '@tanstack/react-query';
-import { Opportunity } from '../../types';
-import { formatTimeUntilEvent, calculateEndTime } from '../../utils/timeUtils';
+import DriverFormPopup from '../../components/DriverFormPopup';
+import WaiverPopup from '../../components/WaiverPopup';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { getOpportunity, getRides, getProfilePictureUrl, removeRider } from '../../api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Opportunity, User, Ride } from '../../types';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { formatTimeUntilEvent, calculateEndTime, canUnregisterFromOpportunity } from '../../utils/timeUtils';
 
-const CarpoolPage: React.FC = () => {
+interface CarpoolPageProps {
+    currentUser: User;
+    showPopup: (
+        title: string,
+        message: string,
+        type: 'success' | 'info' | 'warning' | 'error'
+    ) => void,
+}
+
+const CarpoolPage: React.FC<CarpoolPageProps> = ({currentUser, showPopup}) => {
     const [showRiderForm, setShowRiderForm] = useState(false);
-
+    const [selectedRideId, setSelectedRideId] = useState('');
+    const [showWaiverPopup, setShowWaiverPopup] = useState<boolean>(!currentUser.carpool_waiver_signed);
     const { id: opportunityId } = useParams();
-
-    if (!opportunityId) return;
+    const location = useLocation();
+    const { mode } = location.state || {};
+    const queryClient = useQueryClient();
+    const [showDriverPopup, setShowDriverPopup] = useState(mode == 'driver');
+    const navigate = useNavigate();
 
     const { data: opportunity, isLoading } = useQuery<Opportunity>({
         queryKey: ['opportunity', opportunityId],
-        queryFn: () => getOpportunity(parseInt(opportunityId))
-    })
+        queryFn: () => getOpportunity(parseInt(opportunityId!)),
+        enabled: !!opportunityId
+    });
 
-    if (isLoading || !opportunity) return <p>Loading...</p>
+    const carpoolId = opportunity?.carpool_id;
 
+    const { data: rides, isLoading: ridesLoading } = useQuery<Ride[]>({
+        queryKey: ['rides', carpoolId],
+        queryFn: () => getRides(parseInt(carpoolId!)),
+        enabled: !!carpoolId,
+        refetchInterval: 30000
+    });
+
+    console.log('rides', rides)
+
+    const unregistrationCheck = useMemo(() => {
+        if (!opportunity) return;
+        return canUnregisterFromOpportunity(opportunity.date, opportunity.time);
+    }, [opportunity?.date, opportunity?.time]);
+
+
+    if (!opportunityId || !carpoolId) return null;
+
+    if (isLoading || !opportunity || ridesLoading || !rides) return <p>Loading...</p>
+    
+    const canUnregister = unregistrationCheck?.canUnregister ?? true;
+    const isDriver = rides.some(ride => ride.driver_id == currentUser.id.toString());
+    const userRide = rides.find(ride => ride.riders.some(rider => rider.user_id == currentUser.id.toString()));
+    const isRider = !!userRide;
+
+    console.log('CARPOOL OPP', opportunity)
+
+    // Logic to get the time/date
     const dateObj = new Date(opportunity.date);
     dateObj.setDate(dateObj.getDate() + 1);
 
     const displayDate = dateObj.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
     });
 
-    // const displayTime = new Date(`1970-01-01T${opportunity.time}`).toLocaleTimeString('en-US', {
-    //     hour: 'numeric',
-    //     minute: '2-digit',
-    //     hour12: true
-    // });
+    const displayTime = new Date(`1970-01-01T${opportunity.time}`).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    });
 
-    // const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, opportunity.duration);
+    const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, opportunity.duration);
+    
 
-    const onSelectRide = () => {
-        setShowRiderForm(true);
+    const onSelectRide = async (id: string) => {
+        if (isRider && userRide.id == id) {
+            try {
+                await removeRider({
+                    user_id: currentUser.id,
+                    ride_id: id
+                });
+                queryClient.invalidateQueries({ queryKey: ['rides', carpoolId] });
+            } catch (err) {
+                console.log('Failed to remove ride:', err);
+            }
+        } else {
+            setSelectedRideId(id);
+            setShowRiderForm(true);
+        }
+    };
 
+    const onAddRide = () => {
+        setShowDriverPopup(true);
     }
 
     return (
         <div className="carpool-page">
+            <button className="back-btn" onClick={() => navigate(`/opportunity/${opportunityId}`)}>
+                <ArrowBackIosIcon style={{fontSize: "14px"}}/>
+                <p>Back to Opportunity Details</p>
+            </button>
             <div className="carpool-header">
                 <h1>Carpool for {opportunity.name}</h1>
                 <div className="primary-details">
-                    <p>11:00 AM - 2:00 PM | {displayDate}</p>
+                    <p>{displayTime} - {displayEndTime} | {displayDate}</p>
                 </div>
                 {opportunity.address &&
                     <div className="location">
@@ -59,72 +124,79 @@ const CarpoolPage: React.FC = () => {
                         <p>{opportunity.address}</p>
                     </div>
                 }
-                <div className="deadline-alert">
-                    <p>Sign ups close at 6 AM, {displayDate}</p>
-                </div>
+                {!canUnregister &&
+                    <div className="deadline-alert">
+                        <p>⚠ Carpool rides are now closed</p>
+                    </div>
+                }
             </div>
             <div className="cp-content">
-                <div className="cp-card">
-                    <div className="cp-card-header">
-                        <DirectionsCarFilledIcon className="cp-car-icon" />
-                        <div className="cp-card-header-text">
-                            <h2>John Smith</h2>
-                            {/* WRITE DRIVERS NAME SOMEWHERE */}
-                            <div className="cp-card-riders">
-                                <div className="cp-card-slots">
-                                    <div className="cp-card-slot">
-                                        <img src={"https://images.unsplash.com/photo-1760624876412-e6d69fb8ff8e?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1035"} />
-                                    </div>
-                                    <div className="cp-card-slot" style={{ borderColor: "lightgrey" }}>
-                                    </div>
-                                    <div className="cp-card-slot" style={{ borderColor: "lightgrey" }}>
-                                    </div>
-                                    <div className="cp-card-slot" style={{ borderColor: "lightgrey" }}>
-                                    </div>
-                                </div>
-                                <p>3 Seats Available</p>
-                            </div>
-                        </div>
-                    </div>
-                    <button className="btn-red" onClick={onSelectRide}>Join Ride</button>
-                </div>
-                <div className="cp-card">
-                    <div className="cp-card-header">
-                        <DirectionsCarFilledIcon className="cp-car-icon" />
-                        <div className="cp-card-header-text">
-                            <h2>John Smith</h2>
-                            {/* WRITE DRIVERS NAME SOMEWHERE */}
-                            <div className="cp-card-riders">
-                                <div className="cp-card-slots">
-                                    <div className="cp-card-slot">
-                                        <img src={"https://images.unsplash.com/photo-1760624876412-e6d69fb8ff8e?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1035"} />
-                                    </div>
-                                    <div className="cp-card-slot" style={{ borderColor: "lightgrey" }}>
-                                    </div>
-                                    <div className="cp-card-slot" style={{ borderColor: "lightgrey" }}>
-                                    </div>
-                                    <div className="cp-card-slot" style={{ borderColor: "lightgrey" }}>
+                {rides.map(ride => {
+                    const seatsLeft = ride.driver_seats - ride.riders.length;
+                    console.log('seats', ride)
+                    console.log('riders', ride.riders)
+                    return (
+                        <div className="cp-card" key={ride.id}>
+                            <div className="cp-card-header">
+                                <DirectionsCarFilledIcon className="cp-car-icon" />
+                                <div className="cp-card-header-text">
+                                    <h2>{ride.driver_name}</h2>
+                                    <div className="cp-card-riders">
+                                        <div className="cp-card-slots">
+                                            {ride.riders.map(rider => 
+                                                <div className="cp-card-slot" key={rider.id}>
+                                                    <img src={getProfilePictureUrl(rider.profile_image)} alt={`${rider.name} pfp`}/>
+                                                </div>
+                                            )}
+                                            {Array.from({length: seatsLeft}).map((_, i) =>
+                                                <div className="cp-card-slot" key={`empty-${i}`} style={{ borderColor: "lightgrey" }}/>
+                                            )}
+                                        </div>
+                                        <p>{seatsLeft} Seat{seatsLeft == 1 ? '' : 's'} Available</p>
                                     </div>
                                 </div>
-                                <p>3 Seats Available</p>
                             </div>
-                        </div>
+                            <button 
+                                className="btn-red" 
+                                onClick={() => onSelectRide(ride.id)} 
+                                disabled={seatsLeft == 0 || isDriver || (isRider && !(userRide.id == ride.id)) || !canUnregister ? true : false}
+                            >
+                                {isRider && userRide.id == ride.id ? 'Ride Joined ✓' : 'Join Ride'}
+                            </button>
                     </div>
-                    <button className="btn-red" onClick={onSelectRide}>Join Ride</button>
-                </div>
+                )})}
 
                 <div className="cp-add">
-                    <button className="btn-orange">
+                    <button className="btn-orange" disabled={!canUnregister || isDriver || isRider ? true : false} onClick={onAddRide}>
                         + Add Ride
                     </button>
                 </div>
             </div>
 
-
             {showRiderForm &&
                 <CarpoolFormPopup
                     setShowPopup={setShowRiderForm}
-                    header={"Carpool Information"}
+                    selectedRideId={selectedRideId}
+                    currentUser={currentUser}
+                    showPopup={showPopup}
+                    carpoolId={carpoolId}
+                />
+            }
+
+            {showDriverPopup && opportunity.carpool_id && 
+                <DriverFormPopup 
+                    setShowPopup={setShowDriverPopup}
+                    currentUser={currentUser}
+                    carpoolId={opportunity.carpool_id}
+                    showPopup={showPopup}
+                />
+            }
+
+            {showWaiverPopup &&
+                <WaiverPopup
+                    showWaiverPopup={showWaiverPopup}
+                    setShowWaiverPopup={setShowWaiverPopup}
+                    opportunityId={opportunityId}
                 />
             }
         </div>

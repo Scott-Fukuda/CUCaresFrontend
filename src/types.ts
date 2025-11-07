@@ -56,6 +56,7 @@ export interface Opportunity {
   visibility: number[]; // empty list means public, otherwise list of organization IDs that can see it
   redirect_url?: string | null; // External URL for signup, null means normal signup
   allow_carpool: boolean;
+  carpool_id: string | null;
 }
 
 export interface SignUp {
@@ -209,4 +210,37 @@ export interface Waiver {
   checked_consent: boolean;
   user_id: number;
   organization_id?: number;
+}
+
+export interface Carpool {
+  id: string;
+  opportunity_id: string;
+}
+
+export interface Ride {
+  id: string;
+  carpool_id: string;
+  driver_id: string;
+  driver_name: string;
+  driver_seats: number;
+  riders: RideRider[]
+}
+
+export interface RideRider {
+  id: string;
+  ride_id: string;
+  user_id: string;
+  pickup_location: string;
+  profile_image?: string;
+  name: string;
+  notes?: string
+}
+
+export interface Car {
+  id: string;
+  user_id: string;
+  color?: string;
+  model?: string;
+  seats: number;
+  license_plate?: string;
 }

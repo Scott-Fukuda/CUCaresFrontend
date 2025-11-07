@@ -2,11 +2,12 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Opportunity, Organization, User } from '../types';
 import * as api from '../api';
 import { auth } from '../firebase-config';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AdminPageProps {
   currentUser: User;
   opportunities: Opportunity[];
-  setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
+  // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
   organizations: Organization[];
   setOrganizations: React.Dispatch<React.SetStateAction<Organization[]>>;
   allUsers: User[];
@@ -15,11 +16,12 @@ interface AdminPageProps {
 const AdminPage: React.FC<AdminPageProps> = ({
   currentUser,
   opportunities,
-  setOpportunities,
+  // setOpportunities,
   organizations,
   setOrganizations,
   allUsers,
 }) => {
+  const queryClient = useQueryClient();
   // Helper function to get user name by ID
   const getUserNameById = (userId?: number): string => {
     if (!userId) return 'Unknown';
@@ -165,7 +167,8 @@ const AdminPage: React.FC<AdminPageProps> = ({
 
       // Add approved opportunities to the main opportunities list
       const approvedOpps = selectedOpps.map((opp) => ({ ...opp, approved: true }));
-      setOpportunities((prev) => [...prev, ...approvedOpps]);
+      // setOpportunities((prev) => [...prev, ...approvedOpps]);
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
       // Add approved organizations to the main organizations list
       const approvedOrgs = selectedOrgs.map((org) => ({ ...org, approved: true }));
@@ -197,7 +200,8 @@ const AdminPage: React.FC<AdminPageProps> = ({
       alert('Selected items have been approved successfully!');
     } catch (error: any) {
       // Revert frontend state if backend update failed
-      setOpportunities(originalOpportunities);
+      // setOpportunities(originalOpportunities);
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       setOrganizations(originalOrganizations);
       setUnapprovedOpportunities(originalUnapprovedOpportunities);
       setUnapprovedOrganizations(originalUnapprovedOrganizations);

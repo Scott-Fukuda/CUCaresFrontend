@@ -2,27 +2,62 @@ import './index.scss';
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { addRider } from '../../api';
+import { User } from '../../types';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface CarpoolFormPopupProps {
     setShowPopup: React.Dispatch<React.SetStateAction<boolean>>,
-    header: string
+    selectedRideId: string,
+    currentUser: User,
+    showPopup: (
+        title: string,
+        message: string,
+        type: 'success' | 'info' | 'warning' | 'error'
+    ) => void,
+    carpoolId: string
 }
 
 const CarpoolFormPopup: React.FC<CarpoolFormPopupProps> = ({
     setShowPopup,
-    header
+    selectedRideId,
+    currentUser,
+    showPopup,
+    carpoolId
 }) => {
-    const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const [loc, setLoc] = useState("");
     const [otherLoc, setOtherLoc] = useState("");
     const [notes, setNotes] = useState("");
     const [error, setError] = useState("");
     const locationOptions = ["RPCC", "Baker Flagpole", "CTB", "Other"];
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
         if (loc == "Other" && !otherLoc) {
             setError("Please specify at what location you would like to be picked up");
             return;
+        }
+
+        const pickupLocation = loc == "Other" ? otherLoc : loc;
+
+        try {
+            await addRider({
+                ride_id: selectedRideId,
+                user_id: currentUser.id,
+                pickup_location: pickupLocation,
+                notes: notes
+            });
+
+            queryClient.invalidateQueries({ queryKey: ['rides', carpoolId] });
+            setShowPopup(false);
+            showPopup(
+                'Ride Joined!',
+                'You have successfully joined a carpool ride! An email will be sent to you seven hours prior to the event with details about the ride (including car information, pickup times, etc.). Please provide atleast 30 minutes of buffer prior to the event for rides.',
+                'success'
+            );
+        } catch (err) {
+            console.log('Failed to add rider to ride:', err);
+            setError('Failed to join ride, please try again.');
         }
     }
 
@@ -32,7 +67,7 @@ const CarpoolFormPopup: React.FC<CarpoolFormPopupProps> = ({
                 <div className="modal">
                     <CloseIcon className="close-icon" onClick={() => setShowPopup(false)} />
                     <div className="modal-content" style={{ gap: "20px" }}>
-                        <h1>{header}</h1>
+                        <h1>Enter Pickup Information</h1>
                         <div className="carpool-form-content">
                             <div>
                                 <label className="form-label" htmlFor="loc">

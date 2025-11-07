@@ -18,6 +18,11 @@ interface OpportunitiesPageProps {
   currentUserSignupsSet: Set<number>;
   showCarpoolPopup: number | null;
   setShowCarpoolPopup: React.Dispatch<React.SetStateAction<number | null>>;
+  showPopup: (
+        title: string,
+        message: string,
+        type: 'success' | 'info' | 'warning' | 'error'
+    ) => void
 }
 
 const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
@@ -30,9 +35,11 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   allOrgs,
   currentUserSignupsSet,
   showCarpoolPopup,
-  setShowCarpoolPopup
+  setShowCarpoolPopup,
+  showPopup
 }) => {
   const navigate = useNavigate();
+  console.log('pre opps', opportunities)
   // Filter functionality disabled
   // const [causeFilter, setCauseFilter] = useState<string>('All');
   // const [dateFilter, setDateFilter] = useState<string>('');
@@ -222,6 +229,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               allOrgs={allOrgs}
               onExternalSignup={handleExternalSignup} // Add the callback
               onExternalUnsignup={handleExternalUnsignup} // Add the callback
+              showPopup={showPopup}
             />
           );
         })}

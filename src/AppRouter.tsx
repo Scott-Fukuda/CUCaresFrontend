@@ -46,7 +46,7 @@ interface AppRouterProps {
     handleLogout: () => void;
     students: User[];
     opportunities: Opportunity[];
-    setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[] | []>>;
+    // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[] | []>>;
     signups: SignUp[];
     organizations: Organization[];
     setOrganizations: React.Dispatch<React.SetStateAction<Organization[] | []>>;
@@ -73,11 +73,14 @@ interface AppRouterProps {
         message: string;
         type: 'success' | 'info' | 'warning' | 'error';
     };
+    showPopup: (
+        title: string,
+        message: string,
+        type: 'success' | 'info' | 'warning' | 'error'
+    ) => void;
     closePopup: () => void;
     showCarpoolPopup: number | null;
     setShowCarpoolPopup: React.Dispatch<React.SetStateAction<number | null>>;
-    showDriverPopup: boolean;
-    setShowDriverPopup: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AppRouter: React.FC<AppRouterProps> = ({
@@ -89,7 +92,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
     handleLogout,
     students,
     opportunities,
-    setOpportunities,
+    // setOpportunities,
     signups,
     organizations,
     setOrganizations,
@@ -114,8 +117,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
     closePopup,
     showCarpoolPopup,
     setShowCarpoolPopup,
-    showDriverPopup,
-    setShowDriverPopup
+    showPopup
 }) => {
     if (!currentUser) return null;
     if (isLoading) {
@@ -167,8 +169,9 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 currentUserSignupsSet={currentUserSignupsSet}
                                 showCarpoolPopup={showCarpoolPopup}
                                 setShowCarpoolPopup={setShowCarpoolPopup}
+                                showPopup={showPopup}
                             />} />;
-                    <Route path="/my-opportunities" element={<MyOpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />} />
+                    <Route path="/my-opportunities" element={<MyOpportunitiesPage showPopup={showPopup} opportunities={opportunities} students={students} allOrgs={organizations} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />} />
                     <Route path="/account-setup" element={<PostRegistrationOrgSetup
                         currentUser={currentUser}
                         allOrgs={organizations}
@@ -181,7 +184,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                             <AdminPage
                                 currentUser={currentUser}
                                 opportunities={opportunities}
-                                setOpportunities={setOpportunities}
+                                // setOpportunities={setOpportunities}
                                 organizations={organizations}
                                 setOrganizations={setOrganizations}
                                 allUsers={students}
@@ -200,7 +203,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 handleUnSignUp={handleUnSignUp}
                                 allOrgs={organizations}
                                 currentUserSignupsSet={currentUserSignupsSet}
-                                setOpportunities={setOpportunities}
+                                // setOpportunities={setOpportunities}
                             />}
                     />
                     <Route
@@ -282,7 +285,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 currentUser={currentUser}
                                 organizations={organizations}
                                 opportunities={opportunities}
-                                setOpportunities={setOpportunities}
+                                // setOpportunities={setOpportunities}
                             />}
                     />
                     <Route
@@ -308,14 +311,16 @@ const AppRouter: React.FC<AppRouterProps> = ({
                             <Waiver
                                 type="carpool"
                                 currentUser={currentUser}
+                                setCurrentUser={setCurrentUser}
                             />
                         }
                     />
                     <Route
-                        path="/carpool/:id" // ADD ID
+                        path="/carpool/:id" 
                         element={
                             <CarpoolPage
-                                setShowDriverPopup={setShowDriverPopup}
+                                currentUser={currentUser}
+                                showPopup={showPopup}
                             />
                         }
                     />
@@ -324,21 +329,13 @@ const AppRouter: React.FC<AppRouterProps> = ({
                 </Routes>
             </main>
             <BottomNav currentUser={currentUser} />
-            {/* {showWaiverPopup &&
-                <WaiverPopup
-                    showWaiverPopup={showWaiverPopup}
-                    setShowWaiverPopup={setShowWaiverPopup}
-                />
-            } */}
             {showCarpoolPopup &&
                 <CarpoolPopup
                     opportunityId={showCarpoolPopup}
                     setShowPopup={setShowCarpoolPopup}
                 />
             }
-            {showDriverPopup
-
-            }
+            
             <a
                 href="mailto:sdf72@cornell.edu?subject=Bug Report - CampusCares Frontend&body=Please describe the bug you encountered:"
                 className="hidden md:flex fixed bottom-6 right-6 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-lg transition-colors duration-200 items-center gap-2 z-50 text-base"

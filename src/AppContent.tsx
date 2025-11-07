@@ -26,11 +26,13 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import AuthFlow from './AuthFlow';
 import AppRouter from './AppRouter';
 import PopupMessage from './components/PopupMessage';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 type AuthView = 'login' | 'register';
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Subscribe to Firebase auth state on mount so users stay logged in across reloads
   useEffect(() => {
@@ -91,16 +93,21 @@ const AppContent: React.FC = () => {
   }, []);
 
   // Data state from API
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [students, setStudents] = useState<User[]>([]);
   const [leaderboardUsers, setLeaderboardUsers] = useState<User[]>([]);
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  // const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [signups, setSignups] = useState<SignUp[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
 
+  const { data: opportunities = [], isLoading: oppsLoading} = useQuery({
+    queryKey: ['opportunities'],
+    queryFn: api.getOpportunities,
+    enabled: !!currentUser
+  });
+
   // Friendships data from backend
   const [friendshipsData, setFriendshipsData] = useState<FriendshipsResponse | null>(null);
-
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Track last loaded user to prevent infinite loops
   const lastLoadedUserId = useRef<number | null>(null);
@@ -128,7 +135,6 @@ const AppContent: React.FC = () => {
   const [showPostRegistrationSetup, setShowPostRegistrationSetup] = useState(false);
 
   const [showCarpoolPopup, setShowCarpoolPopup] = useState<number | null>(null);
-  const [showDriverPopup, setShowDriverPopup] = useState<boolean>(false);
 
   // Load all app data after user is logged in
   useEffect(() => {
@@ -154,7 +160,8 @@ const AppContent: React.FC = () => {
           // getUsers now returns full User objects, no conversion needed
           setStudents(usersData);
           setLeaderboardUsers(usersData); // Use the same data for leaderboard
-          setOpportunities(oppsData);
+          // setOpportunities(oppsData);
+          await queryClient.invalidateQueries({ queryKey: ['opportunities']});
           setOrganizations(orgsData);
           setSignups([]); // Initialize empty signups - we'll track this locally
 
@@ -397,7 +404,8 @@ const AppContent: React.FC = () => {
         //console.log('Refreshing opportunities data after finding opportunity is full...');
         const updatedOpps = await api.getOpportunities();
         //console.log('Updated opportunities received:', updatedOpps.length);
-        setOpportunities(updatedOpps);
+        // setOpportunities(updatedOpps);
+        await queryClient.invalidateQueries({ queryKey: ['opportunities']});
 
         return; // Exit early, don't proceed with registration
       }
@@ -415,7 +423,8 @@ const AppContent: React.FC = () => {
       //console.log('Refreshing opportunities data...');
       const updatedOpps = await api.getOpportunities();
       //console.log('Updated opportunities received:', updatedOpps.length);
-      setOpportunities(updatedOpps);
+      // setOpportunities(updatedOpps);
+      await queryClient.invalidateQueries({ queryKey: ['opportunities']});
 
       const opportunity = await api.getOpportunity(opportunityId);
       if (opportunity.allow_carpool) {
@@ -464,8 +473,9 @@ const AppContent: React.FC = () => {
         });
 
         // Refresh opportunities to get updated involved_users from backend
-        const updatedOpps = await api.getOpportunities();
-        setOpportunities(updatedOpps);
+        // const updatedOpps = await api.getOpportunities();
+        // setOpportunities(updatedOpps);
+        await queryClient.invalidateQueries({ queryKey: ['opportunities']});
       } catch (e: any) {
         console.error('Error in handleUnSignUp:', e);
         // Revert local state on error
@@ -913,7 +923,7 @@ const AppContent: React.FC = () => {
           handleLogout={handleLogout}
           students={students}
           opportunities={opportunities}
-          setOpportunities={setOpportunities}
+          // setOpportunities={setOpportunities}
           signups={signups}
           organizations={organizations}
           setOrganizations={setOrganizations}
@@ -938,8 +948,7 @@ const AppContent: React.FC = () => {
           closePopup={closePopup}
           showCarpoolPopup={showCarpoolPopup}
           setShowCarpoolPopup={setShowCarpoolPopup}
-          showDriverPopup={showDriverPopup}
-          setShowDriverPopup={setShowDriverPopup}
+          showPopup={showPopup}
         />
       ) : (
         <AuthFlow
