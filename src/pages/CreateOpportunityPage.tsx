@@ -1,34 +1,40 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { allInterests, Opportunity, Organization } from '../types';
+import { allInterests, Opportunity, Organization, MultiOpp } from '../types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import * as api from '../api';
 import { formatDateTimeForBackend } from '../utils/timeUtils';
 import { useQueryClient } from '@tanstack/react-query';
 
 // Helper function to transform opportunity from backend format to frontend format
-const transformOpportunityFromBackend = (opp: any): Opportunity => {
-  // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
-  const dateObj = new Date(opp.date);
+const transformOpportunityFromBackend = (opp: any): Opportunity | MultiOpp => {
+  // Detect if this is a recurring opportunity (MultiOpp)
+  const isMultiOpp =
+    opp.days_of_week !== undefined ||
+    opp.week_frequency !== undefined ||
+    opp.week_recurrences !== undefined;
 
-  // Extract date and time components
-  const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
+  // ---------- COMMON: date/time parsing ----------
+  let dateOnly = '';
+  let timeOnly = '';
 
-  // Extract time in HH:MM:SS format
-  let timeOnly;
-  if (opp.date.includes('GMT')) {
-    // GMT format - convert to Eastern Time (UTC-4)
-    const gmtHours = dateObj.getUTCHours();
-    const easternHours = (gmtHours - 4 + 24) % 24; // Convert GMT to Eastern
-    const hours = easternHours.toString().padStart(2, '0');
-    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
-    const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
-    timeOnly = `${hours}:${minutes}:${seconds}`;
-  } else {
-    // Already Eastern Time - use as is
-    const hours = dateObj.getHours().toString().padStart(2, '0');
-    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-    const seconds = dateObj.getSeconds().toString().padStart(2, '0');
-    timeOnly = `${hours}:${minutes}:${seconds}`;
+  if (opp.date) {
+    const dateObj = new Date(opp.date);
+    dateOnly = dateObj.toISOString().split('T')[0];
+
+    if (opp.date.includes('GMT')) {
+      // Backend sends GMT → convert to Eastern
+      const gmtHours = dateObj.getUTCHours();
+      const easternHours = (gmtHours - 4 + 24) % 24;
+      const hours = easternHours.toString().padStart(2, '0');
+      const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+      const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+      timeOnly = `${hours}:${minutes}:${seconds}`;
+    } else {
+      const hours = dateObj.getHours().toString().padStart(2, '0');
+      const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+      const seconds = dateObj.getSeconds().toString().padStart(2, '0');
+      timeOnly = `${hours}:${minutes}:${seconds}`;
+    }
   }
 
   // Transform involved users if they exist
@@ -58,10 +64,42 @@ const transformOpportunityFromBackend = (opp: any): Opportunity => {
     };
   }) : [];
 
-  // Use image URL directly from backend
+  // ---------- COMMON: image URL ----------
   const resolvedImageUrl =
     opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
 
+  // ---------- CASE 1: MultiOpp ----------
+  if (isMultiOpp) {
+    const firstOppDate = opp.opportunities && opp.opportunities.length > 0 ? opp.opportunities[0].date : null;
+    const firstOppTime = firstOppDate ? new Date(firstOppDate) : null;
+    return {
+      id: opp.id,
+      name: opp.name,
+      date: firstOppDate ? firstOppDate.split('T')[0] : '',
+      time: firstOppTime ? firstOppTime.toTimeString().split(' ')[0] : '',
+      description: opp.description,
+      causes: opp.causes ?? [],
+      tags: opp.tags ?? [],
+      address: opp.address ?? '',
+      nonprofit: opp.nonprofit ?? '',
+      image: resolvedImageUrl,
+      approved: opp.approved ?? false,
+      host_org_name: opp.host_org_name ?? null,
+      qualifications: opp.qualifications ?? [],
+      visibility: opp.visibility ?? [],
+      host_org_id: opp.host_org_id ?? null,
+      host_user_id: opp.host_user_id ?? null,
+      days_of_week: opp.days_of_week ?? [],
+      week_frequency: opp.week_frequency ?? 1,
+      week_recurrences: opp.week_recurrences ?? 4,
+      start_date: opp.start_date ?? null,
+      opportunities: opp.opportunities ?? [],
+      isMultiOpp: true,
+    } as MultiOpp;
+  }
+
+
+  // ---------- CASE 2: Single Opportunity ----------
   return {
     id: opp.id,
     name: opp.name,
@@ -87,21 +125,27 @@ const transformOpportunityFromBackend = (opp: any): Opportunity => {
     qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
     tags: opp.tags !== undefined ? opp.tags : [],
     redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
-  } as unknown as Opportunity;
+  } as Opportunity;
 };
+
 
 interface CreateOpportunityPageProps {
   currentUser: any;
   organizations: Organization[];
   opportunities: Opportunity[];
+  allOpps: (Opportunity | MultiOpp)[];
+  setAllOpps: (allOpps: (Opportunity | MultiOpp)[] | ((prev: (Opportunity | MultiOpp)[]) => (Opportunity | MultiOpp)[])) => void;
   // setOpportunities: (
   //   opportunities: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])
   // ) => void;
 }
 
+
 const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
   currentUser,
   organizations, // Add this parameter
+  setAllOpps,
+  allOpps,
   opportunities,
   // setOpportunities,
 }) => {
@@ -148,12 +192,22 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
   const [imagePreview, setImagePreview] = useState<string | null>(
     clonedOpportunityData?.imageUrl || null
   );
-
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Repeating event controls
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [daysOfWeek, setDaysOfWeek] = useState<
+    { [key: string]: [string, number][] }[]
+  >([]);
+  const [weekFrequency, setWeekFrequency] = useState<number>(1);
+  const [weekRecurrences, setWeekRecurrences] = useState<number>(4);
+  const [startDate, setStartDate] = useState<string>('');
+
+
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   // For searchable org selector when event is private
   const [orgFilter, setOrgFilter] = useState<string>('');
@@ -295,6 +349,13 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       } else {
         console.log('No image URL to add to form data');
       }
+      if (isRecurring) {
+        formDataToSend.append('start_date', startDate);
+        formDataToSend.append('days_of_week', JSON.stringify(daysOfWeek));
+        formDataToSend.append('week_frequency', weekFrequency.toString());
+        formDataToSend.append('week_recurrences', weekRecurrences.toString());
+      }
+
 
       // If private, append visibility org ids as a single JSON field (numbers)
       // This ensures the backend receives a JSON array of integers instead of
@@ -309,18 +370,31 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       }
 
       // Make the API call
-      const newOpp = await api.createOpportunity(formDataToSend);
+      const newOpp = isRecurring
+        ? await api.createMultiOpportunity(formDataToSend)
+        : await api.createOpportunity(formDataToSend);
       // console.log('Created opportunity (raw):', newOpp);
 
       // Transform the opportunity to match the frontend format
-      const transformedOpp = transformOpportunityFromBackend(newOpp);
+      const rawOpp = isRecurring ? newOpp.multiopp : newOpp;
+      const transformedOpp = transformOpportunityFromBackend(rawOpp);
       // console.log('Transformed opportunity:', transformedOpp);
 
-      // If current user is admin, automatically approve the opportunity
+      const isSingleOpp = !isRecurring;
+
       if (currentUser.admin) {
         const approvedOpp = { ...transformedOpp, approved: true };
-        // console.log('Admin user - adding approved opportunity:', approvedOpp);
-        // setOpportunities((prev) => [approvedOpp, ...prev]);
+
+        if (isSingleOpp) {
+          // setOpportunities((prev) => [approvedOpp as Opportunity, ...prev]);
+        }
+
+        setAllOpps((prev) => {
+          const updated = [approvedOpp, ...prev];
+          return updated;
+        });
+      } else if (isSingleOpp) {
+        // setOpportunities((prev) => [transformedOpp as Opportunity, ...prev]);
         queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       }
 
@@ -334,6 +408,44 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       setIsSubmitting(false);
     }
   };
+
+  const addDaySlot = (day: string) => {
+    const updated = [...daysOfWeek];
+    const existing = updated.find((d) => Object.keys(d)[0] === day);
+    if (existing) {
+      existing[day].push(['', 60]); // default time + duration
+    } else {
+      updated.push({ [day]: [['', 60]] });
+    }
+    setDaysOfWeek(updated);
+  };
+
+  const updateDaySlot = (day: string, index: number, field: 'time' | 'duration', value: string) => {
+    const updated = [...daysOfWeek];
+    const target = updated.find((d) => Object.keys(d)[0] === day);
+    if (target) {
+      const slots = target[day];
+      if (field === 'time') slots[index][0] = value;
+      else slots[index][1] = parseInt(value);
+      target[day] = slots;
+    }
+    setDaysOfWeek(updated);
+  };
+
+  const removeDaySlot = (day: string, index: number) => {
+    const updated = [...daysOfWeek];
+    const target = updated.find((d) => Object.keys(d)[0] === day);
+    if (target) {
+      target[day].splice(index, 1);
+      if (target[day].length === 0) {
+        const filtered = updated.filter((d) => Object.keys(d)[0] !== day);
+        setDaysOfWeek(filtered);
+        return;
+      }
+    }
+    setDaysOfWeek(updated);
+  };
+
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -374,46 +486,6 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
                 placeholder="Enter opportunity name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Date *</label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Time *</label>
-              <input
-                type="time"
-                name="time"
-                value={formData.time}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Duration (minutes) *
-              </label>
-              <input
-                type="number"
-                name="duration"
-                value={formData.duration}
-                onChange={handleInputChange}
-                required
-                min="15"
-                step="15"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
               />
             </div>
 
@@ -545,6 +617,172 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
             </select>
             <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple causes</p>
           </div> */}
+          {(currentUser.admin) && (
+            <>
+              <div className="pt-6 border-t mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Does this event repeat?
+                </label>
+                <div className="flex items-center space-x-3 mb-4">
+                  <input
+                    type="checkbox"
+                    checked={isRecurring}
+                    onChange={(e) => setIsRecurring(e.target.checked)}
+                    className="h-4 w-4 text-cornell-red"
+                  />
+                  <span className="text-gray-700">Yes</span>
+                  <input
+                    type="checkbox"
+                    checked={!isRecurring}
+                    onChange={(e) => setIsRecurring(!e.target.checked)}
+                    className="h-4 w-4 text-cornell-red"
+                  />
+                  <span className="text-gray-700">No</span>
+                </div>
+
+                {isRecurring && (
+                  <div className="bg-gray-50 p-4 rounded-lg border space-y-6">
+                    {/* Days + Time Slots */}
+                    <div>
+                      <p className="font-semibold mb-3">Which days of the week does this occur on?</p>
+                      <div className="space-y-4">
+                        {days.map((day) => {
+                          const existing = daysOfWeek.find((d) => Object.keys(d)[0] === day);
+                          return (
+                            <div key={day}>
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium text-gray-800">{day}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => addDaySlot(day)}
+                                  className="text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200"
+                                >
+                                  + Add time
+                                </button>
+                              </div>
+
+                              {existing &&
+                                existing[day].map(([time, duration], idx) => (
+                                  <div key={idx} className="flex gap-2 mt-2">
+                                    <input
+                                      type="time"
+                                      value={time}
+                                      onChange={(e) => updateDaySlot(day, idx, 'time', e.target.value)}
+                                      className="border border-gray-300 rounded px-2 py-1 w-32"
+                                    />
+                                    <input
+                                      type="number"
+                                      value={duration}
+                                      onChange={(e) => updateDaySlot(day, idx, 'duration', e.target.value)}
+                                      min={15}
+                                      step={15}
+                                      className="border border-gray-300 rounded px-2 py-1 w-24"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => removeDaySlot(day, idx)}
+                                      className="text-red-500 hover:text-red-700 text-sm"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Frequency */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        How often does this repeat? (every X weeks)
+                      </label>
+                      <input
+                        type="number"
+                        value={weekFrequency}
+                        onChange={(e) => setWeekFrequency(parseInt(e.target.value) || 1)}
+                        min={1}
+                        className="w-32 border border-gray-300 rounded px-2 py-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        When should this recurring event start?
+                      </label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        required
+                        className="border border-gray-300 rounded px-2 py-1 w-56"
+                      />
+                    </div>
+
+
+                    {/* Recurrence count */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        For how many weeks should this pattern repeat?
+                      </label>
+                      <input
+                        type="number"
+                        value={weekRecurrences}
+                        onChange={(e) => setWeekRecurrences(parseInt(e.target.value) || 1)}
+                        min={1}
+                        className="w-32 border border-gray-300 rounded px-2 py-1"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>)
+          }
+
+          {!isRecurring && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Date *</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Time *</label>
+                <input
+                  type="time"
+                  name="time"
+                  value={formData.time}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Duration (minutes) *
+                </label>
+                <input
+                  type="number"
+                  name="duration"
+                  value={formData.duration}
+                  onChange={handleInputChange}
+                  required
+                  min="15"
+                  step="15"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+                />
+              </div>
+            </>
+          )}
+
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

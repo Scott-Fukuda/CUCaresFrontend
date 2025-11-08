@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
 import PopupMessage from './components/PopupMessage';
@@ -23,6 +23,21 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
   setCurrentUser
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getRedirectState = () => {
+    const existingState = location.state as { from?: { pathname: string; search?: string; hash?: string } } | null;
+    if (existingState?.from) {
+      return existingState;
+    }
+    return {
+      from: {
+        pathname: location.pathname,
+        search: location.search,
+        hash: location.hash,
+      },
+    };
+  };
 
   const handleShowRegister = () => {
     navigate('/register');
@@ -64,8 +79,8 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
             <AboutUsPage />
           </div>
         } />
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/login" state={getRedirectState()} replace />} />
+        <Route path="*" element={<Navigate to="/login" state={getRedirectState()} replace />} />
       </Routes>
     </div>
   );

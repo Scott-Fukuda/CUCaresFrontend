@@ -1,4 +1,4 @@
-import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, Waiver, Ride } from './types';
+import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride } from './types';
 import { auth } from './firebase-config';
 import { canUnregisterFromOpportunity } from './utils/timeUtils';
 
@@ -106,7 +106,7 @@ export const loginTest = async (userId: number) => {
     throw new Error("Failed to log in test user")
   }
 
-  console.log("Logged in test user!")
+  // console.log("Logged in test user!")
   return response;
 }
 
@@ -139,6 +139,38 @@ export const getUsers = async (): Promise<User[]> => {
     carpool_waiver_signed: user.carpool_waiver_signed
   }));
 };
+
+/**
+ * Fetch minimal user data (for global state like allUsers/sharedStudents)
+ */
+export const getUsersMinimal = async (): Promise<User[]> => {
+  const response = await authenticatedRequest('/users/minimal');
+  const users = response.users || [];
+
+  return users.map((user: any) => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    points: user.points || 0,
+    profile_image: user.profile_image || null,
+    organizationIds: user.organizationIds || [],
+    admin: user.admin || false,
+    car_seats: user.car_seats || 0,
+    bio: user.bio || '',
+
+    // These remain empty for minimal payloads
+    interests: [],
+    friendIds: [],
+    gender: null,
+    graduationYear: null,
+    academicLevel: null,
+    major: null,
+    birthday: null,
+    registration_date: null,
+  }));
+};
+
 
 // Get user by email for login - new endpoint
 export const getUserByEmail = async (email: string, token?: string): Promise<User | null> => {
@@ -611,6 +643,8 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
         causes: opp.causes !== undefined ? opp.causes : [],
         tags: opp.tags !== undefined ? opp.tags : [],
         redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
+        multiopp: opp.multiopp || null,
+        multiopp_id: opp.multiopp_id || null,
         allow_carpool: opp.allow_carpool,
         carpool_id: opp.carpool_id !== undefined ? opp.carpool_id : null
       };
@@ -622,68 +656,171 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
     throw error;
   }
 };
-export const getOpportunity = async (id: number): Promise<Opportunity> => {
-  const opp = await authenticatedRequest(`/opps/${id}`);
-  // console.log('res', response)
-  // const opp = response.opportunity;
-  console.log('opp', opp)
-  const dateObj = new Date(opp.date);
 
-  const dateOnly = dateObj.toISOString().split('T')[0];
+export const getCurrentOpportunities = async (): Promise<Opportunity[]> => {
+  try {
+    const response = await authenticatedRequest('/opps/current');
+    //console.log('getOpportunities raw response:', response);
 
-  let timeOnly;
-  if (opp.date.includes('GMT')) {
-    const gmtHours = dateObj.getUTCHours();
-    const easternHours = (gmtHours - 4 + 24) % 24; 
-    const hours = easternHours.toString().padStart(2, '0');
-    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
-    const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
-    timeOnly = `${hours}:${minutes}:${seconds}`;
-  } else {
-    const hours = dateObj.getHours().toString().padStart(2, '0');
-    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-    const seconds = dateObj.getSeconds().toString().padStart(2, '0');
-    timeOnly = `${hours}:${minutes}:${seconds}`;
-  }
+    // Transform backend data to match frontend expectations
+    const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
+      //console.log(`Processing opportunity ${opp.id} - ${opp.name}:`, opp);
+      // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
+      const dateObj = new Date(opp.date);
 
-  const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => {
-      //console.log('Transforming involved user:', involvedUser);
+      // Extract date and time components
+      // Use the date as provided by the backend without manipulation
+      const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
 
-      const transformedUser = {
-        id: involvedUser.id,
-        name: involvedUser.user || 'Unknown User', // Use full name from backend
-        email: involvedUser.email || '', // Now provided by backend
-        phone: involvedUser.phone || '',
-        profile_image: involvedUser.profile_image,
-        interests: [],
-        friendIds: [],
-        organizationIds: [],
-        // Add attendance info if needed
-        attended: involvedUser.attended,
-        registered: involvedUser.registered,
+      // Extract time in HH:MM:SS format
+      // If the original string contains GMT, convert GMT to Eastern Time (UTC-4)
+      // Otherwise, assume it's already Eastern Time
+      let timeOnly;
+      if (opp.date.includes('GMT')) {
+        // GMT format - convert to Eastern Time (UTC-4)
+        const gmtHours = dateObj.getUTCHours();
+        const easternHours = (gmtHours - 4 + 24) % 24; // Convert GMT to Eastern
+        const hours = easternHours.toString().padStart(2, '0');
+        const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+        const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+        timeOnly = `${hours}:${minutes}:${seconds}`;
+      } else {
+        // Already Eastern Time - use as is
+        const hours = dateObj.getHours().toString().padStart(2, '0');
+        const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+        const seconds = dateObj.getSeconds().toString().padStart(2, '0');
+        timeOnly = `${hours}:${minutes}:${seconds}`;
+      }
+
+      // Transform involved_users from backend format to frontend User format
+      const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => {
+        //console.log('Transforming involved user:', involvedUser);
+
+        const transformedUser = {
+          id: involvedUser.id,
+          name: involvedUser.user || 'Unknown User', // Use full name from backend
+          email: involvedUser.email || '', // Now provided by backend
+          phone: involvedUser.phone || '',
+          profile_image: involvedUser.profile_image,
+          interests: [],
+          friendIds: [],
+          organizationIds: [],
+          // Add attendance info if needed
+          attended: involvedUser.attended,
+          registered: involvedUser.registered,
+        };
+
+        return transformedUser;
+      });
+
+      // Use image URL directly from backend (full URLs like "https://imgur.com/a/y0f0Geb")
+      const resolvedImageUrl =
+        opp.image_url ||
+        opp.image ||
+        opp.imageUrl ||
+        'https://campus-cares.s3.us-east-2.amazonaws.com';
+
+      return {
+        id: opp.id,
+        name: opp.name, // Use name directly from backend
+        nonprofit: opp.nonprofit || null, // Use nonprofit from backend, can be null
+        description: opp.description,
+        date: dateOnly,
+        time: timeOnly,
+        duration: opp.duration,
+        total_slots: opp.total_slots || 10, // Use total_slots from backend
+        imageUrl: resolvedImageUrl,
+        points: opp.duration || 0, // 1 minute = 1 point
+        cause: opp.cause || opp.cause ? [opp.cause] : [], // Handle both array and single cause
+        isPrivate: false, // Default
+        host_id: opp.host_user_id || opp.host_org_id, // Include host_id from backend
+        host_org_id: opp.host_org_id, // Include host organization ID
+        host_org_name: opp.host_org_name, // Include host organization name
+        involved_users: transformedInvolvedUsers, // Include transformed involved_users
+        address: opp.address || '', // Address is now required
+        approved: opp.approved !== undefined ? opp.approved : true, // Default to true if not specified
+        attendance_marked: opp.attendance_marked !== undefined ? opp.attendance_marked : false,
+        visibility: opp.visibility !== undefined ? opp.visibility : [],
+        comments: opp.comments !== undefined ? opp.comments : [],
+        qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
+        causes: opp.causes !== undefined ? opp.causes : [],
+        tags: opp.tags !== undefined ? opp.tags : [],
+        redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
+        multiopp: opp.multiopp || null,
+        multiopp_id: opp.multiopp_id || null,
+        allow_carpool: opp.allow_carpool,
+        carpool_id: opp.carpool_id !== undefined ? opp.carpool_id : null
       };
-
-      return transformedUser;
     });
 
-  return {
+    return transformedOpportunities;
+  } catch (error) {
+    console.error('Error fetching opportunities:', error);
+    throw error;
+  }
+};
+
+export const getOpportunity = async (id: number): Promise<Opportunity> => {
+  try {
+    const opp = await authenticatedRequest(`/opps/${id}`);
+    console.log('opp', opp);
+
+    // --- Parse date & time ---
+    const dateObj = new Date(opp.date);
+    const dateOnly = dateObj.toISOString().split('T')[0];
+
+    let timeOnly: string;
+    if (opp.date.includes('GMT')) {
+      const gmtHours = dateObj.getUTCHours();
+      const easternHours = (gmtHours - 4 + 24) % 24; // adjust to Eastern
+      const hours = easternHours.toString().padStart(2, '0');
+      const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+      const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+      timeOnly = `${hours}:${minutes}:${seconds}`;
+    } else {
+      const hours = dateObj.getHours().toString().padStart(2, '0');
+      const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+      const seconds = dateObj.getSeconds().toString().padStart(2, '0');
+      timeOnly = `${hours}:${minutes}:${seconds}`;
+    }
+
+    // --- Transform involved users ---
+    const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => ({
+      id: involvedUser.id,
+      name: involvedUser.user || 'Unknown User',
+      email: involvedUser.email || '',
+      phone: involvedUser.phone || '',
+      profile_image: involvedUser.profile_image,
+      interests: [],
+      friendIds: [],
+      organizationIds: [],
+      attended: involvedUser.attended,
+      registered: involvedUser.registered,
+    }));
+
+    // --- Resolve image ---
+    const resolvedImageUrl =
+      opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
+
+    // --- Build unified Opportunity object ---
+    const transformedOpp: Opportunity = {
       id: opp.id,
-      name: opp.name, // Use name directly from backend
-      nonprofit: opp.nonprofit || null, // Use nonprofit from backend, can be null
+      name: opp.name,
+      nonprofit: opp.nonprofit || null,
       description: opp.description,
       date: dateOnly,
       time: timeOnly,
       duration: opp.duration,
-      total_slots: opp.total_slots || 10, // Use total_slots from backend
-      imageUrl: opp.image,
+      total_slots: opp.total_slots || 10,
+      imageUrl: resolvedImageUrl,
       points: opp.duration || 0, // 1 minute = 1 point
-      isPrivate: false, // Default
-      host_id: opp.host_user_id || opp.host_org_id, // Include host_id from backend
-      host_org_id: opp.host_org_id, // Include host organization ID
-      host_org_name: opp.host_org_name, // Include host organization name
-      involved_users: transformedInvolvedUsers, // Include transformed involved_users
-      address: opp.address || '', // Address is now required
-      approved: opp.approved !== undefined ? opp.approved : true, // Default to true if not specified
+      isPrivate: false,
+      host_id: opp.host_user_id || opp.host_org_id,
+      host_org_id: opp.host_org_id,
+      host_org_name: opp.host_org_name,
+      involved_users: transformedInvolvedUsers,
+      address: opp.address || '',
+      approved: opp.approved !== undefined ? opp.approved : true,
       attendance_marked: opp.attendance_marked !== undefined ? opp.attendance_marked : false,
       visibility: opp.visibility !== undefined ? opp.visibility : [],
       comments: opp.comments !== undefined ? opp.comments : [],
@@ -691,10 +828,19 @@ export const getOpportunity = async (id: number): Promise<Opportunity> => {
       causes: opp.causes !== undefined ? opp.causes : [],
       tags: opp.tags !== undefined ? opp.tags : [],
       redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
+      multiopp: opp.multiopp || null,
+      multiopp_id: opp.multiopp_id || null,
       allow_carpool: opp.allow_carpool,
-      carpool_id: opp.carpool_id !== undefined ? opp.carpool_id : null
+      carpool_id: opp.carpool_id !== undefined ? opp.carpool_id : null,
     };
-}
+
+    return transformedOpp;
+  } catch (error) {
+    console.error(`Error fetching opportunity ${id}:`, error);
+    throw error;
+  }
+};
+
 
 export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
   try {
@@ -1098,6 +1244,103 @@ export const getServiceDataCsv = async (
   return await response;
 };
 
+
+// MULTIOPP endpoints
+export const getMultiOpps = async (): Promise<MultiOpp[]> => {
+  try {
+    const response = await authenticatedRequest('/multiopps');
+    const rawMultiOpps = Array.isArray(response) ? response : response.multiopps || [];
+
+    return rawMultiOpps.map((multiopp: any) => {
+      // Normalize start_date
+      const startDate =
+        typeof multiopp.start_date === 'string'
+          ? multiopp.start_date
+          : multiopp.start_date
+            ? new Date(multiopp.start_date).toISOString()
+            : null;
+
+      // Map miniopps (individual opportunities)
+      const opportunities: MiniOpp[] = Array.isArray(multiopp.opportunities)
+        ? multiopp.opportunities.map((opp: any) => ({
+          id: opp.id,
+          date:
+            typeof opp.date === 'string'
+              ? opp.date
+              : new Date(opp.date).toISOString(),
+          duration: opp.duration ?? 0,
+          total_slots: opp.total_slots ?? 10,
+          involved_users: Array.isArray(opp.involved_users)
+            ? opp.involved_users.map((u: any) => ({
+              id: u.id,
+              name: u.name ?? 'Unknown',
+              profile_image: u.profile_image ?? null,
+            }))
+            : [],
+        }))
+        : [];
+
+
+      // Extract a representative time from the first opportunity's ISO date
+      const time =
+        opportunities.length > 0
+          ? new Date(opportunities[0].date)
+            .toISOString()
+            .substring(11, 16) // "HH:MM" from ISO 8601
+          : null;
+
+      return {
+        id: multiopp.id,
+        name: multiopp.name,
+        description: multiopp.description ?? null,
+        causes: multiopp.causes ?? [],
+        tags: multiopp.tags ?? [],
+        address: multiopp.address ?? '',
+        nonprofit: multiopp.nonprofit ?? null,
+        image: multiopp.image ?? null,
+        approved: multiopp.approved ?? false,
+        host_org_name: multiopp.host_org_name ?? null,
+        host_org_id: multiopp.host_org_id ?? null,
+        host_user_id: multiopp.host_user_id ?? null,
+        qualifications: multiopp.qualifications ?? [],
+        visibility: multiopp.visibility ?? [],
+        date: startDate,
+        time,
+        days_of_week: multiopp.days_of_week ?? [],
+        week_frequency: multiopp.week_frequency ?? null,
+        week_recurrences: multiopp.week_recurrences ?? 4,
+        opportunities,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching multiopps:', error);
+    throw error;
+  }
+};
+
+export const createMultiOpportunity = async (formData: FormData): Promise<any> => {
+  const token = await getFirebaseToken();
+
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${ENDPOINT_URL}/api/multiopps`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    console.error('Create multiopportunity failed with status:', response.status);
+    const errorInfo = await response.json().catch(() => ({ message: response.statusText }));
+    console.error('Error details:', errorInfo);
+    throw new Error(errorInfo.message || 'Failed to create multiopportunity');
+  }
+
+  return response.json(); // { multiopp, generated_opportunities }
+};
 // -- Cars --
 export const getCar = async (userId: string) => {
   try {
@@ -1192,7 +1435,7 @@ export const getRides = async (carpoolId: number): Promise<Ride[]> => {
 }
 
 // -- Carpool -- 
-export const createCarpool = async (data: object) =>  {
+export const createCarpool = async (data: object) => {
   try {
     await authenticatedRequest('/carpools', {
       method: 'POST',

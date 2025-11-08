@@ -21,7 +21,7 @@ interface CarpoolPageProps {
     ) => void,
 }
 
-const CarpoolPage: React.FC<CarpoolPageProps> = ({currentUser, showPopup}) => {
+const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => {
     const [showRiderForm, setShowRiderForm] = useState(false);
     const [selectedRideId, setSelectedRideId] = useState('');
     const [showWaiverPopup, setShowWaiverPopup] = useState<boolean>(!currentUser.carpool_waiver_signed);
@@ -29,7 +29,11 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({currentUser, showPopup}) => {
     const location = useLocation();
     const { mode } = location.state || {};
     const queryClient = useQueryClient();
-    const [showDriverPopup, setShowDriverPopup] = useState(mode == 'driver');
+    // const [showDriverPopup, setShowDriverPopup] = useState<boolean>(currentUser.carpool_waiver_signed && mode == 'driver');
+    const [showDriverPopup, setShowDriverPopup] = useState<boolean>(
+        !!(currentUser?.carpool_waiver_signed && mode === 'driver')
+    );
+
     const navigate = useNavigate();
 
     const { data: opportunity, isLoading } = useQuery<Opportunity>({
@@ -58,7 +62,7 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({currentUser, showPopup}) => {
     if (!opportunityId || !carpoolId) return null;
 
     if (isLoading || !opportunity || ridesLoading || !rides) return <p>Loading...</p>
-    
+
     const canUnregister = unregistrationCheck?.canUnregister ?? true;
     const isDriver = rides.some(ride => ride.driver_id == currentUser.id.toString());
     const userRide = rides.find(ride => ride.riders.some(rider => rider.user_id == currentUser.id.toString()));
@@ -71,20 +75,20 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({currentUser, showPopup}) => {
     dateObj.setDate(dateObj.getDate() + 1);
 
     const displayDate = dateObj.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
     });
 
     const displayTime = new Date(`1970-01-01T${opportunity.time}`).toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
     });
 
     const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, opportunity.duration);
-    
+
 
     const onSelectRide = async (id: string) => {
         if (isRider && userRide.id == id) {
@@ -110,7 +114,7 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({currentUser, showPopup}) => {
     return (
         <div className="carpool-page">
             <button className="back-btn" onClick={() => navigate(`/opportunity/${opportunityId}`)}>
-                <ArrowBackIosIcon style={{fontSize: "14px"}}/>
+                <ArrowBackIosIcon style={{ fontSize: "14px" }} />
                 <p>Back to Opportunity Details</p>
             </button>
             <div className="carpool-header">
@@ -143,28 +147,29 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({currentUser, showPopup}) => {
                                     <h2>{ride.driver_name}</h2>
                                     <div className="cp-card-riders">
                                         <div className="cp-card-slots">
-                                            {ride.riders.map(rider => 
+                                            {ride.riders.map(rider =>
                                                 <div className="cp-card-slot" key={rider.id}>
-                                                    <img src={getProfilePictureUrl(rider.profile_image)} alt={`${rider.name} pfp`}/>
+                                                    <img src={getProfilePictureUrl(rider.profile_image)} alt={`${rider.name} pfp`} />
                                                 </div>
                                             )}
-                                            {Array.from({length: seatsLeft}).map((_, i) =>
-                                                <div className="cp-card-slot" key={`empty-${i}`} style={{ borderColor: "lightgrey" }}/>
+                                            {Array.from({ length: seatsLeft }).map((_, i) =>
+                                                <div className="cp-card-slot" key={`empty-${i}`} style={{ borderColor: "lightgrey" }} />
                                             )}
                                         </div>
                                         <p>{seatsLeft} Seat{seatsLeft == 1 ? '' : 's'} Available</p>
                                     </div>
                                 </div>
                             </div>
-                            <button 
-                                className="btn-red" 
-                                onClick={() => onSelectRide(ride.id)} 
+                            <button
+                                className="btn-red"
+                                onClick={() => onSelectRide(ride.id)}
                                 disabled={seatsLeft == 0 || isDriver || (isRider && !(userRide.id == ride.id)) || !canUnregister ? true : false}
                             >
                                 {isRider && userRide.id == ride.id ? 'Ride Joined ✓' : 'Join Ride'}
                             </button>
-                    </div>
-                )})}
+                        </div>
+                    )
+                })}
 
                 <div className="cp-add">
                     <button className="btn-orange" disabled={!canUnregister || isDriver || isRider ? true : false} onClick={onAddRide}>
@@ -183,8 +188,8 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({currentUser, showPopup}) => {
                 />
             }
 
-            {showDriverPopup && opportunity.carpool_id && 
-                <DriverFormPopup 
+            {showDriverPopup && opportunity.carpool_id &&
+                <DriverFormPopup
                     setShowPopup={setShowDriverPopup}
                     currentUser={currentUser}
                     carpoolId={opportunity.carpool_id}

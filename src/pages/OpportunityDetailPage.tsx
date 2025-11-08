@@ -6,7 +6,7 @@ import {
   deleteOpportunity,
   registerForOpp,
   unregisterForOpp,
-  getOpportunities,
+  getCurrentOpportunities,
   uploadProfilePicture,
   getOpportunityAttendance,
 } from '../api';
@@ -122,26 +122,90 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
 
   // Parse time correctly for display (assuming Eastern Time)
   const [hours, minutes] = opportunity.time.split(':');
-  const displayTime = new Date(2024, 0, 1, parseInt(hours), parseInt(minutes)).toLocaleTimeString(
-    'en-US',
-    { hour: 'numeric', minute: '2-digit', hour12: true }
-  );
+  const displayTime =
+    (() => {
+      // Handle normal opportunities (with `time` field)
+      const [hours, minutes] = opportunity.time.split(':');
+      const realHours = opportunity.multiopp ? parseInt(hours) - 1 : parseInt(hours); // convert GMT → Eastern (accounting for bug)
+      return new Date(2024, 0, 1, realHours, parseInt(minutes)).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      });
+    })();
 
   // Calculate and format end time
-  const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, opportunity.duration);
+  const displayEndTime = (() => {
+    // Split the time string
+    let [hours, minutes] = opportunity.time.split(':');
+
+    // Adjust for multiopp GMT issue
+    let realHours = opportunity.multiopp ? parseInt(hours) - 1 : parseInt(hours);
+
+    // Normalize and handle wraparound
+    if (realHours < 0) realHours += 24;
+
+    // Construct corrected time string
+    let realTime = realHours.toString().padStart(2, '0') + ':' + minutes;
+
+    // Return formatted end time using your utility
+    return calculateEndTime(opportunity.date, realTime, opportunity.duration);
+  })();
+
+  // convert GMT → Eastern (accounting for bug)
+
+
+
   // Organizations that can see this opportunity (visibility list)
   const visibilityOrgs = (allOrgs || [])
     .filter(
       (org) => Array.isArray(opportunity.visibility) && opportunity.visibility.includes(org.id)
     )
     .sort((a, b) => a.name.localeCompare(b.name));
-  const handleButtonClick = () => {
-    if (isUserSignedUp) {
-      handleUnSignUp(opportunity.id, opportunity.date, opportunity.time);
-    } else {
-      handleSignUp(opportunity.id);
+
+  const handleButtonClick = async () => {
+    try {
+      // If user is already signed up, confirm unregistration
+      if (isUserSignedUp) {
+        if (opportunity.redirect_url) {
+          alert(
+            "You are registered for this opportunity via an external site. To un-register, please visit that site as well."
+          );
+        }
+
+        const confirmed = window.confirm(
+          "Are you sure you want to un-register from this opportunity?"
+        );
+        if (confirmed) {
+          await handleUnSignUp(opportunity.id, opportunity.date, opportunity.time);
+          alert("You have been unregistered successfully.");
+        }
+        return; // stop here after un-sign-up
+      }
+
+      // Otherwise, handle sign up
+      if (opportunity.redirect_url) {
+        // External registration link flow
+        const confirmed = window.confirm(
+          "This opportunity requires registration on an external site.\n\nClick OK to open the registration link in a new tab."
+        );
+        if (confirmed) {
+          window.open(opportunity.redirect_url, "_blank");
+          await handleSignUp(opportunity.id); // mark them registered in system
+          alert("You are now registered and redirected to the external site!");
+        }
+        return;
+      }
+
+      // Normal sign up
+      await handleSignUp(opportunity.id);
+      alert("You have successfully signed up!");
+    } catch (error) {
+      console.error("Error during sign up / un-sign up:", error);
+      alert("Something went wrong. Please try again.");
     }
   };
+
 
   const handleAttendanceSubmitted = async () => {
     try {
@@ -207,7 +271,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
     try {
       await registerForOpp({ user_id: userId, opportunity_id: opportunity.id });
       // Refresh opportunities data to get updated involved_users
-      const updatedOpps = await getOpportunities();
+      const updatedOpps = await getCurrentOpportunities();
       // setOpportunities(updatedOpps);
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       // alert('User registered successfully!');
@@ -229,7 +293,8 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
         isAdminOrHost: currentUser.admin || opportunity.host_id === currentUser.id, // Pass admin/host status
       });
       // Refresh opportunities data to get updated involved_users
-      const updatedOpps = await getOpportunities();
+      // FIX? Uses getCurrentOpportunities instead of getOpportuinties, make sure not important
+      const updatedOpps = await getCurrentOpportunities();
       // setOpportunities(updatedOpps);
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       alert('User unregistered successfully!');
@@ -590,6 +655,18 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
               </span>
             </div>
           )}
+          <button
+            onClick={handleButtonClick}
+            disabled={!isUserSignedUp && !canSignUp}
+            className={`mt-6 inline-flex items-center justify-center rounded-lg px-5 py-3 text-base font-semibold shadow-lg transition-colors ${isUserSignedUp
+                ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                : canSignUp
+                  ? 'bg-cornell-red hover:bg-red-700 text-white'
+                  : 'bg-gray-500/70 text-white/80 cursor-not-allowed'
+              }`}
+          >
+            {isUserSignedUp ? 'Signed Up ✓' : canSignUp ? 'Sign Up Now' : 'Event Full'}
+          </button>
         </div>
       </div>
 
@@ -597,6 +674,19 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
         <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-2xl font-bold">Event Details</h3>
+            {/* 🕒 Event Time Display */}
+            {!isEditing && (
+              <div className="mb-6 text-gray-700 text-lg">
+                <p>
+                  <span className="font-semibold">Date:</span>{' '}
+                  {displayDate}
+                </p>
+                <p>
+                  <span className="font-semibold">Time:</span>{' '}
+                  {displayTime} – {displayEndTime}
+                </p>
+              </div>
+            )}
             {canManageOpportunity && (
               <div className="flex gap-2">
                 {!isEditing ? (
@@ -638,6 +728,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
                   </>
                 )}
               </div>
+
             )}
           </div>
 
@@ -982,11 +1073,11 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
 
 
           {allowCarpool && isUserSignedUp &&
-            <button className="w-full mt-6 font-bold py-4 px-4 rounded-lg bg-red-600 transition-colors text-white text-lg" 
-              onClick={() => {navigate(`/carpool/${opportunity.id}`)}} 
-              style={{cursor: "pointer"}}
+            <button className="w-full mt-6 font-bold py-4 px-4 rounded-lg bg-red-600 transition-colors text-white text-lg"
+              onClick={() => { navigate(`/carpool/${opportunity.id}`) }}
+              style={{ cursor: "pointer" }}
             >
-                View Carpool Rides
+              View Carpool Rides
             </button>
           }
         </div>
@@ -1183,10 +1274,10 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
                 onClick={handleButtonClick}
                 disabled={!canSignUp && !isUserSignedUp}
                 className={`w-full mt-6 font-bold py-4 px-4 rounded-lg transition-colors text-white text-lg ${isUserSignedUp
-                    ? 'bg-green-600 hover:bg-green-700'
-                    : canSignUp
-                      ? 'bg-cornell-red hover:bg-red-800'
-                      : 'bg-gray-400 cursor-not-allowed'
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : canSignUp
+                    ? 'bg-cornell-red hover:bg-red-800'
+                    : 'bg-gray-400 cursor-not-allowed'
                   }`}
               >
                 {isUserSignedUp ? 'Signed Up ✓' : canSignUp ? 'Sign Up Now' : 'Event Full'}

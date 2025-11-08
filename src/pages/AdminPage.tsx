@@ -35,8 +35,9 @@ const AdminPage: React.FC<AdminPageProps> = ({
   const [unapprovedOrganizations, setUnapprovedOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [securityToken, setSecurityToken] = useState<string | null>(null);
   const [isLoadingToken, setIsLoadingToken] = useState(false);
+  const [securityToken, setSecurityToken] = useState<string | null>(null);
+  const [showCopied, setShowCopied] = useState(false);
   const [userEmails, setUserEmails] = useState<string[]>([]);
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
   const [showEmails, setShowEmails] = useState(false);
@@ -223,6 +224,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
       if (firebaseUser) {
         const token = await firebaseUser.getIdToken();
         setSecurityToken(token);
+        return token;
       } else {
         setError('No authenticated Firebase user found. Please sign in again.');
       }
@@ -445,48 +447,40 @@ const promptAndDownloadCsv = async () => {
       </div>
 
       {/* Security Token Section */}
-      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Security Token</h2>
-        <div className="flex flex-col space-y-4">
-          <button
-            onClick={handleGetSecurityToken}
-            disabled={isLoadingToken}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 w-fit"
-          >
-            {isLoadingToken ? 'Getting Token...' : 'Get Security Token'}
-          </button>
+      {/* Security Token Section */}
+<div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+  <h2 className="text-xl font-semibold text-gray-900 mb-4">Security Token</h2>
 
-          {securityToken && (
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Security Token:
-              </label>
-              <div className="bg-white border border-gray-300 rounded-lg p-3">
-                <textarea
-                  value={securityToken}
-                  readOnly
-                  className="w-full h-32 p-2 text-sm font-mono bg-gray-50 border border-gray-200 rounded resize-none"
-                  placeholder="Token will appear here..."
-                />
-                <div className="mt-2 flex space-x-2">
-                  <button
-                    onClick={() => navigator.clipboard.writeText(securityToken)}
-                    className="text-sm bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 transition-colors"
-                  >
-                    Copy to Clipboard
-                  </button>
-                  <button
-                    onClick={() => setSecurityToken(null)}
-                    className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors"
-                  >
-                    Clear Token
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+  <div className="flex flex-col space-y-4">
+    <button
+      onClick={async () => {
+        setIsLoadingToken(true);
+        try {
+          const token = await handleGetSecurityToken();
+          if (token) {
+            await navigator.clipboard.writeText(token);
+            setShowCopied(true);
+            setTimeout(() => setShowCopied(false), 2000);
+          }
+        } finally {
+          setIsLoadingToken(false);
+        }
+      }}
+      disabled={isLoadingToken}
+      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 w-fit"
+    >
+      {isLoadingToken ? 'Getting Token...' : 'Get Security Token'}
+    </button>
+
+    {showCopied && (
+      <div className="bg-green-100 text-green-800 px-3 py-2 rounded-md text-sm font-medium w-fit">
+        ✅ Copied!
       </div>
+    )}
+  </div>
+</div>
+
+
       {/* CSV Export Section */}
       <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">CSV Data Export</h2>

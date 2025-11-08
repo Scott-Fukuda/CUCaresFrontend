@@ -12,6 +12,7 @@ import {
   FriendshipStatus,
   FriendshipsResponse,
   UserWithFriendshipStatus,
+  MultiOpp
 } from './types';
 import * as api from './api';
 import {
@@ -22,7 +23,7 @@ import {
   signOut,
   initializeFirebase,
 } from './firebase-config';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AuthFlow from './AuthFlow';
 import AppRouter from './AppRouter';
 import PopupMessage from './components/PopupMessage';
@@ -30,8 +31,54 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 type AuthView = 'login' | 'register';
 
+type RedirectState = {
+  from?: {
+    pathname: string;
+    search?: string;
+    hash?: string;
+  };
+};
+
+const AUTH_ROUTES = new Set(['/login', '/register', '/about-us', '/']);
+
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const latestLocationRef = useRef(location);
+
+  useEffect(() => {
+    latestLocationRef.current = location;
+  }, [location]);
+
+  const getRedirectPath = () => {
+    const currentLocation = latestLocationRef.current;
+    const state = currentLocation.state as RedirectState | null;
+    const from = state?.from;
+    if (from?.pathname) {
+      if (AUTH_ROUTES.has(from.pathname)) {
+        return '/opportunities';
+      }
+      const search = from.search ?? '';
+      const hash = from.hash ?? '';
+      return `${from.pathname}${search}${hash}`;
+    }
+    return '/opportunities';
+  };
+
+  const getAuthRedirectState = (): RedirectState => {
+    const currentLocation = latestLocationRef.current;
+    const existingState = currentLocation.state as RedirectState | null;
+    if (existingState?.from) {
+      return existingState;
+    }
+    return {
+      from: {
+        pathname: currentLocation.pathname,
+        search: currentLocation.search,
+        hash: currentLocation.hash,
+      },
+    };
+  };
   const queryClient = useQueryClient();
 
   // Subscribe to Firebase auth state on mount so users stay logged in across reloads
@@ -60,7 +107,11 @@ const AppContent: React.FC = () => {
             // console.log('User exists in backend, fetching user data...');
             const existingUser = await api.getUserByEmail(firebaseUser.email, token);
             setCurrentUser(existingUser);
-            navigate('/opportunities');
+            const currentLocation = latestLocationRef.current;
+            if (AUTH_ROUTES.has(currentLocation.pathname)) {
+              const redirectPath = getRedirectPath();
+              navigate(redirectPath, { replace: true, state: null });
+            }
           } else {
             // console.log('User does NOT exist in backend, sending to register page');
 
@@ -70,9 +121,9 @@ const AppContent: React.FC = () => {
 
             if (response.is_approved) {
               setAuthView('register');
-              navigate('/register');
+              navigate('/register', { state: getAuthRedirectState() });
             } else {
-              navigate('/login');
+              navigate('/login', { state: getAuthRedirectState() });
             }
           }
         } else {
@@ -99,10 +150,12 @@ const AppContent: React.FC = () => {
   // const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [signups, setSignups] = useState<SignUp[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [multiopp, setMultiopp] = useState<MultiOpp[]>([]);
+  const [allOpps, setAllOpps] = useState<(Opportunity | MultiOpp)[]>([]);
 
-  const { data: opportunities = [], isLoading: oppsLoading} = useQuery({
+  const { data: opportunities = [], isLoading: oppsLoading } = useQuery({
     queryKey: ['opportunities'],
-    queryFn: api.getOpportunities,
+    queryFn: api.getCurrentOpportunities,
     enabled: !!currentUser
   });
 
@@ -146,10 +199,11 @@ const AppContent: React.FC = () => {
         setAppError(null);
         try {
           //console.log('Making API calls...');
-          const [usersData, oppsData, orgsData] = await Promise.all([
-            api.getUsers(),
-            api.getOpportunities(),
+          const [usersData, oppsData, orgsData, mulitoppsData] = await Promise.all([
+            api.getUsersMinimal(),
+            api.getCurrentOpportunities(),
             api.getApprovedOrgs(),
+            api.getMultiOpps(),
           ]);
 
           //console.log('API calls completed:', {
@@ -161,8 +215,10 @@ const AppContent: React.FC = () => {
           setStudents(usersData);
           setLeaderboardUsers(usersData); // Use the same data for leaderboard
           // setOpportunities(oppsData);
-          await queryClient.invalidateQueries({ queryKey: ['opportunities']});
+          await queryClient.invalidateQueries({ queryKey: ['opportunities'] });
           setOrganizations(orgsData);
+          setMultiopp(mulitoppsData);
+          setAllOpps([...oppsData, ...mulitoppsData]);
           setSignups([]); // Initialize empty signups - we'll track this locally
 
           // Update currentUser with full data if they exist in the usersData
@@ -252,16 +308,17 @@ const AppContent: React.FC = () => {
           console.log('User found, logging in:', existingUser);
 
           setCurrentUser(existingUser);
-          navigate('/');
+          const redirectPath = getRedirectPath();
+          navigate(redirectPath, { replace: true, state: null });
         } else {
           // User doesn't exist, redirect to registration
           console.log('User not found, redirecting to registration');
           if (approvalCheck.is_approved || firebaseUser.email.toLowerCase().endsWith('@cornell.edu')) {
             console.log('Approved user, redirecting to registration');
             setAuthView('register');
-            navigate('/register');
+            navigate('/register', { state: getAuthRedirectState() });
           } else {
-            navigate('/login');
+            navigate('/login', { state: getAuthRedirectState() });
           }
         }
       }
@@ -291,7 +348,7 @@ const AppContent: React.FC = () => {
     const firebaseUser = auth.currentUser;
     if (!firebaseUser || !firebaseUser.email) {
       setAuthError('No authenticated user found. Please sign in with Google first.');
-      navigate('/login');
+      navigate('/login', { state: getAuthRedirectState() });
       return;
     }
 
@@ -339,7 +396,8 @@ const AppContent: React.FC = () => {
 
       setStudents((prev) => [...prev, finalNewUser]);
       setCurrentUser(finalNewUser);
-      navigate('/opportunities');
+      const redirectPath = getRedirectPath();
+      navigate(redirectPath, { replace: true, state: null });
       setShowPostRegistrationSetup(true);
       // navigate(`/profile/${currentUser?.id}`) // Redirect to profile page after registration
     } catch (e: any) {
@@ -382,73 +440,87 @@ const AppContent: React.FC = () => {
   };
 
   // Data Handlers
-  const handleSignUp = useCallback(async (opportunityId: number) => {
-    if (!currentUser) return;
-    //console.log('handleSignUp called for opportunity:', opportunityId, 'user:', currentUser.id);
+  const handleSignUp = useCallback(
+    async (opportunityId: number) => {
+      if (!currentUser) return;
+      //console.log('handleSignUp called for opportunity:', opportunityId, 'user:', currentUser.id);
+      // const isMultiOpp = allOpps?.some(
+      // (opp) => 'opportunities' in opp && opp.id === opportunityId
+      // );
+      // if (isMultiOpp) {
+      //   console.log('Skipping signup — this is a MultiOpp container, not an event.');
+      //   return;
+      // }
+      try {
+        // Check if opportunity is fully booked before attempting registration
+        //console.log('Checking opportunity availability...');
+        const availabilityCheck = await api.checkOpportunityAvailability(opportunityId);
+        //console.log('Availability check result:', availabilityCheck);
 
-    try {
-      // Check if opportunity is fully booked before attempting registration
-      //console.log('Checking opportunity availability...');
-      const availabilityCheck = await api.checkOpportunityAvailability(opportunityId);
-      //console.log('Availability check result:', availabilityCheck);
+        if (availabilityCheck.is_full) {
+          // Show popup explaining the opportunity is full
+          showPopup(
+            'Opportunity Full',
+            'This opportunity has recently filled up. We apologize for the inconvenience. Please check back later or look for other opportunities to get involved!',
+            'warning'
+          );
 
-      if (availabilityCheck.is_full) {
-        // Show popup explaining the opportunity is full
-        showPopup(
-          'Opportunity Full',
-          'This opportunity has recently filled up. We apologize for the inconvenience. Please check back later or look for other opportunities to get involved!',
-          'warning'
-        );
+          // Refresh opportunities to get updated state from backend
+          //console.log('Refreshing opportunities data after finding opportunity is full...');
+          const updatedOpps = await api.getCurrentOpportunities();
+          //console.log('Updated opportunities received:', updatedOpps.length);
+          // setOpportunities(updatedOpps);
+          await queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
-        // Refresh opportunities to get updated state from backend
-        //console.log('Refreshing opportunities data after finding opportunity is full...');
-        const updatedOpps = await api.getOpportunities();
+          return; // Exit early, don't proceed with registration
+        }
+
+        // If not full, proceed with registration
+        //console.log('Opportunity has available slots, proceeding with registration...');
+
+        // Optimistically update local state immediately
+        setSignups(prev => [...prev, { userId: currentUser.id, opportunityId }]);
+
+        await api.registerForOpp({ user_id: currentUser.id, opportunity_id: opportunityId });
+        //console.log('API registerForOpp successful');
+
+        // Refresh opportunities to get updated involved_users from backend
+        //console.log('Refreshing opportunities data...');
+        const updatedOpps = await api.getCurrentOpportunities();
         //console.log('Updated opportunities received:', updatedOpps.length);
         // setOpportunities(updatedOpps);
-        await queryClient.invalidateQueries({ queryKey: ['opportunities']});
+        await queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
-        return; // Exit early, don't proceed with registration
+        const opportunity = await api.getOpportunity(opportunityId);
+        if (opportunity.allow_carpool) {
+          setShowCarpoolPopup(opportunity.id);
+        } else {
+          // Show success popup
+          showPopup(
+            'Thank you for signing up!',
+            'Thank you for signing up for this opportunity. The event host may reach out to you with further details (i.e. ride coordination). Otherwise, please arrive at the listed address at the designated time. Thank you for serving!',
+            'success'
+          );
+        }
+
+      } catch (e: any) {
+        console.error('Error in handleSignUp:', e);
+        // Revert local state on error
+        setSignups(prev => prev.filter(s => !(s.userId === currentUser.id && s.opportunityId === opportunityId)));
+        alert(`Error signing up: ${e.message}`);
       }
-
-      // If not full, proceed with registration
-      //console.log('Opportunity has available slots, proceeding with registration...');
-
-      // Optimistically update local state immediately
-      setSignups(prev => [...prev, { userId: currentUser.id, opportunityId }]);
-
-      await api.registerForOpp({ user_id: currentUser.id, opportunity_id: opportunityId });
-      //console.log('API registerForOpp successful');
-
-      // Refresh opportunities to get updated involved_users from backend
-      //console.log('Refreshing opportunities data...');
-      const updatedOpps = await api.getOpportunities();
-      //console.log('Updated opportunities received:', updatedOpps.length);
-      // setOpportunities(updatedOpps);
-      await queryClient.invalidateQueries({ queryKey: ['opportunities']});
-
-      const opportunity = await api.getOpportunity(opportunityId);
-      if (opportunity.allow_carpool) {
-        setShowCarpoolPopup(opportunity.id);
-      } else {
-        // Show success popup
-        showPopup(
-          'Thank you for signing up!',
-          'Thank you for signing up for this opportunity. The event host may reach out to you with further details (i.e. ride coordination). Otherwise, please arrive at the listed address at the designated time. Thank you for serving!',
-          'success'
-        );
-      }
-
-    } catch (e: any) {
-      console.error('Error in handleSignUp:', e);
-      // Revert local state on error
-      setSignups(prev => prev.filter(s => !(s.userId === currentUser.id && s.opportunityId === opportunityId)));
-      alert(`Error signing up: ${e.message}`);
-    }
-  }, [currentUser]);
+    }, [currentUser]);
 
   const handleUnSignUp = useCallback(
     async (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => {
       if (!currentUser) return;
+      // const isMultiOpp = allOpps?.some(
+      //   (opp) => 'opportunities' in opp && opp.id === opportunityId
+      // );
+      // if (isMultiOpp) {
+      //   console.log('Skipping signup — this is a MultiOpp container, not an event.');
+      //   return;
+      // }
 
       // Find the opportunity to check if user is host
       const opportunity = opportunities.find((opp) => opp.id === opportunityId);
@@ -473,9 +545,9 @@ const AppContent: React.FC = () => {
         });
 
         // Refresh opportunities to get updated involved_users from backend
-        // const updatedOpps = await api.getOpportunities();
+        // const updatedOpps = await api.getCurrentOpportunities();
         // setOpportunities(updatedOpps);
-        await queryClient.invalidateQueries({ queryKey: ['opportunities']});
+        await queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       } catch (e: any) {
         console.error('Error in handleUnSignUp:', e);
         // Revert local state on error
@@ -800,6 +872,10 @@ const AppContent: React.FC = () => {
 
   const joinOrg = useCallback(
     async (orgId: number) => {
+      if (orgId === 15 && !currentUser?.admin) {
+        alert('CampusCares organization is only joinable to team members.');
+        return;
+      }
       if (
         !currentUser ||
         !currentUser.organizationIds ||
@@ -917,6 +993,10 @@ const AppContent: React.FC = () => {
         <AppRouter
           currentUser={currentUser}
           setCurrentUser={setCurrentUser}
+          multiopp={multiopp}
+          setAllOpps={setAllOpps}
+          allOpps={allOpps}
+          setMultiopp={setMultiopp}
           isLoading={isLoading}
           appError={appError}
           pendingRequestCount={pendingRequestCount}

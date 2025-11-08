@@ -55,6 +55,44 @@ export interface Opportunity {
   attendance_marked?: boolean; // Whether the attendance has been marked by the host
   visibility: number[]; // empty list means public, otherwise list of organization IDs that can see it
   redirect_url?: string | null; // External URL for signup, null means normal signup
+  multiopp_id?: number | null; // ID of the multi-opportunity group, null if not part of one
+  multiopp?: MultiOpp | null;
+  allow_carpool: boolean;
+  carpool_id: string;
+}
+
+export interface MultiOpp {
+  id: number;
+  name: string;
+  date: string; // represents the first date in the opps
+  time: string
+  days_of_week: Array<Record<string, string[]>>;
+  week_frequency?: number | null;
+  week_recurrences: number;
+  created_at?: string;
+
+  // Optional metadata (if you extend the serializer later)
+  description?: string | null;
+  causes?: string[];
+  tags?: string[];
+  address?: string;
+  nonprofit?: string | null;
+  image?: string | null;
+  approved?: boolean;
+  host_user_id?: number | null;
+  host_org_name?: string | null;
+  qualifications?: string[];
+  visibility?: number[];
+  redirect_url?: string | null;
+  total_slots?: number | null;
+
+  opportunities: Opportunity[];
+}
+
+export interface MiniOpp {
+  id: number;
+  date: string;
+  duration: number;
   allow_carpool: boolean;
   carpool_id: string | null;
 }

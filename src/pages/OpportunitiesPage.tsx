@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Opportunity, User, SignUp, allInterests, Organization } from '../types';
+import { Opportunity, User, SignUp, allInterests, Organization, MultiOpp } from '../types';
 import OpportunityCard from '../components/OpportunityCard';
+import MultiOppCard from '../components/MultiOppCard';
 import { useNavigate } from 'react-router-dom';
 
 interface OpportunitiesPageProps {
@@ -16,13 +17,14 @@ interface OpportunitiesPageProps {
   ) => void;
   allOrgs: Organization[];
   currentUserSignupsSet: Set<number>;
+  multiopps: MultiOpp[];
   showCarpoolPopup: number | null;
   setShowCarpoolPopup: React.Dispatch<React.SetStateAction<number | null>>;
   showPopup: (
-        title: string,
-        message: string,
-        type: 'success' | 'info' | 'warning' | 'error'
-    ) => void
+    title: string,
+    message: string,
+    type: 'success' | 'info' | 'warning' | 'error'
+  ) => void
 }
 
 const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
@@ -34,6 +36,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   handleUnSignUp,
   allOrgs,
   currentUserSignupsSet,
+  multiopps,
   showCarpoolPopup,
   setShowCarpoolPopup,
   showPopup
@@ -81,6 +84,9 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           return opp.visibility.some((orgId) => userOrgIds.includes(orgId));
         }
       })
+      .filter((opp) => {
+        return (!opp.multiopp)
+      })
       .sort((a, b) => a.fullDateTime.getTime() - b.fullDateTime.getTime());
   }, [opportunities]);
 
@@ -93,6 +99,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     setShowExternalSignupModal(true);
   };
 
+  console.log(currentUser);
   const handleExternalUnsignup = (opportunity: Opportunity) => {
     setSelectedOpportunity(opportunity);
     setShowExternalUnsignupModal(true);
@@ -192,6 +199,30 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
 
       {/* Opportunities Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Render MultiOpps with visibility filtering */}
+        {multiopps
+          .filter((multiopp) => {
+            // Public or admin always allowed
+            if (!multiopp.visibility || multiopp.visibility.length === 0 || currentUser.admin)
+              return true;
+
+            const userOrgIds = currentUser.organizationIds || [];
+            return multiopp.visibility.some((orgId) => userOrgIds.includes(orgId));
+          })
+          .map((multiopp) => (
+            <MultiOppCard
+              key={multiopp.id}
+              multiopp={multiopp}
+              currentUser={currentUser}
+              allOrgs={allOrgs}
+              opportunitiesData={opportunities}
+              onSignUp={handleSignUp}
+              onUnSignUp={handleUnSignUp}
+              onExternalSignup={handleExternalSignup}
+              onExternalUnsignup={handleExternalUnsignup}
+            />
+          ))}
+
         {filteredOpportunities.map((opp) => {
           // Use backend data directly - it's more reliable than trying to combine sources
           let signedUpStudents: User[] = [];
@@ -302,18 +333,18 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           </div>
         </div>
       )}
-        <p className="text-xs text-gray-500 mt-6 text-center">
-          Click here to see our {" "}
-          <a
-            href="/Terms of Service.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-gray-700"
-          >
-            Terms of Service and Privacy Policy
-          </a>
-          .
-        </p>
+      <p className="text-xs text-gray-500 mt-6 text-center">
+        Click here to see our {" "}
+        <a
+          href="/Terms of Service.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-gray-700"
+        >
+          Terms of Service and Privacy Policy
+        </a>
+        .
+      </p>
     </>
   );
 };
