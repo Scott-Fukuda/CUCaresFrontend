@@ -21,10 +21,10 @@ interface OpportunityCardProps {
   onExternalSignup?: (opportunity: Opportunity) => void; // Add callback for external signup
   onExternalUnsignup?: (opportunity: Opportunity) => void; // Add callback for external unsignup
   showPopup: (
-        title: string,
-        message: string,
-        type: 'success' | 'info' | 'warning' | 'error'
-    ) => void
+    title: string,
+    message: string,
+    type: 'success' | 'info' | 'warning' | 'error'
+  ) => void
 }
 
 const PeopleIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -94,22 +94,22 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
     if (isUserSignedUp) {
       if (opportunity.allow_carpool) {
         try {
-            const res = await removeCarpoolUser({
-                user_id: currentUser.id,
-                carpool_id: opportunity.carpool_id
-            });
+          const res = await removeCarpoolUser({
+            user_id: currentUser.id,
+            carpool_id: opportunity.carpool_id
+          });
 
-            if (!res.valid) {
-              showPopup(
-                'Failed to unregister',
-                'You have signed up to drive for this event and therefore cannot unregister.',
-                'error'
-              );
-              return;
-            }
-            queryClient.invalidateQueries({ queryKey: ['rides', opportunity.carpool_id] });
+          if (!res.valid) {
+            showPopup(
+              'Failed to unregister',
+              'You have signed up to drive for this event and therefore cannot unregister.',
+              'error'
+            );
+            return;
+          }
+          queryClient.invalidateQueries({ queryKey: ['rides', opportunity.carpool_id] });
         } catch (err) {
-            console.log('Failed to remove ride:', err);
+          console.log('Failed to remove ride:', err);
         }
       }
       // Check if this is an external opportunity and user is trying to unregister
@@ -208,7 +208,6 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   }, [opportunity.visibility, allOrgs]);
 
   // Create a Date object and add 1 day
-  console.log('card opp', opportunity)
   const dateObj = new Date(opportunity.date);
   dateObj.setDate(dateObj.getDate() + 1);
 
@@ -307,8 +306,8 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
                 />
                 <div
                   className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded-md transition-opacity pointer-events-none ${clickedStudentId === student.id
-                      ? 'opacity-100'
-                      : 'opacity-0 group-hover:opacity-100'
+                    ? 'opacity-100'
+                    : 'opacity-0 group-hover:opacity-100'
                     }`}
                 >
                   {student.name}
@@ -389,14 +388,14 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
             eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister)
           }
           className={`w-full mt-auto font-bold py-3 px-4 rounded-lg transition-colors text-white ${eventStarted
-              ? 'bg-gray-500 cursor-not-allowed'
-              : isUserSignedUp
-                ? canUnregister
-                  ? 'bg-green-600 hover:bg-green-700'
-                  : 'bg-orange-500 cursor-not-allowed'
-                : canSignUp
-                  ? 'bg-cornell-red hover:bg-red-800'
-                  : 'bg-gray-400 cursor-not-allowed'
+            ? 'bg-gray-500 cursor-not-allowed'
+            : isUserSignedUp
+              ? canUnregister
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-orange-500 cursor-not-allowed'
+              : canSignUp
+                ? 'bg-cornell-red hover:bg-red-800'
+                : 'bg-gray-400 cursor-not-allowed'
             }`}
         >
           {eventStarted

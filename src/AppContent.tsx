@@ -107,6 +107,7 @@ const AppContent: React.FC = () => {
             // console.log('User exists in backend, fetching user data...');
             const existingUser = await api.getUserByEmail(firebaseUser.email, token);
             setCurrentUser(existingUser);
+            console.log('setting user', existingUser)
             const currentLocation = latestLocationRef.current;
             if (AUTH_ROUTES.has(currentLocation.pathname)) {
               const redirectPath = getRedirectPath();
@@ -230,6 +231,7 @@ const AppContent: React.FC = () => {
               //   after: { interests: fullCurrentUser.interests, organizationIds: fullCurrentUser.organizationIds }
               // });
               setCurrentUser(fullCurrentUser);
+              console.log('setting full current user', fullCurrentUser)
             }
             // Mark this user as loaded to prevent infinite loops
             lastLoadedUserId.current = currentUser.id;

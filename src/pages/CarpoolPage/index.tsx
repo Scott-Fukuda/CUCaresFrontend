@@ -11,6 +11,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Opportunity, User, Ride } from '../../types';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { formatTimeUntilEvent, calculateEndTime, canUnregisterFromOpportunity } from '../../utils/timeUtils';
+import { Tooltip } from 'react-tooltip';
 
 interface CarpoolPageProps {
     currentUser: User;
@@ -29,11 +30,10 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
     const location = useLocation();
     const { mode } = location.state || {};
     const queryClient = useQueryClient();
-    // const [showDriverPopup, setShowDriverPopup] = useState<boolean>(currentUser.carpool_waiver_signed && mode == 'driver');
     const [showDriverPopup, setShowDriverPopup] = useState<boolean>(
         !!(currentUser?.carpool_waiver_signed && mode === 'driver')
     );
-
+    console.log('signed?', currentUser)
     const navigate = useNavigate();
 
     const { data: opportunity, isLoading } = useQuery<Opportunity>({
@@ -113,6 +113,7 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
 
     return (
         <div className="carpool-page">
+            <Tooltip id="rider-tooltip" className="small-tooltip" />
             <button className="back-btn" onClick={() => navigate(`/opportunity/${opportunityId}`)}>
                 <ArrowBackIosIcon style={{ fontSize: "14px" }} />
                 <p>Back to Opportunity Details</p>
@@ -137,6 +138,9 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
             <div className="cp-content">
                 {rides.map(ride => {
                     const seatsLeft = ride.driver_seats - ride.riders.length;
+                    const totalSlots = [...ride.riders, ...Array.from({ length: seatsLeft })];
+                    const shownSlots = totalSlots.slice(0, 6);
+                    const extraCount = totalSlots.length - shownSlots.length;
                     console.log('seats', ride)
                     console.log('riders', ride.riders)
                     return (
@@ -147,14 +151,38 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
                                     <h2>{ride.driver_name}</h2>
                                     <div className="cp-card-riders">
                                         <div className="cp-card-slots">
-                                            {ride.riders.map(rider =>
-                                                <div className="cp-card-slot" key={rider.id}>
-                                                    <img src={getProfilePictureUrl(rider.profile_image)} alt={`${rider.name} pfp`} />
+                                            {shownSlots.map((slot, i) => {
+                                                if (i < ride.riders.length) {
+                                                    const rider = ride.riders[i];
+                                                    return (
+                                                        <a
+                                                            data-tooltip-id="rider-tooltip"
+                                                            data-tooltip-content={rider.name}
+                                                            key={rider.id}
+                                                        >
+                                                            <div className="cp-card-slot">
+                                                                <img src={getProfilePictureUrl(rider.profile_image)} alt={`${rider.name} pfp`} />
+                                                            </div>
+                                                        </a>
+                                                    )
+                                                } else {
+                                                    return (
+                                                        <div
+                                                            className="cp-card-slot"
+                                                            key={`empty-${i}`}
+                                                            style={{ borderColor: "lightgrey" }}
+                                                        />
+                                                    );
+                                                }
+                                            })}
+                                            {extraCount > 0 && (
+                                                <div className="cp-card-more">
+                                                    +{extraCount}
                                                 </div>
                                             )}
-                                            {Array.from({ length: seatsLeft }).map((_, i) =>
+                                            {/* {Array.from({ length: seatsLeft }).map((_, i) =>
                                                 <div className="cp-card-slot" key={`empty-${i}`} style={{ borderColor: "lightgrey" }} />
-                                            )}
+                                            )} */}
                                         </div>
                                         <p>{seatsLeft} Seat{seatsLeft == 1 ? '' : 's'} Available</p>
                                     </div>
@@ -163,7 +191,7 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
                             <button
                                 className="btn-red"
                                 onClick={() => onSelectRide(ride.id)}
-                                disabled={seatsLeft == 0 || isDriver || (isRider && !(userRide.id == ride.id)) || !canUnregister ? true : false}
+                                disabled={seatsLeft == 0 && (!isRider || (isRider && !(userRide.id == ride.id))) || isDriver || (isRider && !(userRide.id == ride.id)) || !canUnregister ? true : false}
                             >
                                 {isRider && userRide.id == ride.id ? 'Ride Joined ✓' : 'Join Ride'}
                             </button>

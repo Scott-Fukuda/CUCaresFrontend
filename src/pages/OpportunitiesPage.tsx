@@ -42,7 +42,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   showPopup
 }) => {
   const navigate = useNavigate();
-  console.log('pre opps', opportunities)
+  console.log('CURR USER', currentUser)
   // Filter functionality disabled
   // const [causeFilter, setCauseFilter] = useState<string>('All');
   // const [dateFilter, setDateFilter] = useState<string>('');
@@ -99,7 +99,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     setShowExternalSignupModal(true);
   };
 
-  console.log(currentUser);
   const handleExternalUnsignup = (opportunity: Opportunity) => {
     setSelectedOpportunity(opportunity);
     setShowExternalUnsignupModal(true);

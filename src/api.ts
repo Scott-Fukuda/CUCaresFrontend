@@ -157,6 +157,7 @@ export const getUsersMinimal = async (): Promise<User[]> => {
     organizationIds: user.organizationIds || [],
     admin: user.admin || false,
     car_seats: user.car_seats || 0,
+    carpool_waiver_signed: user.carpool_waiver_signed,
     bio: user.bio || '',
 
     // These remain empty for minimal payloads
@@ -190,6 +191,7 @@ export const getUserByEmail = async (email: string, token?: string): Promise<Use
       }
 
       const response: User = await res.json();
+      console.log('user', response)
       return response;
     }
 

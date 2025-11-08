@@ -40,7 +40,7 @@ const CarpoolFormPopup: React.FC<CarpoolFormPopupProps> = ({
     });
 
     useEffect(() => {
-        if (!carData) return; 
+        if (!carData) return;
 
         if (carData.exists) {
             const car = carData.car;
@@ -55,9 +55,11 @@ const CarpoolFormPopup: React.FC<CarpoolFormPopupProps> = ({
     const onSubmit = async () => {
         if (!carSeats) {
             setError('Number of car seats cannot be empty');
+            return;
         }
         if (licensePlate && licensePlate.length != 4) {
             setError('License plate value should only be the last 4 characters');
+            return;
         }
 
         try {
@@ -108,12 +110,12 @@ const CarpoolFormPopup: React.FC<CarpoolFormPopupProps> = ({
                                     onChange={(e) => {
                                         const value = e.target.value;
                                         if (value === '') {
-                                        setCarSeats(0);
+                                            setCarSeats(0);
                                         } else {
-                                        const numValue = parseInt(value);
-                                        if (!isNaN(numValue) && numValue >= 1 && numValue <= 15) {
-                                            setCarSeats(numValue);
-                                        }
+                                            const numValue = parseInt(value);
+                                            if (!isNaN(numValue) && numValue >= 1 && numValue <= 15) {
+                                                setCarSeats(numValue);
+                                            }
                                         }
                                     }}
                                 />
