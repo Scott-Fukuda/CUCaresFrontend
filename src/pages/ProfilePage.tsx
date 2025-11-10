@@ -14,6 +14,7 @@ import { getProfilePictureUrl, updateUser } from '../api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase-config';
+import Calendar from "../components/Calendar";
 
 interface ProfilePageProps {
   students: User[];
