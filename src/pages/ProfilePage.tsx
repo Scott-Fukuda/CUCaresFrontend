@@ -194,9 +194,9 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   return (
   <div>
     <div>
-      <div className="grid grid-cols 1 lg:grid-cols 3 gap-8"> {/* grid makes the contianer use the CSS grid layout; 1 column on small screens and 3 columns on large screens; gap is the space between the grid colums */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8"> {/* grid makes the contianer use the CSS grid layout; 1 column on small screens and 3 columns on large screens; gap is the space between the grid colums */}
         {/* Left Column */}
-        <div className="lg:col-span-1 space-y-8"> {/* on large screens, this div takes up 1 of the 3 columns */}
+        <div className="lg:col-span-1 space-y-8 lg:max-w-sm"> {/* on large screens, this div takes up 1 of the 3 columns */}
           <div className="bg-white p-6 rounded-2xl shadow-lg text-center">
             <div className="relative w-32 h-32 mx-auto"> {/* positioning context for the profile picture; creates a square box centered horizontally */}
               <img
@@ -293,10 +293,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
               </button> */}
 
               {/*Service Calendar*/}
-              <div className= "bg-white p-4 rounded-xl shadow">
-                <h2 className="test-lg font-semibold text-black mb-2">My Service Calendar</h2>
                 <Calendar opportunities={opportunities}/>
-              </div>
 
               {/* 🧭 View Service Journal Button */}
               {/*

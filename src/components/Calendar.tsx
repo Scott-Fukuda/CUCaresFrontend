@@ -47,8 +47,8 @@ const Calendar: React.FC<CalendarProps> = ({ opportunities }) => {
     const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     return (
-        <div className="p-6">
-  <h2 className="text-2xl font-semibold text-cornell-red mb-6">
+        <div className="bg-white p-6 rounded-2xl shadow-lg p-4 mt-6">
+  <h2 className="text-xl font-bold mb-4">
     Service Journal Calendar
   </h2>
 
@@ -62,7 +62,7 @@ const Calendar: React.FC<CalendarProps> = ({ opportunities }) => {
       }
       className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm"
     >
-      ← Prev
+      ← 
     </button>
     <h3 className="text-lg font-medium">
       {current.toLocaleString("default", { month: "long" })} {current.getFullYear()}
@@ -75,7 +75,7 @@ const Calendar: React.FC<CalendarProps> = ({ opportunities }) => {
       }
       className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm"
     >
-      Next →
+       →
     </button>
   </div>
 
@@ -92,7 +92,7 @@ const Calendar: React.FC<CalendarProps> = ({ opportunities }) => {
     {calendarDays.map(({ date, opps }, idx) => (
       <div
         key={idx}
-        className={`h-24 rounded-2xl shadow-sm border flex flex-col p-2 
+        className={`h-12 rounded-2xl shadow-sm border flex flex-col p-2 
           ${
             isNaN(date.getTime())
               ? "bg-transparent border-none"
