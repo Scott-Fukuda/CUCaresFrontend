@@ -32,7 +32,7 @@ import { initialBadges } from './data/initialData'; // Using initial data for ba
 import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
 import MultiOppPage from './pages/MultiOppPage';
-import ServiceJournal from './pages/ServiceJournal';
+import UserDayOpportunities from './pages/UserDayOpportunities';
 
 
 interface AppRouterProps {
@@ -150,6 +150,10 @@ const AppRouter: React.FC<AppRouterProps> = ({
   // Legacy function names for compatibility with existing components
   const handleFriendRequest = handleSendFriendRequest;
   const handleAddFriend = handleSendFriendRequest;
+
+  function isUserSignedUp(oppId: number): boolean {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div className="min-h-screen bg-light-gray pb-20 md:pb-0">
@@ -389,7 +393,18 @@ const AppRouter: React.FC<AppRouterProps> = ({
               />
             }
           />
-          <Route path="/service-journal/:userId" element={<ServiceJournal />} />
+          <Route
+            path="/service-journal/day/:date"
+            element={
+              <UserDayOpportunities
+                currentUser={currentUser}
+                onSignUp={handleSignUp}           // your signup handler
+                onUnSignUp={handleUnSignUp}       // your unsignup handler
+                isUserSignedUp={(oppId, userId) => currentUserSignupsSet.has(oppId)} // your function to check if user is signed up
+                allOrgs={organizations}           // your org list
+              />
+            }
+          />
           {/* <Route path="/" element={<OpportunitiesPage opportunities={opportunities} students={students} allOrgs={organizations} signups={signups} currentUser={currentUser} handleSignUp={handleSignUp} handleUnSignUp={handleUnSignUp} currentUserSignupsSet={currentUserSignupsSet} />}/> */}
           <Route path="/" element={<Navigate to="/opportunities" replace />} />
         </Routes>

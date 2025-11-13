@@ -293,7 +293,9 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
               </button> */}
 
               {/*Service Calendar*/}
-                <Calendar opportunities={opportunities}/>
+                <Calendar 
+                currentUser={currentUser}
+                />
 
               {/* 🧭 View Service Journal Button */}
               {/*

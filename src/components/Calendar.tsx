@@ -1,16 +1,51 @@
-import React, { useState, useMemo } from "react"; 
+import React, { useState, useEffect, useMemo } from "react"; 
 import { useNavigate } from "react-router-dom";
-import { Opportunity } from "../types";
+import { Opportunity, User } from "../types";
+import { getOpportunities } from "../api";
 
 type CalendarProps = {
-    opportunities: Opportunity[];
+    currentUser: User; 
 };
 
-const Calendar: React.FC<CalendarProps> = ({ opportunities }) => {
-    const navigate = useNavigate();
+const Calendar: React.FC<{currentUser: User}> = ({
+  currentUser,
+}) => {
+    const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+    const navigate = useNavigate()
+    
+    useEffect(() => {
+    const fetchAll = async () => {
+      const all = await getOpportunities();
+      setOpportunities(all);
+    };
+    fetchAll();
+  }, []);
     
     const [current, setCurrent] = useState(new Date()); // if you never call setCurrent, then the value stays constant forever 
 
+    // helper: parse an opportunity's date+time into a local Date
+    const parseOppDateTime = (opp: Opportunity) => {
+      // prefer opp.time when available; fallback to "00:00"
+      const time = opp.time || "00:00";
+      // Build an ISO string with time to ensure Date treats it as local datetime
+      // Note: "YYYY-MM-DDTHH:MM:SS" without timezone is treated as local time in modern browsers.
+      return new Date(`${opp.date}T${time}`);
+    };
+
+    const pastOpportunities = useMemo(() => {
+      const now = new Date();
+      return opportunities.filter((opp) => {
+        const oppDateTime = parseOppDateTime(opp);
+        const isPast = oppDateTime < now;
+
+        return (isPast &&
+          opp.involved_users?.some(
+            (user) => user.id === currentUser.id && user.attended // check if the user id matchs the current user and the user attended field is true
+          )
+        ); 
+      });
+    }, [opportunities, currentUser.id, current]);
+  
     const calendarDays = useMemo(() => {
         const year = current.getFullYear();
         const month = current.getMonth();
@@ -24,13 +59,15 @@ const Calendar: React.FC<CalendarProps> = ({ opportunities }) => {
 
         for (let day = 1; day <= numDays; day++) {
             const date = new Date(year, month, day);
-            const dayOpportunities = opportunities.filter(
-                opp => {new Date(opp.date).toDateString() === date.toDateString() // compare whether the opportunity happened on the same day as the date we're processing 
-            });
+
+            const dayOpportunities = pastOpportunities.filter((opp) => {
+              const oppDateTime = parseOppDateTime(opp);
+              return oppDateTime.toDateString() === date.toDateString() // compare whether the opportunity happened on the same day as the date we're processing 
+        });
             days.push({ date: date, opps: dayOpportunities });
         }
         return days;
-    }, [current, opportunities]);
+    }, [current, pastOpportunities]);
 
     const prevMonth = () => {
         setCurrent(
@@ -92,39 +129,36 @@ const Calendar: React.FC<CalendarProps> = ({ opportunities }) => {
     {calendarDays.map(({ date, opps }, idx) => (
       <div
         key={idx}
-        className={`h-12 rounded-2xl shadow-sm border flex flex-col p-2 
-          ${
-            isNaN(date.getTime())
-              ? "bg-transparent border-none"
-              : opps.length > 0
-              ? "bg-cornell-red/10 hover:bg-cornell-red/20 border-cornell-red cursor-pointer transition"
-              : "bg-white border-gray-200"
-          }`}
-        onClick={() =>
-          !isNaN(date.getTime()) && opps.length > 0
-            ? navigate(`/service-journal/day/${date.toISOString().split("T")[0]}`)
-            : null
+className={`
+        h-12 rounded-2xl shadow-sm flex flex-col p-2
+        ${isNaN(date.getTime()) ? "bg-transparent border-none" : ""}
+        ${!isNaN(date.getTime()) ? "border" : ""}
+        ${opps.length > 0 || date.toDateString() === new Date().toDateString() ? "bg-cornell-red/10 border-cornell-red" : "bg-white border-gray-200"}
+        ${opps.length > 0 ? "hover:bg-cornell-red/20 cursor-pointer transition" : ""}
+      `}
+        onClick={() => {
+        if (!isNaN(date.getTime()) && opps.length > 0) {
+          const localDateStr = date.toLocaleDateString("en-CA"); 
+          navigate(`/service-journal/day/${localDateStr}`);
         }
+      }}
       >
-        {!isNaN(date.getTime()) && (
+         {!isNaN(date.getTime()) && (
           <>
-            <div className="text-right text-sm font-semibold text-gray-700">
-              {date.getDate()}
-            </div>
-            {opps.length > 0 && (
-              <div className="mt-auto">
-                <span className="text-xs font-medium text-cornell-red">
-                  {opps.length} event{opps.length > 1 ? "s" : ""}
-                </span>
-              </div>
-            )}
-          </>
-        )}
+          <div className={`text-right text-sm font-semibold ${
+            date.toDateString() === new Date().toDateString()
+            ? "text-cornell-red"
+            : "text-gray-700"
+      }`}>
+        {date.getDate()}
       </div>
-    ))}
+    </>
+  )}
   </div>
+))}
 </div>
-    ); 
+</div>
+); 
 };
 
 export default Calendar; 
