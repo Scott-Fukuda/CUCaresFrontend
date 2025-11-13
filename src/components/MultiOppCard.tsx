@@ -145,7 +145,7 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
 
   const [y, m, d] = gmtDate.split('-').map(Number);
   const [h = 0, min = 0, s = 0] = (gmtTime || '00:00:00').split(':').map(Number);
-  const start = new Date(Date.UTC(y, m - 1, d, h, min, s));
+  const start = new Date(Date.UTC(y, m - 1, d, h+4, min, s));
   if (Number.isNaN(start.getTime())) return { date: 'Date TBD', timeRange: '' };
 
   const end = new Date(start.getTime() + (durationMinutes ?? 0) * 60 * 1000);

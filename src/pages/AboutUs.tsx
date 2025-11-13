@@ -63,7 +63,10 @@ const TeamMemberCard: React.FC<{ member: Member }> = ({ member }) => {
           <p className="text-sm text-gray-600 italic leading-relaxed mb-2">"{displayText}"</p>
           {shouldTruncate && (
             <button
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={(e) => {
+              e.stopPropagation(); // ⛔ prevent parent click
+              setIsExpanded(!isExpanded);
+              }}
               className="text-xs text-cornell-red hover:text-red-800 font-medium transition-colors duration-200"
             >
               {isExpanded ? 'See Less' : 'See More'}
