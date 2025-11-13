@@ -42,7 +42,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   showPopup
 }) => {
   const navigate = useNavigate();
-  console.log('CURR USER', currentUser)
   // Filter functionality disabled
   // const [causeFilter, setCauseFilter] = useState<string>('All');
   // const [dateFilter, setDateFilter] = useState<string>('');

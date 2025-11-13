@@ -26,7 +26,7 @@ const CarpoolFormPopup: React.FC<CarpoolFormPopupProps> = ({
     showPopup
 }) => {
     const navigate = useNavigate();
-    const [carSeats, setCarSeats] = useState(currentUser.car_seats);
+    const [carSeats, setCarSeats] = useState(0);
     const [color, setColor] = useState('');
     const [model, setModel] = useState('');
     const [licensePlate, setLicensePlate] = useState('');
@@ -44,6 +44,7 @@ const CarpoolFormPopup: React.FC<CarpoolFormPopupProps> = ({
 
         if (carData.exists) {
             const car = carData.car;
+            setCarSeats(car.seats ? car.seats : 0)
             setColor(car.color ? car.color : '');
             setModel(car.model ? car.model : '');
             setLicensePlate(car.license_plate ? car.license_plate : '');
@@ -96,7 +97,7 @@ const CarpoolFormPopup: React.FC<CarpoolFormPopupProps> = ({
                     <CloseIcon className="close-icon" onClick={() => setShowPopup(false)} />
                     <div className="modal-content" style={{ gap: "20px" }}>
                         <h1>Add a Ride</h1>
-                        <h3>{carSeats == 0 ? 'Please enter the details of your car' : 'Please confirm and adjust the details accordingly'}</h3>
+                        <h3>{carData.exists ? 'Please enter the details of your car' : 'Please confirm and adjust the details accordingly'}</h3>
                         <div className="carpool-form-content">
                             <div>
                                 <label className="form-label" htmlFor="seats">
