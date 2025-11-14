@@ -23,6 +23,7 @@ const UserDayOpportunities: React.FC<UserDayOpportunitiesProps> = ({
   onExternalSignup,
   onExternalUnsignup,
 }) => {
+
   // 1️⃣ Get the date from the URL
   const { date } = useParams<{ date: string }>();
 
@@ -72,7 +73,7 @@ const UserDayOpportunities: React.FC<UserDayOpportunitiesProps> = ({
 
   // 5️⃣ Show loading state
   if (loading) {
-    return <p className="text-center mt-4 text-gray-500">Loading...</p>;
+    return <div className="text-center p-10 font-semibold text-lg"> Loading...</div>;
   }
 
   const formattedDate = date
@@ -88,13 +89,15 @@ const UserDayOpportunities: React.FC<UserDayOpportunitiesProps> = ({
     : "";
 
   return (
-    <div className="user-day-opportunities max-w-4xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">
-        Opportunities You Attended on {formattedDate}
-      </h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8">
+    {/* Header */}
+    <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-6">
+      Opportunities You Attended on {formattedDate}
+    </h2>
 
-      {dayOpportunities.length > 0 ? (
-        dayOpportunities.map((opp) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {dayOpportunities.map((opp) => {
+      return (
           <OpportunityCard
             key={opp.id}
             opportunity={opp}
@@ -111,13 +114,10 @@ const UserDayOpportunities: React.FC<UserDayOpportunitiesProps> = ({
               onExternalUnsignup ? () => onExternalUnsignup(opp.id) : undefined
             }
           />
-        ))
-      ) : (
-        <p className="text-gray-500 text-center mt-4">
-          No opportunities for this day.
-        </p>
-      )}
-    </div>
+      );
+    })}
+  </div>
+</div>
   );
 };
 
