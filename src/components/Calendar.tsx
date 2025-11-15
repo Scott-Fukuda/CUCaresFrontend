@@ -48,6 +48,20 @@ const Calendar: React.FC<{
       });
     }, [opportunities, currentUser.id, current]);
 
+    const pastRegistered = useMemo(() => {
+      const now = new Date();
+      return opportunities.filter((opp) => {
+        const oppDateTime = parseOppDateTime(opp);
+        const isPast = oppDateTime < now;
+
+        return (isPast &&
+          opp.involved_users?.some(
+            (user) => user.id === currentUser.id // check if the user id matchs the current user and the user attended field is true
+          )
+        ); 
+      });
+    }, [opportunities, currentUser.id, current]);
+
 {/*Stats*/}
 // 1. All signups for this user
 const totalSignedUp = opportunities.filter(
@@ -61,7 +75,7 @@ const totalAttended = pastOpportunities.length;
 const hoursVolunteered = ((currentUser.points || 0) / 60).toFixed(1)
 
 // 4. Attendance rate
-const attendanceRate = totalSignedUp > 0 ? (pastOpportunities.length / totalSignedUp) * 100 : 0;
+const attendanceRate = totalSignedUp > 0 ? (pastOpportunities.length / pastRegistered.length) * 100 : 0;
 
 {/*Stats In the Last 4 Weeks*/}
 const now = new Date();
