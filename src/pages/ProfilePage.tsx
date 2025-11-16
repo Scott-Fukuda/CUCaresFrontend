@@ -482,19 +482,19 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
         </div>
       </div>
       <p className="mt-6 text-xs text-gray-500 text-center">
-            Click here to see our{" "}
-            <a
-              href="/terms_of_service.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-gray-700"
+          Click here to see our{" "} 
+          <a
+            href="/terms_of_service.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover: text-gray-700"
             >
               Terms of Service and Privacy Policy
             </a>
             .
           </p>
-          </div>
-    </div>
+        </div>
+      </div>
   );
 };
 

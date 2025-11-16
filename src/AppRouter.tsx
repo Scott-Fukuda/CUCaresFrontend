@@ -365,6 +365,24 @@ const AppRouter: React.FC<AppRouterProps> = ({
                 />
               }
             />
+
+             <Route
+              path="/prisoner-express"
+              element={
+                <MultiOppPage
+                  opportunities={opportunities}
+                  users={students}
+                  multiopps={multiopp}
+                  currentUser={currentUser}
+                  allOrgs={organizations}
+                  setMultiOpps={setMultiopp}
+                  onSignUp={(id) => handleSignUp(id)}
+                  staticId={7}
+                />
+              }
+            />
+            
+
             <Route
               path="/ithaca-reuse"
               element={
