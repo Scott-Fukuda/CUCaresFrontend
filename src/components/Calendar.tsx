@@ -98,6 +98,82 @@ const totalPointsLast4Weeks = lastFourWeeksOpportunities.reduce((sum, opp) => su
 const hoursLast4Weeks = parseFloat((totalPointsLast4Weeks / 60).toFixed(1));
 const avgHoursPerWeek = parseFloat((hoursLast4Weeks / 4).toFixed(1));
 
+function getWeekKey(dateString: string) {
+  const d = new Date(dateString);
+
+  // Normalize to midnight local time
+  d.setHours(0, 0, 0, 0);
+
+  const day = d.getDay(); // 0 = Sunday
+
+  // Go back to the Sunday of that week
+  const sunday = new Date(d);
+  sunday.setDate(d.getDate() - day);
+
+  // Use ISO date as week identifier (YYYY-MM-DD)
+  return sunday.toISOString().split("T")[0];
+}
+
+function computeWeeklyStreak(attendedDates: string[]) {
+  if (attendedDates.length === 0) {
+    return { currentStreak: 0, longestStreak: 0 };
+  }
+
+  const weekKeys = attendedDates.map(getWeekKey);
+  const uniqueWeeks = [...new Set(weekKeys)]
+    .map(key => new Date(key))
+    .sort((a, b) => a.getTime() - b.getTime());
+
+  let longest = 1;
+  let current = 1;
+
+  for (let i = 1; i < uniqueWeeks.length; i++) {
+    const prev = uniqueWeeks[i - 1];
+    const curr = uniqueWeeks[i];
+
+    const diffDays = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (Math.round(diffDays) === 7) {
+      current++;
+      longest = Math.max(longest, current);
+    } else {
+      current = 1;
+    }
+  }
+
+  // Compute the current streak specifically up to THIS week's Sunday
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const day = today.getDay();
+  const thisSunday = new Date(today);
+  thisSunday.setDate(today.getDate() - day);
+
+  let currentStreak = 0;
+  let week = new Date(thisSunday);
+
+  while (true) {
+    const key = week.toISOString().split("T")[0];
+    if (weekKeys.includes(key)) {
+      currentStreak++;
+      week.setDate(week.getDate() - 7); // step back 1 week
+    } else {
+      break;
+    }
+  }
+
+  return { currentStreak, longestStreak: longest };
+}
+
+const attendedDates = opportunities
+  .filter(opp =>
+    opp.involved_users?.some(
+      (u) => u.id === currentUser.id && u.attended
+    )
+  )
+  .map(opp => opp.date);
+
+const { currentStreak, longestStreak } = computeWeeklyStreak(attendedDates);
+
   {/*Calendar*/}
     const calendarDays = useMemo(() => {
         const year = current.getFullYear();
@@ -181,7 +257,51 @@ return (
 
     {/* Calendar */}
     <div className="bg-white p-6 rounded-2xl shadow-lg">
-      <h2 className="text-xl font-bold mb-4">Service Calendar</h2>
+
+{/* TITLE + STREAK BADGE */}
+<div className="flex justify-between items-center mb-4">
+  <h2 className="text-xl font-bold">Service Calendar</h2>
+
+  {/* Duolingo-Style Streak Box */}
+  <div className="flex items-center">
+
+    {/* Current Streak Badge */}
+    <div
+      className="
+        flex items-center gap-1 px-3 py-1
+        font-semibold text-gray-800
+      "
+    >
+      <span className="text-orange-600 text-xl">🔥</span>
+      <span className="text-lg">{currentStreak}</span>
+    </div>
+
+{/* Longest Streak (two lines: "Your Longest" / "Streak: X weeks") */}
+<div className="text-xs text-gray-600 leading-tight text-left ml-2">
+  <div className="whitespace-nowrap font-medium">
+    Your Longest
+  </div>
+  <div className="font-medium">
+    Streak: {longestStreak} week{longestStreak !== 1 ? "s" : ""}
+  </div>
+</div>
+
+  </div>
+</div>
+
+{/* Motivational message with POP animation */}
+{currentStreak === 0 && (
+  <div
+    className="
+      bg-yellow-50 border border-yellow-200 
+      text-yellow-700 px-4 py-2 rounded-xl mb-4 
+      text-sm font-medium flex items-center gap-2
+    "
+  >
+    <span className="text-yellow-600 text-lg">✨</span>
+    Start your service streak! Sign up for an opportunity this week.
+  </div>
+)}
 
       {/* Month navigation */}
       <div className="flex justify-between items-center mb-4">
