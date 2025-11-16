@@ -32,6 +32,9 @@ import { initialBadges } from './data/initialData'; // Using initial data for ba
 import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
 import MultiOppPage from './pages/MultiOppPage';
+import UserDayOpportunities from './pages/UserDayOpportunities';
+import PastOpportunitiesPage from './pages/PastOpportunitiesPage';
+
 
 interface AppRouterProps {
   currentUser: User;
@@ -148,6 +151,10 @@ const AppRouter: React.FC<AppRouterProps> = ({
   // Legacy function names for compatibility with existing components
   const handleFriendRequest = handleSendFriendRequest;
   const handleAddFriend = handleSendFriendRequest;
+
+  function isUserSignedUp(oppId: number): boolean {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div className="min-h-screen bg-light-gray pb-20 md:pb-0">
@@ -402,6 +409,30 @@ const AppRouter: React.FC<AppRouterProps> = ({
                 allOrgs={organizations}
                 setMultiOpps={setMultiopp}
                 onSignUp={(id) => handleSignUp(id)}
+              />
+            }
+          />
+          <Route
+            path="/service-journal/day/:date"
+            element={
+              <UserDayOpportunities
+                currentUser={currentUser}
+                onSignUp={handleSignUp}           // your signup handler
+                onUnSignUp={handleUnSignUp}       // your unsignup handler
+                isUserSignedUp={(oppId, userId) => currentUserSignupsSet.has(oppId)} // your function to check if user is signed up
+                allOrgs={organizations}           // your org list
+              />
+            }
+          />
+          <Route
+            path="/past-opportunities"
+            element={
+              <PastOpportunitiesPage
+                currentUser={currentUser}
+                onSignUp={handleSignUp}           // your signup handler
+                onUnSignUp={handleUnSignUp}       // your unsignup handler
+                isUserSignedUp={(oppId, userId) => currentUserSignupsSet.has(oppId)} // your function to check if user is signed up
+                allOrgs={organizations}    
               />
             }
           />

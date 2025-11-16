@@ -14,6 +14,7 @@ import { getProfilePictureUrl, updateUser } from '../api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase-config';
+import Calendar from "../components/Calendar";
 
 interface ProfilePageProps {
   students: User[];
@@ -191,12 +192,13 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   // });
 
   return (
+  <div>
     <div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8"> {/* grid makes the contianer use the CSS grid layout; 1 column on small screens and 3 columns on large screens; gap is the space between the grid colums */}
         {/* Left Column */}
-        <div className="lg:col-span-1 space-y-8">
+        <div className="lg:col-span-1 space-y-8 lg:max-w-sm"> {/* on large screens, this div takes up 1 of the 3 columns */}
           <div className="bg-white p-6 rounded-2xl shadow-lg text-center">
-            <div className="relative w-32 h-32 mx-auto">
+            <div className="relative w-32 h-32 mx-auto"> {/* positioning context for the profile picture; creates a square box centered horizontally */}
               <img
                 src={getProfilePictureUrl(user.profile_image)}
                 alt={user.name}
@@ -289,6 +291,23 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
               >
                 See my opportunities
               </button> */}
+
+              {/*Service Calendar*/}
+                <Calendar 
+                currentUser={currentUser}
+                />
+
+              {/* 🧭 View Service Journal Button */}
+              {/*
+              <div>
+                <button
+                   onClick={() => navigate(`/service-journal/${user.id}`)}
+                   className="w-full bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors"
+                >
+                   View Service Journal
+                </div></button>
+               </div>
+              */}
 
               {/* 🔴 Logout Button */}
               <button
@@ -474,7 +493,8 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
             </a>
             .
           </p>
-          </div>
+        </div>
+      </div>
   );
 };
 

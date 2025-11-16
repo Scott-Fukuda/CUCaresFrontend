@@ -1308,3 +1308,68 @@ export const createMultiOpportunity = async (formData: FormData): Promise<any> =
 
   return response.json(); // { multiopp, generated_opportunities }
 };
+
+// Fetch the user's service journal data (JSON)
+export async function getServiceJournal(userId: string, token: string) {
+  try {
+    const response = await fetch(`${ENDPOINT_URL}/api/service-journal/opps/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch service journal: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data; // an array of opportunities
+  } catch (error) {
+    console.error("Error fetching service journal:", error);
+    throw error;
+  }
+}
+
+// Download the user's service journal CSV
+export const downloadServiceJournalCSV = async (userId: string, token: string) => {
+  try {
+    const response = await fetch(`https://cucaresbackend.onrender.com/api/service-journal/opps/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch service journal: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // Convert data to CSV
+    const csvRows = [
+      ["Event Name", "Date", "Hours", "Attended"], // header
+      ...data.map((opp: any) => [
+        opp.name,
+        new Date(opp.date).toLocaleDateString(),
+        opp.duration / 60, // convert minutes to hours
+        opp.attended ? "Yes" : "No",
+      ]),
+    ];
+
+    const csvContent = csvRows.map((row) => row.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `service-journal_${userId}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Error downloading CSV:", err);
+  }
+};
