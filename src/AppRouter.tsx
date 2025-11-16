@@ -33,6 +33,7 @@ import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
 import MultiOppPage from './pages/MultiOppPage';
 import UserDayOpportunities from './pages/UserDayOpportunities';
+import PastOpportunitiesPage from './pages/PastOpportunitiesPage';
 
 
 interface AppRouterProps {
@@ -402,6 +403,18 @@ const AppRouter: React.FC<AppRouterProps> = ({
                 onUnSignUp={handleUnSignUp}       // your unsignup handler
                 isUserSignedUp={(oppId, userId) => currentUserSignupsSet.has(oppId)} // your function to check if user is signed up
                 allOrgs={organizations}           // your org list
+              />
+            }
+          />
+          <Route
+            path="/past-opportunities"
+            element={
+              <PastOpportunitiesPage
+                currentUser={currentUser}
+                onSignUp={handleSignUp}           // your signup handler
+                onUnSignUp={handleUnSignUp}       // your unsignup handler
+                isUserSignedUp={(oppId, userId) => currentUserSignupsSet.has(oppId)} // your function to check if user is signed up
+                allOrgs={organizations}    
               />
             }
           />

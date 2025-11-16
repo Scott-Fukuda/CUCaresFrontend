@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Opportunity, User } from "../types";
 import { getOpportunities } from "../api";
+import { Link } from "react-router-dom";
+
 
 type CalendarProps = {
     currentUser: User;
@@ -246,9 +248,15 @@ return (
           </div>
         ))}
       </div>
+      <Link
+        to="/past-opportunities"
+        className="mt-4 block text-xs text-gray-500 text-center hover:text-gray-700"
+      >
+        View All Attended Opportunities
+      </Link>
     </div>
   </div>
 );
 };
 
-export default Calendar; 
+export default Calendar;
