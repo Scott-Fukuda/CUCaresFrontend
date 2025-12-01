@@ -1279,6 +1279,7 @@ export const getMultiOpps = async (): Promise<MultiOpp[]> => {
               profile_image: u.profile_image ?? null,
             }))
             : [],
+          allow_carpool: opp.allow_carpool
         }))
         : [];
 
@@ -1343,6 +1344,18 @@ export const createMultiOpportunity = async (formData: FormData): Promise<any> =
 
   return response.json(); // { multiopp, generated_opportunities }
 };
+
+export const updateMultiOpp = (id: number, data: object): Promise<Opportunity> =>
+  authenticatedRequest(`/multiopps/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
+export const deleteMultiOpp = (id: number): Promise<void> =>
+  authenticatedRequest(`/multiopps/${id}`, {
+    method: 'DELETE',
+  });
+
 // -- Cars --
 export const getCar = async (userId: string) => {
   try {
@@ -1432,19 +1445,6 @@ export const getRides = async (carpoolId: number): Promise<Ride[]> => {
     return res.rides;
   } catch (err) {
     console.log('Error getting rides', err);
-    throw err;
-  }
-}
-
-// -- Carpool -- 
-export const createCarpool = async (data: object) => {
-  try {
-    await authenticatedRequest('/carpools', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
-  } catch (err) {
-    console.log('Error creating carpool', err);
     throw err;
   }
 }

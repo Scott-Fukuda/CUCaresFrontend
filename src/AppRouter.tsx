@@ -50,7 +50,6 @@ interface AppRouterProps {
     opportunities: Opportunity[];
     // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[] | []>>;
     multiopp: MultiOpp[];
-    setMultiopp: React.Dispatch<React.SetStateAction<MultiOpp[] | []>>;
     allOpps: (Opportunity | MultiOpp)[];
     setAllOpps: React.Dispatch<React.SetStateAction<(Opportunity | MultiOpp)[] | []>>;
     signups: SignUp[];
@@ -100,7 +99,6 @@ const AppRouter: React.FC<AppRouterProps> = ({
     opportunities,
     // setOpportunities,
     multiopp,
-    setMultiopp,
     allOpps,
     setAllOpps,
     signups,
@@ -389,7 +387,6 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 multiopps={multiopp}
                                 currentUser={currentUser}
                                 allOrgs={organizations}
-                                setMultiOpps={setMultiopp}
                                 onSignUp={(id) => handleSignUp(id)}
                                 staticId={4}
                             />
@@ -404,7 +401,6 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 multiopps={multiopp}
                                 currentUser={currentUser}
                                 allOrgs={organizations}
-                                setMultiOpps={setMultiopp}
                                 onSignUp={(id) => handleSignUp(id)}
                                 staticId={6}
                             />
@@ -419,7 +415,6 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 multiopps={multiopp}
                                 currentUser={currentUser}
                                 allOrgs={organizations}
-                                setMultiOpps={setMultiopp}
                                 onSignUp={(id) => handleSignUp(id)}
                                 staticId={5}
                             />
@@ -434,7 +429,6 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 multiopps={multiopp}
                                 currentUser={currentUser}
                                 allOrgs={organizations}
-                                setMultiOpps={setMultiopp}
                                 onSignUp={(id) => handleSignUp(id)}
                             />
                         }

@@ -842,7 +842,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
               Enable carpooling for this event?
             </label>
             <select
-              name="isPrivate"
+              name="allowCarpool"
               value={formData.allow_carpool ? 'yes' : 'no'}
               onChange={(e) => setFormData(prev => ({ ...prev, allow_carpool: e.target.value === 'yes' }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"

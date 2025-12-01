@@ -61,7 +61,9 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
     duration: opportunity.duration,
     nonprofit: opportunity.nonprofit || '',
     redirect_url: opportunity.redirect_url || '', // Add redirect_url to form state
+    allow_carpool: opportunity.allow_carpool || false
   });
+  const initAllowCarpool = opportunity.allow_carpool;
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -109,7 +111,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
   const availableSlots = opportunity.total_slots - signedUpStudents.length;
   const canSignUp = availableSlots > 0 && !isUserSignedUp;
   const allowCarpool = opportunity.allow_carpool;
-  console.log('allow', opportunity)
 
   // Parse date components manually to avoid timezone issues
   const [year, month, day] = opportunity.date.split('-').map(Number);
@@ -367,28 +368,10 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
         duration: editForm.duration,
         nonprofit: editForm.nonprofit,
         redirect_url: editForm.redirect_url.trim() || null, // Send null if empty
+        allow_carpool: editForm.allow_carpool
       };
 
       await updateOpportunity(opportunity.id, updateData);
-
-      // Update the opportunity in the state
-      // setOpportunities((prevOpportunities) =>
-      //   prevOpportunities.map((opp) =>
-      //     opp.id === opportunity.id
-      //       ? {
-      //         ...opp,
-      //         name: editForm.name,
-      //         description: editForm.description,
-      //         address: editForm.address,
-      //         date: editForm.date,
-      //         time: editForm.time,
-      //         duration: editForm.duration,
-      //         nonprofit: editForm.nonprofit,
-      //         redirect_url: editForm.redirect_url.trim() || null,
-      //       }
-      //       : opp
-      //   )
-      // );
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
       // Update the local opportunity object to reflect changes
@@ -400,6 +383,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
         time: editForm.time,
         duration: editForm.duration,
         redirect_url: editForm.redirect_url.trim() || null,
+        allow_carpool: editForm.allow_carpool
       });
 
       alert('Opportunity details updated successfully!');
@@ -421,6 +405,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       duration: opportunity.duration,
       redirect_url: opportunity.redirect_url || '', // Reset redirect_url
       nonprofit: opportunity.nonprofit || '',
+      allow_carpool: opportunity.allow_carpool || false
     });
     setSelectedImage(null);
     setImagePreview(null);
@@ -601,6 +586,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       imageUrl: opportunity.imageUrl || '',
       visibility: opportunity.visibility || [],
       isPrivate: opportunity.isPrivate || false,
+      allow_carpool: opportunity.allow_carpool
     };
 
     // Navigate to create opportunity page with cloned data
@@ -659,10 +645,10 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
             onClick={handleButtonClick}
             disabled={!isUserSignedUp && !canSignUp}
             className={`mt-6 inline-flex items-center justify-center rounded-lg px-5 py-3 text-base font-semibold shadow-lg transition-colors ${isUserSignedUp
-                ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                : canSignUp
-                  ? 'bg-cornell-red hover:bg-red-700 text-white'
-                  : 'bg-gray-500/70 text-white/80 cursor-not-allowed'
+              ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+              : canSignUp
+                ? 'bg-cornell-red hover:bg-red-700 text-white'
+                : 'bg-gray-500/70 text-white/80 cursor-not-allowed'
               }`}
           >
             {isUserSignedUp ? 'Signed Up ✓' : canSignUp ? 'Sign Up Now' : 'Event Full'}
@@ -870,6 +856,26 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   If you would like this opportunity to redirect to an external registration, enter the link here.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Enable carpooling for this event?
+                </label>
+                <select
+                  name="allowCarpool"
+                  value={editForm.allow_carpool ? 'yes' : 'no'}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, allow_carpool: e.target.value === 'yes' }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+                  disabled={initAllowCarpool}
+                >
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  Volunteers can sign up to drive or request a ride through the system (this feature cannot be undone once enabled).
                 </p>
               </div>
             </div>

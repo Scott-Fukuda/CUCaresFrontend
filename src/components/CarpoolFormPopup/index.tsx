@@ -52,7 +52,7 @@ const CarpoolFormPopup: React.FC<CarpoolFormPopupProps> = ({
             setShowPopup(false);
             showPopup(
                 'Ride Joined!',
-                'You have successfully joined a carpool ride! An email will be sent to you seven hours prior to the event with details about the ride (including car information, pickup times, etc.). Please provide atleast 20 minutes of buffer prior to the event for rides.',
+                'You have successfully joined a carpool ride! An email will be sent to you seven hours prior to the event with details about the ride (including car information, pickup times, etc.).',
                 'success'
             );
         } catch (err) {

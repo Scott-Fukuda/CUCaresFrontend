@@ -61,12 +61,14 @@ export interface Opportunity {
   carpool_id: string;
 }
 
+type DaySlot = [string, number];
+
 export interface MultiOpp {
   id: number;
   name: string;
   date: string; // represents the first date in the opps
   time: string
-  days_of_week: Array<Record<string, string[]>>;
+  days_of_week: Array<Record<string, DaySlot[]>>;
   week_frequency?: number | null;
   week_recurrences: number;
   created_at?: string;

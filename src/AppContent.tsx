@@ -151,7 +151,6 @@ const AppContent: React.FC = () => {
   // const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [signups, setSignups] = useState<SignUp[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [multiopp, setMultiopp] = useState<MultiOpp[]>([]);
   const [allOpps, setAllOpps] = useState<(Opportunity | MultiOpp)[]>([]);
 
   const { data: opportunities = [], isLoading: oppsLoading } = useQuery({
@@ -159,6 +158,13 @@ const AppContent: React.FC = () => {
     queryFn: api.getCurrentOpportunities,
     enabled: !!currentUser
   });
+
+  const { data: multiopps = [], isLoading: multioppsLoading } = useQuery({
+    queryKey: ['multiopps'],
+    queryFn: api.getMultiOpps,
+    enabled: !!currentUser
+  });
+
 
   // Friendships data from backend
   const [friendshipsData, setFriendshipsData] = useState<FriendshipsResponse | null>(null);
@@ -218,7 +224,6 @@ const AppContent: React.FC = () => {
           // setOpportunities(oppsData);
           await queryClient.invalidateQueries({ queryKey: ['opportunities'] });
           setOrganizations(orgsData);
-          setMultiopp(mulitoppsData);
           setAllOpps([...oppsData, ...mulitoppsData]);
           setSignups([]); // Initialize empty signups - we'll track this locally
 
@@ -995,16 +1000,15 @@ const AppContent: React.FC = () => {
         <AppRouter
           currentUser={currentUser}
           setCurrentUser={setCurrentUser}
-          multiopp={multiopp}
           setAllOpps={setAllOpps}
           allOpps={allOpps}
-          setMultiopp={setMultiopp}
           isLoading={isLoading}
           appError={appError}
           pendingRequestCount={pendingRequestCount}
           handleLogout={handleLogout}
           students={students}
           opportunities={opportunities}
+          multiopp={multiopps}
           // setOpportunities={setOpportunities}
           signups={signups}
           organizations={organizations}
