@@ -1,0 +1,41 @@
+@import '../../global.scss';
+
+.waiver {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    .waiver-content {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        height: fit-content;
+        border: none;
+    }
+
+    h2 {
+        font-size: 25px;
+        font-weight: 800;
+    }
+
+    .checkbox-wrapper {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        font-size: 13px;
+    }
+
+    .name-input-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        input {
+            width: 70%;
+            padding: 5px 15px;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: lightgrey;
+        }
+    }
+}
