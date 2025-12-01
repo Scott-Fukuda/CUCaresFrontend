@@ -165,7 +165,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
         </div> */}
 
         {/* Car Ownership Question */}
-        {/* <div>
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
             Do you have a car on campus? *
           </label>
@@ -195,10 +195,10 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
               No
             </label>
           </div>
-        </div> */}
+        </div>
 
         {/* Car Seats Input - Only show if user has a car */}
-        {/* {hasCar === 'yes' && (
+        {hasCar === 'yes' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
               How many seats do you have? *
@@ -231,7 +231,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
             />
             <p className="text-xs text-gray-500 mt-1 text-left">Minimum: 1, Maximum: 15</p>
           </div>
-        )} */}
+        )}
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 

@@ -27,7 +27,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import AuthFlow from './AuthFlow';
 import AppRouter from './AppRouter';
 import PopupMessage from './components/PopupMessage';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 type AuthView = 'login' | 'register';
 
@@ -79,7 +78,6 @@ const AppContent: React.FC = () => {
       },
     };
   };
-  const queryClient = useQueryClient();
 
   // Subscribe to Firebase auth state on mount so users stay logged in across reloads
   useEffect(() => {
@@ -107,7 +105,6 @@ const AppContent: React.FC = () => {
             // console.log('User exists in backend, fetching user data...');
             const existingUser = await api.getUserByEmail(firebaseUser.email, token);
             setCurrentUser(existingUser);
-            console.log('setting user', existingUser)
             const currentLocation = latestLocationRef.current;
             if (AUTH_ROUTES.has(currentLocation.pathname)) {
               const redirectPath = getRedirectPath();
@@ -145,29 +142,18 @@ const AppContent: React.FC = () => {
   }, []);
 
   // Data state from API
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [students, setStudents] = useState<User[]>([]);
   const [leaderboardUsers, setLeaderboardUsers] = useState<User[]>([]);
-  // const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [signups, setSignups] = useState<SignUp[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [multiopp, setMultiopp] = useState<MultiOpp[]>([]);
   const [allOpps, setAllOpps] = useState<(Opportunity | MultiOpp)[]>([]);
-
-  const { data: opportunities = [], isLoading: oppsLoading } = useQuery({
-    queryKey: ['opportunities'],
-    queryFn: api.getCurrentOpportunities,
-    enabled: !!currentUser
-  });
-
-  const { data: multiopps = [], isLoading: multioppsLoading } = useQuery({
-    queryKey: ['multiopps'],
-    queryFn: api.getMultiOpps,
-    enabled: !!currentUser
-  });
-
 
   // Friendships data from backend
   const [friendshipsData, setFriendshipsData] = useState<FriendshipsResponse | null>(null);
+
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Track last loaded user to prevent infinite loops
   const lastLoadedUserId = useRef<number | null>(null);
@@ -194,8 +180,6 @@ const AppContent: React.FC = () => {
   // Add state for tracking first-time registration
   const [showPostRegistrationSetup, setShowPostRegistrationSetup] = useState(false);
 
-  const [showCarpoolPopup, setShowCarpoolPopup] = useState<number | null>(null);
-
   // Load all app data after user is logged in
   useEffect(() => {
     //console.log('App useEffect triggered:', { currentUser, isLoading, lastLoadedUserId: lastLoadedUserId.current });
@@ -221,9 +205,9 @@ const AppContent: React.FC = () => {
           // getUsers now returns full User objects, no conversion needed
           setStudents(usersData);
           setLeaderboardUsers(usersData); // Use the same data for leaderboard
-          // setOpportunities(oppsData);
-          await queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+          setOpportunities(oppsData);
           setOrganizations(orgsData);
+          setMultiopp(mulitoppsData);
           setAllOpps([...oppsData, ...mulitoppsData]);
           setSignups([]); // Initialize empty signups - we'll track this locally
 
@@ -236,7 +220,6 @@ const AppContent: React.FC = () => {
               //   after: { interests: fullCurrentUser.interests, organizationIds: fullCurrentUser.organizationIds }
               // });
               setCurrentUser(fullCurrentUser);
-              console.log('setting full current user', fullCurrentUser)
             }
             // Mark this user as loaded to prevent infinite loops
             lastLoadedUserId.current = currentUser.id;
@@ -381,7 +364,6 @@ const AppContent: React.FC = () => {
         birthday,
         car_seats, // Add car_seats from registration
         registration_date: api.formatRegistrationDate(), // Format: YYYY-MM-DDTHH:MM:SS
-        carpool_waiver_signed: false
       };
 
       // API takes `name`, so we combine first and last, and include phone
@@ -396,7 +378,6 @@ const AppContent: React.FC = () => {
         birthday,
         car_seats, // Include car_seats in the API call
         registration_date: api.formatRegistrationDate(), // Format: YYYY-MM-DDTHH:MM:SS
-        carpool_waiver_signed: false
       });
 
       const finalNewUser = { ...newUser, ...responseUser };
@@ -476,8 +457,7 @@ const AppContent: React.FC = () => {
           //console.log('Refreshing opportunities data after finding opportunity is full...');
           const updatedOpps = await api.getCurrentOpportunities();
           //console.log('Updated opportunities received:', updatedOpps.length);
-          // setOpportunities(updatedOpps);
-          await queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+          setOpportunities(updatedOpps);
 
           return; // Exit early, don't proceed with registration
         }
@@ -486,7 +466,7 @@ const AppContent: React.FC = () => {
         //console.log('Opportunity has available slots, proceeding with registration...');
 
         // Optimistically update local state immediately
-        setSignups(prev => [...prev, { userId: currentUser.id, opportunityId }]);
+        setSignups((prev) => [...prev, { userId: currentUser.id, opportunityId }]);
 
         await api.registerForOpp({ user_id: currentUser.id, opportunity_id: opportunityId });
         //console.log('API registerForOpp successful');
@@ -495,28 +475,25 @@ const AppContent: React.FC = () => {
         //console.log('Refreshing opportunities data...');
         const updatedOpps = await api.getCurrentOpportunities();
         //console.log('Updated opportunities received:', updatedOpps.length);
-        // setOpportunities(updatedOpps);
-        await queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+        setOpportunities(updatedOpps);
 
-        const opportunity = await api.getOpportunity(opportunityId);
-        if (opportunity.allow_carpool) {
-          setShowCarpoolPopup(opportunity.id);
-        } else {
-          // Show success popup
-          showPopup(
-            'Thank you for signing up!',
-            'Thank you for signing up for this opportunity. The event host may reach out to you with further details (i.e. ride coordination). Otherwise, please arrive at the listed address at the designated time. Thank you for serving!',
-            'success'
-          );
-        }
-
+        // Show success popup
+        showPopup(
+          'Thank you for signing up!',
+          'Thank you for signing up for this opportunity. The event host may reach out to you with further details (i.e. ride coordination). Otherwise, please arrive at the listed address at the designated time. Thank you for serving!',
+          'success'
+        );
       } catch (e: any) {
         console.error('Error in handleSignUp:', e);
         // Revert local state on error
-        setSignups(prev => prev.filter(s => !(s.userId === currentUser.id && s.opportunityId === opportunityId)));
+        setSignups((prev) =>
+          prev.filter((s) => !(s.userId === currentUser.id && s.opportunityId === opportunityId))
+        );
         alert(`Error signing up: ${e.message}`);
       }
-    }, [currentUser]);
+    },
+    [currentUser]
+  );
 
   const handleUnSignUp = useCallback(
     async (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => {
@@ -552,9 +529,8 @@ const AppContent: React.FC = () => {
         });
 
         // Refresh opportunities to get updated involved_users from backend
-        // const updatedOpps = await api.getCurrentOpportunities();
-        // setOpportunities(updatedOpps);
-        await queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+        const updatedOpps = await api.getCurrentOpportunities();
+        setOpportunities(updatedOpps);
       } catch (e: any) {
         console.error('Error in handleUnSignUp:', e);
         // Revert local state on error
@@ -1000,16 +976,17 @@ const AppContent: React.FC = () => {
         <AppRouter
           currentUser={currentUser}
           setCurrentUser={setCurrentUser}
+          multiopp={multiopp}
           setAllOpps={setAllOpps}
           allOpps={allOpps}
+          setMultiopp={setMultiopp}
           isLoading={isLoading}
           appError={appError}
           pendingRequestCount={pendingRequestCount}
           handleLogout={handleLogout}
           students={students}
           opportunities={opportunities}
-          multiopp={multiopps}
-          // setOpportunities={setOpportunities}
+          setOpportunities={setOpportunities}
           signups={signups}
           organizations={organizations}
           setOrganizations={setOrganizations}
@@ -1032,9 +1009,6 @@ const AppContent: React.FC = () => {
           leaderboardUsers={leaderboardUsers}
           popupMessage={popupMessage}
           closePopup={closePopup}
-          showCarpoolPopup={showCarpoolPopup}
-          setShowCarpoolPopup={setShowCarpoolPopup}
-          showPopup={showPopup}
         />
       ) : (
         <AuthFlow

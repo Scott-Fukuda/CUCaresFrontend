@@ -14,9 +14,9 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
   const navigate = useNavigate();
   const mode = import.meta.env.VITE_ENV;
 
-  const handleLoginTest = async (id: number) => {
+  const handleLoginTest = async () => {
     try {
-      const res = await loginTest(id);
+      const res = await loginTest(41);
 
       const data: User = await res.json();
       console.log("Current test user:", data);
@@ -82,17 +82,12 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
         </button>
 
         {mode == 'staging' &&
-          <div style={{display: "flex", flexDirection: "column", gap: "10px"}}>
-            {Array.from({length: 8}).map((_, i) => 
-              <button
-                key={i + 1}
-                className="w-full bg-light-gray text-black font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => handleLoginTest(i + 1)}
-              >
-                Sign in with test user {i + 1}
-              </button>
-            )}
-          </div>
+          <button
+            className="w-full bg-cornell-red text-white font-bold py-3 px-4 rounded-lg hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleLoginTest}
+          >
+            *Dev testing only* <br /> Sign in with test user
+          </button>
         }
 
         <button
