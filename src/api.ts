@@ -1,4 +1,13 @@
-import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride } from './types';
+import {
+  User,
+  MinimalUser,
+  Opportunity,
+  Organization,
+  SignUp,
+  Friendship,
+  FriendshipStatus,
+  FriendshipsResponse,MiniOpp, MultiOpp
+} from './types';
 import { auth } from './firebase-config';
 import { canUnregisterFromOpportunity } from './utils/timeUtils';
 
@@ -136,7 +145,6 @@ export const getUsers = async (): Promise<User[]> => {
     phone: user.phone,
     car_seats: user.car_seats || 0,
     bio: user.bio,
-    carpool_waiver_signed: user.carpool_waiver_signed
   }));
 };
 
@@ -157,7 +165,6 @@ export const getUsersMinimal = async (): Promise<User[]> => {
     organizationIds: user.organizationIds || [],
     admin: user.admin || false,
     car_seats: user.car_seats || 0,
-    carpool_waiver_signed: user.carpool_waiver_signed,
     bio: user.bio || '',
 
     // These remain empty for minimal payloads
@@ -191,7 +198,6 @@ export const getUserByEmail = async (email: string, token?: string): Promise<Use
       }
 
       const response: User = await res.json();
-      console.log('user', response)
       return response;
     }
 
@@ -229,7 +235,6 @@ export const getUser = async (id: number): Promise<User> => {
     registration_date: response.registration_date,
     phone: response.phone,
     car_seats: response.car_seats || 0,
-    carpool_waiver_signed: response.carpool_waiver_signed || false
   };
 };
 export const updateUser = (id: number, data: object): Promise<User> => {
@@ -560,6 +565,7 @@ export const unregisterForOrg = (data: { user_id: number; organization_id: numbe
 export const getOpportunities = async (): Promise<Opportunity[]> => {
   try {
     const response = await authenticatedRequest('/opps');
+    //console.log('getOpportunities raw response:', response);
 
     // Transform backend data to match frontend expectations
     const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
@@ -647,8 +653,6 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
         redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
         multiopp: opp.multiopp || null,
         multiopp_id: opp.multiopp_id || null,
-        allow_carpool: opp.allow_carpool,
-        carpool_id: opp.carpool_id !== undefined ? opp.carpool_id : null
       };
     });
 
@@ -750,8 +754,6 @@ export const getCurrentOpportunities = async (): Promise<Opportunity[]> => {
         redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
         multiopp: opp.multiopp || null,
         multiopp_id: opp.multiopp_id || null,
-        allow_carpool: opp.allow_carpool,
-        carpool_id: opp.carpool_id !== undefined ? opp.carpool_id : null
       };
     });
 
@@ -765,16 +767,14 @@ export const getCurrentOpportunities = async (): Promise<Opportunity[]> => {
 export const getOpportunity = async (id: number): Promise<Opportunity> => {
   try {
     const opp = await authenticatedRequest(`/opps/${id}`);
-    console.log('opp', opp);
 
-    // --- Parse date & time ---
+    // Parse date & time
     const dateObj = new Date(opp.date);
     const dateOnly = dateObj.toISOString().split('T')[0];
-
-    let timeOnly: string;
+    let timeOnly;
     if (opp.date.includes('GMT')) {
       const gmtHours = dateObj.getUTCHours();
-      const easternHours = (gmtHours - 4 + 24) % 24; // adjust to Eastern
+      const easternHours = (gmtHours - 4 + 24) % 24;
       const hours = easternHours.toString().padStart(2, '0');
       const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
       const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
@@ -786,7 +786,7 @@ export const getOpportunity = async (id: number): Promise<Opportunity> => {
       timeOnly = `${hours}:${minutes}:${seconds}`;
     }
 
-    // --- Transform involved users ---
+    // Transform involved users
     const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => ({
       id: involvedUser.id,
       name: involvedUser.user || 'Unknown User',
@@ -800,11 +800,11 @@ export const getOpportunity = async (id: number): Promise<Opportunity> => {
       registered: involvedUser.registered,
     }));
 
-    // --- Resolve image ---
+    // Resolve image
     const resolvedImageUrl =
       opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
 
-    // --- Build unified Opportunity object ---
+    // Build unified Opportunity object
     const transformedOpp: Opportunity = {
       id: opp.id,
       name: opp.name,
@@ -815,7 +815,7 @@ export const getOpportunity = async (id: number): Promise<Opportunity> => {
       duration: opp.duration,
       total_slots: opp.total_slots || 10,
       imageUrl: resolvedImageUrl,
-      points: opp.duration || 0, // 1 minute = 1 point
+      points: opp.duration || 0,
       isPrivate: false,
       host_id: opp.host_user_id || opp.host_org_id,
       host_org_id: opp.host_org_id,
@@ -832,8 +832,6 @@ export const getOpportunity = async (id: number): Promise<Opportunity> => {
       redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
       multiopp: opp.multiopp || null,
       multiopp_id: opp.multiopp_id || null,
-      allow_carpool: opp.allow_carpool,
-      carpool_id: opp.carpool_id !== undefined ? opp.carpool_id : null,
     };
 
     return transformedOpp;
@@ -875,34 +873,40 @@ export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
       }
 
       // Transform involved users if they exist
-      const transformedInvolvedUsers = opp.involved_users ? opp.involved_users.map((involvedUser: any) => {
-        const user = involvedUser.user || involvedUser;
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          profile_image: user.profile_image,
-          interests: user.interests || [],
-          friendIds: user.friends || [],
-          organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
-          admin: user.admin || false,
-          gender: user.gender,
-          graduationYear: user.graduation_year,
-          academicLevel: user.academic_level,
-          major: user.major,
-          birthday: user.birthday,
-          points: user.points || 0,
-          registration_date: user.registration_date,
-          phone: user.phone,
-          car_seats: user.car_seats || 0,
-          bio: user.bio,
-          registered: involvedUser.registered || false,
-          attended: involvedUser.attended || false,
-        };
-      }) : [];
+      const transformedInvolvedUsers = opp.involved_users
+        ? opp.involved_users.map((involvedUser: any) => {
+          const user = involvedUser.user || involvedUser;
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            profile_image: user.profile_image,
+            interests: user.interests || [],
+            friendIds: user.friends || [],
+            organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
+            admin: user.admin || false,
+            gender: user.gender,
+            graduationYear: user.graduation_year,
+            academicLevel: user.academic_level,
+            major: user.major,
+            birthday: user.birthday,
+            points: user.points || 0,
+            registration_date: user.registration_date,
+            phone: user.phone,
+            car_seats: user.car_seats || 0,
+            bio: user.bio,
+            registered: involvedUser.registered || false,
+            attended: involvedUser.attended || false,
+          };
+        })
+        : [];
 
       // Use image URL directly from backend
-      const resolvedImageUrl = opp.image_url || opp.image || opp.imageUrl || 'https://campus-cares.s3.us-east-2.amazonaws.com';
+      const resolvedImageUrl =
+        opp.image_url ||
+        opp.image ||
+        opp.imageUrl ||
+        'https://campus-cares.s3.us-east-2.amazonaws.com';
 
       return {
         id: opp.id,
@@ -929,8 +933,6 @@ export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
         qualifications: opp.qualifications !== undefined ? opp.qualifications : [],
         tags: opp.tags !== undefined ? opp.tags : [],
         redirect_url: opp.redirect_url !== undefined ? opp.redirect_url : null,
-        allow_carpool: opp.allow_carpool,
-        carpool_id: opp.carpool_id !== undefined ? opp.carpool_id : null
       };
     });
 
@@ -1131,43 +1133,6 @@ export const getMonthlyPoints = async (
 
   return response.json();
 };
-
-// --- Waivers ---
-export const createWaiver = async (data: {
-  typed_name: string,
-  type: string,
-  content: string;
-  checked_consent: boolean,
-  user_id: number,
-  organization_id?: number
-}): Promise<Waiver> => {
-  const token = await getFirebaseToken();
-
-  const response = await fetch(`${ENDPOINT_URL}/api/waivers/create-waiver`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      typed_name: data.typed_name,
-      type: data.type,
-      content: data.content,
-      checked_consent: data.checked_consent,
-      user_id: data.user_id,
-      organization_id: data.organization_id
-    })
-  });
-
-  if (!response.ok) {
-    console.error('Create opportunity failed with status:', response.status);
-    const errorInfo = await response.json().catch(() => ({ message: response.statusText }));
-    console.error('Error details:', errorInfo);
-    throw new Error(errorInfo.message || 'Failed to create waiver');
-  }
-
-  return response.json();
-};
 // api.ts
 const BASE_URL = 'https://cucaresbackend.onrender.com'; // adjust if you store it elsewhere
 
@@ -1259,37 +1224,36 @@ export const getMultiOpps = async (): Promise<MultiOpp[]> => {
         typeof multiopp.start_date === 'string'
           ? multiopp.start_date
           : multiopp.start_date
-            ? new Date(multiopp.start_date).toISOString()
-            : null;
+          ? new Date(multiopp.start_date).toISOString()
+          : null;
 
       // Map miniopps (individual opportunities)
       const opportunities: MiniOpp[] = Array.isArray(multiopp.opportunities)
-        ? multiopp.opportunities.map((opp: any) => ({
-          id: opp.id,
-          date:
-            typeof opp.date === 'string'
-              ? opp.date
-              : new Date(opp.date).toISOString(),
-          duration: opp.duration ?? 0,
-          total_slots: opp.total_slots ?? 10,
-          involved_users: Array.isArray(opp.involved_users)
-            ? opp.involved_users.map((u: any) => ({
-              id: u.id,
-              name: u.name ?? 'Unknown',
-              profile_image: u.profile_image ?? null,
-            }))
-            : [],
-          allow_carpool: opp.allow_carpool
-        }))
-        : [];
+  ? multiopp.opportunities.map((opp: any) => ({
+      id: opp.id,
+      date:
+        typeof opp.date === 'string'
+          ? opp.date
+          : new Date(opp.date).toISOString(),
+      duration: opp.duration ?? 0,
+      total_slots: opp.total_slots ?? 10,
+      involved_users: Array.isArray(opp.involved_users)
+        ? opp.involved_users.map((u: any) => ({
+            id: u.id,
+            name: u.name ?? 'Unknown',
+            profile_image: u.profile_image ?? null,
+          }))
+        : [],
+    }))
+  : [];
 
 
       // Extract a representative time from the first opportunity's ISO date
       const time =
         opportunities.length > 0
           ? new Date(opportunities[0].date)
-            .toISOString()
-            .substring(11, 16) // "HH:MM" from ISO 8601
+              .toISOString()
+              .substring(11, 16) // "HH:MM" from ISO 8601
           : null;
 
       return {
@@ -1308,7 +1272,7 @@ export const getMultiOpps = async (): Promise<MultiOpp[]> => {
         qualifications: multiopp.qualifications ?? [],
         visibility: multiopp.visibility ?? [],
         date: startDate,
-        time,
+        time, 
         days_of_week: multiopp.days_of_week ?? [],
         week_frequency: multiopp.week_frequency ?? null,
         week_recurrences: multiopp.week_recurrences ?? 4,
@@ -1334,7 +1298,7 @@ export const createMultiOpportunity = async (formData: FormData): Promise<any> =
     headers,
     body: formData,
   });
-
+  
   if (!response.ok) {
     console.error('Create multiopportunity failed with status:', response.status);
     const errorInfo = await response.json().catch(() => ({ message: response.statusText }));
@@ -1344,107 +1308,3 @@ export const createMultiOpportunity = async (formData: FormData): Promise<any> =
 
   return response.json(); // { multiopp, generated_opportunities }
 };
-
-export const updateMultiOpp = (id: number, data: object): Promise<Opportunity> =>
-  authenticatedRequest(`/multiopps/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  });
-
-export const deleteMultiOpp = (id: number): Promise<void> =>
-  authenticatedRequest(`/multiopps/${id}`, {
-    method: 'DELETE',
-  });
-
-// -- Cars --
-export const getCar = async (userId: string) => {
-  try {
-    const res = await authenticatedRequest(`/cars/${userId}`);
-    if (res.exists) {
-      return {
-        exists: true,
-        car: res.car
-      }
-    }
-
-    return {
-      exists: false
-    }
-  } catch (error) {
-    console.error('Error fetching car:', error);
-    throw error;
-  }
-}
-
-export const createOrUpdateCar = async (data: object) => {
-  try {
-    await authenticatedRequest('/cars', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
-  } catch (err) {
-    console.log('Error creating car', err);
-    throw err;
-  }
-}
-
-// -- Rides -- 
-export const createRide = async (data: object) => {
-  try {
-    await authenticatedRequest('/rides', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
-  } catch (err) {
-    console.log('Error creating ride', err);
-    throw err;
-  }
-}
-
-export const addRider = async (data: object) => {
-  try {
-    await authenticatedRequest('/rides/add-rider', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
-  } catch (err) {
-    console.log('Error creating rider', err);
-    throw err;
-  }
-}
-
-export const removeRider = async (data: object) => {
-  try {
-    await authenticatedRequest('/rides/remove-rider', {
-      method: 'DELETE',
-      body: JSON.stringify(data)
-    });
-  } catch (err) {
-    console.log('Error deleting rider', err);
-    throw err;
-  }
-}
-
-export const removeCarpoolUser = async (data: object) => {
-  try {
-    const res = await authenticatedRequest('/rides/remove-carpool-user', {
-      method: 'DELETE',
-      body: JSON.stringify(data)
-    });
-
-    return res;
-  } catch (err) {
-    console.log('Error deleting carpool user', err);
-    throw err;
-  }
-}
-
-export const getRides = async (carpoolId: number): Promise<Ride[]> => {
-  try {
-    const res = await authenticatedRequest(`/rides/${carpoolId}`);
-    return res.rides;
-  } catch (err) {
-    console.log('Error getting rides', err);
-    throw err;
-  }
-}

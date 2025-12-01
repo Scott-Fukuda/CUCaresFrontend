@@ -27,7 +27,6 @@ export interface User {
   _lastUpdate?: number; // Internal timestamp for forcing re-renders
   car_seats: number; // Number of car seats available
   bio?: string; // bio
-  carpool_waiver_signed?: boolean;
 }
 
 export interface Opportunity {
@@ -57,18 +56,14 @@ export interface Opportunity {
   redirect_url?: string | null; // External URL for signup, null means normal signup
   multiopp_id?: number | null; // ID of the multi-opportunity group, null if not part of one
   multiopp?: MultiOpp | null;
-  allow_carpool: boolean;
-  carpool_id: string;
 }
-
-type DaySlot = [string, number];
 
 export interface MultiOpp {
   id: number;
   name: string;
   date: string; // represents the first date in the opps
   time: string
-  days_of_week: Array<Record<string, DaySlot[]>>;
+  days_of_week: Array<Record<string, string[]>>; 
   week_frequency?: number | null;
   week_recurrences: number;
   created_at?: string;
@@ -95,8 +90,6 @@ export interface MiniOpp {
   id: number;
   date: string;
   duration: number;
-  allow_carpool: boolean;
-  carpool_id: string | null;
 }
 
 export interface SignUp {
@@ -222,11 +215,7 @@ export const allInterests = [
   'Other',
 ];
 
-export const genderOptions = [
-  'Male',
-  'Female',
-  'Prefer not to say'
-];
+export const genderOptions = ['Male', 'Female', 'Prefer not to say'];
 
 export const academicLevelOptions = ['Undergraduate', 'Graduate', 'Faculty'];
 
@@ -240,47 +229,4 @@ export interface Member {
   campusOrgs: string[];
   favoriteService: string;
   role: string;
-}
-
-export interface Waiver {
-  id: string;
-  typed_name: string;
-  type: string;
-  content: string;
-  checked_consent: boolean;
-  user_id: number;
-  organization_id?: number;
-}
-
-export interface Carpool {
-  id: string;
-  opportunity_id: string;
-}
-
-export interface Ride {
-  id: string;
-  carpool_id: string;
-  driver_id: string;
-  driver_name: string;
-  driver_seats: number;
-  riders: RideRider[]
-}
-
-export interface RideRider {
-  id: string;
-  ride_id: string;
-  user_id: string;
-  pickup_location: string;
-  profile_image?: string;
-  name: string;
-  notes?: string
-}
-
-export interface Car {
-  id: string;
-  user_id: string;
-  color?: string;
-  model?: string;
-  seats: number;
-  license_plate?: string;
 }
