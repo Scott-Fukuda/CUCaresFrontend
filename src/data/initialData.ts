@@ -261,4 +261,15 @@ export const ourTeam: Member[] = [
     favoriteService: "Volunteering at multiple after-school programs at my local middle schools!",
     role: 'Brand Strategy Manager',
   },
+   {
+    id: 93,
+    name: 'Arianna Hsu',
+    picture: './team_pic/arianna.jpg',
+    hometown: 'Bay Area, CA',
+    major: 'Information, Systems, and Technology',
+    class: '2028',
+    campusOrgs: ['Cru', 'Hack4Impact'],
+    favoriteService: "My favorite community service experience is teaching elementary school students music and seeing how proud they are when they can play the songs they love!",
+    role: 'Product Manager',
+  },
 ];
