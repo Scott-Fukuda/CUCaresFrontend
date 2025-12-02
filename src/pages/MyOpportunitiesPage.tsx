@@ -14,6 +14,11 @@ interface MyOpportunitiesPageProps {
     opportunityTime?: string
   ) => void;
   currentUserSignupsSet: Set<number>;
+  showPopup: (
+      title: string,
+      message: string,
+      type: 'success' | 'info' | 'warning' | 'error'
+  ) => void
 }
 
 const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
@@ -24,6 +29,7 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
   handleSignUp,
   handleUnSignUp,
   currentUserSignupsSet,
+  showPopup
 }) => {
   const [showPastHosted, setShowPastHosted] = useState(false);
   const [showPastRegistered, setShowPastRegistered] = useState(false);
@@ -188,6 +194,7 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
                   isUserSignedUp={isUserSignedUp}
                   onExternalSignup={handleExternalSignup}
                   onExternalUnsignup={handleExternalUnsignup}
+                showPopup={showPopup}
                 />
               );
             })}
@@ -220,6 +227,7 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
                     isUserSignedUp={isUserSignedUp}
                     onExternalSignup={handleExternalSignup}
                     onExternalUnsignup={handleExternalUnsignup}
+                showPopup={showPopup}
                   />
                 );
               })}
@@ -280,6 +288,7 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
                   isUserSignedUp={isUserSignedUp}
                   onExternalSignup={handleExternalSignup}
                   onExternalUnsignup={handleExternalUnsignup}
+                showPopup={showPopup}
                 />
               );
             })}
@@ -310,6 +319,7 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
                     isUserSignedUp={isUserSignedUp}
                     onExternalSignup={handleExternalSignup}
                     onExternalUnsignup={handleExternalUnsignup}
+                showPopup={showPopup}
                   />
                 );
               })}
@@ -361,6 +371,7 @@ const MyOpportunitiesPage: React.FC<MyOpportunitiesPageProps> = ({
                     isUserSignedUp={isUserSignedUp}
                     onExternalSignup={handleExternalSignup}
                     onExternalUnsignup={handleExternalUnsignup}
+              showPopup={showPopup}
                   />
                 );
               })}

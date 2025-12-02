@@ -3,7 +3,7 @@ import { allInterests, Opportunity, Organization, MultiOpp } from '../types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import * as api from '../api';
 import { formatDateTimeForBackend } from '../utils/timeUtils';
-
+import { useQueryClient } from '@tanstack/react-query';
 
 // Helper function to transform opportunity from backend format to frontend format
 const transformOpportunityFromBackend = (opp: any): Opportunity | MultiOpp => {
@@ -37,34 +37,32 @@ const transformOpportunityFromBackend = (opp: any): Opportunity | MultiOpp => {
     }
   }
 
-  // ---------- COMMON: transform involved users ----------
-  const transformedInvolvedUsers = opp.involved_users
-    ? opp.involved_users.map((involvedUser: any) => {
-        const user = involvedUser.user || involvedUser;
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          profile_image: user.profile_image,
-          interests: user.interests || [],
-          friendIds: user.friends || [],
-          organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
-          admin: user.admin || false,
-          gender: user.gender,
-          graduationYear: user.graduation_year,
-          academicLevel: user.academic_level,
-          major: user.major,
-          birthday: user.birthday,
-          points: user.points || 0,
-          registration_date: user.registration_date,
-          phone: user.phone,
-          car_seats: user.car_seats || 0,
-          bio: user.bio,
-          registered: involvedUser.registered || false,
-          attended: involvedUser.attended || false,
-        }
-      })
-    : [];
+  // Transform involved users if they exist
+  const transformedInvolvedUsers = opp.involved_users ? opp.involved_users.map((involvedUser: any) => {
+    const user = involvedUser.user || involvedUser;
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      profile_image: user.profile_image,
+      interests: user.interests || [],
+      friendIds: user.friends || [],
+      organizationIds: (user.organizations || []).map((org: any) => org.id) || [],
+      admin: user.admin || false,
+      gender: user.gender,
+      graduationYear: user.graduation_year,
+      academicLevel: user.academic_level,
+      major: user.major,
+      birthday: user.birthday,
+      points: user.points || 0,
+      registration_date: user.registration_date,
+      phone: user.phone,
+      car_seats: user.car_seats || 0,
+      bio: user.bio,
+      registered: involvedUser.registered || false,
+      attended: involvedUser.attended || false,
+    };
+  }) : [];
 
   // ---------- COMMON: image URL ----------
   const resolvedImageUrl =
@@ -72,33 +70,33 @@ const transformOpportunityFromBackend = (opp: any): Opportunity | MultiOpp => {
 
   // ---------- CASE 1: MultiOpp ----------
   if (isMultiOpp) {
-  const firstOppDate = opp.opportunities && opp.opportunities.length > 0 ? opp.opportunities[0].date : null;
-  const firstOppTime = firstOppDate ? new Date(firstOppDate) : null;
-  return {
-    id: opp.id,
-    name: opp.name,
-    date: firstOppDate ? firstOppDate.split('T')[0] : '',
-    time: firstOppTime ? firstOppTime.toTimeString().split(' ')[0] : '',
-    description: opp.description,
-    causes: opp.causes ?? [],
-    tags: opp.tags ?? [],
-    address: opp.address ?? '',
-    nonprofit: opp.nonprofit ?? '',
-    image: resolvedImageUrl,
-    approved: opp.approved ?? false,
-    host_org_name: opp.host_org_name ?? null,
-    qualifications: opp.qualifications ?? [],
-    visibility: opp.visibility ?? [],
-    host_org_id: opp.host_org_id ?? null,
-    host_user_id: opp.host_user_id ?? null,
-    days_of_week: opp.days_of_week ?? [],
-    week_frequency: opp.week_frequency ?? 1,
-    week_recurrences: opp.week_recurrences ?? 4,
-    start_date: opp.start_date ?? null,
-    opportunities: opp.opportunities ?? [],
-    isMultiOpp: true,
-  } as MultiOpp;
-}
+    const firstOppDate = opp.opportunities && opp.opportunities.length > 0 ? opp.opportunities[0].date : null;
+    const firstOppTime = firstOppDate ? new Date(firstOppDate) : null;
+    return {
+      id: opp.id,
+      name: opp.name,
+      date: firstOppDate ? firstOppDate.split('T')[0] : '',
+      time: firstOppTime ? firstOppTime.toTimeString().split(' ')[0] : '',
+      description: opp.description,
+      causes: opp.causes ?? [],
+      tags: opp.tags ?? [],
+      address: opp.address ?? '',
+      nonprofit: opp.nonprofit ?? '',
+      image: resolvedImageUrl,
+      approved: opp.approved ?? false,
+      host_org_name: opp.host_org_name ?? null,
+      qualifications: opp.qualifications ?? [],
+      visibility: opp.visibility ?? [],
+      host_org_id: opp.host_org_id ?? null,
+      host_user_id: opp.host_user_id ?? null,
+      days_of_week: opp.days_of_week ?? [],
+      week_frequency: opp.week_frequency ?? 1,
+      week_recurrences: opp.week_recurrences ?? 4,
+      start_date: opp.start_date ?? null,
+      opportunities: opp.opportunities ?? [],
+      isMultiOpp: true,
+    } as MultiOpp;
+  }
 
 
   // ---------- CASE 2: Single Opportunity ----------
@@ -137,9 +135,9 @@ interface CreateOpportunityPageProps {
   opportunities: Opportunity[];
   allOpps: (Opportunity | MultiOpp)[];
   setAllOpps: (allOpps: (Opportunity | MultiOpp)[] | ((prev: (Opportunity | MultiOpp)[]) => (Opportunity | MultiOpp)[])) => void;
-  setOpportunities: (
-    opportunities: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])
-  ) => void;
+  // setOpportunities: (
+  //   opportunities: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])
+  // ) => void;
 }
 
 
@@ -149,10 +147,11 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
   setAllOpps,
   allOpps,
   opportunities,
-  setOpportunities,
+  // setOpportunities,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   const clonedOpportunityData = location.state?.clonedOpportunityData;
 
@@ -174,7 +173,8 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
     // New fields for private events and visibility (list of org ids)
     isPrivate: clonedOpportunityData?.isPrivate || false,
-    visibility: clonedOpportunityData?.visibility || ([] as number[]),
+    visibility: clonedOpportunityData?.visibility || [] as number[],
+    allow_carpool: clonedOpportunityData?.allow_carpool || false
   });
 
   // set isPrivate and visibility if cloning a private event for form UI
@@ -281,6 +281,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
     setError(null);
 
     try {
+
       // Upload image first if selected
       let imageUrl = clonedOpportunityData?.imageUrl || ''; // ✅ default to cloned image if present
 
@@ -331,6 +332,8 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       formDataToSend.append('host_org_id', formData.host_org_id);
       formDataToSend.append('host_user_id', currentUser.id.toString());
       formDataToSend.append('address', formData.address);
+      formDataToSend.append('allow_carpool', formData.allow_carpool)
+
       formDataToSend.append('points', formData.duration.toString());
       formDataToSend.append('approved', currentUser.admin ? 'true' : 'false');
 
@@ -346,11 +349,11 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       } else {
         console.log('No image URL to add to form data');
       }
-        if (isRecurring) {
-          formDataToSend.append('start_date', startDate);
-          formDataToSend.append('days_of_week', JSON.stringify(daysOfWeek));
-          formDataToSend.append('week_frequency', weekFrequency.toString());
-          formDataToSend.append('week_recurrences', weekRecurrences.toString());
+      if (isRecurring) {
+        formDataToSend.append('start_date', startDate);
+        formDataToSend.append('days_of_week', JSON.stringify(daysOfWeek));
+        formDataToSend.append('week_frequency', weekFrequency.toString());
+        formDataToSend.append('week_recurrences', weekRecurrences.toString());
       }
 
 
@@ -383,7 +386,7 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
         const approvedOpp = { ...transformedOpp, approved: true };
 
         if (isSingleOpp) {
-          setOpportunities((prev) => [approvedOpp as Opportunity, ...prev]);
+          // setOpportunities((prev) => [approvedOpp as Opportunity, ...prev]);
         }
 
         setAllOpps((prev) => {
@@ -391,7 +394,8 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
           return updated;
         });
       } else if (isSingleOpp) {
-        setOpportunities((prev) => [transformedOpp as Opportunity, ...prev]);
+        // setOpportunities((prev) => [transformedOpp as Opportunity, ...prev]);
+        queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       }
 
       setSuccess(true);
@@ -405,42 +409,42 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
     }
   };
 
-const addDaySlot = (day: string) => {
-  const updated = [...daysOfWeek];
-  const existing = updated.find((d) => Object.keys(d)[0] === day);
-  if (existing) {
-    existing[day].push(['', 60]); // default time + duration
-  } else {
-    updated.push({ [day]: [['', 60]] });
-  }
-  setDaysOfWeek(updated);
-};
-
-const updateDaySlot = (day: string, index: number, field: 'time' | 'duration', value: string) => {
-  const updated = [...daysOfWeek];
-  const target = updated.find((d) => Object.keys(d)[0] === day);
-  if (target) {
-    const slots = target[day];
-    if (field === 'time') slots[index][0] = value;
-    else slots[index][1] = parseInt(value);
-    target[day] = slots;
-  }
-  setDaysOfWeek(updated);
-};
-
-const removeDaySlot = (day: string, index: number) => {
-  const updated = [...daysOfWeek];
-  const target = updated.find((d) => Object.keys(d)[0] === day);
-  if (target) {
-    target[day].splice(index, 1);
-    if (target[day].length === 0) {
-      const filtered = updated.filter((d) => Object.keys(d)[0] !== day);
-      setDaysOfWeek(filtered);
-      return;
+  const addDaySlot = (day: string) => {
+    const updated = [...daysOfWeek];
+    const existing = updated.find((d) => Object.keys(d)[0] === day);
+    if (existing) {
+      existing[day].push(['', 60]); // default time + duration
+    } else {
+      updated.push({ [day]: [['', 60]] });
     }
-  }
-  setDaysOfWeek(updated);
-};
+    setDaysOfWeek(updated);
+  };
+
+  const updateDaySlot = (day: string, index: number, field: 'time' | 'duration', value: string) => {
+    const updated = [...daysOfWeek];
+    const target = updated.find((d) => Object.keys(d)[0] === day);
+    if (target) {
+      const slots = target[day];
+      if (field === 'time') slots[index][0] = value;
+      else slots[index][1] = parseInt(value);
+      target[day] = slots;
+    }
+    setDaysOfWeek(updated);
+  };
+
+  const removeDaySlot = (day: string, index: number) => {
+    const updated = [...daysOfWeek];
+    const target = updated.find((d) => Object.keys(d)[0] === day);
+    if (target) {
+      target[day].splice(index, 1);
+      if (target[day].length === 0) {
+        const filtered = updated.filter((d) => Object.keys(d)[0] !== day);
+        setDaysOfWeek(filtered);
+        return;
+      }
+    }
+    setDaysOfWeek(updated);
+  };
 
 
   return (
@@ -613,172 +617,172 @@ const removeDaySlot = (day: string, index: number) => {
             </select>
             <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple causes</p>
           </div> */}
-        {(currentUser.admin) && (
-                  <>
-          <div className="pt-6 border-t mt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Does this event repeat?
-            </label>
-            <div className="flex items-center space-x-3 mb-4">
-              <input
-                type="checkbox"
-                checked={isRecurring}
-                onChange={(e) => setIsRecurring(e.target.checked)}
-                className="h-4 w-4 text-cornell-red"
-              />
-              <span className="text-gray-700">Yes</span>
-              <input
-                type="checkbox"
-                checked={!isRecurring}
-                onChange={(e) => setIsRecurring(!e.target.checked)}
-                className="h-4 w-4 text-cornell-red"
-              />
-              <span className="text-gray-700">No</span>
-            </div>
+          {(currentUser.admin) && (
+            <>
+              <div className="pt-6 border-t mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Does this event repeat?
+                </label>
+                <div className="flex items-center space-x-3 mb-4">
+                  <input
+                    type="checkbox"
+                    checked={isRecurring}
+                    onChange={(e) => setIsRecurring(e.target.checked)}
+                    className="h-4 w-4 text-cornell-red"
+                  />
+                  <span className="text-gray-700">Yes</span>
+                  <input
+                    type="checkbox"
+                    checked={!isRecurring}
+                    onChange={(e) => setIsRecurring(!e.target.checked)}
+                    className="h-4 w-4 text-cornell-red"
+                  />
+                  <span className="text-gray-700">No</span>
+                </div>
 
-            {isRecurring && (
-              <div className="bg-gray-50 p-4 rounded-lg border space-y-6">
-                {/* Days + Time Slots */}
-                <div>
-                  <p className="font-semibold mb-3">Which days of the week does this occur on?</p>
-                  <div className="space-y-4">
-                    {days.map((day) => {
-                      const existing = daysOfWeek.find((d) => Object.keys(d)[0] === day);
-                      return (
-                        <div key={day}>
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-gray-800">{day}</span>
-                            <button
-                              type="button"
-                              onClick={() => addDaySlot(day)}
-                              className="text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200"
-                            >
-                              + Add time
-                            </button>
-                          </div>
-
-                          {existing &&
-                            existing[day].map(([time, duration], idx) => (
-                              <div key={idx} className="flex gap-2 mt-2">
-                                <input
-                                  type="time"
-                                  value={time}
-                                  onChange={(e) => updateDaySlot(day, idx, 'time', e.target.value)}
-                                  className="border border-gray-300 rounded px-2 py-1 w-32"
-                                />
-                                <input
-                                  type="number"
-                                  value={duration}
-                                  onChange={(e) => updateDaySlot(day, idx, 'duration', e.target.value)}
-                                  min={15}
-                                  step={15}
-                                  className="border border-gray-300 rounded px-2 py-1 w-24"
-                                />
+                {isRecurring && (
+                  <div className="bg-gray-50 p-4 rounded-lg border space-y-6">
+                    {/* Days + Time Slots */}
+                    <div>
+                      <p className="font-semibold mb-3">Which days of the week does this occur on?</p>
+                      <div className="space-y-4">
+                        {days.map((day) => {
+                          const existing = daysOfWeek.find((d) => Object.keys(d)[0] === day);
+                          return (
+                            <div key={day}>
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium text-gray-800">{day}</span>
                                 <button
                                   type="button"
-                                  onClick={() => removeDaySlot(day, idx)}
-                                  className="text-red-500 hover:text-red-700 text-sm"
+                                  onClick={() => addDaySlot(day)}
+                                  className="text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200"
                                 >
-                                  Remove
+                                  + Add time
                                 </button>
                               </div>
-                            ))}
-                        </div>
-                      );
-                    })}
+
+                              {existing &&
+                                existing[day].map(([time, duration], idx) => (
+                                  <div key={idx} className="flex gap-2 mt-2">
+                                    <input
+                                      type="time"
+                                      value={time}
+                                      onChange={(e) => updateDaySlot(day, idx, 'time', e.target.value)}
+                                      className="border border-gray-300 rounded px-2 py-1 w-32"
+                                    />
+                                    <input
+                                      type="number"
+                                      value={duration}
+                                      onChange={(e) => updateDaySlot(day, idx, 'duration', e.target.value)}
+                                      min={15}
+                                      step={15}
+                                      className="border border-gray-300 rounded px-2 py-1 w-24"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => removeDaySlot(day, idx)}
+                                      className="text-red-500 hover:text-red-700 text-sm"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Frequency */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        How often does this repeat? (every X weeks)
+                      </label>
+                      <input
+                        type="number"
+                        value={weekFrequency}
+                        onChange={(e) => setWeekFrequency(parseInt(e.target.value) || 1)}
+                        min={1}
+                        className="w-32 border border-gray-300 rounded px-2 py-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        When should this recurring event start?
+                      </label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        required
+                        className="border border-gray-300 rounded px-2 py-1 w-56"
+                      />
+                    </div>
+
+
+                    {/* Recurrence count */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        For how many weeks should this pattern repeat?
+                      </label>
+                      <input
+                        type="number"
+                        value={weekRecurrences}
+                        onChange={(e) => setWeekRecurrences(parseInt(e.target.value) || 1)}
+                        min={1}
+                        className="w-32 border border-gray-300 rounded px-2 py-1"
+                      />
+                    </div>
                   </div>
-                </div>
-
-                {/* Frequency */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    How often does this repeat? (every X weeks)
-                  </label>
-                  <input
-                    type="number"
-                    value={weekFrequency}
-                    onChange={(e) => setWeekFrequency(parseInt(e.target.value) || 1)}
-                    min={1}
-                    className="w-32 border border-gray-300 rounded px-2 py-1"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    When should this recurring event start?
-                  </label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                    className="border border-gray-300 rounded px-2 py-1 w-56"
-                  />
-                </div>
-
-
-                {/* Recurrence count */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    For how many weeks should this pattern repeat?
-                  </label>
-                  <input
-                    type="number"
-                    value={weekRecurrences}
-                    onChange={(e) => setWeekRecurrences(parseInt(e.target.value) || 1)}
-                    min={1}
-                    className="w-32 border border-gray-300 rounded px-2 py-1"
-                  />
-                </div>
+                )}
               </div>
-            )}
-          </div>  
-          </>)
-        }
+            </>)
+          }
 
           {!isRecurring && (
-          <>
-          <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Date *</label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-              />
-            </div>
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Date *</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Time *</label>
-              <input
-                type="time"
-                name="time"
-                value={formData.time}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Time *</label>
+                <input
+                  type="time"
+                  name="time"
+                  value={formData.time}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Duration (minutes) *
-              </label>
-              <input
-                type="number"
-                name="duration"
-                value={formData.duration}
-                onChange={handleInputChange}
-                required
-                min="15"
-                step="15"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Duration (minutes) *
+                </label>
+                <input
+                  type="number"
+                  name="duration"
+                  value={formData.duration}
+                  onChange={handleInputChange}
+                  required
+                  min="15"
+                  step="15"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+                />
+              </div>
             </>
           )}
-          
+
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -833,6 +837,24 @@ const removeDaySlot = (day: string, index: number) => {
             )}
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Enable carpooling for this event?
+            </label>
+            <select
+              name="allowCarpool"
+              value={formData.allow_carpool ? 'yes' : 'no'}
+              onChange={(e) => setFormData(prev => ({ ...prev, allow_carpool: e.target.value === 'yes' }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+            >
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+
+            <p className="text-xs text-gray-500 mt-1">
+              Volunteers can sign up to drive or request a ride through the system.
+            </p>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

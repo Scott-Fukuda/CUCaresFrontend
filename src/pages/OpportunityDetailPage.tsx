@@ -14,6 +14,7 @@ import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 import { upload } from '@testing-library/user-event/dist/upload';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface OpportunityDetailPageProps {
   opportunities: Opportunity[];
@@ -28,7 +29,7 @@ interface OpportunityDetailPageProps {
   ) => void;
   allOrgs: Organization[];
   currentUserSignupsSet: Set<number>;
-  setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
+  // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
 }
 
 const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
@@ -40,10 +41,11 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
   handleUnSignUp,
   allOrgs,
   currentUserSignupsSet,
-  setOpportunities,
+  // setOpportunities,
 }) => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const queryClient = useQueryClient();
 
   const opportunity = opportunities.find((o) => o.id === parseInt(id!));
 
@@ -59,7 +61,9 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
     duration: opportunity.duration,
     nonprofit: opportunity.nonprofit || '',
     redirect_url: opportunity.redirect_url || '', // Add redirect_url to form state
+    allow_carpool: opportunity.allow_carpool || false
   });
+  const initAllowCarpool = opportunity.allow_carpool;
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -82,30 +86,31 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
   // Note: For hosts, being in involved_users means they're signed up, regardless of registered flag
   const signedUpStudents = opportunity.involved_users
     ? opportunity.involved_users.filter(
-        (user) => user.registered === true || opportunity.host_id === user.id
-      )
+      (user) => user.registered === true || opportunity.host_id === user.id
+    )
     : students.filter((student) => {
-        const signupUserIds = signups
-          .filter((s) => s.opportunityId === opportunity.id)
-          .map((s) => s.userId);
-        return signupUserIds.includes(student.id);
-      });
+      const signupUserIds = signups
+        .filter((s) => s.opportunityId === opportunity.id)
+        .map((s) => s.userId);
+      return signupUserIds.includes(student.id);
+    });
 
   // Check if current user is signed up by looking in involved_users from backend
   // This persists across login/logout cycles
   // Note: For hosts, being in involved_users means they're signed up, regardless of registered flag
   const isUserSignedUp = opportunity.involved_users
     ? opportunity.involved_users.some(
-        (user) =>
-          user.id === currentUser.id &&
-          (user.registered === true || opportunity.host_id === user.id)
-      )
+      (user) =>
+        user.id === currentUser.id &&
+        (user.registered === true || opportunity.host_id === user.id)
+    )
     : currentUserSignupsSet.has(opportunity.id);
 
   const isUserHost = opportunity.host_id === currentUser.id;
   const canManageOpportunity = isUserHost || currentUser.admin;
   const availableSlots = opportunity.total_slots - signedUpStudents.length;
   const canSignUp = availableSlots > 0 && !isUserSignedUp;
+  const allowCarpool = opportunity.allow_carpool;
 
   // Parse date components manually to avoid timezone issues
   const [year, month, day] = opportunity.date.split('-').map(Number);
@@ -118,11 +123,11 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
 
   // Parse time correctly for display (assuming Eastern Time)
   const [hours, minutes] = opportunity.time.split(':');
-const displayTime = 
-  (() => {
+  const displayTime =
+    (() => {
       // Handle normal opportunities (with `time` field)
       const [hours, minutes] = opportunity.time.split(':');
-      const realHours = opportunity.multiopp? parseInt(hours) - 1: parseInt(hours); // convert GMT → Eastern (accounting for bug)
+      const realHours = opportunity.multiopp ? parseInt(hours) - 1 : parseInt(hours); // convert GMT → Eastern (accounting for bug)
       return new Date(2024, 0, 1, realHours, parseInt(minutes)).toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
@@ -132,23 +137,23 @@ const displayTime =
 
   // Calculate and format end time
   const displayEndTime = (() => {
-  // Split the time string
-  let [hours, minutes] = opportunity.time.split(':');
+    // Split the time string
+    let [hours, minutes] = opportunity.time.split(':');
 
-  // Adjust for multiopp GMT issue
-  let realHours = opportunity.multiopp ? parseInt(hours) - 1 : parseInt(hours);
+    // Adjust for multiopp GMT issue
+    let realHours = opportunity.multiopp ? parseInt(hours) - 1 : parseInt(hours);
 
-  // Normalize and handle wraparound
-  if (realHours < 0) realHours += 24;
+    // Normalize and handle wraparound
+    if (realHours < 0) realHours += 24;
 
-  // Construct corrected time string
-  let realTime = realHours.toString().padStart(2, '0') + ':' + minutes;
+    // Construct corrected time string
+    let realTime = realHours.toString().padStart(2, '0') + ':' + minutes;
 
-  // Return formatted end time using your utility
-  return calculateEndTime(opportunity.date, realTime, opportunity.duration);
-})();
+    // Return formatted end time using your utility
+    return calculateEndTime(opportunity.date, realTime, opportunity.duration);
+  })();
 
-// convert GMT → Eastern (accounting for bug)
+  // convert GMT → Eastern (accounting for bug)
 
 
 
@@ -158,49 +163,49 @@ const displayTime =
       (org) => Array.isArray(opportunity.visibility) && opportunity.visibility.includes(org.id)
     )
     .sort((a, b) => a.name.localeCompare(b.name));
-    
+
   const handleButtonClick = async () => {
-  try {
-    // If user is already signed up, confirm unregistration
-    if (isUserSignedUp) {
-      if (opportunity.redirect_url) {
-        alert(
-          "You are registered for this opportunity via an external site. To un-register, please visit that site as well."
+    try {
+      // If user is already signed up, confirm unregistration
+      if (isUserSignedUp) {
+        if (opportunity.redirect_url) {
+          alert(
+            "You are registered for this opportunity via an external site. To un-register, please visit that site as well."
+          );
+        }
+
+        const confirmed = window.confirm(
+          "Are you sure you want to un-register from this opportunity?"
         );
+        if (confirmed) {
+          await handleUnSignUp(opportunity.id, opportunity.date, opportunity.time);
+          alert("You have been unregistered successfully.");
+        }
+        return; // stop here after un-sign-up
       }
 
-      const confirmed = window.confirm(
-        "Are you sure you want to un-register from this opportunity?"
-      );
-      if (confirmed) {
-        await handleUnSignUp(opportunity.id, opportunity.date, opportunity.time);
-        alert("You have been unregistered successfully.");
+      // Otherwise, handle sign up
+      if (opportunity.redirect_url) {
+        // External registration link flow
+        const confirmed = window.confirm(
+          "This opportunity requires registration on an external site.\n\nClick OK to open the registration link in a new tab."
+        );
+        if (confirmed) {
+          window.open(opportunity.redirect_url, "_blank");
+          await handleSignUp(opportunity.id); // mark them registered in system
+          alert("You are now registered and redirected to the external site!");
+        }
+        return;
       }
-      return; // stop here after un-sign-up
+
+      // Normal sign up
+      await handleSignUp(opportunity.id);
+      alert("You have successfully signed up!");
+    } catch (error) {
+      console.error("Error during sign up / un-sign up:", error);
+      alert("Something went wrong. Please try again.");
     }
-
-    // Otherwise, handle sign up
-    if (opportunity.redirect_url) {
-      // External registration link flow
-      const confirmed = window.confirm(
-        "This opportunity requires registration on an external site.\n\nClick OK to open the registration link in a new tab."
-      );
-      if (confirmed) {
-        window.open(opportunity.redirect_url, "_blank");
-        await handleSignUp(opportunity.id); // mark them registered in system
-        alert("You are now registered and redirected to the external site!");
-      }
-      return;
-    }
-
-    // Normal sign up
-    await handleSignUp(opportunity.id);
-    alert("You have successfully signed up!");
-  } catch (error) {
-    console.error("Error during sign up / un-sign up:", error);
-    alert("Something went wrong. Please try again.");
-  }
-};
+  };
 
 
   const handleAttendanceSubmitted = async () => {
@@ -229,9 +234,10 @@ const displayTime =
         };
 
         // Update the opportunities in the parent component
-        setOpportunities((prev) =>
-          prev.map((opp) => (opp.id === opportunity.id ? updatedOpportunity : opp))
-        );
+        // setOpportunities((prev) =>
+        //   prev.map((opp) => (opp.id === opportunity.id ? updatedOpportunity : opp))
+        // );
+        queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       }
 
       alert('Attendance submitted successfully!');
@@ -267,7 +273,8 @@ const displayTime =
       await registerForOpp({ user_id: userId, opportunity_id: opportunity.id });
       // Refresh opportunities data to get updated involved_users
       const updatedOpps = await getCurrentOpportunities();
-      setOpportunities(updatedOpps);
+      // setOpportunities(updatedOpps);
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       // alert('User registered successfully!');
     } catch (error) {
       console.error('Error registering user:', error);
@@ -287,8 +294,10 @@ const displayTime =
         isAdminOrHost: currentUser.admin || opportunity.host_id === currentUser.id, // Pass admin/host status
       });
       // Refresh opportunities data to get updated involved_users
+      // FIX? Uses getCurrentOpportunities instead of getOpportuinties, make sure not important
       const updatedOpps = await getCurrentOpportunities();
-      setOpportunities(updatedOpps);
+      // setOpportunities(updatedOpps);
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       alert('User unregistered successfully!');
     } catch (error) {
       console.error('Error unregistering user:', error);
@@ -309,11 +318,12 @@ const displayTime =
       opportunity.approved = false;
 
       // Update the opportunities list in the parent component
-      setOpportunities((prevOpportunities) =>
-        prevOpportunities.map((opp) =>
-          opp.id === opportunity.id ? { ...opp, approved: false } : opp
-        )
-      );
+      // setOpportunities((prevOpportunities) =>
+      //   prevOpportunities.map((opp) =>
+      //     opp.id === opportunity.id ? { ...opp, approved: false } : opp
+      //   )
+      // );
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
       alert('Opportunity has been unapproved successfully!');
     } catch (error: any) {
@@ -331,9 +341,10 @@ const displayTime =
       await deleteOpportunity(opportunity.id);
 
       // Remove the opportunity from the state
-      setOpportunities((prevOpportunities) =>
-        prevOpportunities.filter((opp) => opp.id !== opportunity.id)
-      );
+      // setOpportunities((prevOpportunities) =>
+      //   prevOpportunities.filter((opp) => opp.id !== opportunity.id)
+      // );
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
       alert('Opportunity has been deleted successfully!');
       // Navigate back to opportunities page
@@ -357,28 +368,11 @@ const displayTime =
         duration: editForm.duration,
         nonprofit: editForm.nonprofit,
         redirect_url: editForm.redirect_url.trim() || null, // Send null if empty
+        allow_carpool: editForm.allow_carpool
       };
 
       await updateOpportunity(opportunity.id, updateData);
-
-      // Update the opportunity in the state
-      setOpportunities((prevOpportunities) =>
-        prevOpportunities.map((opp) =>
-          opp.id === opportunity.id
-            ? {
-                ...opp,
-                name: editForm.name,
-                description: editForm.description,
-                address: editForm.address,
-                date: editForm.date,
-                time: editForm.time,
-                duration: editForm.duration,
-                nonprofit: editForm.nonprofit,
-                redirect_url: editForm.redirect_url.trim() || null,
-              }
-            : opp
-        )
-      );
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
       // Update the local opportunity object to reflect changes
       Object.assign(opportunity, {
@@ -389,6 +383,7 @@ const displayTime =
         time: editForm.time,
         duration: editForm.duration,
         redirect_url: editForm.redirect_url.trim() || null,
+        allow_carpool: editForm.allow_carpool
       });
 
       alert('Opportunity details updated successfully!');
@@ -410,6 +405,7 @@ const displayTime =
       duration: opportunity.duration,
       redirect_url: opportunity.redirect_url || '', // Reset redirect_url
       nonprofit: opportunity.nonprofit || '',
+      allow_carpool: opportunity.allow_carpool || false
     });
     setSelectedImage(null);
     setImagePreview(null);
@@ -506,11 +502,12 @@ const displayTime =
 
       // Update local state
       opportunity.imageUrl = imageUrl;
-      setOpportunities((prevOpportunities) =>
-        prevOpportunities.map((opp) =>
-          opp.id === opportunity.id ? { ...opp, imageUrl: imageUrl } : opp
-        )
-      );
+      // setOpportunities((prevOpportunities) =>
+      //   prevOpportunities.map((opp) =>
+      //     opp.id === opportunity.id ? { ...opp, imageUrl: imageUrl } : opp
+      //   )
+      // );
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
 
       // Clear the selected image and preview
       setSelectedImage(null);
@@ -589,6 +586,7 @@ const displayTime =
       imageUrl: opportunity.imageUrl || '',
       visibility: opportunity.visibility || [],
       isPrivate: opportunity.isPrivate || false,
+      allow_carpool: opportunity.allow_carpool
     };
 
     // Navigate to create opportunity page with cloned data
@@ -646,13 +644,12 @@ const displayTime =
           <button
             onClick={handleButtonClick}
             disabled={!isUserSignedUp && !canSignUp}
-            className={`mt-6 inline-flex items-center justify-center rounded-lg px-5 py-3 text-base font-semibold shadow-lg transition-colors ${
-              isUserSignedUp
-                ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                : canSignUp
+            className={`mt-6 inline-flex items-center justify-center rounded-lg px-5 py-3 text-base font-semibold shadow-lg transition-colors ${isUserSignedUp
+              ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+              : canSignUp
                 ? 'bg-cornell-red hover:bg-red-700 text-white'
                 : 'bg-gray-500/70 text-white/80 cursor-not-allowed'
-            }`}
+              }`}
           >
             {isUserSignedUp ? 'Signed Up ✓' : canSignUp ? 'Sign Up Now' : 'Event Full'}
           </button>
@@ -717,7 +714,7 @@ const displayTime =
                   </>
                 )}
               </div>
-              
+
             )}
           </div>
 
@@ -848,578 +845,607 @@ const displayTime =
                 </div>
               </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Redirect Link (Optional)</label>
-                            <input
-                                type="url"
-                                value={editForm.redirect_url}
-                                onChange={(e) => setEditForm({...editForm, redirect_url: e.target.value})}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-                                placeholder="https://example.com/register"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                If you would like this opportunity to redirect to an external registration, enter the link here.
-                            </p>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-gray-700 text-lg leading-relaxed break-words">
-                        {formatDescription(opportunity.description)}
-                    </div>
-                )}
-                
-                <div className="mt-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-2xl font-bold">Participants ({signedUpStudents.length}/{opportunity.total_slots})</h3>
-                        <div className="text-right">
-                            <p className="text-sm text-gray-600">Available Slot</p>
-                            <p className={`text-lg font-semibold ${availableSlots > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {availableSlots}
-                            </p>
-                        </div>
-                    </div>
-                    {signedUpStudents.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                            {signedUpStudents.map(student => (
-                                <div key={`${student.id}-${student._lastUpdate || 'no-update'}`} className="text-center group relative">
-                                    <div onClick={() => navigate(`/profile/${student.id}`)} className="cursor-pointer">
-                                        <p className="font-semibold text-gray-800 group-hover:text-cornell-red transition">{student.name}</p>
-                                    </div>
-                                    {currentUser.admin && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleUnregisterUser(student.id);
-                                            }}
-                                            className="mt-1 text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors"
-                                        >
-                                            Unregister
-                                        </button>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                         <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up! +5 bonus points</div>
-                    )}
-                    
-                    {/* Admin User Registration Section */}
-                    {currentUser.admin && (
-                        <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                            <h4 className="text-lg font-bold text-purple-800 mb-4">Admin: Register Users</h4>
-                            
-                            {!showUserLookup ? (
-                                <button
-                                    onClick={() => setShowUserLookup(true)}
-                                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-                                >
-                                    Register User by Name
-                                </button>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="Type user name to search..."
-                                            value={userLookupName}
-                                            onChange={(e) => setUserLookupName(e.target.value)}
-                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                            autoFocus
-                                        />
-                                        <button
-                                            onClick={() => {
-                                                setShowUserLookup(false);
-                                                setUserLookupName('');
-                                                setUserLookupResults([]);
-                                            }}
-                                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                    
-                                    {/* Show results as you type */}
-                                    {userLookupName.trim() && (
-                                        <div className="max-h-60 overflow-y-auto space-y-2">
-                                            {userLookupResults.length > 0 ? (
-                                                <>
-                                                    <p className="text-sm text-gray-600 font-medium">
-                                                        {userLookupResults.length} user{userLookupResults.length !== 1 ? 's' : ''} found:
-                                                    </p>
-                                                    {userLookupResults.map(user => {
-                                                        const isAlreadyRegistered = signedUpStudents.some(s => s.id === user.id);
-                                                        return (
-                                                            <div key={user.id} className="p-3 bg-white border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors">
-                                                                <div className="flex justify-between items-center">
-                                                                    <div>
-                                                                        <p className="font-semibold">{user.name}</p>
-                                                                        <p className="text-sm text-gray-600">{user.email}</p>
-                                                                    </div>
-                                                                    <button
-                                                                        onClick={() => handleRegisterUser(user.id)}
-                                                                        disabled={isRegisteringUser || isAlreadyRegistered}
-                                                                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                                                    >
-                                                                        {isRegisteringUser ? 'Registering...' : 
-                                                                         isAlreadyRegistered ? 'Already Registered' : 
-                                                                         'Register'}
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </>
-                                            ) : (
-                                                <p className="text-sm text-gray-500 text-center py-4">
-                                                    No users found matching "{userLookupName}"
-                                                </p>
-                                            )}
-                                        </div>
-                                    )}
-                                    
-                                    {/* Show hint when input is empty */}
-                                    {!userLookupName.trim() && (
-                                        <p className="text-sm text-gray-500 text-center py-2">
-                                            Start typing a name to search for users...
-                                        </p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                    
-                    {/* Slot limit warning for hosts */}
-                    {canManageOpportunity && availableSlots <= 0 && (
-                        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <p className="text-sm text-yellow-700 text-center">
-                                ⚠️ This event has reached its maximum capacity. Consider increasing the slot limit if you want to allow more participants. 
-                            </p>
-                        </div>
-                    )}
-                </div>
-                
-                {/* Announcements Section */}
-                <div className="mt-8">
-                    <h3 className="text-2xl font-bold mb-4">Announcements</h3>
-                    
-                    {/* Host can add new announcements */}
-                    {canManageOpportunity && (
-                        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <h4 className="text-lg font-semibold text-blue-800 mb-3">Add New Announcement</h4>
-                            <div className="space-y-3">
-                                <textarea
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    placeholder="Enter your announcement here..."
-                                    className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    rows={3}
-                                />
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={handleAddComment}
-                                        disabled={!newComment.trim() || isAddingComment}
-                                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
-                                    >
-                                        {isAddingComment ? 'Adding...' : 'Post Announcement'}
-                                    </button>
-                                    <button
-                                        onClick={() => setNewComment('')}
-                                        disabled={!newComment.trim()}
-                                        className="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
-                                    >
-                                        Clear
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    
-                    {/* Display existing announcements */}
-                    {opportunity.comments && opportunity.comments.length > 0 ? (
-                        <div className="space-y-4">
-                            {opportunity.comments.map((comment, index) => (
-                                <div key={index} className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-8 h-8 bg-cornell-red rounded-full flex items-center justify-center flex-shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-gray-800 leading-relaxed">{comment}</p>
-                                            <p className="text-xs text-gray-500 mt-2">Posted by host</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center p-6 bg-gray-50 rounded-lg text-gray-500">
-                            {canManageOpportunity ? 'No announcements yet. Add one above!' : 'No announcements yet.'}
-                        </div>
-                    )}
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Redirect Link (Optional)</label>
+                <input
+                  type="url"
+                  value={editForm.redirect_url}
+                  onChange={(e) => setEditForm({ ...editForm, redirect_url: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+                  placeholder="https://example.com/register"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  If you would like this opportunity to redirect to an external registration, enter the link here.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Enable carpooling for this event?
+                </label>
+                <select
+                  name="allowCarpool"
+                  value={editForm.allow_carpool ? 'yes' : 'no'}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, allow_carpool: e.target.value === 'yes' }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+                  disabled={initAllowCarpool}
+                >
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  Volunteers can sign up to drive or request a ride through the system (this feature cannot be undone once enabled).
+                </p>
+              </div>
             </div>
-            <div className="lg:col-span-1 space-y-8">
-                {canManageOpportunity ? (
-                  <div className="space-y-6">
-                    <AttendanceManager 
-                      opportunity={opportunity}
-                      participants={signedUpStudents}
-                      onAttendanceSubmitted={handleAttendanceSubmitted}
-                    />
-                    
-                    {/* Slot Limit Management */}
-                    <div className="bg-white p-6 rounded-2xl shadow-lg">
-                      <h4 className="text-lg font-bold mb-4">Slot Management</h4>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm text-gray-600">Current Slot Limit</p>
-                            <p className="text-2xl font-bold text-gray-800">{opportunity.total_slots}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-gray-600">Available Slots</p>
-                            <p className={`text-lg font-semibold ${availableSlots > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {availableSlots}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        {!isEditingSlots ? (
-                          <button
-                            onClick={handleStartSlotEdit}
-                            className="w-full bg-cornell-red hover:bg-red-800 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-                          >
-                            Update Slot Limit
-                          </button>
-                        ) : (
-                          <div className="space-y-3">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                New Slot Limit
-                              </label>
-                              <input
-                                type="text"
-                                value={newSlotLimit}
-                                onChange={(e) => {
-                                  const value = e.target.value;
-                                  if (value === '') {
-                                    setNewSlotLimit(0);
-                                  } else {
-                                    const numValue = parseInt(value);
-                                    if (!isNaN(numValue) && numValue >= 1) {
-                                      setNewSlotLimit(numValue);
-                                    }
-                                  }
-                                }}
-                                onBlur={(e) => {
-                                  const value = parseInt(e.target.value);
-                                  if (isNaN(value) || value < signedUpStudents.length) {
-                                    setNewSlotLimit(signedUpStudents.length);
-                                  }
-                                }}
-                                placeholder={`Minimum: ${signedUpStudents.length}`}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-                              />
-                              <p className="text-xs text-gray-500 mt-1">
-                                Minimum: {signedUpStudents.length} (current participants)
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={handleUpdateSlotLimit}
-                                disabled={isUpdatingSlots || newSlotLimit < signedUpStudents.length}
-                                className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
-                              >
-                                {isUpdatingSlots ? 'Updating...' : 'Save Changes'}
-                              </button>
-                              <button
-                                onClick={handleCancelSlotEdit}
-                                disabled={isUpdatingSlots}
-                                className="flex-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+          ) : (
+            <div className="text-gray-700 text-lg leading-relaxed break-words">
+              {formatDescription(opportunity.description)}
+            </div>
+          )}
+
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-2xl font-bold">Participants ({signedUpStudents.length}/{opportunity.total_slots})</h3>
+              <div className="text-right">
+                <p className="text-sm text-gray-600">Available Slot</p>
+                <p className={`text-lg font-semibold ${availableSlots > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {availableSlots}
+                </p>
+              </div>
+            </div>
+            {signedUpStudents.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {signedUpStudents.map(student => (
+                  <div key={`${student.id}-${student._lastUpdate || 'no-update'}`} className="text-center group relative">
+                    <div onClick={() => navigate(`/profile/${student.id}`)} className="cursor-pointer">
+                      <p className="font-semibold text-gray-800 group-hover:text-cornell-red transition">{student.name}</p>
                     </div>
-                    {/* Admin Unapprove Button - Now visible to admins and hosts */}
-                    {currentUser.admin && opportunity.approved !== false && (
-                      <div className="bg-white p-6 rounded-2xl shadow-lg">
-                        <h4 className="text-lg font-bold mb-4">Admin Actions</h4>
-                        <button
-                          onClick={handleUnapproveOpportunity}
-                          className="w-full font-bold py-3 px-4 rounded-lg transition-colors text-white text-lg bg-orange-600 hover:bg-orange-700"
-                        >
-                          Unapprove Opportunity
-                        </button>
-                      </div>
-                    )}
-                    {/* Send Email to All Participants Button */}
-                    {signedUpStudents.length > 0 && (
-                      <div className="bg-white p-6 rounded-2xl shadow-lg">
-                        <h4 className="text-lg font-bold mb-4">Communication</h4>
-                        <button
-                          onClick={() => {
-                            // Debug: Log the signedUpStudents to see what data we have
-                            //console.log('Signed up students:', signedUpStudents);
-                            //console.log('Opportunity involved_users:', opportunity.involved_users);
-                            
-                            // Get all participant emails - now directly available from backend
-                            const participantEmails = signedUpStudents
-                              .filter(student => {
-                                const hasEmail = student.email && student.email.trim() !== '';
-                                //console.log(`Student ${student.name}:`, { 
-                              //     email: student.email,
-                              //     hasEmail: !!hasEmail 
-                              //   });
-                                return hasEmail;
-                              })
-                              .map(student => student.email)
-                              .join(', ');
-                            
-                            //console.log('Participant emails collected:', participantEmails);
-                            
-                            if (participantEmails) {
-                              // Create Gmail draft with all participant emails
-                              const subject = encodeURIComponent(`Update for ${opportunity.name}`);
-                                                             const body = encodeURIComponent(`Hi everyone,\n\nThis is an update regarding ${opportunity.name}.\n\nBest regards,\n${currentUser.name}`);
-                              const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(participantEmails)}&su=${subject}&body=${body}`;
-                              window.open(gmailUrl, '_blank');
-                            } else {
-                              alert('No participant emails available to send to. Please check the console for debugging information.');
-                            }
-                          }}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                          Send Email to All Participants
-                        </button>
-                        <p className="text-sm text-gray-500 mt-2 text-center">
-                          Opens Gmail draft with all participant emails
-                        </p>
-                        
-                        {/* Participant Phone Numbers Button */}
-                        <button
-                          onClick={() => {
-                            // Get all participant phone numbers
-                            const participantPhones = signedUpStudents
-                              .filter(student => {
-                                const hasPhone = student.phone && student.phone.trim() !== '';
-                                return hasPhone;
-                              })
-                              .map(student => student.phone)
-                              .join('\n');
-                            
-                            if (participantPhones) {
-                              // Copy to clipboard
-                              navigator.clipboard.writeText(participantPhones).then(() => {
-                                alert('Participant phone numbers copied to clipboard!');
-                              }).catch(() => {
-                                // Fallback: show in alert if clipboard fails
-                                alert(`Participant phone numbers:\n\n${participantPhones}`);
-                              });
-                            } else {
-                              alert('No participant phone numbers available.');
-                            }
-                          }}
-                          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-3"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                          </svg>
-                          Participant Phone Numbers
-                        </button>
-                        <p className="text-sm text-gray-500 mt-2 text-center">
-                          Copies participant phone numbers to clipboard
-                        </p>
-                      </div>
+                    {currentUser.admin && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUnregisterUser(student.id);
+                        }}
+                        className="mt-1 text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors"
+                      >
+                        Unregister
+                      </button>
                     )}
                   </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center p-6 bg-light-gray rounded-lg text-lg text-gray-500">Be the first to sign up! +5 bonus points</div>
+            )}
+
+            {/* Admin User Registration Section */}
+            {currentUser.admin && (
+              <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                <h4 className="text-lg font-bold text-purple-800 mb-4">Admin: Register Users</h4>
+
+                {!showUserLookup ? (
+                  <button
+                    onClick={() => setShowUserLookup(true)}
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    Register User by Name
+                  </button>
                 ) : (
-                  <div className="bg-white p-6 rounded-2xl shadow-lg">
-                    <ul className="space-y-4 text-gray-700">
-                        <li className="flex items-center gap-3"><CalendarIcon /> <span>{displayDate}</span></li>
-                        <li className="flex items-center gap-3"><ClockIcon /> <span>{displayTime} - {displayEndTime}</span></li>
-                        <li className="flex items-center gap-3"><UsersIcon /> <span>{availableSlots} of {opportunity.total_slots} slots remaining</span></li>
-                        <li className="flex items-center gap-3"><StarIcon /> <span>{opportunity.points} points</span></li>
-                    </ul>
-                     <button
-                        onClick={handleButtonClick}
-                        disabled={!canSignUp && !isUserSignedUp}
-                        className={`w-full mt-6 font-bold py-4 px-4 rounded-lg transition-colors text-white text-lg ${
-                            isUserSignedUp
-                            ? 'bg-green-600 hover:bg-green-700'
-                            : canSignUp
-                            ? 'bg-cornell-red hover:bg-red-800'
-                            : 'bg-gray-400 cursor-not-allowed'
-                        }`}
-                        >
-                        {isUserSignedUp ? 'Signed Up ✓' : canSignUp ? 'Sign Up Now' : 'Event Full'}
-                    </button>
-                    
-                    
-                    {/* Slot limit enforcement message */}
-                    {!isUserSignedUp && availableSlots <= 0 && (
-                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm text-red-700 text-center">
-                          This event has reached its maximum capacity of {opportunity.total_slots} participants.
-                        </p>
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Type user name to search..."
+                        value={userLookupName}
+                        onChange={(e) => setUserLookupName(e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => {
+                          setShowUserLookup(false);
+                          setUserLookupName('');
+                          setUserLookupResults([]);
+                        }}
+                        className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+
+                    {/* Show results as you type */}
+                    {userLookupName.trim() && (
+                      <div className="max-h-60 overflow-y-auto space-y-2">
+                        {userLookupResults.length > 0 ? (
+                          <>
+                            <p className="text-sm text-gray-600 font-medium">
+                              {userLookupResults.length} user{userLookupResults.length !== 1 ? 's' : ''} found:
+                            </p>
+                            {userLookupResults.map(user => {
+                              const isAlreadyRegistered = signedUpStudents.some(s => s.id === user.id);
+                              return (
+                                <div key={user.id} className="p-3 bg-white border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors">
+                                  <div className="flex justify-between items-center">
+                                    <div>
+                                      <p className="font-semibold">{user.name}</p>
+                                      <p className="text-sm text-gray-600">{user.email}</p>
+                                    </div>
+                                    <button
+                                      onClick={() => handleRegisterUser(user.id)}
+                                      disabled={isRegisteringUser || isAlreadyRegistered}
+                                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                    >
+                                      {isRegisteringUser ? 'Registering...' :
+                                        isAlreadyRegistered ? 'Already Registered' :
+                                          'Register'}
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </>
+                        ) : (
+                          <p className="text-sm text-gray-500 text-center py-4">
+                            No users found matching "{userLookupName}"
+                          </p>
+                        )}
                       </div>
                     )}
 
+                    {/* Show hint when input is empty */}
+                    {!userLookupName.trim() && (
+                      <p className="text-sm text-gray-500 text-center py-2">
+                        Start typing a name to search for users...
+                      </p>
+                    )}
                   </div>
                 )}
-                 <div className="bg-white p-6 rounded-2xl shadow-lg">
-                    <h4 className="text-lg font-bold mb-2">Location</h4>
-                    <div className="mb-4">
-                      <a 
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(opportunity.address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-cornell-red hover:text-red-800 underline"
-                      >
-                        {opportunity.address}
-                      </a>
+              </div>
+            )}
+
+            {/* Slot limit warning for hosts */}
+            {canManageOpportunity && availableSlots <= 0 && (
+              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-700 text-center">
+                  ⚠️ This event has reached its maximum capacity. Consider increasing the slot limit if you want to allow more participants.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Announcements Section */}
+          <div className="mt-8">
+            <h3 className="text-2xl font-bold mb-4">Announcements</h3>
+
+            {/* Host can add new announcements */}
+            {canManageOpportunity && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="text-lg font-semibold text-blue-800 mb-3">Add New Announcement</h4>
+                <div className="space-y-3">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Enter your announcement here..."
+                    className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleAddComment}
+                      disabled={!newComment.trim() || isAddingComment}
+                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
+                    >
+                      {isAddingComment ? 'Adding...' : 'Post Announcement'}
+                    </button>
+                    <button
+                      onClick={() => setNewComment('')}
+                      disabled={!newComment.trim()}
+                      className="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Display existing announcements */}
+            {opportunity.comments && opportunity.comments.length > 0 ? (
+              <div className="space-y-4">
+                {opportunity.comments.map((comment, index) => (
+                  <div key={index} className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-cornell-red rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-gray-800 leading-relaxed">{comment}</p>
+                        <p className="text-xs text-gray-500 mt-2">Posted by host</p>
+                      </div>
                     </div>
-                    
-                 </div>
-                 
-                 {/* Causes and Tags Section */}
-                 {(opportunity.causes && opportunity.causes.length > 0) || (opportunity.tags && opportunity.tags.length > 0) ? (
-                   <div className="bg-white p-6 rounded-2xl shadow-lg">
-                     <h4 className="text-lg font-bold mb-4">Categories & Tags</h4>
-                     <div className="space-y-3">
-                       {opportunity.causes && Array.isArray(opportunity.causes) && opportunity.causes.length > 0 && (
-                         <div>
-                           <h5 className="text-sm font-medium text-gray-700 mb-2">Causes</h5>
-                           <div className="flex flex-wrap gap-2">
-                             {opportunity.causes.map((cause, index) => (
-                               <span key={index} className="bg-cornell-red/10 text-cornell-red px-3 py-1 rounded-full text-sm font-medium">
-                                 {cause}
-                               </span>
-                             ))}
-                           </div>
-                         </div>
-                       )}
-                       {opportunity.tags && Array.isArray(opportunity.tags) && opportunity.tags.length > 0 && (
-                         <div>
-                           <h5 className="text-sm font-medium text-gray-700 mb-2">Tags</h5>
-                           <div className="flex flex-wrap gap-2">
-                             {opportunity.tags.map((tag, index) => (
-                               <span key={index} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
-                                 {tag}
-                               </span>
-                             ))}
-                           </div>
-                         </div>
-                       )}
-                     </div>
-                   </div>
-                 ) : null}
-                 
-                 {/* Contact Host Section - Available to all users */}
-                 {opportunity.host_id && (
-                   <div className="bg-white p-6 rounded-2xl shadow-lg">
-                     <h4 className="text-lg font-bold mb-4">Contact Host</h4>
-                     {(() => {
-                       const hostUser = students.find(student => student.id === opportunity.host_id);
-                       if (hostUser) {
-                        //console.log(hostUser);
-                         return (
-                           <div className="space-y-3">
-                             <div 
-                               className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                               onClick={() => navigate(`/profile/${hostUser.id}`)}
-                             >
-                               <div className="w-10 h-10 bg-cornell-red rounded-full flex items-center justify-center flex-shrink-0">
-                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                 </svg>
-                               </div>
-                               <div className="flex-1">
-                                 <p className="font-semibold text-gray-800 hover:text-cornell-red transition-colors">{hostUser.name}</p>
-                                 <p className="text-sm text-gray-600">Event Host</p>
-                               </div>
-                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                               </svg>
-                             </div>
-                             
-                             {/* Host Organization Information */}
-                             {opportunity.host_org_name && (
-                               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cornell-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                 </svg>
-                                 <div className="flex-1">
-                                   <p className="text-sm text-gray-600">Host Organization</p>
-                                   <p className="font-semibold text-gray-800">{opportunity.host_org_name}</p>
-                                 </div>
-                               </div>
-                             )}
-                             
-                             {hostUser.email && (
-                               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cornell-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                 </svg>
-                                 <div className="flex-1">
-                                   <p className="text-sm text-gray-600">Email</p>
-                                   <a 
-                                     href={`mailto:${hostUser.email}`}
-                                     className="text-cornell-red hover:text-red-800 font-medium break-all"
-                                   >
-                                     {hostUser.email}
-                                   </a>
-                                 </div>
-                               </div>
-                             )}
-                             
-                             {hostUser.phone && isUserSignedUp &&(
-                               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cornell-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                 </svg>
-                                 <div className="flex-1">
-                                   <p className="text-sm text-gray-600">Phone</p>
-                                   <a 
-                                     href={`tel:${hostUser.phone}`}
-                                     className="text-cornell-red hover:text-red-800 font-medium"
-                                   >
-                                     {hostUser.phone}
-                                   </a>
-                                 </div>
-                               </div>
-                             )}
-                             
-                             {!hostUser.email && !hostUser.phone && (
-                               <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                 <p className="text-sm text-gray-500">
-                                   No contact information available for the host.
-                                 </p>
-                               </div>
-                             )}
-                           </div>
-                         );
-                       }
-                       return (
-                         <div className="text-center p-4 bg-gray-50 rounded-lg">
-                           <p className="text-sm text-gray-500">
-                             Host information not available.
-                           </p>
-                         </div>
-                       );
-                     })()}
-                   </div>
-                 )}
-            </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center p-6 bg-gray-50 rounded-lg text-gray-500">
+                {canManageOpportunity ? 'No announcements yet. Add one above!' : 'No announcements yet.'}
+              </div>
+            )}
+          </div>
+
+
+          {allowCarpool && isUserSignedUp &&
+            <button className="w-full mt-6 font-bold py-4 px-4 rounded-lg bg-red-600 transition-colors text-white text-lg"
+              onClick={() => { navigate(`/carpool/${opportunity.id}`) }}
+              style={{ cursor: "pointer" }}
+            >
+              View Carpool Rides
+            </button>
+          }
         </div>
+        <div className="lg:col-span-1 space-y-8">
+          {canManageOpportunity ? (
+            <div className="space-y-6">
+              <AttendanceManager
+                opportunity={opportunity}
+                participants={signedUpStudents}
+                onAttendanceSubmitted={handleAttendanceSubmitted}
+              />
+
+              {/* Slot Limit Management */}
+              <div className="bg-white p-6 rounded-2xl shadow-lg">
+                <h4 className="text-lg font-bold mb-4">Slot Management</h4>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Current Slot Limit</p>
+                      <p className="text-2xl font-bold text-gray-800">{opportunity.total_slots}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-600">Available Slots</p>
+                      <p className={`text-lg font-semibold ${availableSlots > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {availableSlots}
+                      </p>
+                    </div>
+                  </div>
+
+                  {!isEditingSlots ? (
+                    <button
+                      onClick={handleStartSlotEdit}
+                      className="w-full bg-cornell-red hover:bg-red-800 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                    >
+                      Update Slot Limit
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          New Slot Limit
+                        </label>
+                        <input
+                          type="text"
+                          value={newSlotLimit}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '') {
+                              setNewSlotLimit(0);
+                            } else {
+                              const numValue = parseInt(value);
+                              if (!isNaN(numValue) && numValue >= 1) {
+                                setNewSlotLimit(numValue);
+                              }
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const value = parseInt(e.target.value);
+                            if (isNaN(value) || value < signedUpStudents.length) {
+                              setNewSlotLimit(signedUpStudents.length);
+                            }
+                          }}
+                          placeholder={`Minimum: ${signedUpStudents.length}`}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Minimum: {signedUpStudents.length} (current participants)
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleUpdateSlotLimit}
+                          disabled={isUpdatingSlots || newSlotLimit < signedUpStudents.length}
+                          className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
+                        >
+                          {isUpdatingSlots ? 'Updating...' : 'Save Changes'}
+                        </button>
+                        <button
+                          onClick={handleCancelSlotEdit}
+                          disabled={isUpdatingSlots}
+                          className="flex-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {/* Admin Unapprove Button - Now visible to admins and hosts */}
+              {currentUser.admin && opportunity.approved !== false && (
+                <div className="bg-white p-6 rounded-2xl shadow-lg">
+                  <h4 className="text-lg font-bold mb-4">Admin Actions</h4>
+                  <button
+                    onClick={handleUnapproveOpportunity}
+                    className="w-full font-bold py-3 px-4 rounded-lg transition-colors text-white text-lg bg-orange-600 hover:bg-orange-700"
+                  >
+                    Unapprove Opportunity
+                  </button>
+                </div>
+              )}
+              {/* Send Email to All Participants Button */}
+              {signedUpStudents.length > 0 && (
+                <div className="bg-white p-6 rounded-2xl shadow-lg">
+                  <h4 className="text-lg font-bold mb-4">Communication</h4>
+                  <button
+                    onClick={() => {
+                      // Debug: Log the signedUpStudents to see what data we have
+                      //console.log('Signed up students:', signedUpStudents);
+                      //console.log('Opportunity involved_users:', opportunity.involved_users);
+
+                      // Get all participant emails - now directly available from backend
+                      const participantEmails = signedUpStudents
+                        .filter(student => {
+                          const hasEmail = student.email && student.email.trim() !== '';
+                          //console.log(`Student ${student.name}:`, { 
+                          //     email: student.email,
+                          //     hasEmail: !!hasEmail 
+                          //   });
+                          return hasEmail;
+                        })
+                        .map(student => student.email)
+                        .join(', ');
+
+                      //console.log('Participant emails collected:', participantEmails);
+
+                      if (participantEmails) {
+                        // Create Gmail draft with all participant emails
+                        const subject = encodeURIComponent(`Update for ${opportunity.name}`);
+                        const body = encodeURIComponent(`Hi everyone,\n\nThis is an update regarding ${opportunity.name}.\n\nBest regards,\n${currentUser.name}`);
+                        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(participantEmails)}&su=${subject}&body=${body}`;
+                        window.open(gmailUrl, '_blank');
+                      } else {
+                        alert('No participant emails available to send to. Please check the console for debugging information.');
+                      }
+                    }}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Send Email to All Participants
+                  </button>
+                  <p className="text-sm text-gray-500 mt-2 text-center">
+                    Opens Gmail draft with all participant emails
+                  </p>
+
+                  {/* Participant Phone Numbers Button */}
+                  <button
+                    onClick={() => {
+                      // Get all participant phone numbers
+                      const participantPhones = signedUpStudents
+                        .filter(student => {
+                          const hasPhone = student.phone && student.phone.trim() !== '';
+                          return hasPhone;
+                        })
+                        .map(student => student.phone)
+                        .join('\n');
+
+                      if (participantPhones) {
+                        // Copy to clipboard
+                        navigator.clipboard.writeText(participantPhones).then(() => {
+                          alert('Participant phone numbers copied to clipboard!');
+                        }).catch(() => {
+                          // Fallback: show in alert if clipboard fails
+                          alert(`Participant phone numbers:\n\n${participantPhones}`);
+                        });
+                      } else {
+                        alert('No participant phone numbers available.');
+                      }
+                    }}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-3"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    Participant Phone Numbers
+                  </button>
+                  <p className="text-sm text-gray-500 mt-2 text-center">
+                    Copies participant phone numbers to clipboard
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white p-6 rounded-2xl shadow-lg">
+              <ul className="space-y-4 text-gray-700">
+                <li className="flex items-center gap-3"><CalendarIcon /> <span>{displayDate}</span></li>
+                <li className="flex items-center gap-3"><ClockIcon /> <span>{displayTime} - {displayEndTime}</span></li>
+                <li className="flex items-center gap-3"><UsersIcon /> <span>{availableSlots} of {opportunity.total_slots} slots remaining</span></li>
+                <li className="flex items-center gap-3"><StarIcon /> <span>{opportunity.points} points</span></li>
+              </ul>
+              <button
+                onClick={handleButtonClick}
+                disabled={!canSignUp && !isUserSignedUp}
+                className={`w-full mt-6 font-bold py-4 px-4 rounded-lg transition-colors text-white text-lg ${isUserSignedUp
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : canSignUp
+                    ? 'bg-cornell-red hover:bg-red-800'
+                    : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+              >
+                {isUserSignedUp ? 'Signed Up ✓' : canSignUp ? 'Sign Up Now' : 'Event Full'}
+              </button>
+
+
+              {/* Slot limit enforcement message */}
+              {!isUserSignedUp && availableSlots <= 0 && (
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700 text-center">
+                    This event has reached its maximum capacity of {opportunity.total_slots} participants.
+                  </p>
+                </div>
+              )}
+
+            </div>
+          )}
+          <div className="bg-white p-6 rounded-2xl shadow-lg">
+            <h4 className="text-lg font-bold mb-2">Location</h4>
+            <div className="mb-4">
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(opportunity.address)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cornell-red hover:text-red-800 underline"
+              >
+                {opportunity.address}
+              </a>
+            </div>
+
+          </div>
+
+          {/* Causes and Tags Section */}
+          {(opportunity.causes && opportunity.causes.length > 0) || (opportunity.tags && opportunity.tags.length > 0) ? (
+            <div className="bg-white p-6 rounded-2xl shadow-lg">
+              <h4 className="text-lg font-bold mb-4">Categories & Tags</h4>
+              <div className="space-y-3">
+                {opportunity.causes && Array.isArray(opportunity.causes) && opportunity.causes.length > 0 && (
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Causes</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {opportunity.causes.map((cause, index) => (
+                        <span key={index} className="bg-cornell-red/10 text-cornell-red px-3 py-1 rounded-full text-sm font-medium">
+                          {cause}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {opportunity.tags && Array.isArray(opportunity.tags) && opportunity.tags.length > 0 && (
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Tags</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {opportunity.tags.map((tag, index) => (
+                        <span key={index} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
+
+          {/* Contact Host Section - Available to all users */}
+          {opportunity.host_id && (
+            <div className="bg-white p-6 rounded-2xl shadow-lg">
+              <h4 className="text-lg font-bold mb-4">Contact Host</h4>
+              {(() => {
+                const hostUser = students.find(student => student.id === opportunity.host_id);
+                if (hostUser) {
+                  //console.log(hostUser);
+                  return (
+                    <div className="space-y-3">
+                      <div
+                        className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                        onClick={() => navigate(`/profile/${hostUser.id}`)}
+                      >
+                        <div className="w-10 h-10 bg-cornell-red rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-800 hover:text-cornell-red transition-colors">{hostUser.name}</p>
+                          <p className="text-sm text-gray-600">Event Host</p>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+
+                      {/* Host Organization Information */}
+                      {opportunity.host_org_name && (
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cornell-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-600">Host Organization</p>
+                            <p className="font-semibold text-gray-800">{opportunity.host_org_name}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {hostUser.email && (
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cornell-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-600">Email</p>
+                            <a
+                              href={`mailto:${hostUser.email}`}
+                              className="text-cornell-red hover:text-red-800 font-medium break-all"
+                            >
+                              {hostUser.email}
+                            </a>
+                          </div>
+                        </div>
+                      )}
+
+                      {hostUser.phone && isUserSignedUp && (
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cornell-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                          </svg>
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-600">Phone</p>
+                            <a
+                              href={`tel:${hostUser.phone}`}
+                              className="text-cornell-red hover:text-red-800 font-medium"
+                            >
+                              {hostUser.phone}
+                            </a>
+                          </div>
+                        </div>
+                      )}
+
+                      {!hostUser.email && !hostUser.phone && (
+                        <div className="text-center p-4 bg-gray-50 rounded-lg">
+                          <p className="text-sm text-gray-500">
+                            No contact information available for the host.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return (
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-500">
+                      Host information not available.
+                    </p>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
