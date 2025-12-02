@@ -270,6 +270,6 @@ export const ourTeam: Member[] = [
     class: '2028',
     campusOrgs: ['Cru', 'Hack4Impact'],
     favoriteService: "My favorite community service experience is teaching elementary school students music and seeing how proud they are when they can play the songs they love!",
-    role: 'Brand Strategy Manager',
+    role: 'Product Manager',
   },
 ];
