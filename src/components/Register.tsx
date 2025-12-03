@@ -42,13 +42,13 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
       return; // Form validation will show required messages
     }
 
-    // Validate car ownership question
-    if (hasCar === '') {
-      return; // User must answer the car question
-    }
+    // // Validate car ownership question
+    // if (hasCar === '') {
+    //   return; // User must answer the car question
+    // }
 
     // Set car_seats based on user's answer
-    const finalCarSeats = hasCar === 'yes' ? carSeats : 0;
+    const finalCarSeats = 0;
 
     onRegister(
       firstName.trim(),
