@@ -75,7 +75,7 @@ const Header: React.FC<HeaderProps> = (props) => {
             <NavButton page="groups" label="Groups" />
             {user.admin && <NavButton page="admin" label="Admin Page" />}
             <NavButton page="leaderboard" label="Leaderboard" />
-            <NavButton page="about-Us" label="About Us" />
+            <NavButton page="about-us" label="About Us" />
             <NavButton page="profile" label="Profile" />
           </nav>
         </div>
