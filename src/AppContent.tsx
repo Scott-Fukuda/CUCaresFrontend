@@ -974,11 +974,11 @@ const AppContent: React.FC = () => {
       }
 
       // Show success popup
-      showPopup(
-        'Organization Created Successfully!',
-        'Admins will verify your organization shortly. Once approved, you will be able to post events and opportunities.',
-        'success'
-      );
+      // showPopup(
+      //   'Organization Created Successfully!',
+      //   'Admins will verify your organization shortly. Once approved, you will be able to post events and opportunities.',
+      //   'success'
+      // );
     } catch (e: any) {
       alert(`Error creating organization: ${e.message}`);
     }
