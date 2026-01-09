@@ -157,7 +157,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   };
 
   if (oppsLoading) {
-    return <div style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem' }}>Loading...</div>;
+    return <div className="text-center p-10 font-semibold text-lg">Loading...</div>;
   }
 
   return (
