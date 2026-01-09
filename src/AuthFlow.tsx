@@ -20,6 +20,7 @@ interface AuthFlowProps {
   students: User[];
   organizations: Organization[];
   signups: SignUp[];
+  oppsLoading: boolean
 }
 
 const AuthFlow: React.FC<AuthFlowProps> = ({
@@ -32,7 +33,8 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
   multiopp,
   students,
   organizations,
-  signups
+  signups,
+  oppsLoading
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -111,6 +113,7 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
                 allOrgs={organizations}
                 signups={signups}
                 currentUser={null}
+                oppsLoading={oppsLoading}
               />
             </div>
           </div>

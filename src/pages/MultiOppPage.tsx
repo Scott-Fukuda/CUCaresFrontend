@@ -51,8 +51,6 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const initAllowCarpool = multiopp.opportunities.every(opp => opp.allow_carpool)
-  console.log("OPPS", multiopp.opportunities)
-  console.log("INIT", initAllowCarpool)
   const [editForm, setEditForm] = useState({
     name: multiopp.name,
     description: multiopp.description || '',
@@ -776,7 +774,7 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
       <p className="text-xs text-gray-500 mt-6 text-center">
         Click here to see our{' '}
         <a
-          href="/Terms of Service.pdf"
+          href="/terms_of_service.pdf"
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-gray-700"

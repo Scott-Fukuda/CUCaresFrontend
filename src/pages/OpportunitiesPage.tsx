@@ -24,7 +24,8 @@ interface OpportunitiesPageProps {
     title: string,
     message: string,
     type: 'success' | 'info' | 'warning' | 'error'
-  ) => void
+  ) => void;
+  oppsLoading: boolean
 }
 
 const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
@@ -39,9 +40,11 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   multiopps,
   showCarpoolPopup,
   setShowCarpoolPopup,
-  showPopup
+  showPopup,
+  oppsLoading
 }) => {
   const navigate = useNavigate();
+
   // Filter functionality disabled
   // const [causeFilter, setCauseFilter] = useState<string>('All');
   // const [dateFilter, setDateFilter] = useState<string>('');
@@ -60,7 +63,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         // Parse time and create a full datetime object
         const [hours, minutes] = opp.time.split(':').map(Number);
         const fullDateTime = new Date(year, month - 1, day, hours, minutes);
-
+        console.log('map')
         return {
           ...opp,
           localDate: actualDate,
@@ -70,6 +73,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       })
       .filter((opp) => {
         // Only approved opportunities
+        console.log('hit1')
         if (!opp.approved) return false;
 
         // Don't show past events - compare with actual date
@@ -77,13 +81,16 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       })
       .filter((opp) => {
         if (opp.visibility) {
-          // If opportunity is private, check if user belongs to any allowed orgs
-          if (opp.visibility.length === 0) return true; // public
+          // If opportunity is public (visibility.length === 0), always show it
+          if (opp.visibility.length === 0) return true;
+          // If opportunity is private, only show to logged-in users
           if (!currentUser) return false;
           if (currentUser.admin) return true;
           const userOrgIds = currentUser.organizationIds || [];
           return opp.visibility.some((orgId) => userOrgIds.includes(orgId));
         }
+        // If visibility is not set, treat as public
+        return true;
       })
       .filter((opp) => {
         return (!opp.multiopp)
@@ -149,6 +156,10 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     setShowExternalUnsignupModal(false);
     setSelectedOpportunity(null);
   };
+
+  if (oppsLoading) {
+    return <div style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem' }}>Loading...</div>;
+  }
 
   return (
     <>
@@ -347,7 +358,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       <p className="text-xs text-gray-500 mt-6 text-center">
         Click here to see our {" "}
         <a
-          href="/Terms of Service.pdf"
+          href="/terms_of_service.pdf"
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-gray-700"

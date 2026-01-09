@@ -1,14 +1,15 @@
 import React, { useMemo } from 'react';
-import { Opportunity, User, SignUp, Organization } from '../types';
+import { Opportunity, User, SignUp, Organization } from '../../types';
 import { useNavigate } from 'react-router-dom';
-import { getProfilePictureUrl, removeCarpoolUser } from '../api';
+import { getProfilePictureUrl, removeCarpoolUser } from '../../api';
 import {
   canUnregisterFromOpportunity,
   formatTimeUntilEvent,
   calculateEndTime,
-} from '../utils/timeUtils';
+} from '../../utils/timeUtils';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import './index.scss';
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -60,6 +61,8 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
 
   // Add click handler for profile pictures
   const handleProfileClick = (studentId: number) => {
+    if (!currentUser) setClickedStudentId(null);
+
     if (clickedStudentId === studentId) {
       setClickedStudentId(null); // Hide if already showing
     } else {
@@ -82,7 +85,8 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   const timeUntilEvent = unregistrationCheck?.hoursUntilEvent ?? 0;
 
   const handleCardClick = (e: React.MouseEvent) => {
-    if (!currentUser) navigate('/login');
+    console.log('clicked')
+    if (!currentUser) { navigate('/sign-up'); return; }
 
     // Prevent navigation if the signup button or a group link was clicked
     if ((e.target as HTMLElement).closest('button, [data-clickable-org]')) {
@@ -92,7 +96,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   };
 
   const handleButtonClick = async () => {
-    if (!currentUser) navigate('/login');
+    if (!currentUser) navigate('/sign-up');
 
     if (currentUser && isUserSignedUp) {
       if (opportunity.allow_carpool) {
@@ -232,119 +236,113 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   // const [showExternalSignupModal, setShowExternalSignupModal] = useState(false); // This state is removed
 
   return (
-    <div
-      onClick={handleCardClick}
-      className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105 duration-300 cursor-pointer"
-    >
+    <div onClick={handleCardClick} className="opportunity-card">
       <img
         src={opportunity.imageUrl || '/backup.jpeg'}
         alt={opportunity.name}
-        className="w-full h-48 object-cover"
+        className="opportunity-card__image"
         onError={(e) => {
-          // Fallback to backup image if the main image fails to load
           const target = e.target as HTMLImageElement;
           if (target.src !== '/backup.jpeg') {
             target.src = '/backup.jpeg';
           }
         }}
       />
-      <div className="p-6 flex flex-col flex-grow">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <span className="text-sm font-semibold text-cornell-red uppercase tracking-wider truncate">
+      <div className="opportunity-card__content">
+        <div className="opportunity-card__header">
+          <div className="opportunity-card__nonprofit-container">
+            <span className="opportunity-card__nonprofit">
               {opportunity.nonprofit}
             </span>
             {isUserHost && (
-              <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full flex-shrink-0">
+              <span className="opportunity-card__host-badge">
                 Host
               </span>
             )}
-            {/* {currentUser.admin && !isUserHost && (
-                    <span className="bg-purple-100 text-purple-800 text-xs font-semibold px-2 py-1 rounded-full">
-                        Admin
-                    </span>
-                )} */}
           </div>
-          <span
-            className="text-white-50 text-xs font-bold py-1 rounded-full w-[80px] text-center inline-block flex-shrink-0 ml-2"
-            style={{ backgroundColor: '#F5F5F5' }}
-          >
+          <span className="opportunity-card__points" style={{ backgroundColor: '#F5F5F5' }}>
             {opportunity.points} PTS
           </span>
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2">{opportunity.name}</h3>
-        <p className="text-gray-500 text-sm mb-4">
+
+        <h3 className="opportunity-card__title">{opportunity.name}</h3>
+
+        <p className="opportunity-card__datetime">
           {displayDate} &bull; {displayTime} - {displayEndTime}
         </p>
+
         {opportunity.address && (
-          <p className="text-gray-600 text-sm mb-4">📍 {opportunity.address}</p>
+          <p className="opportunity-card__address">📍 {opportunity.address}</p>
         )}
 
-        <div className="flex justify-between items-center text-sm font-medium text-gray-600 mb-2">
-          <div className="flex items-center gap-2">
-            <PeopleIcon className="h-5 w-5 text-cornell-red" />
+        <div className="opportunity-card__slots-info">
+          <div className="opportunity-card__slots-label">
+            <PeopleIcon className="opportunity-card__slots-icon" />
             <span>
               Signed Up ({signedUpStudents.length}/{opportunity.total_slots})
             </span>
           </div>
           <span
-            className={`${availableSlots > 0 || isUserSignedUp ? 'text-green-600' : 'text-red-600'} font-bold`}
+            className={`opportunity-card__slots-available ${availableSlots > 0 || isUserSignedUp
+              ? 'opportunity-card__slots-available--available'
+              : 'opportunity-card__slots-available--unavailable'
+              }`}
           >
             {availableSlots} slots left
           </span>
         </div>
 
         {signedUpStudents.length > 0 ? (
-          <div className="flex items-center -space-x-2 mb-4">
+          <div className="opportunity-card__students">
             {signedUpStudents.slice(0, 10).map((student) => (
-              <div key={student.id} className="group relative hover:z-10">
+              <div key={student.id} className="opportunity-card__student-avatar-container">
                 <img
-                  className="h-8 w-8 rounded-full object-cover ring-2 ring-white cursor-pointer"
+                  className={`opportunity-card__student-avatar ${currentUser ? '' : 'restricted'}`}
                   src={getProfilePictureUrl(student.profile_image)}
                   alt={student.name}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleProfileClick(student.id);
                   }}
-                />
-                <div
-                  className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded-md transition-opacity pointer-events-none ${clickedStudentId === student.id
-                    ? 'opacity-100'
-                    : 'opacity-0 group-hover:opacity-100'
-                    }`}
-                >
-                  {student.name}
-                  <svg
-                    className="absolute text-gray-800 h-2 w-full left-0 top-full"
-                    x="0px"
-                    y="0px"
-                    viewBox="0 0 255 255"
-                    xmlSpace="preserve"
+                /> {currentUser &&
+                  <div
+                    className={`opportunity-card__student-tooltip ${clickedStudentId === student.id
+                      ? 'opportunity-card__student-tooltip--visible'
+                      : ''
+                      }`}
                   >
-                    <polygon className="fill-current" points="0,0 127.5,127.5 255,0" />
-                  </svg>
-                </div>
+                    {student.name}
+                    <svg
+                      className="opportunity-card__student-tooltip-arrow"
+                      x="0px"
+                      y="0px"
+                      viewBox="0 0 255 255"
+                      xmlSpace="preserve"
+                    >
+                      <polygon className="fill-current" points="0,0 127.5,127.5 255,0" />
+                    </svg>
+                  </div>}
               </div>
             ))}
             {signedUpStudents.length > 10 && (
-              <div className="h-8 w-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-semibold ring-2 ring-white">
+              <div className="opportunity-card__more-students">
                 +{signedUpStudents.length - 10}
               </div>
             )}
           </div>
         ) : (
-          <div className="text-center h-8 mb-4 rounded-lg text-sm text-gray-500">
+          <div className="opportunity-card__first-signup">
             Be the first to sign up! +5 bonus points
           </div>
         )}
 
         {topOrgs.length > 0 && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
-              <TrophyIcon className="h-5 w-5 text-yellow-500" />
+          <div className="opportunity-card__top-orgs">
+            <div className="opportunity-card__top-orgs-header">
+              <TrophyIcon className="opportunity-card__trophy-icon" />
               <span>Top Organizations Attending</span>
             </div>
-            <div className="flex flex-wrap gap-2 p-3 bg-light-gray rounded-lg">
+            <div className="opportunity-card__org-list">
               {topOrgs.map((org) => (
                 <span
                   key={org.id}
@@ -353,7 +351,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
                     e.stopPropagation();
                     navigate(`/group-detail/${org.id}`);
                   }}
-                  className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded-full cursor-pointer hover:bg-gray-300 transition-colors"
+                  className="opportunity-card__org-tag"
                 >
                   {org.name}
                 </span>
@@ -363,11 +361,11 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
         )}
 
         {visibilityOrgs.length > 0 && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+          <div className="opportunity-card__visibility">
+            <div className="opportunity-card__visibility-header">
               <span>Visible To</span>
             </div>
-            <div className="flex flex-wrap gap-2 p-1">
+            <div className="opportunity-card__visibility-list">
               {visibilityOrgs.map((org) => (
                 <span
                   key={org.id}
@@ -376,7 +374,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
                     e.stopPropagation();
                     navigate(`/group-detail/${org.id}`);
                   }}
-                  className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
+                  className="opportunity-card__visibility-tag"
                 >
                   {org.name}
                 </span>
@@ -390,15 +388,15 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
           disabled={
             eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister)
           }
-          className={`w-full mt-auto font-bold py-3 px-4 rounded-lg transition-colors text-white ${eventStarted
-            ? 'bg-gray-500 cursor-not-allowed'
+          className={`opportunity-card__button ${eventStarted
+            ? 'opportunity-card__button--started'
             : isUserSignedUp
               ? canUnregister
-                ? 'bg-green-600 hover:bg-green-700'
-                : 'bg-orange-500 cursor-not-allowed'
+                ? 'opportunity-card__button--signed-up'
+                : 'opportunity-card__button--unregister-closed'
               : canSignUp
-                ? 'bg-cornell-red hover:bg-red-800'
-                : 'bg-gray-400 cursor-not-allowed'
+                ? 'opportunity-card__button--available'
+                : 'opportunity-card__button--unavailable'
             }`}
         >
           {eventStarted
@@ -414,26 +412,19 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
                 : 'No Slots Available'}
         </button>
 
-        {/* Remove the modal from here - it will be handled at page level */}
-
-        {/* Show warning message if unregistration is blocked */}
         {isUserSignedUp && !canUnregister && (
-          <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded-lg">
-            <p className="text-xs text-orange-800 text-center">
+          <div className="opportunity-card__warning">
+            <p className="opportunity-card__warning-text">
               ⚠️ Unregistration closed within 7 hours of event. Contact organizer if you need to
               cancel.
             </p>
           </div>
         )}
 
-        {/* Tags at bottom */}
         {opportunity.tags && Array.isArray(opportunity.tags) && opportunity.tags.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1">
+          <div className="opportunity-card__tags">
             {opportunity.tags.map((tag, index) => (
-              <span
-                key={index}
-                className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium"
-              >
+              <span key={index} className="opportunity-card__tag">
                 {tag}
               </span>
             ))}

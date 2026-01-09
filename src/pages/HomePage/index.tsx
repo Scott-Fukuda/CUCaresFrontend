@@ -176,7 +176,7 @@ const HomePage = () => {
                 {isMobile &&
                     <div className="main-content mb">
                         <h1>Show Our <br /> Campus Cares</h1>
-                        <p>Meet new friends, support local organizations, and help us <br /> build a community we can all be proud of.</p>
+                        <p>Meet new friends, support local organizations, and help us build a community we can all be proud of.</p>
                         <button className="explore-button" onClick={() => navigate('/opportunities')}>Explore Opportunities</button>
                     </div>
                 }
@@ -207,19 +207,28 @@ const HomePage = () => {
                 <div className="impact-grid">
                     <div className="top-grid">
                         <div className="grid-container red" data-aos="zoom-in">
-                            <div className="red-left">
-                                <div className="grid-text" >
-                                    <h1>475+</h1>
-                                    <p>Total hours contributed</p>
+                            <div className="red-row">
+                                <div className="red-left">
+                                    <div className="grid-text" >
+                                        <h1>475+</h1>
+                                        <p>Total hours contributed</p>
+                                    </div>
+                                    {!isMobile &&
+                                        <button className='request-btn' onClick={() => navigate('/sign-up')}>
+                                            <p>Request Volunteers</p>
+                                            <ArrowForwardIcon className="arrow-icon" />
+                                        </button>}
                                 </div>
+                                <div>
+                                    <img className="heart-img" src={heartImg} alt='Student Working' />
+                                </div>
+                            </div>
+                            {isMobile &&
                                 <button className='request-btn' onClick={() => navigate('/sign-up')}>
                                     <p>Request Volunteers</p>
                                     <ArrowForwardIcon className="arrow-icon" />
                                 </button>
-                            </div>
-                            <div>
-                                <img className="heart-img" src={heartImg} alt='Student Working' />
-                            </div>
+                            }
                         </div>
                         <div className="grid-container yellow" data-aos="zoom-in">
                             <h1>49</h1>

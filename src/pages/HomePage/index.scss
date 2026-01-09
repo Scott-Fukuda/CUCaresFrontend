@@ -5,6 +5,7 @@
     flex-direction: column;
     flex: 1;
     font-family: segoe-ui, sans-serif;
+    overflow-x: hidden;
 
     .main {
         height: calc(100vh - 60px);
@@ -79,7 +80,7 @@
                     color: #333;
                     padding: 2rem 1.5rem;
                     background: $dark-red;
-                    padding: 4rem 5rem;
+                    padding: 40px 20px;
                 }
             }
         }
@@ -95,6 +96,7 @@
 
             @media (max-width: 768px) {
                 text-shadow: none;
+                font-size: 48px;
             }
         }
 
@@ -182,6 +184,10 @@
         width: 100vw;
         padding: 180px 160px;
 
+        @media (max-width: 1024px) {
+            padding: 100px 20px;
+        }
+
         @media (max-width: 768px) {
             padding: 20px;
             height: fit-content;
@@ -205,7 +211,7 @@
 
             p {
                 color: $azure;
-                font-size: 16px;
+                font-size: 1rem;
                 text-align: center;
             }
         }
@@ -237,11 +243,19 @@
             align-items: center;
             justify-content: center;
 
+            @media (max-width: 768px) {
+                padding: 20px;
+            }
+
             h1 {
                 font-weight: 700;
                 color: #FFF8F8;
                 font-size: 60px;
                 margin: 0;
+
+                @media (max-width: 768px) {
+                    font-size: 48px;
+                }
             }
 
             p {
@@ -252,9 +266,19 @@
 
             &.red {
                 background-color: $dark-red;
-                flex-direction: row;
+                flex-direction: column;
                 gap: 20px;
-                flex: 2;
+
+                .red-row {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 20px;
+                    flex: 2;
+
+                    @media (max-width: 768px) {
+                        gap: 8px;
+                    }
+                }
             }
 
             &.yellow {
@@ -308,6 +332,10 @@
             justify-content: center;
             gap: 7px;
 
+            @media (max-width: 768px) {
+                width: 100%;
+            }
+
             .arrow-icon {
                 transition: transform 0.2s ease;
             }
@@ -320,6 +348,10 @@
         .heart-img {
             height: 200px;
             object-fit: scale-down;
+
+            @media (max-width: 768px) {
+                height: 100px;
+            }
         }
 
         .users-line {
@@ -418,6 +450,10 @@
                         overflow: hidden;
                         background-color: #E5E7EB;
 
+                        @media (max-width: 768px) {
+                            height: 150px;
+                        }
+
                         img {
                             width: 100%;
                             height: 100%;
@@ -508,6 +544,7 @@
 
         @media (max-width: 768px) {
             align-items: flex-start;
+            gap: 20px;
         }
 
         .left-timeline,
@@ -527,6 +564,10 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+
+            @media (max-width: 768px) {
+                width: 305px
+            }
 
             img {
                 object-fit: contain;

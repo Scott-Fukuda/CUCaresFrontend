@@ -46,6 +46,7 @@ interface AppRouterProps {
     handleLogout: () => void;
     students: User[];
     opportunities: Opportunity[];
+    oppsLoading: boolean;
     // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[] | []>>;
     multiopp: MultiOpp[];
     allOpps: (Opportunity | MultiOpp)[];
@@ -123,7 +124,8 @@ const AppRouter: React.FC<AppRouterProps> = ({
     closePopup,
     showCarpoolPopup,
     setShowCarpoolPopup,
-    showPopup
+    showPopup,
+    oppsLoading
 }) => {
     const AdminRoute: React.FC = () => {
         const location = useLocation();
@@ -188,6 +190,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                             <OpportunitiesPage
                                 multiopps={multiopp}
                                 opportunities={opportunities}
+                                oppsLoading={oppsLoading}
                                 students={students}
                                 allOrgs={organizations}
                                 signups={signups}

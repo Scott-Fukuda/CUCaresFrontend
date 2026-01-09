@@ -9,10 +9,12 @@
     align-items: center;
     width: 100vw;
     font-family: segoe-ui, sans-serif;
+    text-align: center;
 
     @media (max-width: 786px) {
         flex-direction: column;
         gap: 10px;
+        padding: 20px;
     }
 
     .logo-wrapper {
