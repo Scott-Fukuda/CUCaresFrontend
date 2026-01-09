@@ -45,59 +45,6 @@ const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const latestLocationRef = useRef(location);
-  const [authInitialized, setAuthInitialized] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-  // Data state from API
-  const [students, setStudents] = useState<User[]>([]);
-  const [leaderboardUsers, setLeaderboardUsers] = useState<User[]>([]);
-  // const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [signups, setSignups] = useState<SignUp[]>([]);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [allOpps, setAllOpps] = useState<(Opportunity | MultiOpp)[]>([]);
-
-  const { data: opportunities = [], isLoading: oppsLoading } = useQuery({
-    queryKey: ['opportunities'],
-    queryFn: api.getCurrentOpportunities
-  });
-
-  const { data: multiopps = [], isLoading: multioppsLoading } = useQuery({
-    queryKey: ['multiopps'],
-    queryFn: api.getMultiOpps
-  });
-
-
-  // Friendships data from backend
-  const [friendshipsData, setFriendshipsData] = useState<FriendshipsResponse | null>(null);
-
-  // Track last loaded user to prevent infinite loops
-  const lastLoadedUserId = useRef<number | null>(null);
-
-  // UI State
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [appError, setAppError] = useState<string | null>(null);
-  const [authView, setAuthView] = useState<AuthView>('login');
-
-  // Popup State
-  const [popupMessage, setPopupMessage] = useState<{
-    isOpen: boolean;
-    title: string;
-    message: string;
-    type: 'success' | 'info' | 'warning' | 'error';
-  }>({
-    isOpen: false,
-    title: '',
-    message: '',
-    type: 'info',
-  });
-
-  // Add state for tracking first-time registration
-  const [showPostRegistrationSetup, setShowPostRegistrationSetup] = useState(false);
-
-  const [showCarpoolPopup, setShowCarpoolPopup] = useState<number | null>(null);
-
-  const [userFriends, setUserFriends] = useState<User[]>([]);
 
   useEffect(() => {
     latestLocationRef.current = location;
@@ -144,7 +91,6 @@ const AppContent: React.FC = () => {
       if (!mounted) return;
       if (!firebaseUser) {
         setCurrentUser(null);
-        setAuthInitialized(true);
         return;
       }
 
@@ -196,7 +142,57 @@ const AppContent: React.FC = () => {
       mounted = false;
       unsubscribe();
     };
-  }, [navigate]);
+  }, []);
+
+  // Data state from API
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [students, setStudents] = useState<User[]>([]);
+  const [leaderboardUsers, setLeaderboardUsers] = useState<User[]>([]);
+  // const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [signups, setSignups] = useState<SignUp[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [allOpps, setAllOpps] = useState<(Opportunity | MultiOpp)[]>([]);
+
+  const { data: opportunities = [], isLoading: oppsLoading } = useQuery({
+    queryKey: ['opportunities'],
+    queryFn: api.getCurrentOpportunities
+  });
+
+  const { data: multiopps = [], isLoading: multioppsLoading } = useQuery({
+    queryKey: ['multiopps'],
+    queryFn: api.getMultiOpps
+  });
+
+
+  // Friendships data from backend
+  const [friendshipsData, setFriendshipsData] = useState<FriendshipsResponse | null>(null);
+
+  // Track last loaded user to prevent infinite loops
+  const lastLoadedUserId = useRef<number | null>(null);
+
+  // UI State
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [appError, setAppError] = useState<string | null>(null);
+  const [authView, setAuthView] = useState<AuthView>('login');
+
+  // Popup State
+  const [popupMessage, setPopupMessage] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'info' | 'warning' | 'error';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info',
+  });
+
+  // Add state for tracking first-time registration
+  const [showPostRegistrationSetup, setShowPostRegistrationSetup] = useState(false);
+
+  const [showCarpoolPopup, setShowCarpoolPopup] = useState<number | null>(null);
 
   // Load all app data after user is logged in
   useEffect(() => {
@@ -708,6 +704,9 @@ const AppContent: React.FC = () => {
     return 'add';
   };
 
+  // Get user's friends (accepted friendships) - using the new API endpoint
+  const [userFriends, setUserFriends] = useState<User[]>([]);
+
   // Load user's friends when currentUser changes
   useEffect(() => {
     const loadUserFriends = async () => {
@@ -992,10 +991,6 @@ const AppContent: React.FC = () => {
       console.error('Error refreshing organizations:', error);
     }
   };
-
-  if (!authInitialized) {
-    return null
-  }
 
   return (
     <>
