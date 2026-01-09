@@ -13,8 +13,8 @@ const TeamMemberCard: React.FC<{ member: Member }> = ({ member }) => {
       : member.favoriteService.substring(0, maxLength) + '...';
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-      <div className="text-center">
+    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
+      <div className="text-center flex-1 flex flex-col">
         <div className="mb-4">
           {member.picture ? (
             <img
@@ -64,8 +64,8 @@ const TeamMemberCard: React.FC<{ member: Member }> = ({ member }) => {
           {shouldTruncate && (
             <button
               onClick={(e) => {
-              e.stopPropagation(); // ⛔ prevent parent click
-              setIsExpanded(!isExpanded);
+                e.stopPropagation(); // ⛔ prevent parent click
+                setIsExpanded(!isExpanded);
               }}
               className="text-xs text-cornell-red hover:text-red-800 font-medium transition-colors duration-200"
             >
@@ -167,11 +167,11 @@ const AboutUsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {teamMembers.map((member) => (
               <button
-              key={member.id}
-              className = "clickable-card"
-              onClick = {() => navigate(`/profile/${member.id}`)}
+                key={member.id}
+                className="clickable-card"
+                onClick={() => navigate(`/profile/${member.id}`)}
               >
-              <TeamMemberCard member={member} />
+                <TeamMemberCard member={member} />
               </button>
             ))}
           </div>

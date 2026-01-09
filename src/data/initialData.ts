@@ -250,7 +250,7 @@ export const ourTeam: Member[] = [
     favoriteService: "Volunteering for my friend’s Indonesian Food Bazaar event and bringing together members of my community to celebrate Indonesian culture!",
     role: 'Communication Manager',
   },
-    {
+  {
     id: 199,
     name: 'Tayten Han',
     picture: './team_pic/tayten.JPG',
@@ -261,7 +261,7 @@ export const ourTeam: Member[] = [
     favoriteService: "Volunteering at multiple after-school programs at my local middle schools!",
     role: 'Brand Strategy Manager',
   },
-   {
+  {
     id: 93,
     name: 'Arianna Hsu',
     picture: './team_pic/arianna.jpg',

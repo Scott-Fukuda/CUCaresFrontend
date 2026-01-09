@@ -27,16 +27,14 @@ import ProfilePage from './pages/ProfilePage';
 import NotificationsPage from './pages/NotificationsPage';
 import GroupsPage from './pages/GroupsPage';
 import CreateOpportunityPage from './pages/CreateOpportunityPage';
-import PopupMessage from './components/PopupMessage';
 import { initialBadges } from './data/initialData'; // Using initial data for badges
 import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
 import MultiOppPage from './pages/MultiOppPage';
-import WaiverPopup from './components/WaiverPopup';
 import Waiver from './pages/Waiver';
 import CarpoolPopup from './components/CarpoolPopup';
 import CarpoolPage from './pages/CarpoolPage';
-import DriverFormPopup from './components/DriverFormPopup';
+import HomePage from './pages/HomePage';
 import { useState } from "react";
 
 interface AppRouterProps {
@@ -48,6 +46,7 @@ interface AppRouterProps {
     handleLogout: () => void;
     students: User[];
     opportunities: Opportunity[];
+    oppsLoading: boolean;
     // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[] | []>>;
     multiopp: MultiOpp[];
     allOpps: (Opportunity | MultiOpp)[];
@@ -125,7 +124,8 @@ const AppRouter: React.FC<AppRouterProps> = ({
     closePopup,
     showCarpoolPopup,
     setShowCarpoolPopup,
-    showPopup
+    showPopup,
+    oppsLoading
 }) => {
     const AdminRoute: React.FC = () => {
         const location = useLocation();
@@ -190,6 +190,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                             <OpportunitiesPage
                                 multiopps={multiopp}
                                 opportunities={opportunities}
+                                oppsLoading={oppsLoading}
                                 students={students}
                                 allOrgs={organizations}
                                 signups={signups}

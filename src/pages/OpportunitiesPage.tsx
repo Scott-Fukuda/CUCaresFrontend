@@ -3,28 +3,30 @@ import { Opportunity, User, SignUp, allInterests, Organization, MultiOpp } from 
 import OpportunityCard from '../components/OpportunityCard';
 import MultiOppCard from '../components/MultiOppCard';
 import { useNavigate } from 'react-router-dom';
+import MainFooter from '../components/MainFooter';
 
 interface OpportunitiesPageProps {
   opportunities: Opportunity[];
   students: User[];
   signups: SignUp[];
-  currentUser: User;
-  handleSignUp: (opportunityId: number) => void;
-  handleUnSignUp: (
+  currentUser: User | null;
+  handleSignUp?: (opportunityId: number) => void;
+  handleUnSignUp?: (
     opportunityId: number,
     opportunityDate?: string,
     opportunityTime?: string
   ) => void;
   allOrgs: Organization[];
-  currentUserSignupsSet: Set<number>;
+  currentUserSignupsSet?: Set<number>;
   multiopps: MultiOpp[];
-  showCarpoolPopup: number | null;
-  setShowCarpoolPopup: React.Dispatch<React.SetStateAction<number | null>>;
-  showPopup: (
+  showCarpoolPopup?: number | null;
+  setShowCarpoolPopup?: React.Dispatch<React.SetStateAction<number | null>>;
+  showPopup?: (
     title: string,
     message: string,
     type: 'success' | 'info' | 'warning' | 'error'
-  ) => void
+  ) => void;
+  oppsLoading: boolean
 }
 
 const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
@@ -39,9 +41,11 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   multiopps,
   showCarpoolPopup,
   setShowCarpoolPopup,
-  showPopup
+  showPopup,
+  oppsLoading
 }) => {
   const navigate = useNavigate();
+
   // Filter functionality disabled
   // const [causeFilter, setCauseFilter] = useState<string>('All');
   // const [dateFilter, setDateFilter] = useState<string>('');
@@ -60,7 +64,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         // Parse time and create a full datetime object
         const [hours, minutes] = opp.time.split(':').map(Number);
         const fullDateTime = new Date(year, month - 1, day, hours, minutes);
-
+        console.log('map')
         return {
           ...opp,
           localDate: actualDate,
@@ -70,6 +74,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       })
       .filter((opp) => {
         // Only approved opportunities
+        console.log('hit1')
         if (!opp.approved) return false;
 
         // Don't show past events - compare with actual date
@@ -77,17 +82,22 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       })
       .filter((opp) => {
         if (opp.visibility) {
-          // If opportunity is private, check if user belongs to any allowed orgs
-          if (opp.visibility.length === 0 || currentUser.admin) return true; // public
+          // If opportunity is public (visibility.length === 0), always show it
+          if (opp.visibility.length === 0) return true;
+          // If opportunity is private, only show to logged-in users
+          if (!currentUser) return false;
+          if (currentUser.admin) return true;
           const userOrgIds = currentUser.organizationIds || [];
           return opp.visibility.some((orgId) => userOrgIds.includes(orgId));
         }
+        // If visibility is not set, treat as public
+        return true;
       })
       .filter((opp) => {
         return (!opp.multiopp)
       })
       .sort((a, b) => a.fullDateTime.getTime() - b.fullDateTime.getTime());
-  }, [opportunities]);
+  }, [opportunities, currentUser]);
 
   const [showExternalSignupModal, setShowExternalSignupModal] = useState(false);
   const [showExternalUnsignupModal, setShowExternalUnsignupModal] = useState(false);
@@ -105,15 +115,20 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
 
   const handleExternalSignupConfirm = () => {
     if (selectedOpportunity) {
+      if (!currentUser) {
+        navigate('/login');
+        return;
+      }
       // Open the external URL in a new tab
       window.open(selectedOpportunity.redirect_url!, '_blank');
 
-      // Still register the user locally
-      handleSignUp(selectedOpportunity.id);
-      // if (selectedOpportunity.allow_carpool) {
-      //   setShowCarpoolPopup(true)
-      // }
-
+      if (handleSignUp) {
+        // Still register the user locally
+        handleSignUp(selectedOpportunity.id);
+        // if (selectedOpportunity.allow_carpool) {
+        //   setShowCarpoolPopup(true)
+        // }
+      }
       // Close the modal
       setShowExternalSignupModal(false);
       setSelectedOpportunity(null);
@@ -123,7 +138,9 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const handleExternalUnsignupConfirm = () => {
     if (selectedOpportunity) {
       // Proceed with local unregistration
-      handleUnSignUp(selectedOpportunity.id, selectedOpportunity.date, selectedOpportunity.time);
+      if (handleUnSignUp) {
+        handleUnSignUp(selectedOpportunity.id, selectedOpportunity.date, selectedOpportunity.time);
+      }
 
       // Close the modal
       setShowExternalUnsignupModal(false);
@@ -141,6 +158,10 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     setSelectedOpportunity(null);
   };
 
+  if (oppsLoading) {
+    return <div style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem' }}>Loading...</div>;
+  }
+
   return (
     <>
       {/* Header */}
@@ -153,14 +174,15 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
             Find the perfect way to make an impact in the Ithaca community.
           </p>
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={() => navigate('/create-opportunity')}
-            className="bg-cornell-red text-white px-6 py-2 rounded-lg hover:bg-red-800 transition-colors font-semibold"
-          >
-            Create Opportunity
-          </button>
-        </div>
+        {currentUser &&
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate('/create-opportunity')}
+              className="bg-cornell-red text-white px-6 py-2 rounded-lg hover:bg-red-800 transition-colors font-semibold"
+            >
+              Create Opportunity
+            </button>
+          </div>}
       </div>
 
       {/* Filters - Disabled */}
@@ -200,6 +222,8 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         {/* Render MultiOpps with visibility filtering */}
         {multiopps
           .filter((multiopp) => {
+            if (!currentUser) return false;
+
             // Public or admin always allowed
             if (!multiopp.visibility || multiopp.visibility.length === 0 || currentUser.admin)
               return true;
@@ -239,12 +263,13 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           }
 
           // Check if current user is signed up
-          const isUserSignedUp = opp.involved_users
-            ? opp.involved_users.some(
-              (user) =>
-                user.id === currentUser.id && (user.registered || opp.host_id === currentUser.id)
-            )
-            : currentUserSignupsSet.has(opp.id);
+          const isUserSignedUp = currentUser && currentUserSignupsSet ? (
+            opp.involved_users
+              ? opp.involved_users.some(
+                (user) =>
+                  user.id === currentUser.id && (user.registered || opp.host_id === currentUser.id)
+              )
+              : currentUserSignupsSet.has(opp.id)) : false;
 
           return (
             <OpportunityCard
@@ -269,7 +294,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           <h3 className="text-xl font-semibold text-gray-800">
             There are currently no opportunities.
           </h3>
-          <p className="text-gray-500 mt-2">Please click 'Create Opportunity' if you would like to propose an opportunity.</p>
+          {currentUser && <p className="text-gray-500 mt-2">Please click 'Create Opportunity' if you would like to propose an opportunity.</p>}
         </div>
       )}
 
@@ -334,7 +359,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       <p className="text-xs text-gray-500 mt-6 text-center">
         Click here to see our {" "}
         <a
-          href="/Terms of Service.pdf"
+          href="/terms_of_service.pdf"
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-gray-700"

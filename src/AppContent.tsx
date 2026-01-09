@@ -39,7 +39,7 @@ type RedirectState = {
   };
 };
 
-const AUTH_ROUTES = new Set(['/login', '/register', '/about-us', '/']);
+const AUTH_ROUTES = new Set(['/login', '/register', '/about-us', '/', '/opportunities']);
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
@@ -155,14 +155,12 @@ const AppContent: React.FC = () => {
 
   const { data: opportunities = [], isLoading: oppsLoading } = useQuery({
     queryKey: ['opportunities'],
-    queryFn: api.getCurrentOpportunities,
-    enabled: !!currentUser
+    queryFn: api.getCurrentOpportunities
   });
 
   const { data: multiopps = [], isLoading: multioppsLoading } = useQuery({
     queryKey: ['multiopps'],
-    queryFn: api.getMultiOpps,
-    enabled: !!currentUser
+    queryFn: api.getMultiOpps
   });
 
 
@@ -1008,6 +1006,7 @@ const AppContent: React.FC = () => {
           handleLogout={handleLogout}
           students={students}
           opportunities={opportunities}
+          oppsLoading={oppsLoading}
           multiopp={multiopps}
           // setOpportunities={setOpportunities}
           signups={signups}
@@ -1043,6 +1042,12 @@ const AppContent: React.FC = () => {
           authError={authError}
           isLoading={isLoading}
           setCurrentUser={setCurrentUser}
+          multiopp={multiopps}
+          opportunities={opportunities}
+          oppsLoading={oppsLoading}
+          students={students}
+          organizations={organizations}
+          signups={signups}
         />
       )}
 

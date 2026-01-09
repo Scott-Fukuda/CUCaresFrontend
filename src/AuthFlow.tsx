@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
-import PopupMessage from './components/PopupMessage';
+import HomePage from './pages/HomePage';
 import { User } from './types';
 import AboutUsPage from './pages/AboutUs';
-import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
+import HomeHeader from './components/HomeHeader';
+import OpportunitiesPage from './pages/OpportunitiesPage';
+import { Opportunity, MultiOpp, Organization, SignUp } from './types';
 
 interface AuthFlowProps {
   handleGoogleSignIn: () => void;
@@ -13,6 +15,12 @@ interface AuthFlowProps {
   handleRegister: (firstName: string, lastName: string, phone: string, gender: string, graduationYear: string, academicLevel: string, major: string, birthday: string, car_seats: number) => void;
   authError: string | null;
   setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
+  opportunities: Opportunity[];
+  multiopp: MultiOpp[];
+  students: User[];
+  organizations: Organization[];
+  signups: SignUp[];
+  oppsLoading: boolean
 }
 
 const AuthFlow: React.FC<AuthFlowProps> = ({
@@ -20,7 +28,13 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
   handleRegister,
   authError,
   isLoading,
-  setCurrentUser
+  setCurrentUser,
+  opportunities,
+  multiopp,
+  students,
+  organizations,
+  signups,
+  oppsLoading
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,23 +53,37 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
     };
   };
 
-  const handleShowRegister = () => {
-    navigate('/register');
-  };
-
   const handleBackToLogin = () => {
     navigate('/login');
   };
 
   return (
-    <div className="min-h-screen flex items-start justify-center p-4 bg-light-gray">
+    <div>
       <Routes>
+        <Route path="/" element={
+          <div>
+            <HomeHeader />
+            <div style={{ paddingTop: '60px' }}>
+              <HomePage />
+            </div>
+          </div>
+        } />
         <Route path="/login" element={
           <Login
             onGoogleSignIn={handleGoogleSignIn}
             error={authError}
             isLoading={isLoading}
             setCurrentUser={setCurrentUser}
+            mode={'login'}
+          />}
+        />
+        <Route path="/sign-up" element={
+          <Login
+            onGoogleSignIn={handleGoogleSignIn}
+            error={authError}
+            isLoading={isLoading}
+            setCurrentUser={setCurrentUser}
+            mode={'sign-up'}
           />}
         />
         <Route path="/register" element={
@@ -67,20 +95,30 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
           />}
         />
         <Route path="/about-us" element={
-          <div className="w-full max-w-6xl mx-auto">
-            <div className="mb-6">
-              <button
-                onClick={handleBackToLogin}
-                className="bg-cornell-red text-white px-4 py-2 rounded-lg hover:bg-red-800 transition-colors"
-              >
-                ← Back to Login
-              </button>
+          <div >
+            <HomeHeader />
+            <div style={{ paddingTop: '60px' }}>
+              <AboutUsPage />
             </div>
-            <AboutUsPage />
           </div>
         } />
-        <Route path="/" element={<Navigate to="/login" state={getRedirectState()} replace />} />
-        <Route path="*" element={<Navigate to="/login" state={getRedirectState()} replace />} />
+        <Route path="/opportunities" element={
+          <div >
+            <HomeHeader />
+            <div style={{ padding: '100px 50px' }}>
+              <OpportunitiesPage
+                multiopps={multiopp}
+                opportunities={opportunities}
+                students={students}
+                allOrgs={organizations}
+                signups={signups}
+                currentUser={null}
+                oppsLoading={oppsLoading}
+              />
+            </div>
+          </div>
+        } />
+        <Route path="*" element={<Navigate to="/" state={getRedirectState()} replace />} />
       </Routes>
     </div>
   );
