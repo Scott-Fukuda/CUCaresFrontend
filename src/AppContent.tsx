@@ -39,7 +39,7 @@ type RedirectState = {
   };
 };
 
-const AUTH_ROUTES = new Set(['/login', '/register', '/about-us', '/']);
+const AUTH_ROUTES = new Set(['/login', '/register', '/about-us', '/', '/opportunities']);
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
@@ -1043,6 +1043,11 @@ const AppContent: React.FC = () => {
           authError={authError}
           isLoading={isLoading}
           setCurrentUser={setCurrentUser}
+          multiopp={multiopps}
+          opportunities={opportunities}
+          students={students}
+          organizations={organizations}
+          signups={signups}
         />
       )}
 

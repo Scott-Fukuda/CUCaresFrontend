@@ -6,11 +6,11 @@ import { canUnregisterFromOpportunity, formatTimeUntilEvent } from '../utils/tim
 
 interface MultiOppCardProps {
   multiopp: MultiOpp;
-  currentUser: User;
+  currentUser: User | null;
   allOrgs: Organization[];
   opportunitiesData?: Opportunity[];
-  onSignUp: (opportunityId: number) => void;
-  onUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
+  onSignUp?: (opportunityId: number) => void;
+  onUnSignUp?: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
   onExternalSignup?: (opportunity: Opportunity) => void;
   onExternalUnsignup?: (opportunity: Opportunity) => void;
 }
@@ -137,36 +137,31 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
               const oppDate = parseDateTime(rawDateString, normalizedTime);
 
               const displayTime = (
-  gmtDate: string,
-  gmtTime?: string,
-  durationMinutes?: number
-) => {
-  if (!gmtDate) return { date: 'Date TBD', timeRange: '' };
+                gmtDate: string,
+                gmtTime?: string,
+                durationMinutes?: number
+              ) => {
+                if (!gmtDate) return { date: 'Date TBD', timeRange: '' };
 
-  const [y, m, d] = gmtDate.split('-').map(Number);
-  const [h = 0, min = 0, s = 0] = (gmtTime || '00:00:00').split(':').map(Number);
-  const start = new Date(Date.UTC(y, m - 1, d, h+4, min, s));
-  if (Number.isNaN(start.getTime())) return { date: 'Date TBD', timeRange: '' };
+                const [y, m, d] = gmtDate.split('-').map(Number);
+                const [h = 0, min = 0, s = 0] = (gmtTime || '00:00:00').split(':').map(Number);
+                const start = new Date(Date.UTC(y, m - 1, d, h + 4, min, s));
+                if (Number.isNaN(start.getTime())) return { date: 'Date TBD', timeRange: '' };
 
-  const end = new Date(start.getTime() + (durationMinutes ?? 0) * 60 * 1000);
+                const end = new Date(start.getTime() + (durationMinutes ?? 0) * 60 * 1000);
 
-  const dateStr = start.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
-  const timeFmt = { hour: 'numeric', minute: '2-digit', hour12: true } as const;
-  const timeRange = `${start.toLocaleTimeString('en-US', timeFmt)} – ${end.toLocaleTimeString('en-US', timeFmt)}`;
+                const dateStr = start.toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric',
+                });
+                const timeFmt = { hour: 'numeric', minute: '2-digit', hour12: true } as const;
+                const timeRange = `${start.toLocaleTimeString('en-US', timeFmt)} – ${end.toLocaleTimeString('en-US', timeFmt)}`;
 
-  return { date: dateStr, timeRange };
-};
-
-
-
-
-
+                return { date: dateStr, timeRange };
+              };
               const participants = Array.isArray(opp.involved_users) ? opp.involved_users : [];
-              const isUserSignedUp = participants.some((u) => u.id === currentUser.id);
+              const isUserSignedUp = currentUser ? participants.some((u) => u.id === currentUser.id) : false;
               const totalSlots =
                 typeof opp.total_slots === 'number'
                   ? opp.total_slots
@@ -218,80 +213,79 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
                   if (redirectUrl && onExternalUnsignup) {
                     onExternalUnsignup(opp);
                   } else {
-                    onUnSignUp(opp.id, derivedDateString, derivedTimeString);
+                    if (onUnSignUp) onUnSignUp(opp.id, derivedDateString, derivedTimeString);
                   }
                 } else {
                   if (redirectUrl && onExternalSignup) {
                     onExternalSignup(opp);
                   } else {
-                    onSignUp(opp.id);
+                    if (onSignUp) onSignUp(opp.id);
                   }
                 }
               };
               return (
                 <div
-  key={opp.id}
-  className="flex justify-between items-start bg-gray-50 rounded-lg px-4 py-3 hover:bg-gray-100 transition"
->
-  {/* LEFT: Date, Time, Volunteers */}
-  <div className="flex flex-col min-w-0">
-    <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
-      {displayTime(opp.date, opp.time, opp.duration).date}
-    </span>
-    <span className="text-sm text-gray-900 whitespace-nowrap">
-      {displayTime(opp.date, opp.time, opp.duration).timeRange}
-    </span>
-    <span className="text-xs text-gray-500 mt-0.5">
-      {slotsFull
-        ? 'Slots full'
-        : `${participants.length}/${totalSlots ?? '∞'} volunteers`}
-    </span>
-  </div>
+                  key={opp.id}
+                  className="flex justify-between items-start bg-gray-50 rounded-lg px-4 py-3 hover:bg-gray-100 transition"
+                >
+                  {/* LEFT: Date, Time, Volunteers */}
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                      {displayTime(opp.date, opp.time, opp.duration).date}
+                    </span>
+                    <span className="text-sm text-gray-900 whitespace-nowrap">
+                      {displayTime(opp.date, opp.time, opp.duration).timeRange}
+                    </span>
+                    <span className="text-xs text-gray-500 mt-0.5">
+                      {slotsFull
+                        ? 'Slots full'
+                        : `${participants.length}/${totalSlots ?? '∞'} volunteers`}
+                    </span>
+                  </div>
 
-  {/* RIGHT: Avatars above the button */}
-  <div className="flex flex-col items-center gap-2 flex-shrink-0">
-    <div className="flex -space-x-2">
-      {participants.slice(0, 4).map((u) => (
-        <img
-          key={u.id}
-          src={getProfilePictureUrl(u.profile_image || null)}
-          alt={u.name}
-          title={u.name}
-          className="w-6 h-6 rounded-full border-2 border-white object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            if (target.src !== '/backup.jpeg') target.src = '/backup.jpeg';
-          }}
-        />
-      ))}
-      {participants.length > 4 && (
-        <span className="text-xs text-gray-500 self-center ml-1">
-          +{participants.length - 4}
-        </span>
-      )}
-    </div>
+                  {/* RIGHT: Avatars above the button */}
+                  <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                    <div className="flex -space-x-2">
+                      {participants.slice(0, 4).map((u) => (
+                        <img
+                          key={u.id}
+                          src={getProfilePictureUrl(u.profile_image || null)}
+                          alt={u.name}
+                          title={u.name}
+                          className="w-6 h-6 rounded-full border-2 border-white object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            if (target.src !== '/backup.jpeg') target.src = '/backup.jpeg';
+                          }}
+                        />
+                      ))}
+                      {participants.length > 4 && (
+                        <span className="text-xs text-gray-500 self-center ml-1">
+                          +{participants.length - 4}
+                        </span>
+                      )}
+                    </div>
 
-    <button
-      onClick={handleButtonClick}
-      disabled={buttonDisabled}
-      className={`text-xs font-semibold px-3 py-1 rounded-lg transition text-white whitespace-nowrap ${
-        eventStarted
-          ? 'bg-gray-400 cursor-not-allowed'
-          : isUserSignedUp
-            ? canUnregister
-              ? 'bg-green-600 hover:bg-green-700'
-              : 'bg-orange-500 cursor-not-allowed'
-            : canSignUp
-              ? redirectUrl
-                ? 'bg-cornell-red hover:bg-red-800'
-                : 'bg-cornell-red hover:bg-red-800'
-              : 'bg-gray-300 cursor-not-allowed'
-      }`}
-    >
-      {buttonText}
-    </button>
-  </div>
-</div>
+                    <button
+                      onClick={handleButtonClick}
+                      disabled={buttonDisabled}
+                      className={`text-xs font-semibold px-3 py-1 rounded-lg transition text-white whitespace-nowrap ${eventStarted
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : isUserSignedUp
+                          ? canUnregister
+                            ? 'bg-green-600 hover:bg-green-700'
+                            : 'bg-orange-500 cursor-not-allowed'
+                          : canSignUp
+                            ? redirectUrl
+                              ? 'bg-cornell-red hover:bg-red-800'
+                              : 'bg-cornell-red hover:bg-red-800'
+                            : 'bg-gray-300 cursor-not-allowed'
+                        }`}
+                    >
+                      {buttonText}
+                    </button>
+                  </div>
+                </div>
 
 
 

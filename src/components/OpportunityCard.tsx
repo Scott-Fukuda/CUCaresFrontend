@@ -14,13 +14,13 @@ interface OpportunityCardProps {
   opportunity: Opportunity;
   signedUpStudents: User[];
   allOrgs: Organization[];
-  currentUser: User;
-  onSignUp: (opportunityId: number) => void;
-  onUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
+  currentUser: User | null;
+  onSignUp?: (opportunityId: number) => void;
+  onUnSignUp?: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
   isUserSignedUp: boolean;
   onExternalSignup?: (opportunity: Opportunity) => void; // Add callback for external signup
   onExternalUnsignup?: (opportunity: Opportunity) => void; // Add callback for external unsignup
-  showPopup: (
+  showPopup?: (
     title: string,
     message: string,
     type: 'success' | 'info' | 'warning' | 'error'
@@ -70,8 +70,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   const availableSlots = opportunity.total_slots - signedUpStudents.length;
   const canSignUp = availableSlots > 0 && !isUserSignedUp;
   const eventStarted = new Date() >= new Date(`${opportunity.date}T${opportunity.time}`);
-  const isUserHost = opportunity.host_id === currentUser.id;
-  const canManageOpportunity = isUserHost || currentUser.admin;
+  const isUserHost = currentUser ? opportunity.host_id === currentUser.id : false;
 
   // Check if user can unregister (7-hour rule)
   const unregistrationCheck = useMemo(() => {
@@ -83,6 +82,8 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   const timeUntilEvent = unregistrationCheck?.hoursUntilEvent ?? 0;
 
   const handleCardClick = (e: React.MouseEvent) => {
+    if (!currentUser) navigate('/login');
+
     // Prevent navigation if the signup button or a group link was clicked
     if ((e.target as HTMLElement).closest('button, [data-clickable-org]')) {
       return;
@@ -91,7 +92,9 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   };
 
   const handleButtonClick = async () => {
-    if (isUserSignedUp) {
+    if (!currentUser) navigate('/login');
+
+    if (currentUser && isUserSignedUp) {
       if (opportunity.allow_carpool) {
         try {
           const res = await removeCarpoolUser({
@@ -99,7 +102,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
             carpool_id: opportunity.carpool_id
           });
 
-          if (!res.valid) {
+          if (!res.valid && showPopup) {
             showPopup(
               'Failed to unregister',
               'You have signed up to drive for this event and therefore cannot unregister.',
@@ -116,14 +119,14 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
       if (opportunity.redirect_url && onExternalUnsignup) {
         onExternalUnsignup(opportunity);
       } else {
-        onUnSignUp(opportunity.id, opportunity.date, opportunity.time);
+        if (onUnSignUp) onUnSignUp(opportunity.id, opportunity.date, opportunity.time);
       }
     } else {
       // Check if this is an external signup opportunity
       if (opportunity.redirect_url && onExternalSignup) {
         onExternalSignup(opportunity);
       } else {
-        onSignUp(opportunity.id);
+        if (onSignUp) onSignUp(opportunity.id);
       }
     }
   };
@@ -133,7 +136,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
     window.open(opportunity.redirect_url!, '_blank');
 
     // Still register the user locally
-    onSignUp(opportunity.id);
+    if (onSignUp) onSignUp(opportunity.id);
 
     // Close the modal
     // setShowExternalSignupModal(false); // This state is removed, so this line is removed
@@ -144,7 +147,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
     window.open(opportunity.redirect_url!, '_blank');
 
     // Still register the user locally
-    onSignUp(opportunity.id);
+    if (onSignUp) onSignUp(opportunity.id);
 
     // Close the modal
     // setShowExternalUnsignupModal(false); // This state is removed, so this line is removed
@@ -156,7 +159,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
       window.open(opportunity.redirect_url!, '_blank');
 
       // Still register the user locally
-      onSignUp(opportunity.id);
+      if (onSignUp) onSignUp(opportunity.id);
 
       // Close the modal
       // setShowExternalSignupModal(false); // This state is removed, so this line is removed
@@ -166,7 +169,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   const handleExternalUnsignupConfirm = () => {
     if (opportunity) {
       // Proceed with local unregistration
-      onUnSignUp(opportunity.id, opportunity.date, opportunity.time);
+      if (onUnSignUp) onUnSignUp(opportunity.id, opportunity.date, opportunity.time);
 
       // Close the modal
       // setShowExternalUnsignupModal(false); // This state is removed, so this line is removed
