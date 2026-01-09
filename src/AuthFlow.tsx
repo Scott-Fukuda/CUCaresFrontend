@@ -98,7 +98,7 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
           <div >
             <HomeHeader />
             <div style={{ paddingTop: '60px' }}>
-              <AboutUsPage />
+              <AboutUsPage currentUser={null} />
             </div>
           </div>
         } />

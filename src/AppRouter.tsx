@@ -457,7 +457,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                     />
 
                     {/* About Us */}
-                    <Route path="/about-us" element={<AboutUsPage />} />
+                    <Route path="/about-us" element={<AboutUsPage currentUser={currentUser} />} />
 
                     {/* Default Redirect */}
                     <Route path="/" element={<Navigate to="/opportunities" replace />} />

@@ -64,7 +64,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         // Parse time and create a full datetime object
         const [hours, minutes] = opp.time.split(':').map(Number);
         const fullDateTime = new Date(year, month - 1, day, hours, minutes);
-        console.log('map')
         return {
           ...opp,
           localDate: actualDate,
@@ -74,7 +73,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       })
       .filter((opp) => {
         // Only approved opportunities
-        console.log('hit1')
         if (!opp.approved) return false;
 
         // Don't show past events - compare with actual date

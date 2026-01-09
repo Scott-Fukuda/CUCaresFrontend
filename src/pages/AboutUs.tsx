@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Member } from '../types';
+import { Member, User } from '../types';
 import { ourTeam } from '../data/initialData';
 import { useNavigate } from 'react-router-dom';
 
@@ -78,7 +78,11 @@ const TeamMemberCard: React.FC<{ member: Member }> = ({ member }) => {
   );
 };
 
-const AboutUsPage: React.FC = () => {
+interface AboutUsProps {
+  currentUser: User | null
+}
+
+const AboutUsPage: React.FC<AboutUsProps> = ({ currentUser }) => {
   const teamMembers = ourTeam; // Get the team members array
   const navigate = useNavigate();
 
@@ -169,7 +173,10 @@ const AboutUsPage: React.FC = () => {
               <button
                 key={member.id}
                 className="clickable-card"
-                onClick={() => navigate(`/profile/${member.id}`)}
+                onClick={() => {
+                  if (!currentUser) return;
+                  else navigate(`/profile/${member.id}`);
+                }}
               >
                 <TeamMemberCard member={member} />
               </button>
