@@ -165,7 +165,7 @@ const HomePage = () => {
     useEffect(() => {
         const id = setInterval(() => {
             setActive((prev) => (prev + 1) % covers.length);
-        }, 10000);
+        }, 7000);
 
         return () => clearInterval(id);
     }, []);

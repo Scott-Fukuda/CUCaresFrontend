@@ -3,6 +3,7 @@ import { Opportunity, User, SignUp, allInterests, Organization, MultiOpp } from 
 import OpportunityCard from '../components/OpportunityCard';
 import MultiOppCard from '../components/MultiOppCard';
 import { useNavigate } from 'react-router-dom';
+import MainFooter from '../components/MainFooter';
 
 interface OpportunitiesPageProps {
   opportunities: Opportunity[];
