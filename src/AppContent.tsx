@@ -28,6 +28,8 @@ import AuthFlow from './AuthFlow';
 import AppRouter from './AppRouter';
 import PopupMessage from './components/PopupMessage';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Zoomies } from 'ldrs/react';
+import 'ldrs/react/Zoomies.css';
 
 type AuthView = 'login' | 'register';
 
@@ -45,7 +47,6 @@ const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const latestLocationRef = useRef(location);
-  const [authInitialized, setAuthInitialized] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Data state from API
@@ -55,6 +56,7 @@ const AppContent: React.FC = () => {
   const [signups, setSignups] = useState<SignUp[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [allOpps, setAllOpps] = useState<(Opportunity | MultiOpp)[]>([]);
+  const [authChecked, setAuthChecked] = useState<boolean>(false);
 
   const { data: opportunities = [], isLoading: oppsLoading } = useQuery({
     queryKey: ['opportunities'],
@@ -142,9 +144,10 @@ const AppContent: React.FC = () => {
 
     const unsubscribe = onAuthStateChanged(async (firebaseUser) => {
       if (!mounted) return;
+      setAuthChecked(true);
+
       if (!firebaseUser) {
         setCurrentUser(null);
-        setAuthInitialized(true);
         return;
       }
 
@@ -993,8 +996,18 @@ const AppContent: React.FC = () => {
     }
   };
 
-  if (!authInitialized) {
-    return null
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-start justify-center pt-20">
+        <Zoomies
+          size="80"
+          stroke="5"
+          bgOpacity="0.1"
+          speed="2"
+          color="#B31B1B"
+        />
+      </div>
+    );
   }
 
   return (
