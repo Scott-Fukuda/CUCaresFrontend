@@ -176,7 +176,7 @@ const HomePage = () => {
                     <div className="main-content mb">
                         <h1>Show Our <br /> Campus Cares</h1>
                         <p>Meet new friends, support local organizations, and help us build a community we can all be proud of.</p>
-                        <button className="explore-button" onClick={() => navigate('/login')}>Explore Opportunities</button>
+                        <button className="explore-button" onClick={() => navigate('/opportunities')}>Explore Opportunities</button>
                     </div>
                 }
                 <div className="bg-slides">
@@ -192,7 +192,7 @@ const HomePage = () => {
                     <div className="main-content">
                         <h1>Show Our <br /> Campus Cares</h1>
                         <p>Meet new friends, support local organizations, and help us <br /> build a community we can all be proud of.</p>
-                        <button className="explore-button" onClick={() => navigate('/login')}>Explore Opportunities</button>
+                        <button className="explore-button" onClick={() => navigate('/opportunities')}>Explore Opportunities</button>
                         <div className={`below ${isVisible ? '' : 'hidden'}`}>
                             <KeyboardArrowDownIcon style={{ fontSize: '30px' }} />
                         </div>

@@ -318,12 +318,9 @@
         }
 
         .request-btn {
-            p {
-                color: white;
-                font-weight: 600;
-                font-size: 14px;
-            }
-
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
             background-color: #CC5D56;
             box-shadow: 0px 2px 4px 0px #0000001A;
             padding: 8px 16px;
@@ -340,8 +337,6 @@
 
             .arrow-icon {
                 transition: transform 0.2s ease;
-                color: white;
-                font-size: 16px;
             }
 
             &:hover .arrow-icon {
