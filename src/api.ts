@@ -661,16 +661,11 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
 
 export const getCurrentOpportunities = async (): Promise<Opportunity[]> => {
   try {
-    const response = await fetch(`${ENDPOINT_URL}/api/opps/current`);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch opportunities');
-    }
-
-    const data = await response.json();
+    const response = await authenticatedRequest('/opps/current');
+    //console.log('getOpportunities raw response:', response);
 
     // Transform backend data to match frontend expectations
-    const transformedOpportunities = (data.opportunities || []).map((opp: any) => {
+    const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
       //console.log(`Processing opportunity ${opp.id} - ${opp.name}:`, opp);
       // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
       const dateObj = new Date(opp.date);
@@ -1255,15 +1250,8 @@ export const getServiceDataCsv = async (
 // MULTIOPP endpoints
 export const getMultiOpps = async (): Promise<MultiOpp[]> => {
   try {
-    // const response = await authenticatedRequest('/multiopps'); 
-    const response = await fetch(`${ENDPOINT_URL}/api/multiopps`);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch opportunities');
-    }
-
-    const data = await response.json();
-    const rawMultiOpps = Array.isArray(data) ? data : data.multiopps || [];
+    const response = await authenticatedRequest('/multiopps');
+    const rawMultiOpps = Array.isArray(response) ? response : response.multiopps || [];
 
     return rawMultiOpps.map((multiopp: any) => {
       // Normalize start_date
