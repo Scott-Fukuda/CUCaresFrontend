@@ -36,6 +36,8 @@ import CarpoolPopup from './components/CarpoolPopup';
 import CarpoolPage from './pages/CarpoolPage';
 import HomePage from './pages/HomePage';
 import { useState } from "react";
+import { Zoomies } from 'ldrs/react'
+import 'ldrs/react/Zoomies.css'
 
 interface AppRouterProps {
     currentUser: User;
@@ -145,9 +147,18 @@ const AppRouter: React.FC<AppRouterProps> = ({
         );
     };
 
-    if (!currentUser) return null;
     if (isLoading) {
-        return <div className="text-center p-10 font-semibold text-lg">Loading...</div>;
+        return (
+            <div className="min-h-screen flex items-start justify-center pt-20">
+                <Zoomies
+                    size="80"
+                    stroke="5"
+                    bgOpacity="0.1"
+                    speed="2"
+                    color="#B31B1B"
+                />
+            </div>
+        );
     }
     if (appError) {
         return (
