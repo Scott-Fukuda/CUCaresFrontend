@@ -28,8 +28,6 @@ import AuthFlow from './AuthFlow';
 import AppRouter from './AppRouter';
 import PopupMessage from './components/PopupMessage';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Zoomies } from 'ldrs/react';
-import 'ldrs/react/Zoomies.css';
 
 type AuthView = 'login' | 'register';
 
@@ -47,59 +45,6 @@ const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const latestLocationRef = useRef(location);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-  // Data state from API
-  const [students, setStudents] = useState<User[]>([]);
-  const [leaderboardUsers, setLeaderboardUsers] = useState<User[]>([]);
-  // const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [signups, setSignups] = useState<SignUp[]>([]);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [allOpps, setAllOpps] = useState<(Opportunity | MultiOpp)[]>([]);
-  const [authChecked, setAuthChecked] = useState<boolean>(false);
-
-  const { data: opportunities = [], isLoading: oppsLoading } = useQuery({
-    queryKey: ['opportunities'],
-    queryFn: api.getCurrentOpportunities
-  });
-
-  const { data: multiopps = [], isLoading: multioppsLoading } = useQuery({
-    queryKey: ['multiopps'],
-    queryFn: api.getMultiOpps
-  });
-
-
-  // Friendships data from backend
-  const [friendshipsData, setFriendshipsData] = useState<FriendshipsResponse | null>(null);
-
-  // Track last loaded user to prevent infinite loops
-  const lastLoadedUserId = useRef<number | null>(null);
-
-  // UI State
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [appError, setAppError] = useState<string | null>(null);
-  const [authView, setAuthView] = useState<AuthView>('login');
-
-  // Popup State
-  const [popupMessage, setPopupMessage] = useState<{
-    isOpen: boolean;
-    title: string;
-    message: string;
-    type: 'success' | 'info' | 'warning' | 'error';
-  }>({
-    isOpen: false,
-    title: '',
-    message: '',
-    type: 'info',
-  });
-
-  // Add state for tracking first-time registration
-  const [showPostRegistrationSetup, setShowPostRegistrationSetup] = useState(false);
-
-  const [showCarpoolPopup, setShowCarpoolPopup] = useState<number | null>(null);
-
-  const [userFriends, setUserFriends] = useState<User[]>([]);
 
   useEffect(() => {
     latestLocationRef.current = location;
@@ -144,8 +89,6 @@ const AppContent: React.FC = () => {
 
     const unsubscribe = onAuthStateChanged(async (firebaseUser) => {
       if (!mounted) return;
-      setAuthChecked(true);
-
       if (!firebaseUser) {
         setCurrentUser(null);
         return;
@@ -1048,20 +991,6 @@ const AppContent: React.FC = () => {
       console.error('Error refreshing organizations:', error);
     }
   };
-
-  if (!authChecked) {
-    return (
-      <div className="min-h-screen flex items-start justify-center pt-20">
-        <Zoomies
-          size="80"
-          stroke="5"
-          bgOpacity="0.1"
-          speed="2"
-          color="#B31B1B"
-        />
-      </div>
-    );
-  }
 
   return (
     <>
