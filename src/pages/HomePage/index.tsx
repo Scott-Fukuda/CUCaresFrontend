@@ -33,6 +33,7 @@ import 'aos/dist/aos.css';
 import Footer from '../../components/MainFooter';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 
+
 const HomePage = () => {
     const { isMobile } = useBreakpoint();
     const [isVisible, setIsVisible] = useState(true);
@@ -111,8 +112,6 @@ const HomePage = () => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-
-
 
     const partners = [
         {
