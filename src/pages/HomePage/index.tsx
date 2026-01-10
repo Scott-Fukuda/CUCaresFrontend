@@ -231,8 +231,8 @@ const HomePage = () => {
                             }
                         </div>
                         <div className="grid-container yellow" data-aos="zoom-in">
-                            <h1>49</h1>
-                            <p>Student organizations represented</p>
+                            <h1>350+</h1>
+                            <p>Total student volunteers</p>
                             <div className="users-line">
                                 <div className="circle">
                                     <img src={lee} alt='student pfp' />
@@ -250,15 +250,15 @@ const HomePage = () => {
                     <div className="bot-grid">
                         <div className="grid-container bottom" data-aos="fade">
                             <h1>93</h1>
-                            <p>Volunteer Events</p>
+                            <p>Volunteer events</p>
                         </div>
                         <div className="grid-container bottom" data-aos="fade">
                             <h1>10</h1>
                             <p>Community partners uplifted</p>
                         </div>
                         <div className="grid-container bottom" data-aos="fade">
-                            <h1>350+</h1>
-                            <p>Total student volunteers</p>
+                            <h1>49</h1>
+                            <p>Student organizations</p>
                         </div>
                     </div>
                 </div>
