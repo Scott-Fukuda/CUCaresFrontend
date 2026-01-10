@@ -89,6 +89,7 @@ const AppContent: React.FC = () => {
 
     const unsubscribe = onAuthStateChanged(async (firebaseUser) => {
       if (!mounted) return;
+      setAuthChecked(true);
       if (!firebaseUser) {
         setCurrentUser(null);
         return;
@@ -175,6 +176,7 @@ const AppContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [appError, setAppError] = useState<string | null>(null);
   const [authView, setAuthView] = useState<AuthView>('login');
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Popup State
   const [popupMessage, setPopupMessage] = useState<{
@@ -991,6 +993,14 @@ const AppContent: React.FC = () => {
       console.error('Error refreshing organizations:', error);
     }
   };
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center p-8 font-semibold">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <>
