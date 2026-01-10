@@ -46,9 +46,9 @@ const HomeHeader = () => {
                                 About Us
                             </div>
                             <div
-                                className={`nav-opt ${location.pathname === '/opportunities' ? 'active' : ''}`}
+                                className={`nav-opt ${location.pathname === '/explore' ? 'active' : ''}`}
                                 onClick={() => {
-                                    navigate('/opportunities');
+                                    navigate('/explore');
                                 }}
                             >
                                 Explore
@@ -105,9 +105,9 @@ const HomeHeader = () => {
                             About Us
                         </div>
                         <div
-                            className={`mob-nav ${location.pathname === '/opportunities' ? 'active' : ''}`}
+                            className={`mob-nav ${location.pathname === '/explore' ? 'active' : ''}`}
                             onClick={() => {
-                                navigate('/opportunities');
+                                navigate('/explore');
                             }}
                         >
                             Explore

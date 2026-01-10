@@ -176,7 +176,7 @@ const HomePage = () => {
                     <div className="main-content mb">
                         <h1>Show Our <br /> Campus Cares</h1>
                         <p>Meet new friends, support local organizations, and help us build a community we can all be proud of.</p>
-                        <button className="explore-button" onClick={() => navigate('/opportunities')}>Explore Opportunities</button>
+                        <button className="explore-button" onClick={() => navigate('/explore')}>Explore Opportunities</button>
                     </div>
                 }
                 <div className="bg-slides">
@@ -192,7 +192,7 @@ const HomePage = () => {
                     <div className="main-content">
                         <h1>Show Our <br /> Campus Cares</h1>
                         <p>Meet new friends, support local organizations, and help us <br /> build a community we can all be proud of.</p>
-                        <button className="explore-button" onClick={() => navigate('/opportunities')}>Explore Opportunities</button>
+                        <button className="explore-button" onClick={() => navigate('/explore')}>Explore Opportunities</button>
                         <div className={`below ${isVisible ? '' : 'hidden'}`}>
                             <KeyboardArrowDownIcon style={{ fontSize: '30px' }} />
                         </div>
@@ -319,7 +319,7 @@ const HomePage = () => {
                             <div className="sub-title mid" data-aos="fade-right">
                                 <h1>Find Your Fit</h1>
                                 <p>Browse weekly and one-time service events that match your availability and the causes you’re most passionate about.</p>
-                                <button className="basic-btn" onClick={() => navigate('/opportunities')} >Browse Events</button>
+                                <button className="basic-btn" onClick={() => navigate('/explore')} >Browse Events</button>
                             </div>
                             <div className="timeline-block" data-aos="fade-right">
                                 <img src={tmBlock2} />

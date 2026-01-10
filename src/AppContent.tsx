@@ -28,6 +28,8 @@ import AuthFlow from './AuthFlow';
 import AppRouter from './AppRouter';
 import PopupMessage from './components/PopupMessage';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Zoomies } from 'ldrs/react'
+import 'ldrs/react/Zoomies.css'
 
 type AuthView = 'login' | 'register';
 
@@ -39,12 +41,13 @@ type RedirectState = {
   };
 };
 
-const AUTH_ROUTES = new Set(['/login', '/register', '/about-us', '/', '/opportunities']);
+const AUTH_ROUTES = new Set(['/login', '/register', '/about-us', '/', '/explore']);
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const latestLocationRef = useRef(location);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     latestLocationRef.current = location;
@@ -89,9 +92,9 @@ const AppContent: React.FC = () => {
 
     const unsubscribe = onAuthStateChanged(async (firebaseUser) => {
       if (!mounted) return;
-      setAuthChecked(true);
       if (!firebaseUser) {
         setCurrentUser(null);
+        setAuthChecked(true);
         return;
       }
 
@@ -136,6 +139,7 @@ const AppContent: React.FC = () => {
         setCurrentUser(null);
       } finally {
         setIsLoading(false);
+        setAuthChecked(true);
       }
     });
 
@@ -176,7 +180,6 @@ const AppContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [appError, setAppError] = useState<string | null>(null);
   const [authView, setAuthView] = useState<AuthView>('login');
-  const [authChecked, setAuthChecked] = useState(false);
 
   // Popup State
   const [popupMessage, setPopupMessage] = useState<{
@@ -996,8 +999,14 @@ const AppContent: React.FC = () => {
 
   if (!authChecked) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center p-8 font-semibold">Loading...</div>
+      <div className="min-h-screen flex items-start justify-center pt-20">
+        <Zoomies
+          size="80"
+          stroke="5"
+          bgOpacity="0.1"
+          speed="2"
+          color="#B31B1B"
+        />
       </div>
     );
   }

@@ -102,7 +102,7 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
             </div>
           </div>
         } />
-        <Route path="/opportunities" element={
+        <Route path="/explore" element={
           <div >
             <HomeHeader />
             <div style={{ padding: '100px 50px' }}>
