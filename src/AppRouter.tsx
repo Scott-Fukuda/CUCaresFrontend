@@ -147,19 +147,6 @@ const AppRouter: React.FC<AppRouterProps> = ({
         );
     };
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-start justify-center pt-20">
-                <Zoomies
-                    size="80"
-                    stroke="5"
-                    bgOpacity="0.1"
-                    speed="2"
-                    color="#B31B1B"
-                />
-            </div>
-        );
-    }
     if (appError) {
         return (
             <div className="text-center p-10 font-semibold text-lg text-red-600 bg-red-100 rounded-lg">

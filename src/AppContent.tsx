@@ -997,7 +997,7 @@ const AppContent: React.FC = () => {
     }
   };
 
-  if (!authChecked) {
+  if (!authChecked || isLoading) {
     return (
       <div className="min-h-screen flex items-start justify-center pt-20">
         <Zoomies
