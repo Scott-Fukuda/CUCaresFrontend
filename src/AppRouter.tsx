@@ -36,8 +36,6 @@ import CarpoolPopup from './components/CarpoolPopup';
 import CarpoolPage from './pages/CarpoolPage';
 import HomePage from './pages/HomePage';
 import { useState } from "react";
-import { Zoomies } from 'ldrs/react'
-import 'ldrs/react/Zoomies.css'
 
 interface AppRouterProps {
     currentUser: User;

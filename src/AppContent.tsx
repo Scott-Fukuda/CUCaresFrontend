@@ -95,6 +95,7 @@ const AppContent: React.FC = () => {
       if (!firebaseUser) {
         setCurrentUser(null);
         setAuthChecked(true);
+        setIsLoading(false);
         return;
       }
 
@@ -104,11 +105,9 @@ const AppContent: React.FC = () => {
         const authResult = await api.verifyFirebaseToken(token);
 
         if (authResult.success) {
-          // console.log('Firebase auth state changed, user is authenticated:', firebaseUser.email);
           const response = await api.checkUserExists(firebaseUser.email);
 
           if (response.success && response.exists) {
-            // console.log('User exists in backend, fetching user data...');
             const existingUser = await api.getUserByEmail(firebaseUser.email, token);
             setCurrentUser(existingUser);
             console.log('setting user', existingUser)
@@ -118,10 +117,7 @@ const AppContent: React.FC = () => {
               navigate(redirectPath, { replace: true, state: null });
             }
           } else {
-            // console.log('User does NOT exist in backend, sending to register page');
-
             setCurrentUser(null);
-            // No account in our backend yet, show registration view
             const response = await api.checkEmailApproval(firebaseUser.email);
 
             if (response.is_approved) {
@@ -130,15 +126,17 @@ const AppContent: React.FC = () => {
             } else {
               navigate('/login', { state: getAuthRedirectState() });
             }
+            setIsLoading(false);
           }
         } else {
           setCurrentUser(null);
+          setIsLoading(false);
         }
       } catch (e: any) {
         console.error('Error verifying auth state:', e);
         setCurrentUser(null);
-      } finally {
         setIsLoading(false);
+      } finally {
         setAuthChecked(true);
       }
     });
