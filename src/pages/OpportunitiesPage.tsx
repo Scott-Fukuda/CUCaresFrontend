@@ -156,10 +156,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     setSelectedOpportunity(null);
   };
 
-  if (oppsLoading) {
-    return <div style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem' }}>Loading...</div>;
-  }
-
   return (
     <>
       {/* Header */}
@@ -287,14 +283,16 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         })}
       </div>
 
-      {filteredOpportunities.length === 0 && (
+      {oppsLoading ? (
+        <div style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem', fontWeight: '600' }}>Loading...</div>
+      ) : filteredOpportunities.length === 0 ? (
         <div className="col-span-full text-center py-12 px-6 bg-white rounded-2xl shadow-lg">
           <h3 className="text-xl font-semibold text-gray-800">
             There are currently no opportunities.
           </h3>
           {currentUser && <p className="text-gray-500 mt-2">Please click 'Create Opportunity' if you would like to propose an opportunity.</p>}
         </div>
-      )}
+      ) : null}
 
       {/* External Signup Modal */}
       {showExternalSignupModal && selectedOpportunity && (
