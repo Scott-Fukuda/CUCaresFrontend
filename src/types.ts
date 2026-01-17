@@ -7,7 +7,7 @@ export interface MinimalUser {
 export interface User {
   id: number;
   name: string; // Single name property from backend
-  email: string; // Must be @cornell.edu
+  email: string; // Must be @cornell.edu or @ithaca.edu
   password?: string; // In a real app, this would be a hash. Storing for simulation.
   profile_image?: string; // Profile image URL from backend
   interests: string[];

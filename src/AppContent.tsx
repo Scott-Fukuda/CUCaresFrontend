@@ -269,8 +269,8 @@ const AppContent: React.FC = () => {
       //console.log('Firebase sign-in successful:', firebaseUser.email);
       const approvalCheck = await api.checkEmailApproval(firebaseUser.email);
 
-      // Check if email is @cornell.edu
-      if (!firebaseUser.email.toLowerCase().endsWith('@cornell.edu')) {
+      // Check if email is @cornell.edu or ithaca.edu
+      if (!firebaseUser.email.toLowerCase().endsWith('@cornell.edu') && !firebaseUser.email.toLowerCase().endsWith('@ithaca.edu')) {
         // For non-Cornell emails, check if they're in the approved list
         try {
           if (!approvalCheck.is_approved) {
@@ -321,7 +321,7 @@ const AppContent: React.FC = () => {
         } else {
           // User doesn't exist, redirect to registration
           console.log('User not found, redirecting to registration');
-          if (approvalCheck.is_approved || firebaseUser.email.toLowerCase().endsWith('@cornell.edu')) {
+          if (approvalCheck.is_approved || firebaseUser.email.toLowerCase().endsWith('@cornell.edu') || firebaseUser.email.toLowerCase().endsWith('@ithaca.edu')) {
             console.log('Approved user, redirecting to registration');
             setAuthView('register');
             navigate('/register', { state: getAuthRedirectState() });
