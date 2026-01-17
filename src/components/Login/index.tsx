@@ -74,7 +74,7 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
               </>
             ) : (
               <>
-                Sign {ver} with Cornell email
+                Sign {ver} with Cornell/IC email
               </>
             )}
           </button>
