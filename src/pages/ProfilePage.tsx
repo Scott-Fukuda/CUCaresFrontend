@@ -282,7 +282,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
           {(isCurrentUser || currentUser.admin) && (
             <div className="space-y-4">
               <button
-                onClick={() => navigate(`/service-journal/${id}`)}
+                onClick={() => navigate(`/service-journal/${user.id}`)}
                 className="w-full font-bold py-2 px-4 rounded-lg transition-colors"
               >
                 See my opportunities
