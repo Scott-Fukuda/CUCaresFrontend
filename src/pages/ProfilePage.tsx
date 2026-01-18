@@ -116,7 +116,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
     }
   }, [isCurrentUser, currentUser, user.id, checkFriendshipStatus, friendshipsData]);
 
-  useEffect(() => {}, [currentUser]);
+  useEffect(() => { }, [currentUser]);
 
   // Load friends when user changes
   useEffect(() => {
@@ -205,11 +205,10 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
               {isCurrentUser && (
                 <label
                   htmlFor="photo-upload"
-                  className={`absolute bottom-2 right-0 flex items-center justify-center h-8 w-8 rounded-full text-white transition-colors ${
-                    uploadingProfilePic
+                  className={`absolute bottom-2 right-0 flex items-center justify-center h-8 w-8 rounded-full text-white transition-colors ${uploadingProfilePic
                       ? 'bg-gray-400 cursor-not-allowed'
                       : 'bg-cornell-red cursor-pointer hover:bg-red-800'
-                  }`}
+                    }`}
                 >
                   {uploadingProfilePic ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -266,13 +265,12 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                   <button
                     onClick={() => handleFriendRequest(user.id)}
                     disabled={requestPending || isFriend}
-                    className={`w-full font-bold py-2 px-4 rounded-lg transition-colors ${
-                      isFriend
+                    className={`w-full font-bold py-2 px-4 rounded-lg transition-colors ${isFriend
                         ? 'bg-green-600 text-white cursor-default'
                         : requestPending
                           ? 'bg-red-300 text-white cursor-not-allowed'
                           : 'bg-cornell-red text-white hover:bg-red-800'
-                    }`}
+                      }`}
                   >
                     {isFriend ? 'Friends!' : requestPending ? 'Request Sent' : 'Add Friend'}
                   </button>
@@ -283,12 +281,13 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
 
           {isCurrentUser && (
             <div className="space-y-4">
-              {/* <button
+              <button
                 onClick={() => navigate('/my-opportunities')}
                 className="w-full font-bold py-2 px-4 rounded-lg transition-colors"
               >
                 See my opportunities
-              </button> */}
+              </button>
+
 
               {/* 🔴 Logout Button */}
               <button
@@ -463,18 +462,18 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
         </div>
       </div>
       <p className="mt-6 text-xs text-gray-500 text-center">
-          Click here to see our{" "} 
-          <a
-            href="/terms_of_service.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover: text-gray-700"
-            >
-              Terms of Service and Privacy Policy
-            </a>
-            .
-          </p>
-          </div>
+        Click here to see our{" "}
+        <a
+          href="/terms_of_service.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover: text-gray-700"
+        >
+          Terms of Service and Privacy Policy
+        </a>
+        .
+      </p>
+    </div>
   );
 };
 
