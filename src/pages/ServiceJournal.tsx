@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getServiceJournal, downloadServiceJournalCSV, getOpportunities } from "../api";
 import { auth } from "../firebase-config";
-import { User, Organization, Opportunity as OppType } from "../types";
+import { User, Organization, Opportunity } from "../types";
 import PastAttendedOpportunities from "./PastAttendedOpportunities";
 
-type Opportunity = {
+type ServiceJournalEntry = {
   id: number;
   name: string;
   date: string;
@@ -16,14 +16,15 @@ type Opportunity = {
 interface ServiceJournalProps {
   currentUser: User;
   allOrgs: Organization[];
+  allTimeOpps: Opportunity[];
+  setAllTimeOpps: React.Dispatch<React.SetStateAction<Opportunity[] | []>>;
 }
 
-const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs }) => {
+const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, allTimeOpps, setAllTimeOpps }) => {
   const { userId } = useParams<{ userId: string }>();
   console.log("User ID from URL:", userId);
   const navigate = useNavigate();
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [allOpportunities, setAllOpportunities] = useState<OppType[]>([]);
+  const [opportunities, setOpportunities] = useState<ServiceJournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -61,16 +62,17 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs })
           return;
         }
 
-        // Fetch service journal and all opportunities in parallel
-        const [serviceJournalData, allOppsData] = await Promise.all([
-          getServiceJournal(userId, token),
-          getOpportunities()
-        ]);
+        // Fetch allTimeOpps if not already loaded
+        if (allTimeOpps.length === 0) {
+          const allOppsData = await getOpportunities();
+          setAllTimeOpps(allOppsData);
+        }
 
+        // Fetch service journal data
+        const serviceJournalData = await getServiceJournal(userId, token);
         console.log("Service Journal API data:", JSON.stringify(serviceJournalData, null, 2));
 
         setOpportunities(serviceJournalData);
-        setAllOpportunities(allOppsData);
       } catch (err: any) {
         console.error(err);
         setError(err.message || "Failed to load data");
@@ -80,7 +82,7 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs })
     };
 
     fetchData();
-  }, [userId]);
+  }, [userId, allTimeOpps.length, setAllTimeOpps]);
 
   // Derived statistics
   const totalHours = opportunities.reduce((sum, opp) => sum + opp.duration / 60, 0);
@@ -160,7 +162,7 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs })
 
       {/* Past Opportunities Component */}
       <PastAttendedOpportunities
-        opportunities={allOpportunities}
+        opportunities={allTimeOpps}
         currentUser={currentUser}
         allOrgs={allOrgs}
         loading={loading}
