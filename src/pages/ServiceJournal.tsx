@@ -69,24 +69,18 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
           setAllTimeOpps(allOppsData);
         }
 
-        // Derive service journal data from allTimeOpps instead of using the limited API
-        const serviceJournalData = allTimeOpps
-          .filter(opp => opp.involved_users?.some(user => user.id === parseInt(userId)))
-          .map(opp => {
-            const userInOpp = opp.involved_users?.find(user => user.id === parseInt(userId));
-            return {
-              id: opp.id,
-              name: opp.name,
-              date: opp.date,
-              duration: opp.duration,
-              attended: userInOpp?.attended || false
-            };
-          })
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort by date descending
+        // Fetch service journal data
+        const serviceJournalData = await getServiceJournal(userId, token);
+        console.log("Service Journal API data:", JSON.stringify(serviceJournalData, null, 2));
 
-        console.log("Derived Service Journal data:", JSON.stringify(serviceJournalData, null, 2));
+        // Handle both array and object responses
+        const opportunitiesArray = Array.isArray(serviceJournalData)
+          ? serviceJournalData
+          : serviceJournalData?.opportunities || serviceJournalData?.data || [];
 
-        setOpportunities(serviceJournalData);
+        console.log("Processed opportunities array:", opportunitiesArray.length, "items");
+
+        setOpportunities(opportunitiesArray);
       } catch (err: any) {
         console.error(err);
         setError(err.message || "Failed to load data");
@@ -123,36 +117,39 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
       </div>
 
       {/* Table */}
-      {opportunities.length === 0 ? (
-        <p>No volunteer records found.</p>
-      ) : (
-        <table className="w-full border-collapse border border-gray-300">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="border p-2">Event ID</th>
-              <th className="border p-2">Event Name</th>
-              <th className="border p-2">Date</th>
-              <th className="border p-2">Hours</th>
-              <th className="border p-2">Attended</th>
-            </tr>
-          </thead>
-          <tbody>
-            {opportunities.map((opp) => (
-              <tr key={opp.id}>
-                <td className="border p-2 text-center">{opp.id}</td>
-                <td className="border p-2">{opp.name}</td>
-                <td className="border p-2">
-                  {new Date(opp.date).toLocaleDateString()}
-                </td>
-                <td className="border p-2 text-center">{(opp.duration / 60).toFixed(2)}</td>
-                <td className="border p-2 text-center">
-                  {opp.attended ? "✅" : "❌"}
-                </td>
+      {(() => {
+        console.log("Rendering table with", opportunities.length, "opportunities:", opportunities);
+        return opportunities.length === 0 ? (
+          <p>No volunteer records found.</p>
+        ) : (
+          <table className="w-full border-collapse border border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border p-2">Event ID</th>
+                <th className="border p-2">Event Name</th>
+                <th className="border p-2">Date</th>
+                <th className="border p-2">Hours</th>
+                <th className="border p-2">Attended</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {opportunities.map((opp) => (
+                <tr key={opp.id}>
+                  <td className="border p-2 text-center">{opp.id}</td>
+                  <td className="border p-2">{opp.name}</td>
+                  <td className="border p-2">
+                    {new Date(opp.date).toLocaleDateString()}
+                  </td>
+                  <td className="border p-2 text-center">{(opp.duration / 60).toFixed(2)}</td>
+                  <td className="border p-2 text-center">
+                    {opp.attended ? "✅" : "❌"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+      })()}
 
       {/* Buttons */}
       <div className="mb-6 mt-8 flex gap-4">
