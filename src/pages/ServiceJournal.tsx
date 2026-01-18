@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getServiceJournal, downloadServiceJournalCSV, getOpportunities } from "../api";
 import { auth } from "../firebase-config";
 import { User, Organization, Opportunity } from "../types";
-import PastAttendedOpportunities from "./PastAttendedOpportunities";
+import PastAttendedOpportunities from "../components/PastAttendedOpportunities";
 
 type ServiceJournalEntry = {
   id: number;

@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Opportunity, User, Organization } from "../types";
-import OpportunityCard from "../components/OpportunityCard";
+import OpportunityCard from "./OpportunityCard";
 
 
 interface PastAttendedOpportunitiesProps {
@@ -19,12 +19,27 @@ const PastAttendedOpportunities: React.FC<PastAttendedOpportunitiesProps> = ({
 
   const pastOpportunities = useMemo(() => {
     const now = new Date();
+    console.log("Filtering past opportunities:");
+    console.log("Current user ID:", currentUser.id);
+    console.log("Total opportunities:", opportunities.length);
+
+    if (opportunities.length === 0) {
+      console.log("No opportunities data available");
+      return [];
+    }
+
+    // For now, let's try a simpler approach - show all past opportunities
+    // and let the user see what data we have
     return opportunities.filter((opp) => {
       const oppDateTime = new Date(`${opp.date}T${opp.time}`);
-      return (
-        oppDateTime < now &&
-        opp.involved_users?.some((u) => u.id === currentUser.id && u.attended)
-      );
+      const isPast = oppDateTime < now;
+
+      // Check if user is involved in any way
+      const userInvolved = opp.involved_users?.some((u) => u.id === currentUser.id);
+
+      console.log(`Opp ${opp.id}: date=${opp.date}, time=${opp.time}, isPast=${isPast}, userInvolved=${userInvolved}, involved_users count=${opp.involved_users?.length || 0}`);
+
+      return isPast && userInvolved;
     });
   }, [opportunities, currentUser.id]);
 
@@ -59,8 +74,8 @@ const PastAttendedOpportunities: React.FC<PastAttendedOpportunitiesProps> = ({
                 signedUpStudents={signedUpStudents}
                 allOrgs={allOrgs}
                 currentUser={currentUser}
-                onSignUp={() => {}}
-                onUnSignUp={() => {}}
+                onSignUp={() => { }}
+                onUnSignUp={() => { }}
                 isUserSignedUp={true}
               />
             );
