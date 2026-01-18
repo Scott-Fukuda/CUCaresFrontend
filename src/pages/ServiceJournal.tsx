@@ -113,6 +113,7 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs })
         <table className="w-full border-collapse border border-gray-300">
           <thead className="bg-gray-100">
             <tr>
+              <th className="border p-2">Event ID</th>
               <th className="border p-2">Event Name</th>
               <th className="border p-2">Date</th>
               <th className="border p-2">Hours</th>
@@ -122,6 +123,7 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs })
           <tbody>
             {opportunities.map((opp) => (
               <tr key={opp.id}>
+                <td className="border p-2 text-center">{opp.id}</td>
                 <td className="border p-2">{opp.name}</td>
                 <td className="border p-2">
                   {new Date(opp.date).toLocaleDateString()}
