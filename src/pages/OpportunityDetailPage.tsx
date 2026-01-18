@@ -49,6 +49,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
   const { id } = useParams();
   const queryClient = useQueryClient();
 
+  // If allTimeOpps is empty, then it uses allOpps (aka. default 'opportunities') to find
   const opportunity = allTimeOpps && allTimeOpps.length > 0 ? allTimeOpps.find((o) => o.id === parseInt(id!)) : opportunities.find((o) => o.id === parseInt(id!));
 
   if (!opportunity) return <p>Opportunity not found.</p>;
