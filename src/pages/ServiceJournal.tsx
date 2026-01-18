@@ -73,14 +73,7 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
         const serviceJournalData = await getServiceJournal(userId, token);
         console.log("Service Journal API data:", JSON.stringify(serviceJournalData, null, 2));
 
-        // Handle both array and object responses
-        const opportunitiesArray = Array.isArray(serviceJournalData)
-          ? serviceJournalData
-          : serviceJournalData?.opportunities || serviceJournalData?.data || [];
-
-        console.log("Processed opportunities array:", opportunitiesArray.length, "items");
-
-        setOpportunities(opportunitiesArray);
+        setOpportunities(serviceJournalData);
       } catch (err: any) {
         console.error(err);
         setError(err.message || "Failed to load data");
@@ -117,39 +110,36 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
       </div>
 
       {/* Table */}
-      {(() => {
-        console.log("Rendering table with", opportunities.length, "opportunities:", opportunities);
-        return opportunities.length === 0 ? (
-          <p>No volunteer records found.</p>
-        ) : (
-          <table className="w-full border-collapse border border-gray-300">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="border p-2">Event ID</th>
-                <th className="border p-2">Event Name</th>
-                <th className="border p-2">Date</th>
-                <th className="border p-2">Hours</th>
-                <th className="border p-2">Attended</th>
+      {opportunities.length === 0 ? (
+        <p>No volunteer records found.</p>
+      ) : (
+        <table className="w-full border-collapse border border-gray-300">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border p-2">Event ID</th>
+              <th className="border p-2">Event Name</th>
+              <th className="border p-2">Date</th>
+              <th className="border p-2">Hours</th>
+              <th className="border p-2">Attended</th>
+            </tr>
+          </thead>
+          <tbody>
+            {opportunities.map((opp) => (
+              <tr key={opp.id}>
+                <td className="border p-2 text-center">{opp.id}</td>
+                <td className="border p-2">{opp.name}</td>
+                <td className="border p-2">
+                  {new Date(opp.date).toLocaleDateString()}
+                </td>
+                <td className="border p-2 text-center">{(opp.duration / 60).toFixed(2)}</td>
+                <td className="border p-2 text-center">
+                  {opp.attended ? "✅" : "❌"}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {opportunities.map((opp) => (
-                <tr key={opp.id}>
-                  <td className="border p-2 text-center">{opp.id}</td>
-                  <td className="border p-2">{opp.name}</td>
-                  <td className="border p-2">
-                    {new Date(opp.date).toLocaleDateString()}
-                  </td>
-                  <td className="border p-2 text-center">{(opp.duration / 60).toFixed(2)}</td>
-                  <td className="border p-2 text-center">
-                    {opp.attended ? "✅" : "❌"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        );
-      })()}
+            ))}
+          </tbody>
+        </table>
+      )}
 
       {/* Buttons */}
       <div className="mb-6 mt-8 flex gap-4">
