@@ -69,9 +69,22 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
           setAllTimeOpps(allOppsData);
         }
 
-        // Fetch service journal data
-        const serviceJournalData = await getServiceJournal(userId, token);
-        console.log("Service Journal API data:", JSON.stringify(serviceJournalData, null, 2));
+        // Derive service journal data from allTimeOpps instead of using the limited API
+        const serviceJournalData = allTimeOpps
+          .filter(opp => opp.involved_users?.some(user => user.id === parseInt(userId)))
+          .map(opp => {
+            const userInOpp = opp.involved_users?.find(user => user.id === parseInt(userId));
+            return {
+              id: opp.id,
+              name: opp.name,
+              date: opp.date,
+              duration: opp.duration,
+              attended: userInOpp?.attended || false
+            };
+          })
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort by date descending
+
+        console.log("Derived Service Journal data:", JSON.stringify(serviceJournalData, null, 2));
 
         setOpportunities(serviceJournalData);
       } catch (err: any) {
