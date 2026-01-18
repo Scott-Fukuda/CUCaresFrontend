@@ -206,8 +206,8 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                 <label
                   htmlFor="photo-upload"
                   className={`absolute bottom-2 right-0 flex items-center justify-center h-8 w-8 rounded-full text-white transition-colors ${uploadingProfilePic
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-cornell-red cursor-pointer hover:bg-red-800'
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-cornell-red cursor-pointer hover:bg-red-800'
                     }`}
                 >
                   {uploadingProfilePic ? (
@@ -266,10 +266,10 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                     onClick={() => handleFriendRequest(user.id)}
                     disabled={requestPending || isFriend}
                     className={`w-full font-bold py-2 px-4 rounded-lg transition-colors ${isFriend
-                        ? 'bg-green-600 text-white cursor-default'
-                        : requestPending
-                          ? 'bg-red-300 text-white cursor-not-allowed'
-                          : 'bg-cornell-red text-white hover:bg-red-800'
+                      ? 'bg-green-600 text-white cursor-default'
+                      : requestPending
+                        ? 'bg-red-300 text-white cursor-not-allowed'
+                        : 'bg-cornell-red text-white hover:bg-red-800'
                       }`}
                   >
                     {isFriend ? 'Friends!' : requestPending ? 'Request Sent' : 'Add Friend'}
@@ -279,15 +279,14 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
             )}
           </div>
 
-          {isCurrentUser && (
+          {(isCurrentUser || currentUser.admin) && (
             <div className="space-y-4">
               <button
-                onClick={() => navigate('/my-opportunities')}
+                onClick={() => navigate(`/service-journal/${currentUser.id}`)}
                 className="w-full font-bold py-2 px-4 rounded-lg transition-colors"
               >
                 See my opportunities
               </button>
-
 
               {/* 🔴 Logout Button */}
               <button

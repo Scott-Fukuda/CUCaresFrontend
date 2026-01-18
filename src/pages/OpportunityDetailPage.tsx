@@ -29,6 +29,7 @@ interface OpportunityDetailPageProps {
   ) => void;
   allOrgs: Organization[];
   currentUserSignupsSet: Set<number>;
+  allTimeOpps: Opportunity[];
   // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
 }
 
@@ -41,13 +42,15 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
   handleUnSignUp,
   allOrgs,
   currentUserSignupsSet,
+  allTimeOpps,
   // setOpportunities,
 }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const queryClient = useQueryClient();
 
-  const opportunity = opportunities.find((o) => o.id === parseInt(id!));
+  // If allTimeOpps is empty, then it uses allOpps (aka. default 'opportunities') 
+  const opportunity = allTimeOpps && allTimeOpps.length > 0 ? allTimeOpps.find((o) => o.id === parseInt(id!)) : opportunities.find((o) => o.id === parseInt(id!));
 
   if (!opportunity) return <p>Opportunity not found.</p>;
 
