@@ -280,7 +280,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                         path="/opportunity/:id"
                         element={
                             <OpportunityDetailPage
-                                opportunities={opportunities}
+                                opportunities={allTimeOpps}
                                 students={students}
                                 signups={signups}
                                 currentUser={currentUser}
