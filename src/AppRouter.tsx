@@ -288,6 +288,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 handleUnSignUp={handleUnSignUp}
                                 allOrgs={organizations}
                                 currentUserSignupsSet={currentUserSignupsSet}
+                                allTimeOpps={allTimeOpps}
                             />
                         }
                     />
