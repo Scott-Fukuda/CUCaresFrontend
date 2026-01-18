@@ -4,6 +4,7 @@ import { getServiceJournal, downloadServiceJournalCSV, getOpportunities } from "
 import { auth } from "../firebase-config";
 import { User, Organization, Opportunity } from "../types";
 import PastAttendedOpportunities from "../components/PastAttendedOpportunities";
+import OppLookup from "../components/OppLookup";
 
 type ServiceJournalEntry = {
   id: number;
@@ -141,7 +142,7 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
       )}
 
       {/* Buttons */}
-      <div className="mt-8 flex gap-4">
+      <div className="mb-6 mt-8 flex gap-4">
         <button
           onClick={async () => {
             if (!userId || !token) {
@@ -159,6 +160,9 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
           Download CSV
         </button>
       </div>
+
+      {/* Opportunity Lookup */}
+      <OppLookup allTimeOpps={allTimeOpps} />
 
       {/* Past Opportunities Component */}
       <PastAttendedOpportunities
