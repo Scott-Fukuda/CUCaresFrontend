@@ -18,8 +18,6 @@ export const formatRegistrationDate = (date: Date = new Date()): string => {
   return date.toISOString().slice(0, 19);
 };
 
-// A helper for making Acucaresbackend.onrender.comPI requests.
-// const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
 
 const ENDPOINT_URL = import.meta.env.VITE_ENDPOINT_URL;
 
