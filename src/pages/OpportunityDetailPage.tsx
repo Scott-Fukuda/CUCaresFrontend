@@ -721,6 +721,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
             )}
           </div>
 
+
           {isEditing ? (
             <div className="space-y-4">
               {/* Image Upload Section */}

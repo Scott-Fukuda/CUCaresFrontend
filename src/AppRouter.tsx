@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import {
     User,
     MinimalUser,
@@ -150,6 +150,27 @@ const AppRouter: React.FC<AppRouterProps> = ({
         );
     };
 
+    const ServiceJournalRoute: React.FC = () => {
+        const location = useLocation();
+        const { userId } = useParams<{ userId: string }>();
+        const requestedUserId = parseInt(userId || '0');
+
+        // Allow access if user is viewing their own journal or if they are an admin
+        if (currentUser.id !== requestedUserId && !currentUser.admin) {
+            // Redirect to their own service journal
+            return <Navigate to={`/service-journal/${currentUser.id}`} state={{ from: location }} replace />;
+        }
+
+        return (
+            <ServiceJournal
+                currentUser={currentUser}
+                allOrgs={organizations}
+                allTimeOpps={allTimeOpps}
+                setAllTimeOpps={setAllTimeOpps}
+            />
+        );
+    };
+
     if (appError) {
         return (
             <div className="text-center p-10 font-semibold text-lg text-red-600 bg-red-100 rounded-lg">
@@ -226,15 +247,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                     {/* Service Journal */}
                     <Route
                         path="/service-journal/:userId"
-                        element={
-                            <ServiceJournal
-                                currentUser={currentUser}
-                                allOrgs={organizations}
-                                allTimeOpps={allTimeOpps}
-                                setAllTimeOpps={setAllTimeOpps}
-
-                            />
-                        }
+                        element={<ServiceJournalRoute />}
                     />
 
                     {/* Account / Org Setup */}
@@ -264,15 +277,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                     {/* Admin */}
                     <Route
                         path="/admin"
-                        element={
-                            <AdminPage
-                                currentUser={currentUser}
-                                opportunities={opportunities}
-                                organizations={organizations}
-                                setOrganizations={setOrganizations}
-                                allUsers={students}
-                            />
-                        }
+                        element={<AdminRoute />}
                     />
 
                     {/* Opportunity Detail */}
