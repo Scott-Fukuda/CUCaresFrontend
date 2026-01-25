@@ -410,7 +410,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 currentUser={currentUser}
                                 allOrgs={organizations}
                                 onSignUp={(id) => handleSignUp(id)}
-                                staticId={4}
+                                staticId={9}
                             />
                         }
                     />
@@ -424,7 +424,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 currentUser={currentUser}
                                 allOrgs={organizations}
                                 onSignUp={(id) => handleSignUp(id)}
-                                staticId={6}
+                                staticId={10}
                             />
                         }
                     />
@@ -438,7 +438,21 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 currentUser={currentUser}
                                 allOrgs={organizations}
                                 onSignUp={(id) => handleSignUp(id)}
-                                staticId={5}
+                                staticId={12}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/prep"
+                        element={
+                            <MultiOppPage
+                                opportunities={opportunities}
+                                users={students}
+                                multiopps={multiopp}
+                                currentUser={currentUser}
+                                allOrgs={organizations}
+                                onSignUp={(id) => handleSignUp(id)}
+                                staticId={11}
                             />
                         }
                     />
