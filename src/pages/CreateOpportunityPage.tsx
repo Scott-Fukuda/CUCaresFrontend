@@ -333,7 +333,6 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       formDataToSend.append('host_user_id', currentUser.id.toString());
       formDataToSend.append('address', formData.address);
       formDataToSend.append('allow_carpool', formData.allow_carpool)
-
       formDataToSend.append('points', formData.duration.toString());
       formDataToSend.append('approved', currentUser.admin ? 'true' : 'false');
 

@@ -124,37 +124,16 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
     year: 'numeric',
   });
 
-  // Parse time correctly for display (assuming Eastern Time)
+  // Parse time correctly for display (already in Eastern Time from backend conversion)
   const [hours, minutes] = opportunity.time.split(':');
-  const displayTime =
-    (() => {
-      // Handle normal opportunities (with `time` field)
-      const [hours, minutes] = opportunity.time.split(':');
-      const realHours = opportunity.multiopp ? parseInt(hours) - 1 : parseInt(hours); // convert GMT → Eastern (accounting for bug)
-      return new Date(2024, 0, 1, realHours, parseInt(minutes)).toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-      });
-    })();
+  const displayTime = new Date(2024, 0, 1, parseInt(hours), parseInt(minutes)).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
 
-  // Calculate and format end time
-  const displayEndTime = (() => {
-    // Split the time string
-    let [hours, minutes] = opportunity.time.split(':');
-
-    // Adjust for multiopp GMT issue
-    let realHours = opportunity.multiopp ? parseInt(hours) - 1 : parseInt(hours);
-
-    // Normalize and handle wraparound
-    if (realHours < 0) realHours += 24;
-
-    // Construct corrected time string
-    let realTime = realHours.toString().padStart(2, '0') + ':' + minutes;
-
-    // Return formatted end time using your utility
-    return calculateEndTime(opportunity.date, realTime, opportunity.duration);
-  })();
+  // Calculate and format end time (no adjustment needed - time is already Eastern)
+  const displayEndTime = calculateEndTime(opportunity.date, opportunity.time, opportunity.duration);
 
   // convert GMT → Eastern (accounting for bug)
 
