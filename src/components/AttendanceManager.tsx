@@ -89,17 +89,16 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({
 
   // Create the opportunity date/time string
   const opportunityDateString = (() => {
-  const realHours = opportunity.multiopp ? hours - 1 : hours;
-  return `${year}-${month.toString().padStart(2, '0')}-${day
-    .toString()
-    .padStart(2, '0')}T${realHours
-    .toString()
-    .padStart(2, '0')}:${minutes
-    .toString()
-    .padStart(2, '0')}:00`;
-})();
+    return `${year}-${month.toString().padStart(2, '0')}-${day
+      .toString()
+      .padStart(2, '0')}T${hours
+        .toString()
+        .padStart(2, '0')}:${minutes
+          .toString()
+          .padStart(2, '0')}:00`;
+  })();
 
-const opportunityDateTime = new Date(opportunityDateString);
+  const opportunityDateTime = new Date(opportunityDateString);
 
   // Display time without additional timezone conversion (already Eastern Time from API)
   const displayTime = opportunityDateTime.toLocaleTimeString('en-US', {
@@ -182,11 +181,10 @@ const opportunityDateTime = new Date(opportunityDateString);
       <button
         onClick={handleSubmitClick}
         disabled={isSubmitting || isAttendanceMarked}
-        className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-colors ${
-          !isSubmitting && !isAttendanceMarked
+        className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-colors ${!isSubmitting && !isAttendanceMarked
             ? 'bg-cornell-red hover:bg-red-800'
             : 'bg-gray-400 cursor-not-allowed'
-        }`}
+          }`}
       >
         {isAttendanceMarked
           ? 'Attendance Already Submitted'

@@ -564,32 +564,28 @@ export const getOpportunities = async (): Promise<Opportunity[]> => {
     // Transform backend data to match frontend expectations
     const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
       //console.log(`Processing opportunity ${opp.id} - ${opp.name}:`, opp);
-      // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
+
+      // Parse the UTC date string from backend
       const dateObj = new Date(opp.date);
 
-      // Extract date and time components
-      // Use the date as provided by the backend without manipulation
-      const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
+      // Convert UTC to Eastern Time
+      const easternDateStr = dateObj.toLocaleString('en-US', {
+        timeZone: 'America/New_York',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
 
-      // Extract time in HH:MM:SS format
-      // If the original string contains GMT, convert GMT to Eastern Time (UTC-4)
-      // Otherwise, assume it's already Eastern Time
-      let timeOnly;
-      if (opp.date.includes('GMT')) {
-        // GMT format - convert to Eastern Time (UTC-4)
-        const gmtHours = dateObj.getUTCHours();
-        const easternHours = (gmtHours - 4 + 24) % 24; // Convert GMT to Eastern
-        const hours = easternHours.toString().padStart(2, '0');
-        const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
-        const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
-        timeOnly = `${hours}:${minutes}:${seconds}`;
-      } else {
-        // Already Eastern Time - use as is
-        const hours = dateObj.getHours().toString().padStart(2, '0');
-        const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-        const seconds = dateObj.getSeconds().toString().padStart(2, '0');
-        timeOnly = `${hours}:${minutes}:${seconds}`;
-      }
+      // Parse the Eastern time string to extract date and time
+      // Format: "MM/DD/YYYY, HH:MM:SS"
+      const [datePart, timePart] = easternDateStr.split(', ');
+      const [month, day, year] = datePart.split('/');
+      const dateOnly = `${year}-${month}-${day}`; // YYYY-MM-DD format
+      const timeOnly = timePart; // HH:MM:SS format
 
       // Transform involved_users from backend format to frontend User format
       const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => {
@@ -667,32 +663,28 @@ export const getCurrentOpportunities = async (): Promise<Opportunity[]> => {
     // Transform backend data to match frontend expectations
     const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
       //console.log(`Processing opportunity ${opp.id} - ${opp.name}:`, opp);
-      // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
+
+      // Parse the UTC date string from backend
       const dateObj = new Date(opp.date);
 
-      // Extract date and time components
-      // Use the date as provided by the backend without manipulation
-      const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
+      // Convert UTC to Eastern Time
+      const easternDateStr = dateObj.toLocaleString('en-US', {
+        timeZone: 'America/New_York',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
 
-      // Extract time in HH:MM:SS format
-      // If the original string contains GMT, convert GMT to Eastern Time (UTC-4)
-      // Otherwise, assume it's already Eastern Time
-      let timeOnly;
-      if (opp.date.includes('GMT')) {
-        // GMT format - convert to Eastern Time (UTC-4)
-        const gmtHours = dateObj.getUTCHours();
-        const easternHours = (gmtHours - 4 + 24) % 24; // Convert GMT to Eastern
-        const hours = easternHours.toString().padStart(2, '0');
-        const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
-        const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
-        timeOnly = `${hours}:${minutes}:${seconds}`;
-      } else {
-        // Already Eastern Time - use as is
-        const hours = dateObj.getHours().toString().padStart(2, '0');
-        const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-        const seconds = dateObj.getSeconds().toString().padStart(2, '0');
-        timeOnly = `${hours}:${minutes}:${seconds}`;
-      }
+      // Parse the Eastern time string to extract date and time
+      // Format: "MM/DD/YYYY, HH:MM:SS"
+      const [datePart, timePart] = easternDateStr.split(', ');
+      const [month, day, year] = datePart.split('/');
+      const dateOnly = `${year}-${month}-${day}`; // YYYY-MM-DD format
+      const timeOnly = timePart; // HH:MM:SS format
 
       // Transform involved_users from backend format to frontend User format
       const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => {
@@ -769,22 +761,25 @@ export const getOpportunity = async (id: number): Promise<Opportunity> => {
 
     // --- Parse date & time ---
     const dateObj = new Date(opp.date);
-    const dateOnly = dateObj.toISOString().split('T')[0];
 
-    let timeOnly: string;
-    if (opp.date.includes('GMT')) {
-      const gmtHours = dateObj.getUTCHours();
-      const easternHours = (gmtHours - 4 + 24) % 24; // adjust to Eastern
-      const hours = easternHours.toString().padStart(2, '0');
-      const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
-      const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
-      timeOnly = `${hours}:${minutes}:${seconds}`;
-    } else {
-      const hours = dateObj.getHours().toString().padStart(2, '0');
-      const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-      const seconds = dateObj.getSeconds().toString().padStart(2, '0');
-      timeOnly = `${hours}:${minutes}:${seconds}`;
-    }
+    // Convert UTC to Eastern Time
+    const easternDateStr = dateObj.toLocaleString('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+
+    // Parse the Eastern time string to extract date and time
+    // Format: "MM/DD/YYYY, HH:MM:SS"
+    const [datePart, timePart] = easternDateStr.split(', ');
+    const [month, day, year] = datePart.split('/');
+    const dateOnly = `${year}-${month}-${day}`; // YYYY-MM-DD format
+    const timeOnly = timePart; // HH:MM:SS format
 
     // --- Transform involved users ---
     const transformedInvolvedUsers = (opp.involved_users || []).map((involvedUser: any) => ({
@@ -850,29 +845,27 @@ export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
 
     // Transform backend data to match frontend expectations (same logic as getOpportunities)
     const transformedOpportunities = (response.opportunities || []).map((opp: any) => {
-      // Parse the date string from backend (e.g., "Sat, 26 Sep 2026 18:30:00 GMT" or "2025-08-18T18:17:00")
+      // Parse the UTC date string from backend
       const dateObj = new Date(opp.date);
 
-      // Extract date and time components
-      const dateOnly = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD format
+      // Convert UTC to Eastern Time
+      const easternDateStr = dateObj.toLocaleString('en-US', {
+        timeZone: 'America/New_York',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
 
-      // Extract time in HH:MM:SS format
-      let timeOnly;
-      if (opp.date.includes('GMT')) {
-        // GMT format - convert to Eastern Time (UTC-4)
-        const gmtHours = dateObj.getUTCHours();
-        const easternHours = (gmtHours - 4 + 24) % 24; // Convert GMT to Eastern
-        const hours = easternHours.toString().padStart(2, '0');
-        const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
-        const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
-        timeOnly = `${hours}:${minutes}:${seconds}`;
-      } else {
-        // Already Eastern Time - use as is
-        const hours = dateObj.getHours().toString().padStart(2, '0');
-        const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-        const seconds = dateObj.getSeconds().toString().padStart(2, '0');
-        timeOnly = `${hours}:${minutes}:${seconds}`;
-      }
+      // Parse the Eastern time string to extract date and time
+      // Format: "MM/DD/YYYY, HH:MM:SS"
+      const [datePart, timePart] = easternDateStr.split(', ');
+      const [month, day, year] = datePart.split('/');
+      const dateOnly = `${year}-${month}-${day}`; // YYYY-MM-DD format
+      const timeOnly = timePart; // HH:MM:SS format
 
       // Transform involved users if they exist
       const transformedInvolvedUsers = opp.involved_users ? opp.involved_users.map((involvedUser: any) => {
