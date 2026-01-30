@@ -1009,6 +1009,8 @@ export const createOpportunity = async (formData: FormData): Promise<Opportunity
     // Don't set Content-Type header - let browser set it automatically for FormData
   });
 
+  console.log('Created opp', response);
+
   if (!response.ok) {
     console.error('Create opportunity failed with status:', response.status);
     const errorInfo = await response.json().catch(() => ({ message: response.statusText }));
