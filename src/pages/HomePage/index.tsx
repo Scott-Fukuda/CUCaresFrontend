@@ -171,6 +171,14 @@ const HomePage = () => {
 
     return (
         <div className="homepage">
+            <div className="campus-cares-banner">
+                <div className="banner-content">
+                    
+                    <a href="https://forms.gle/DRD4P8BWCPm5kS4n6" target="_blank" rel="noopener noreferrer">
+                        <span className="banner-badge">Join the CampusCares team (Outreach, Tech, and Marketing)! Click to apply</span>
+                    </a>
+                </div>
+            </div>
             <div className="main">
                 {isMobile &&
                     <div className="main-content mb">
