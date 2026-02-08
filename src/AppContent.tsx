@@ -110,7 +110,6 @@ const AppContent: React.FC = () => {
           if (response.success && response.exists) {
             const existingUser = await api.getUserByEmail(firebaseUser.email, token);
             setCurrentUser(existingUser);
-            console.log('setting user', existingUser)
             const currentLocation = latestLocationRef.current;
             if (AUTH_ROUTES.has(currentLocation.pathname)) {
               const redirectPath = getRedirectPath();
@@ -240,7 +239,6 @@ const AppContent: React.FC = () => {
               //   after: { interests: fullCurrentUser.interests, organizationIds: fullCurrentUser.organizationIds }
               // });
               setCurrentUser(fullCurrentUser);
-              console.log('setting full current user', fullCurrentUser)
             }
             // Mark this user as loaded to prevent infinite loops
             lastLoadedUserId.current = currentUser.id;
@@ -268,7 +266,6 @@ const AppContent: React.FC = () => {
       // Trigger Firebase Google sign-in popup
       //console.log('Triggering Firebase sign-in...');
       const firebaseUser = await signInWithGoogle();
-      console.log('Firebase user after sign-in:', firebaseUser.email);
       //console.log('Firebase sign-in successful:', firebaseUser.email);
       const approvalCheck = await api.checkEmailApproval(firebaseUser.email);
 
@@ -297,35 +294,28 @@ const AppContent: React.FC = () => {
           return 'non approved';
         }
       }
-      console.log('Email approval check passed for:', firebaseUser.email);
 
       // Get the ID token from Firebase
       const token = await firebaseUser.getIdToken();
 
       // Verify token with backend
-      console.log('Verifying Firebase token with backend...');
       const authResult = await api.verifyFirebaseToken(token);
-      console.log('Token verification result:', authResult);
 
       if (authResult.success) {
         // User is authenticated, check if they exist in our database
-        console.log('Checking if user exists in database...');
         const response = await api.checkUserExists(firebaseUser.email);
         const exists = response.exists;
 
         if (exists) {
           // User exists, log them in
           const existingUser = await api.getUserByEmail(firebaseUser.email, token);
-          console.log('User found, logging in:', existingUser);
 
           setCurrentUser(existingUser);
           const redirectPath = getRedirectPath();
           navigate(redirectPath, { replace: true, state: null });
         } else {
           // User doesn't exist, redirect to registration
-          console.log('User not found, redirecting to registration');
           if (approvalCheck.is_approved || firebaseUser.email.toLowerCase().endsWith('@cornell.edu') || firebaseUser.email.toLowerCase().endsWith('@ithaca.edu')) {
-            console.log('Approved user, redirecting to registration');
             setAuthView('register');
             navigate('/register', { state: getAuthRedirectState() });
           } else {

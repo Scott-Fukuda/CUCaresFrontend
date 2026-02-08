@@ -147,7 +147,6 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
         for (const opp of upcomingOpps) {
           try {
             const full = opportunities.find((o) => o.id === opp.id);
-            console.log("Loaded opportunity:", full);
             const participants =
               full?.involved_users
                 ?.map((u: { id: number }) => users.find((usr) => usr.id === u.id))
@@ -171,7 +170,6 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
   if (!multiopp) return <p className="text-center text-gray-500 mt-10">Recurring opportunity not found.</p>;
 
   const handleOppClick = async (opp: OppType) => {
-    console.log("Clicked opp:", opp);
 
     // guard: skip past events
     const d = new Date(opp.date);
@@ -195,7 +193,6 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
 
       }
 
-      console.log("Fetched full opp:", full);
       const isUserSignedUp = full.involved_users?.some(
         (u: { id: number; registered?: boolean }) =>
           u.id === currentUser.id && (u.registered ?? true)

@@ -33,7 +33,6 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
     const [showDriverPopup, setShowDriverPopup] = useState<boolean>(
         !!(currentUser?.carpool_waiver_signed && mode === 'driver')
     );
-    console.log('signed?', currentUser)
     const navigate = useNavigate();
 
     const { data: opportunity, isLoading } = useQuery<Opportunity>({
@@ -51,7 +50,6 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
         refetchInterval: 30000
     });
 
-    console.log('rides', rides)
 
     const unregistrationCheck = useMemo(() => {
         if (!opportunity) return;
@@ -68,7 +66,6 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
     const userRide = rides.find(ride => ride.riders.some(rider => rider.user_id == currentUser.id.toString()));
     const isRider = !!userRide;
 
-    console.log('CARPOOL OPP', opportunity)
 
     // Logic to get the time/date
     const dateObj = new Date(opportunity.date);
@@ -99,7 +96,6 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
                 });
                 queryClient.invalidateQueries({ queryKey: ['rides', carpoolId] });
             } catch (err) {
-                console.log('Failed to remove ride:', err);
             }
         } else {
             setSelectedRideId(id);
@@ -141,8 +137,6 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
                     const totalSlots = [...ride.riders, ...Array.from({ length: seatsLeft })];
                     const shownSlots = totalSlots.slice(0, 6);
                     const extraCount = totalSlots.length - shownSlots.length;
-                    console.log('seats', ride)
-                    console.log('riders', ride.riders)
                     return (
                         <div className="cp-card" key={ride.id}>
                             <div className="cp-card-header">

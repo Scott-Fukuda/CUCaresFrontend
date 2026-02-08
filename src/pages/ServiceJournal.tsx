@@ -23,7 +23,6 @@ interface ServiceJournalProps {
 
 const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, allTimeOpps, setAllTimeOpps }) => {
   const { userId } = useParams<{ userId: string }>();
-  console.log("User ID from URL:", userId);
   const navigate = useNavigate();
   const [opportunities, setOpportunities] = useState<ServiceJournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +70,6 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
 
         // Fetch service journal data
         const serviceJournalData = await getServiceJournal(userId, token);
-        console.log("Service Journal API data:", JSON.stringify(serviceJournalData, null, 2));
 
         setOpportunities(serviceJournalData);
       } catch (err: any) {

@@ -85,7 +85,6 @@ const CarpoolFormPopup: React.FC<CarpoolFormPopupProps> = ({
                 'success'
             );
         } catch (err) {
-            console.log('Failed to add ride:', err);
             setError('Failed to add ride, please try again');
         }
     }

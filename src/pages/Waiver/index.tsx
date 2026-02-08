@@ -55,7 +55,6 @@ loss, liability, damage, or costs due to my child(ren) traveling to and or from 
             setCurrentUser(prev => prev ? ({...prev, carpool_waiver_signed: true}) : null);
             navigate(`/carpool/${opportunityId}`);
         } catch (err) {
-            console.log("Failed to create waiver:", err);
             setError("Failed to submit waiver, please try again.");
         }
     }

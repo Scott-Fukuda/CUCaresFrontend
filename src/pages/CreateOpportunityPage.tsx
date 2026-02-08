@@ -296,7 +296,6 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
           try {
             imageUrl = await api.uploadProfilePicture(file);
-            console.log('Uploaded new image URL:', imageUrl);
             // Replace cloned image with new uploaded one
           } catch (error) {
             console.error('Failed to upload image:', error);
@@ -309,7 +308,6 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
         }
       }
 
-      console.log('Final image URL to send:', imageUrl);
 
       // Create FormData for multipart/form-data
       const formDataToSend = new FormData();
@@ -343,10 +341,8 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
       // Add image URL if uploaded
       if (imageUrl) {
-        console.log('Adding image URL to form data:', imageUrl);
         formDataToSend.append('image', imageUrl);
       } else {
-        console.log('No image URL to add to form data');
       }
       if (isRecurring) {
         formDataToSend.append('start_date', startDate);

@@ -54,7 +54,6 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
 
   if (!opportunity) return <p>Opportunity not found.</p>;
 
-  console.log('OPP', opportunity)
 
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({

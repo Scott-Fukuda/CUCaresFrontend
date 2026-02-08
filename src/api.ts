@@ -191,7 +191,6 @@ export const getUserByEmail = async (email: string, token?: string): Promise<Use
       }
 
       const response: User = await res.json();
-      console.log('user', response)
       return response;
     }
 
@@ -757,7 +756,6 @@ export const getCurrentOpportunities = async (): Promise<Opportunity[]> => {
 export const getOpportunity = async (id: number): Promise<Opportunity> => {
   try {
     const opp = await authenticatedRequest(`/opps/${id}`);
-    console.log('opp', opp);
 
     // --- Parse date & time ---
     const dateObj = new Date(opp.date);
@@ -1009,7 +1007,6 @@ export const createOpportunity = async (formData: FormData): Promise<Opportunity
     // Don't set Content-Type header - let browser set it automatically for FormData
   });
 
-  console.log('Created opp', response);
 
   if (!response.ok) {
     console.error('Create opportunity failed with status:', response.status);
@@ -1378,7 +1375,6 @@ export const createOrUpdateCar = async (data: object) => {
       body: JSON.stringify(data)
     });
   } catch (err) {
-    console.log('Error creating car', err);
     throw err;
   }
 }
@@ -1391,7 +1387,6 @@ export const createRide = async (data: object) => {
       body: JSON.stringify(data)
     });
   } catch (err) {
-    console.log('Error creating ride', err);
     throw err;
   }
 }
@@ -1403,7 +1398,6 @@ export const addRider = async (data: object) => {
       body: JSON.stringify(data)
     });
   } catch (err) {
-    console.log('Error creating rider', err);
     throw err;
   }
 }
@@ -1415,7 +1409,6 @@ export const removeRider = async (data: object) => {
       body: JSON.stringify(data)
     });
   } catch (err) {
-    console.log('Error deleting rider', err);
     throw err;
   }
 }
@@ -1429,7 +1422,6 @@ export const removeCarpoolUser = async (data: object) => {
 
     return res;
   } catch (err) {
-    console.log('Error deleting carpool user', err);
     throw err;
   }
 }
@@ -1439,7 +1431,6 @@ export const getRides = async (carpoolId: number): Promise<Ride[]> => {
     const res = await authenticatedRequest(`/rides/${carpoolId}`);
     return res.rides;
   } catch (err) {
-    console.log('Error getting rides', err);
     throw err;
   }
 }

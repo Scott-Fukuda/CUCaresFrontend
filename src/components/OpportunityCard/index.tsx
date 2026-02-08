@@ -85,7 +85,6 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   const timeUntilEvent = unregistrationCheck?.hoursUntilEvent ?? 0;
 
   const handleCardClick = (e: React.MouseEvent) => {
-    console.log('clicked')
     if (!currentUser) { navigate('/sign-up'); return; }
 
     // Prevent navigation if the signup button or a group link was clicked
@@ -116,7 +115,6 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
           }
           queryClient.invalidateQueries({ queryKey: ['rides', opportunity.carpool_id] });
         } catch (err) {
-          console.log('Failed to remove ride:', err);
         }
       }
       // Check if this is an external opportunity and user is trying to unregister

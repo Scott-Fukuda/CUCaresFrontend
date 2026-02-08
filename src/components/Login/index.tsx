@@ -31,12 +31,10 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
       const res = await loginTest(id);
 
       const data: User = await res.json();
-      console.log("Current test user:", data);
       setCurrentUser(data);
 
       navigate("/");
     } catch (err) {
-      console.log('error', err)
     }
   }
 

@@ -19,12 +19,7 @@ const PastAttendedOpportunities: React.FC<PastAttendedOpportunitiesProps> = ({
 
   const pastOpportunities = useMemo(() => {
     const now = new Date();
-    console.log("Filtering past opportunities:");
-    console.log("Current user ID:", currentUser.id);
-    console.log("Total opportunities:", opportunities.length);
-
     if (opportunities.length === 0) {
-      console.log("No opportunities data available");
       return [];
     }
 
@@ -36,9 +31,6 @@ const PastAttendedOpportunities: React.FC<PastAttendedOpportunitiesProps> = ({
 
       // Check if user is involved in any way
       const userInvolved = opp.involved_users?.some((u) => u.id === currentUser.id);
-
-      console.log(`Opp ${opp.id}: date=${opp.date}, time=${opp.time}, isPast=${isPast}, userInvolved=${userInvolved}, involved_users count=${opp.involved_users?.length || 0}`);
-
       return isPast && userInvolved;
     });
   }, [opportunities, currentUser.id]);

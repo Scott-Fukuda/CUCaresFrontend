@@ -170,16 +170,24 @@ const AboutUsPage: React.FC<AboutUsProps> = ({ currentUser }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {teamMembers.map((member) => (
-              <button
+              <div
                 key={member.id}
                 className="clickable-card"
+                role="button"
+                tabIndex={0}
                 onClick={() => {
                   if (!currentUser) return;
-                  else navigate(`/profile/${member.id}`);
+                  navigate(`/profile/${member.id}`);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter' && e.key !== ' ') return;
+                  e.preventDefault();
+                  if (!currentUser) return;
+                  navigate(`/profile/${member.id}`);
                 }}
               >
                 <TeamMemberCard member={member} />
-              </button>
+              </div>
             ))}
           </div>
         </section>
