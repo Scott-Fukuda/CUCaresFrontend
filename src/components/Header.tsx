@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Organization, FriendshipsResponse } from '../types';
+import { User, Organization, FriendshipsResponse, Opportunity } from '../types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getProfilePictureUrl } from '../api';
 import SearchBar from './SearchBar';
@@ -12,6 +12,7 @@ interface HeaderProps {
   onLogout: () => void;
   allUsers: User[];
   allOrgs: Organization[];
+  opportunities: Opportunity[];
   friendshipsData: FriendshipsResponse | null;
   joinOrg: (orgId: number) => void;
   leaveOrg: (orgId: number) => void;
@@ -87,6 +88,7 @@ const Header: React.FC<HeaderProps> = (props) => {
               key={`searchbar-${user.id}-${user._lastUpdate || 'no-update'}`}
               allUsers={props.allUsers}
               allOrgs={props.allOrgs}
+              opportunities={props.opportunities}
               currentUser={props.user}
               friendshipsData={props.friendshipsData}
               joinOrg={props.joinOrg}

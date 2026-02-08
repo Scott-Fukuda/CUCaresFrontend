@@ -18,6 +18,7 @@ import {
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import OpportunitiesPage from './pages/OpportunitiesPage';
+import OpportunitySearchPage from './pages/OpportunitySearchPage';
 import MyOpportunitiesPage from './pages/MyOpportunitiesPage';
 import AdminPage from './pages/AdminPage';
 import OpportunityDetailPage from './pages/OpportunityDetailPage';
@@ -197,6 +198,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                 onLogout={handleLogout}
                 allUsers={students}
                 allOrgs={organizations}
+                opportunities={opportunities}
                 friendshipsData={friendshipsData}
                 joinOrg={joinOrg}
                 leaveOrg={leaveOrg}
@@ -222,6 +224,24 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 currentUserSignupsSet={currentUserSignupsSet}
                                 showCarpoolPopup={showCarpoolPopup}
                                 setShowCarpoolPopup={setShowCarpoolPopup}
+                                showPopup={showPopup}
+                            />
+                        }
+                    />
+
+                    {/* Opportunity Search Page */}
+                    <Route
+                        path="/opportunity-search"
+                        element={
+                            <OpportunitySearchPage
+                                opportunities={opportunities}
+                                students={students}
+                                allOrgs={organizations}
+                                currentUser={currentUser}
+                                handleSignUp={handleSignUp}
+                                handleUnSignUp={handleUnSignUp}
+                                currentUserSignupsSet={currentUserSignupsSet}
+                                signups={signups}
                                 showPopup={showPopup}
                             />
                         }

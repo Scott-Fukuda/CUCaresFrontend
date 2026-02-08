@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { User, Organization, FriendshipsResponse } from '../types';
+import { User, Organization, FriendshipsResponse, Opportunity } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl } from '../api';
 
 interface SearchBarProps {
   allUsers: User[];
   allOrgs: Organization[];
+  opportunities: Opportunity[];
   currentUser: User;
   friendshipsData: FriendshipsResponse | null;
   joinOrg: (orgId: number) => void;
@@ -33,6 +34,7 @@ const SearchIcon: React.FC<{ className?: string }> = ({ className }) => (
 const SearchBar: React.FC<SearchBarProps> = ({
   allUsers,
   allOrgs,
+  opportunities,
   currentUser,
   friendshipsData,
   joinOrg,
@@ -44,6 +46,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const RESULTS_LIMIT = 3;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -55,18 +58,42 @@ const SearchBar: React.FC<SearchBarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const { filteredUsers, filteredOrgs } = useMemo(() => {
-    if (!query) return { filteredUsers: [], filteredOrgs: [] };
+  const { filteredUsers, filteredOrgs, filteredOpps, hasMoreOpps } = useMemo(() => {
+    if (!query) return { filteredUsers: [], filteredOrgs: [], filteredOpps: [], hasMoreOpps: false };
     const lowerCaseQuery = query.toLowerCase();
 
     const users = allUsers
       .filter((u) => u.name.toLowerCase().includes(lowerCaseQuery) && u.id !== currentUser.id)
-      .slice(0, 4);
+      .slice(0, RESULTS_LIMIT);
 
-    const orgs = allOrgs.filter((g) => g.name.toLowerCase().includes(lowerCaseQuery)).slice(0, 4);
+    const orgs = allOrgs.filter((g) => g.name.toLowerCase().includes(lowerCaseQuery)).slice(0, RESULTS_LIMIT);
 
-    return { filteredUsers: users, filteredOrgs: orgs };
-  }, [query, allUsers, allOrgs, currentUser.id]);
+    const allMatchingOpps = opportunities
+      .filter((opp) => {
+        if (opp.approved === false) return false;
+        if (Array.isArray(opp.visibility) && opp.visibility.length > 0) {
+          if (currentUser.admin) return true;
+          const userOrgIds = currentUser.organizationIds || [];
+          return opp.visibility.some((orgId) => userOrgIds.includes(orgId));
+        }
+        return true;
+      })
+      .filter((opp) => {
+        const oppName = opp.name.toLowerCase();
+        const oppNonprofit = opp.nonprofit ? opp.nonprofit.toLowerCase() : '';
+        const oppHostOrg = opp.host_org_name ? opp.host_org_name.toLowerCase() : '';
+        return (
+          oppName.includes(lowerCaseQuery) ||
+          oppNonprofit.includes(lowerCaseQuery) ||
+          oppHostOrg.includes(lowerCaseQuery)
+        );
+      });
+
+    const opps = allMatchingOpps.slice(0, RESULTS_LIMIT);
+    const hasMore = allMatchingOpps.length > RESULTS_LIMIT;
+
+    return { filteredUsers: users, filteredOrgs: orgs, filteredOpps: opps, hasMoreOpps: hasMore };
+  }, [query, allUsers, allOrgs, opportunities, currentUser.id, RESULTS_LIMIT]);
 
   const getFriendStatus = (userId: number) => {
     if (friendshipsData) {
@@ -89,7 +116,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <SearchIcon className="h-5 w-5 text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2" />
         <input
           type="text"
-          placeholder="Search students & orgs..."
+          placeholder="Search students, orgs & opportunities..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
@@ -99,10 +126,51 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       {isFocused && query.length > 0 && (
         <div className="absolute top-full mt-2 w-full max-h-96 overflow-y-auto bg-white rounded-lg shadow-lg z-30">
-          {filteredUsers.length === 0 && filteredOrgs.length === 0 ? (
+          {filteredUsers.length === 0 && filteredOrgs.length === 0 && filteredOpps.length === 0 ? (
             <p className="text-gray-500 text-center py-4 px-2">No results found for "{query}"</p>
           ) : (
             <ul className="divide-y divide-gray-100">
+              {filteredOpps.length > 0 && (
+                <li>
+                  <h3 className="px-4 py-2 text-xs font-bold text-gray-500 uppercase bg-light-gray">
+                    Opportunities
+                  </h3>
+                  <ul>
+                    {filteredOpps.map((opp) => (
+                      <li
+                        key={opp.id}
+                        className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"
+                      >
+                        <div
+                          className="flex-grow cursor-pointer"
+                          onClick={() => {
+                            navigate(`/opportunity/${opp.id}`);
+                            handleResultClick();
+                          }}
+                        >
+                          <p className="font-semibold text-gray-800">{opp.name}</p>
+                          <p className="text-sm text-gray-500">
+                            {opp.nonprofit || opp.host_org_name || 'Opportunity'}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  {hasMoreOpps && (
+                    <div className="px-4 py-2 border-t border-gray-100">
+                      <button
+                        onClick={() => {
+                          navigate(`/opportunity-search?q=${encodeURIComponent(query)}`);
+                          handleResultClick();
+                        }}
+                        className="w-full text-center text-sm text-cornell-red font-semibold hover:text-red-800 transition-colors py-2"
+                      >
+                        See All Opportunities
+                      </button>
+                    </div>
+                  )}
+                </li>
+              )}
               {filteredOrgs.length > 0 && (
                 <li>
                   <h3 className="px-4 py-2 text-xs font-bold text-gray-500 uppercase bg-light-gray">
