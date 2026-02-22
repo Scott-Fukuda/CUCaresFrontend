@@ -250,14 +250,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
             const userOrgIds = currentUser.organizationIds || [];
             return multiopp.visibility.some((orgId) => userOrgIds.includes(orgId));
           })
-          // .sort((a, b) => {
-          //   const aIsSoup = a.name === "Soup Kitchen";
-          //   const bIsSoup = b.name === "Soup Kitchen";
-
-          //   if (aIsSoup && !bIsSoup) return -1;
-          //   if (!aIsSoup && bIsSoup) return 1;
-          //   return 0; // keep original order otherwise
-          // })
           .map((multiopp) => (
             <MultiOppCard
               key={multiopp.id}
@@ -271,7 +263,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               onExternalUnsignup={handleExternalUnsignup}
             />
           ))}
-
           // Check if current user is signed up
           const isUserSignedUp = currentUser && currentUserSignupsSet ? (
             opp.involved_users
