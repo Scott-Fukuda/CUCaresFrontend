@@ -222,31 +222,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       {/* Opportunities Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {/* Render MultiOpps with visibility filtering */}
-        {multiopps
-          .filter((multiopp) => {
-            if (!currentUser) return false;
-
-            // Public or admin always allowed
-            if (!multiopp.visibility || multiopp.visibility.length === 0 || currentUser.admin)
-              return true;
-
-            const userOrgIds = currentUser.organizationIds || [];
-            return multiopp.visibility.some((orgId) => userOrgIds.includes(orgId));
-          })
-          .map((multiopp) => (
-            <MultiOppCard
-              key={multiopp.id}
-              multiopp={multiopp}
-              currentUser={currentUser}
-              allOrgs={allOrgs}
-              opportunitiesData={opportunities}
-              onSignUp={handleSignUp}
-              onUnSignUp={handleUnSignUp}
-              onExternalSignup={handleExternalSignup}
-              onExternalUnsignup={handleExternalUnsignup}
-            />
-          ))}
-
         {filteredOpportunities.map((opp) => {
           // Use backend data directly - it's more reliable than trying to combine sources
           let signedUpStudents: User[] = [];
@@ -263,6 +238,39 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               opportunitySignups.some((s) => s.userId === student.id)
             );
           }
+        
+        {multiopps
+          .filter((multiopp) => {
+            if (!currentUser) return false;
+
+            // Public or admin always allowed
+            if (!multiopp.visibility || multiopp.visibility.length === 0 || currentUser.admin)
+              return true;
+
+            const userOrgIds = currentUser.organizationIds || [];
+            return multiopp.visibility.some((orgId) => userOrgIds.includes(orgId));
+          })
+          .sort((a, b) => {
+            const aIsSoup = a.name === "Soup Kitchen";
+            const bIsSoup = b.name === "Soup Kitchen";
+
+            if (aIsSoup && !bIsSoup) return -1;
+            if (!aIsSoup && bIsSoup) return 1;
+            return 0; // keep original order otherwise
+          })
+          .map((multiopp) => (
+            <MultiOppCard
+              key={multiopp.id}
+              multiopp={multiopp}
+              currentUser={currentUser}
+              allOrgs={allOrgs}
+              opportunitiesData={opportunities}
+              onSignUp={handleSignUp}
+              onUnSignUp={handleUnSignUp}
+              onExternalSignup={handleExternalSignup}
+              onExternalUnsignup={handleExternalUnsignup}
+            />
+          ))}
 
           // Check if current user is signed up
           const isUserSignedUp = currentUser && currentUserSignupsSet ? (
