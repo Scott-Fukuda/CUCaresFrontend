@@ -1062,7 +1062,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
           </div>
 
 
-          {allowCarpool && isUserSignedUp &&
+          {allowCarpool && (isUserSignedUp || currentUser.admin) &&
             <button className="w-full mt-6 font-bold py-4 px-4 rounded-lg bg-red-600 transition-colors text-white text-lg"
               onClick={() => { navigate(`/carpool/${opportunity.id}`) }}
               style={{ cursor: "pointer" }}
