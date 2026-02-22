@@ -1,3 +1,4 @@
+import { todo } from 'node:test';
 import { User, Opportunity, SignUp, Badge, Organization, Member } from '../types';
 
 const countSignupsForCause = (
@@ -271,5 +272,16 @@ export const ourTeam: Member[] = [
     campusOrgs: ['Cru', 'Hack4Impact'],
     favoriteService: "My favorite community service experience is teaching elementary school students music and seeing how proud they are when they can play the songs they love!",
     role: 'Product Manager',
+  },
+  {
+    id: 276,
+    name: 'Elisa Pan',
+    picture: './team_pic/elisa.jpg',
+    hometown: 'Bay Area, CA',
+    major: 'Computer Science',
+    class: '2028',
+    campusOrgs: ['Cru', 'WICC'],
+    favoriteService: "Volunteering as a camp counselor for an overnight science camp for 5th graders!",
+    role: 'Frontend & Mobile App Developer',
   },
 ];
