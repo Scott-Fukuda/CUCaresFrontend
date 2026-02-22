@@ -250,14 +250,14 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
             const userOrgIds = currentUser.organizationIds || [];
             return multiopp.visibility.some((orgId) => userOrgIds.includes(orgId));
           })
-          .sort((a, b) => {
-            const aIsSoup = a.name === "Soup Kitchen";
-            const bIsSoup = b.name === "Soup Kitchen";
+          // .sort((a, b) => {
+          //   const aIsSoup = a.name === "Soup Kitchen";
+          //   const bIsSoup = b.name === "Soup Kitchen";
 
-            if (aIsSoup && !bIsSoup) return -1;
-            if (!aIsSoup && bIsSoup) return 1;
-            return 0; // keep original order otherwise
-          })
+          //   if (aIsSoup && !bIsSoup) return -1;
+          //   if (!aIsSoup && bIsSoup) return 1;
+          //   return 0; // keep original order otherwise
+          // })
           .map((multiopp) => (
             <MultiOppCard
               key={multiopp.id}
