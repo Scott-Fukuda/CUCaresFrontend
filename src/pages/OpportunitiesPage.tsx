@@ -97,6 +97,19 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       .sort((a, b) => a.fullDateTime.getTime() - b.fullDateTime.getTime());
   }, [opportunities, currentUser]);
 
+  const visibleMultiOpps = useMemo(() => {
+    return multiopps.filter((multiopp) => {
+      if (!currentUser) return false;
+
+      if (!multiopp.visibility || multiopp.visibility.length === 0 || currentUser.admin) {
+        return true;
+      }
+
+      const userOrgIds = currentUser.organizationIds || [];
+      return multiopp.visibility.some((orgId) => userOrgIds.includes(orgId));
+    });
+  }, [multiopps, currentUser]);
+
   const [showExternalSignupModal, setShowExternalSignupModal] = useState(false);
   const [showExternalUnsignupModal, setShowExternalUnsignupModal] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
@@ -221,7 +234,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
 
       {/* Opportunities Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {/* Render MultiOpps with visibility filtering */}
         {filteredOpportunities.map((opp) => {
           // Use backend data directly - it's more reliable than trying to combine sources
           let signedUpStudents: User[] = [];
@@ -238,31 +250,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               opportunitySignups.some((s) => s.userId === student.id)
             );
           }
-        
-        {multiopps
-          .filter((multiopp) => {
-            if (!currentUser) return false;
 
-            // Public or admin always allowed
-            if (!multiopp.visibility || multiopp.visibility.length === 0 || currentUser.admin)
-              return true;
-
-            const userOrgIds = currentUser.organizationIds || [];
-            return multiopp.visibility.some((orgId) => userOrgIds.includes(orgId));
-          })
-          .map((multiopp) => (
-            <MultiOppCard
-              key={multiopp.id}
-              multiopp={multiopp}
-              currentUser={currentUser}
-              allOrgs={allOrgs}
-              opportunitiesData={opportunities}
-              onSignUp={handleSignUp}
-              onUnSignUp={handleUnSignUp}
-              onExternalSignup={handleExternalSignup}
-              onExternalUnsignup={handleExternalUnsignup}
-            />
-          ))}
           // Check if current user is signed up
           const isUserSignedUp = currentUser && currentUserSignupsSet ? (
             opp.involved_users
@@ -288,11 +276,25 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
             />
           );
         })}
+
+        {visibleMultiOpps.map((multiopp) => (
+          <MultiOppCard
+            key={multiopp.id}
+            multiopp={multiopp}
+            currentUser={currentUser}
+            allOrgs={allOrgs}
+            opportunitiesData={opportunities}
+            onSignUp={handleSignUp}
+            onUnSignUp={handleUnSignUp}
+            onExternalSignup={handleExternalSignup}
+            onExternalUnsignup={handleExternalUnsignup}
+          />
+        ))}
       </div>
 
       {oppsLoading ? (
         <div style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem', fontWeight: '600' }}>Loading...</div>
-      ) : filteredOpportunities.length === 0 ? (
+      ) : filteredOpportunities.length === 0 && visibleMultiOpps.length === 0 ? (
         <div className="col-span-full text-center py-12 px-6 bg-white rounded-2xl shadow-lg">
           <h3 className="text-xl font-semibold text-gray-800">
             There are currently no opportunities.
