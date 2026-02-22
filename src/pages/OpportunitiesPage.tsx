@@ -98,16 +98,27 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   }, [opportunities, currentUser]);
 
   const visibleMultiOpps = useMemo(() => {
-    return multiopps.filter((multiopp) => {
-      if (!currentUser) return false;
+    return multiopps
+      .filter((multiopp) => {
+        if (!currentUser) return false;
 
-      if (!multiopp.visibility || multiopp.visibility.length === 0 || currentUser.admin) {
-        return true;
-      }
+        if (!multiopp.visibility || multiopp.visibility.length === 0 || currentUser.admin) {
+          return true;
+        }
 
-      const userOrgIds = currentUser.organizationIds || [];
-      return multiopp.visibility.some((orgId) => userOrgIds.includes(orgId));
-    });
+        const userOrgIds = currentUser.organizationIds || [];
+        return multiopp.visibility.some((orgId) => userOrgIds.includes(orgId));
+      })
+      .sort((a, b) => {
+        const isASalvationArmy =
+          (a.nonprofit || '').trim().toLowerCase() === 'the salvation army';
+        const isBSalvationArmy =
+          (b.nonprofit || '').trim().toLowerCase() === 'the salvation army';
+
+        if (isASalvationArmy && !isBSalvationArmy) return -1;
+        if (!isASalvationArmy && isBSalvationArmy) return 1;
+        return 0;
+      });
   }, [multiopps, currentUser]);
 
   const [showExternalSignupModal, setShowExternalSignupModal] = useState(false);
