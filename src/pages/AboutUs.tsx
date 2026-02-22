@@ -1,17 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Member, User } from '../types';
 import { ourTeam } from '../data/initialData';
 import { useNavigate } from 'react-router-dom';
 
 const TeamMemberCard: React.FC<{ member: Member }> = ({ member }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const maxLength = 120; // Character limit for truncated text
-  const shouldTruncate = member.favoriteService.length > maxLength;
-  const displayText =
-    isExpanded || !shouldTruncate
-      ? member.favoriteService
-      : member.favoriteService.substring(0, maxLength) + '...';
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  
+  const textRef = useRef<HTMLParagraphElement>(null);
 
+  useEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+    el.classList.remove('line-clamp-2');
+    const fullHeight = el.scrollHeight;
+    el.classList.add('line-clamp-2');
+    const clampedHeight = el.clientHeight;
+    setIsOverflowing(fullHeight > clampedHeight);
+  }, []);
+  
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
       <div className="text-center flex-1 flex flex-col">
@@ -40,12 +47,11 @@ const TeamMemberCard: React.FC<{ member: Member }> = ({ member }) => {
 
         <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
         <p className="text-cornell-red font-semibold mb-1">{member.role}</p>
-        <p className="text-gray-600 font-medium mb-1">{member.major}</p>
-        <p className="text-gray-600 text-sm mb-2">Class of {member.class}</p>
+        <p className="text-gray-600 font-medium mb-1">{member.study}</p>
         <p className="text-gray-500 text-sm mb-3">📍 {member.hometown}</p>
 
         <div className="mb-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">Campus Organizations</h4>
+          {/* <h4 className="text-sm font-semibold text-gray-700 mb-2">Campus Organizations</h4> */}
           <div className="flex flex-wrap gap-1 justify-center">
             {member.campusOrgs.map((org, index) => (
               <span
@@ -60,14 +66,21 @@ const TeamMemberCard: React.FC<{ member: Member }> = ({ member }) => {
 
         <div className="border-t pt-4">
           <h4 className="text-sm font-semibold text-gray-700 mb-2">Favorite Service Experience</h4>
-          <p className="text-sm text-gray-600 italic leading-relaxed mb-2">"{displayText}"</p>
-          {shouldTruncate && (
+          <p ref={textRef}
+            className={`text-sm text-gray-600 italic leading-tight mb-1 transition-all ${
+              isExpanded ? '' : 'line-clamp-3'
+            }`}
+          >
+            "{member.favoriteService}"
+          </p>
+
+          {isOverflowing && (
             <button
               onClick={(e) => {
-                e.stopPropagation(); // ⛔ prevent parent click
+                e.stopPropagation();
                 setIsExpanded(!isExpanded);
               }}
-              className="text-xs text-cornell-red hover:text-red-800 font-medium transition-colors duration-200"
+              className="text-xs text-cornell-red hover:text-red-800 font-medium"
             >
               {isExpanded ? 'See Less' : 'See More'}
             </button>
@@ -168,7 +181,7 @@ const AboutUsPage: React.FC<AboutUsProps> = ({ currentUser }) => {
             <div className="w-24 h-1 bg-cornell-red mx-auto mb-8"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {teamMembers.map((member) => (
               <div
                 key={member.id}

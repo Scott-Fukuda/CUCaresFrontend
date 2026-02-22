@@ -235,8 +235,7 @@ export interface Member {
   name: string;
   picture: string;
   hometown: string;
-  major: string;
-  class: string;
+  study: string;
   campusOrgs: string[];
   favoriteService: string;
   role: string;
