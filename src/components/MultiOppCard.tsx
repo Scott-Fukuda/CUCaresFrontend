@@ -141,7 +141,7 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
             >
               <ErrorIcon style={{ color: '#D9534F', minWidth: '24px', minHeight: '24px' }} />
               <p>
-                Due to unforseen circumstances, the weekend volunteer times are canceled until further notice. Sorry for the inconvenience!
+                Due to unforeseen circumstances, the Salvation Army has canceled weekend hot meal service. We apologize for the inconvenience!
               </p>
             </div>
           </div>
