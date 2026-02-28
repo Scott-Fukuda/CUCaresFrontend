@@ -626,7 +626,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
           )}
           <button
             onClick={handleButtonClick}
-            disabled={!isUserSignedUp && !canSignUp}
+            disabled={(!isUserSignedUp && !canSignUp) || opportunity.name == 'Soup Kitchen'}
             className={`mt-6 inline-flex items-center justify-center rounded-lg px-5 py-3 text-base font-semibold shadow-lg transition-colors ${isUserSignedUp
               ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
               : canSignUp
