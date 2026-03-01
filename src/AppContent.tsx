@@ -154,7 +154,7 @@ const AppContent: React.FC = () => {
   const [signups, setSignups] = useState<SignUp[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [allOpps, setAllOpps] = useState<(Opportunity | MultiOpp)[]>([]);
-  const [allTimeOpps, setAllTimeOpps] = useState<(Opportunity)[]>([]);
+  const [allTimeMyOpps, setAllTimeMyOpps] = useState<(Opportunity)[]>([]);
 
 
   const { data: opportunities = [], isLoading: oppsLoading } = useQuery({
@@ -228,7 +228,7 @@ const AppContent: React.FC = () => {
           setOrganizations(orgsData);
           setAllOpps([...oppsData, ...mulitoppsData]);
           setSignups([]); // Initialize empty signups - we'll track this locally
-          setAllTimeOpps([]);
+          setAllTimeMyOpps([]);
 
           // Update currentUser with full data if they exist in the usersData
           if (currentUser) {
@@ -1010,8 +1010,8 @@ const AppContent: React.FC = () => {
           setCurrentUser={setCurrentUser}
           setAllOpps={setAllOpps}
           allOpps={allOpps}
-          allTimeOpps={allTimeOpps}
-          setAllTimeOpps={setAllTimeOpps}
+          allTimeMyOpps={allTimeMyOpps}
+          setAllTimeMyOpps={setAllTimeMyOpps}
           isLoading={isLoading}
           appError={appError}
           pendingRequestCount={pendingRequestCount}

@@ -10,7 +10,7 @@ import {
   FriendshipsResponse,
 } from '../types';
 import BadgeIcon from '../components/BadgeIcon';
-import { getProfilePictureUrl, updateUser } from '../api';
+import { getProfilePictureUrl, updateUser, getUserAllTimeOpps } from '../api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase-config';
@@ -28,8 +28,10 @@ interface ProfilePageProps {
   handleRemoveFriend: (friendId: number) => void;
   friendshipsData: FriendshipsResponse | null;
   checkFriendshipStatus: (otherUserId: number) => Promise<FriendshipStatus>;
-  getFriendsForUser: (userId: number) => Promise<User[]>; // New async function
-  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>; // Add this prop
+  getFriendsForUser: (userId: number) => Promise<User[]>;
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
+  allTimeMyOpps: Opportunity[];
+  setAllTimeMyOpps: React.Dispatch<React.SetStateAction<Opportunity[]>>;
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = (props) => {
@@ -51,6 +53,8 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
     checkFriendshipStatus,
     getFriendsForUser,
     setCurrentUser,
+    allTimeMyOpps,
+    setAllTimeMyOpps,
   } = props;
   const user = id ? students.find((s) => s.id === parseInt(id!)) : currentUser;
   if (!user) return <p>User not found</p>;
@@ -135,6 +139,14 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
 
     loadFriends();
   }, [user.id, getFriendsForUser]);
+
+  // Load allTimeMyOpps when viewing the current user's own profile
+  useEffect(() => {
+    if (!isCurrentUser || allTimeMyOpps.length > 0) return;
+    getUserAllTimeOpps(currentUser.id)
+      .then(setAllTimeMyOpps)
+      .catch((err) => console.error('Error loading allTimeMyOpps:', err));
+  }, [isCurrentUser, currentUser.id]);
 
   const handleInterestChange = (interest: string) => {
     //console.log('🎯 ProfilePage: handleInterestChange called', { interest, isCurrentUser });

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getServiceJournal, downloadServiceJournalCSV, getOpportunities } from "../api";
+import { getServiceJournal, downloadServiceJournalCSV, getUserAllTimeOpps } from "../api";
 import { auth } from "../firebase-config";
 import { User, Organization, Opportunity } from "../types";
 import PastAttendedOpportunities from "../components/PastAttendedOpportunities";
@@ -17,11 +17,11 @@ type ServiceJournalEntry = {
 interface ServiceJournalProps {
   currentUser: User;
   allOrgs: Organization[];
-  allTimeOpps: Opportunity[];
-  setAllTimeOpps: React.Dispatch<React.SetStateAction<Opportunity[] | []>>;
+  allTimeMyOpps: Opportunity[];
+  setAllTimeMyOpps: React.Dispatch<React.SetStateAction<Opportunity[]>>;
 }
 
-const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, allTimeOpps, setAllTimeOpps }) => {
+const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, allTimeMyOpps, setAllTimeMyOpps }) => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const [opportunities, setOpportunities] = useState<ServiceJournalEntry[]>([]);
@@ -41,6 +41,15 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
     };
     fetchToken();
   }, []);
+
+  // Load allTimeMyOpps if not already populated (e.g. direct navigation to this page)
+  useEffect(() => {
+    if (allTimeMyOpps.length === 0) {
+      getUserAllTimeOpps(currentUser.id)
+        .then(setAllTimeMyOpps)
+        .catch((err) => console.error('Error loading allTimeMyOpps:', err));
+    }
+  }, [currentUser.id]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,12 +71,6 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
           return;
         }
 
-        // Fetch allTimeOpps if not already loaded
-        if (allTimeOpps.length === 0) {
-          const allOppsData = await getOpportunities();
-          setAllTimeOpps(allOppsData);
-        }
-
         // Fetch service journal data
         const serviceJournalData = await getServiceJournal(userId, token);
 
@@ -81,7 +84,7 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
     };
 
     fetchData();
-  }, [userId, allTimeOpps.length, setAllTimeOpps]);
+  }, [userId]);
 
   // Derived statistics
   const totalHours = opportunities.reduce((sum, opp) => sum + opp.duration / 60, 0);
@@ -160,14 +163,15 @@ const ServiceJournal: React.FC<ServiceJournalProps> = ({ currentUser, allOrgs, a
       </div>
 
       {/* Opportunity Lookup */}
-      <OppLookup allTimeOpps={allTimeOpps} />
+      <OppLookup allTimeMyOpps={allTimeMyOpps} />
 
       {/* Past Opportunities Component */}
       <PastAttendedOpportunities
-        opportunities={allTimeOpps}
+        opportunities={allTimeMyOpps}
         currentUser={currentUser}
         allOrgs={allOrgs}
         loading={loading}
+        userSpecific={true}
       />
     </div>
 

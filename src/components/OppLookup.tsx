@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Opportunity } from '../types';
 
 interface OppLookupProps {
-    allTimeOpps: Opportunity[];
+    allTimeMyOpps: Opportunity[];
 }
 
-const OppLookup: React.FC<OppLookupProps> = ({ allTimeOpps }) => {
+const OppLookup: React.FC<OppLookupProps> = ({ allTimeMyOpps }) => {
     const [oppId, setOppId] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -18,7 +18,7 @@ const OppLookup: React.FC<OppLookupProps> = ({ allTimeOpps }) => {
             return;
         }
 
-        const opportunity = allTimeOpps.find(opp => opp.id === id);
+        const opportunity = allTimeMyOpps.find(opp => opp.id === id);
         if (opportunity) {
             setError('');
             navigate(`/opportunity/${id}`);

@@ -1436,6 +1436,79 @@ export const getRides = async (carpoolId: number): Promise<Ride[]> => {
 }
 
 
+// Fetch all opportunities for a user (registered or hosted, past and present)
+export const getUserAllTimeOpps = async (userId: number): Promise<Opportunity[]> => {
+  try {
+    const response = await authenticatedRequest(`/service-journal/opps/${userId}`);
+    const opps = Array.isArray(response) ? response : (response.opportunities || []);
+
+    return opps.map((opp: any) => {
+      const dateObj = new Date(opp.date);
+      const easternDateStr = dateObj.toLocaleString('en-US', {
+        timeZone: 'America/New_York',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      });
+      const [datePart, timePart] = easternDateStr.split(', ');
+      const [month, day, year] = datePart.split('/');
+      const dateOnly = `${year}-${month}-${day}`;
+      const timeOnly = timePart;
+
+      const transformedInvolvedUsers = (opp.involved_users || []).map((u: any) => ({
+        id: u.id,
+        name: u.user || 'Unknown User',
+        email: u.email || '',
+        phone: u.phone || '',
+        profile_image: u.profile_image,
+        interests: [],
+        friendIds: [],
+        organizationIds: [],
+        attended: u.attended,
+        registered: u.registered,
+      }));
+
+      return {
+        id: opp.id,
+        name: opp.name,
+        nonprofit: opp.nonprofit || null,
+        description: opp.description || '',
+        date: dateOnly,
+        time: timeOnly,
+        duration: opp.duration || 0,
+        total_slots: opp.total_slots || 10,
+        imageUrl: opp.image_url || opp.image || opp.imageUrl || '',
+        points: opp.duration || 0,
+        isPrivate: false,
+        host_id: opp.host_user_id || opp.host_org_id,
+        host_org_id: opp.host_org_id,
+        host_org_name: opp.host_org_name,
+        involved_users: transformedInvolvedUsers,
+        address: opp.address || '',
+        approved: opp.approved !== undefined ? opp.approved : true,
+        attendance_marked: opp.attendance_marked !== undefined ? opp.attendance_marked : false,
+        visibility: opp.visibility || [],
+        comments: opp.comments || [],
+        qualifications: opp.qualifications || [],
+        causes: opp.causes || [],
+        tags: opp.tags || [],
+        redirect_url: opp.redirect_url || null,
+        multiopp: opp.multiopp || null,
+        multiopp_id: opp.multiopp_id || null,
+        allow_carpool: opp.allow_carpool,
+        carpool_id: opp.carpool_id !== undefined ? opp.carpool_id : null,
+      } as Opportunity;
+    });
+  } catch (error) {
+    console.error('Error fetching user all-time opps:', error);
+    throw error;
+  }
+};
+
 // Fetch the user's service journal data (JSON)
 export async function getServiceJournal(userId: string, token: string) {
   try {

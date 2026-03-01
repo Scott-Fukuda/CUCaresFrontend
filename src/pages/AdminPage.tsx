@@ -3,6 +3,7 @@ import { Opportunity, Organization, User } from '../types';
 import * as api from '../api';
 import { auth } from '../firebase-config';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 interface AdminPageProps {
   currentUser: User;
@@ -22,6 +23,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
   allUsers,
 }) => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   // Helper function to get user name by ID
   const getUserNameById = (userId?: number): string => {
     if (!userId) return 'Unknown';
@@ -444,6 +446,17 @@ const promptAndDownloadCsv = async () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Quick Links */}
+      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Links</h2>
+        <button
+          onClick={() => navigate('/all-opportunities')}
+          className="bg-cornell-red text-white px-5 py-2 rounded-lg hover:bg-red-800 transition-colors font-medium"
+        >
+          View All Opportunities
+        </button>
       </div>
 
       {/* Security Token Section */}
