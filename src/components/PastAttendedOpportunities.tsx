@@ -8,6 +8,7 @@ interface PastAttendedOpportunitiesProps {
   currentUser: User;
   allOrgs: Organization[];
   loading?: boolean;
+  userSpecific?: boolean; // when true, all opps already belong to the user — skip involved_users check
 }
 
 const PastAttendedOpportunities: React.FC<PastAttendedOpportunitiesProps> = ({
@@ -15,6 +16,7 @@ const PastAttendedOpportunities: React.FC<PastAttendedOpportunitiesProps> = ({
   currentUser,
   allOrgs,
   loading = false,
+  userSpecific = false,
 }) => {
 
   const pastOpportunities = useMemo(() => {
@@ -23,17 +25,17 @@ const PastAttendedOpportunities: React.FC<PastAttendedOpportunitiesProps> = ({
       return [];
     }
 
-    // For now, let's try a simpler approach - show all past opportunities
-    // and let the user see what data we have
     return opportunities.filter((opp) => {
       const oppDateTime = new Date(`${opp.date}T${opp.time}`);
       const isPast = oppDateTime < now;
+
+      if (userSpecific) return isPast;
 
       // Check if user is involved in any way
       const userInvolved = opp.involved_users?.some((u) => u.id === currentUser.id);
       return isPast && userInvolved;
     });
-  }, [opportunities, currentUser.id]);
+  }, [opportunities, currentUser.id, userSpecific]);
 
   return (
     <div className="mt-8">

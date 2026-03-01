@@ -53,8 +53,8 @@ interface AppRouterProps {
     multiopp: MultiOpp[];
     allOpps: (Opportunity | MultiOpp)[];
     setAllOpps: React.Dispatch<React.SetStateAction<(Opportunity | MultiOpp)[] | []>>;
-    allTimeOpps: (Opportunity)[];
-    setAllTimeOpps: React.Dispatch<React.SetStateAction<(Opportunity)[] | []>>;
+    allTimeMyOpps: (Opportunity)[];
+    setAllTimeMyOpps: React.Dispatch<React.SetStateAction<(Opportunity)[] | []>>;
     signups: SignUp[];
     organizations: Organization[];
     setOrganizations: React.Dispatch<React.SetStateAction<Organization[] | []>>;
@@ -104,8 +104,8 @@ const AppRouter: React.FC<AppRouterProps> = ({
     multiopp,
     allOpps,
     setAllOpps,
-    allTimeOpps,
-    setAllTimeOpps,
+    allTimeMyOpps,
+    setAllTimeMyOpps,
     signups,
     organizations,
     setOrganizations,
@@ -166,8 +166,8 @@ const AppRouter: React.FC<AppRouterProps> = ({
             <ServiceJournal
                 currentUser={currentUser}
                 allOrgs={organizations}
-                allTimeOpps={allTimeOpps}
-                setAllTimeOpps={setAllTimeOpps}
+                allTimeMyOpps={allTimeMyOpps}
+                setAllTimeMyOpps={setAllTimeMyOpps}
             />
         );
     };
@@ -313,7 +313,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 handleUnSignUp={handleUnSignUp}
                                 allOrgs={organizations}
                                 currentUserSignupsSet={currentUserSignupsSet}
-                                allTimeOpps={allTimeOpps}
+                                allTimeMyOpps={allTimeMyOpps}
                             />
                         }
                     />
@@ -374,6 +374,8 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 checkFriendshipStatus={checkFriendshipStatus}
                                 getFriendsForUser={getFriendsForUser}
                                 setCurrentUser={setCurrentUser}
+                                allTimeMyOpps={allTimeMyOpps}
+                                setAllTimeMyOpps={setAllTimeMyOpps}
                             />
                         }
                     />
