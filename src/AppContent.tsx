@@ -341,7 +341,8 @@ const AppContent: React.FC = () => {
     academicLevel: string,
     major: string,
     birthday: string,
-    car_seats: number
+    car_seats: number,
+    heard_about?: string
   ) => {
     setAuthError(null);
 
@@ -355,6 +356,8 @@ const AppContent: React.FC = () => {
 
     const email = firebaseUser.email;
 
+    const photoURL = firebaseUser.photoURL;
+
     setIsLoading(true);
     try {
       const newUser: User = {
@@ -366,7 +369,7 @@ const AppContent: React.FC = () => {
         points: 0,
         friendIds: [],
         organizationIds: [],
-        profile_image: '',
+        profile_image: photoURL || '',
         admin: false, // Default to false for new users
         gender: gender || undefined,
         graduationYear,
@@ -375,7 +378,8 @@ const AppContent: React.FC = () => {
         birthday,
         car_seats, // Add car_seats from registration
         registration_date: api.formatRegistrationDate(), // Format: YYYY-MM-DDTHH:MM:SS
-        carpool_waiver_signed: false
+        carpool_waiver_signed: false,
+        heard_about
       };
 
       // API takes `name`, so we combine first and last, and include phone
@@ -383,6 +387,7 @@ const AppContent: React.FC = () => {
         name: `${firstName} ${lastName}`,
         email,
         phone,
+        profile_image: photoURL,
         gender: gender || null,
         graduation_year: graduationYear,
         academic_level: academicLevel,
@@ -390,7 +395,8 @@ const AppContent: React.FC = () => {
         birthday,
         car_seats, // Include car_seats in the API call
         registration_date: api.formatRegistrationDate(), // Format: YYYY-MM-DDTHH:MM:SS
-        carpool_waiver_signed: false
+        carpool_waiver_signed: false,
+        heard_about: heard_about
       });
 
       const finalNewUser = { ...newUser, ...responseUser };

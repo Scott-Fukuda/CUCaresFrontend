@@ -296,7 +296,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
               <div key={student.id} className="opportunity-card__student-avatar-container">
                 <img
                   className={`opportunity-card__student-avatar ${currentUser ? '' : 'restricted'}`}
-                  src={getProfilePictureUrl(student.profile_image)}
+                  src={getProfilePictureUrl(student.profile_image, student.photoURL)}
                   alt={student.name}
                   onClick={(e) => {
                     e.stopPropagation();
