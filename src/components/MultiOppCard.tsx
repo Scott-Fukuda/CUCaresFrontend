@@ -275,7 +275,7 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
                       {participants.slice(0, 4).map((u) => (
                         <img
                           key={u.id}
-                          src={getProfilePictureUrl(u.profile_image || null)}
+                          src={getProfilePictureUrl(u.profile_image || null, u.photoURL)}
                           alt={u.name}
                           title={u.name}
                           className="w-6 h-6 rounded-full border-2 border-white object-cover"

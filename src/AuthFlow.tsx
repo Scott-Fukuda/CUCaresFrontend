@@ -12,7 +12,7 @@ import { Opportunity, MultiOpp, Organization, SignUp } from './types';
 interface AuthFlowProps {
   handleGoogleSignIn: () => void;
   isLoading: boolean;
-  handleRegister: (firstName: string, lastName: string, phone: string, gender: string, graduationYear: string, academicLevel: string, major: string, birthday: string, car_seats: number) => void;
+  handleRegister: (firstName: string, lastName: string, phone: string, gender: string, graduationYear: string, academicLevel: string, major: string, birthday: string, car_seats: number, heard_about?: string) => void;
   authError: string | null;
   setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
   opportunities: Opportunity[];

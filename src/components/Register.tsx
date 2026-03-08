@@ -12,7 +12,8 @@ interface RegisterProps {
     academicLevel: string,
     major: string,
     birthday: string,
-    car_seats: number
+    car_seats: number,
+    heard_about?: string
   ) => void;
   onBackToLogin: () => void;
   error: string | null;
@@ -30,6 +31,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
   const [birthday, setBirthday] = useState('');
   const [hasCar, setHasCar] = useState<string>('');
   const [carSeats, setCarSeats] = useState<number>(0);
+  const [heardAbout, setHeardAbout] = useState<string>("");
 
   const firebaseUser = auth.currentUser;
   const userEmail = firebaseUser?.email || '';
@@ -59,7 +61,8 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
       academicLevel.trim(),
       major.trim(),
       birthday.trim(),
-      finalCarSeats
+      finalCarSeats,
+      heardAbout || undefined
     );
   };
 
@@ -105,6 +108,22 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
           pattern="[0-9]{10,}"
           title="Please enter a valid phone number (10+ digits)"
         />
+
+        <label>How did you hear about CampusCares?
+          <span className="optional">(optional)</span>
+          </label>
+        <select
+          value={heardAbout}
+          onChange={(e) => setHeardAbout(e.target.value)}
+        >
+          <option value=""> </option>
+          <option value="friend">Friend</option>
+          <option value="organization">Student Organization</option>
+          <option value="social_media">Social Media</option>
+          <option value="flyer">Flyer / Poster</option>
+          <option value="event">Campus Event</option>
+          <option value="other">Other</option>
+        </select>
 
         {/* <select
           value={gender}

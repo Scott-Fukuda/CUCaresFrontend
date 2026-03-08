@@ -234,7 +234,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                             }}
                           >
                             <img
-                              src={getProfilePictureUrl(user.profile_image)}
+                              src={getProfilePictureUrl(user.profile_image, user.photoURL)}
                               alt=""
                               className="h-9 w-9 rounded-full object-cover"
                             />

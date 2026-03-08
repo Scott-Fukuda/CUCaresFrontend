@@ -155,7 +155,7 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
                                                             key={rider.id}
                                                         >
                                                             <div className="cp-card-slot">
-                                                                <img src={getProfilePictureUrl(rider.profile_image)} alt={`${rider.name} pfp`} />
+                                                                <img src={getProfilePictureUrl(rider.profile_image, rider.photoURL)} alt={`${rider.name} pfp`} />
                                                             </div>
                                                         </a>
                                                     )
