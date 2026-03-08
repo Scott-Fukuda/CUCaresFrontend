@@ -284,4 +284,19 @@ export const ourTeam: Member[] = [
       "My favorite community service experience was volunteering at my town's public library. Over the summer, I helped organize events and worked with children on a variety of activities. I particularly enjoyed playing games with them, such as chess, checkers, ping pong. I was even able to improve my own arts and crafts skills while assisting with creative sessions. Volunteering at my town's library was an especially rewarding experience because it gave me the opportunity to engage with the youth in my community. Witnessing their passion and enthusiasm for learning new skills made me optimistic about the bright future of my town!",
     role: 'Chief Strategy Officer',
   },
+  {
+    id: 423,
+    name: 'Juwon Byeon',
+    picture: './team_pic/juwon.png',
+    hometown: 'South Korea / USA',
+    study: 'CS \'29',
+    campusOrgs: [
+      'Cru',
+      'WICC',
+      'Society of Women Engineers',
+    ],
+    favoriteService:
+      "Volunteering to help paint the walls of an old elementary school! It was very heartwarming to see the little cuties' faces light up when the walls were being filled with their wanted drawings 🥰",
+    role: 'Full Stack & Mobile App Developer',
+  },
 ];
