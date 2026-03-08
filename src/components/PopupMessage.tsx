@@ -6,6 +6,8 @@ interface PopupMessageProps {
   title: string;
   message: string;
   type?: 'success' | 'info' | 'warning' | 'error';
+  opportunityId?: number
+  onInvite?: (opportunityId: number) => void
 }
 
 const PopupMessage: React.FC<PopupMessageProps> = ({
@@ -14,6 +16,8 @@ const PopupMessage: React.FC<PopupMessageProps> = ({
   title,
   message,
   type = 'info',
+  opportunityId,
+  onInvite
 }) => {
   if (!isOpen) return null;
 
@@ -23,6 +27,7 @@ const PopupMessage: React.FC<PopupMessageProps> = ({
         return {
           bgColor: 'bg-green-50',
           borderColor: 'border-green-200',
+          hoverColor: 'hover:border-green-100',
           textColor: 'text-green-800',
           iconColor: 'text-green-600',
           icon: (
@@ -100,14 +105,30 @@ const PopupMessage: React.FC<PopupMessageProps> = ({
         <div className="flex items-start">
           <div className={`flex-shrink-0 ${styles.iconColor}`}>{styles.icon}</div>
           <div className="ml-3 w-full">
-            <h3 className={`text-lg font-medium ${styles.textColor}`}>{title}</h3>
+            <h3 className={`text-lg font-medium ${styles.textColor} text-center`}>{title}</h3>
             <div className="mt-2">
-              <p className={`text-sm ${styles.textColor}`}>{message}</p>
+              <p className={`text-sm ${styles.textColor} whitespace-pre-line text-center`}>{message}</p>
             </div>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-col items-center gap-4">
+                {type === 'success' && opportunityId && onInvite && (
+                  <button
+                    onClick={() => {
+                      onInvite(opportunityId);
+                    }}
+                    className={`px-4 py-2 font-medium text-sm rounded-md
+                      bg-green-50 ${styles.textColor} border ${styles.borderColor} hover:bg-green-100
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500
+                      transition-all duration-200`}
+                  >
+                    Invite Friends!
+                  </button>
+                )}
               <button
                 onClick={onClose}
-                className={`w-full inline-flex justify-center px-4 py-2 text-sm font-medium rounded-md ${styles.textColor} ${styles.bgColor} border ${styles.borderColor} hover:bg-opacity-75 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors`}
+                className={`w-full inline-flex justify-center px-4 py-2 text-sm font-medium rounded-md
+                  bg-green-50 ${styles.textColor} border ${styles.borderColor} hover:bg-green-100
+                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                  transition-all duration-200`}
               >
                 Got it
               </button>

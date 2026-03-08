@@ -186,6 +186,7 @@ const AppContent: React.FC = () => {
     title: string;
     message: string;
     type: 'success' | 'info' | 'warning' | 'error';
+    opportunityId?: number;
   }>({
     isOpen: false,
     title: '',
@@ -421,13 +422,15 @@ const AppContent: React.FC = () => {
   const showPopup = (
     title: string,
     message: string,
-    type: 'success' | 'info' | 'warning' | 'error' = 'info'
+    type: 'success' | 'info' | 'warning' | 'error' = 'info',
+    opportunityId?: number
   ) => {
     setPopupMessage({
       isOpen: true,
       title,
       message,
       type,
+      opportunityId
     });
   };
 
@@ -505,8 +508,9 @@ const AppContent: React.FC = () => {
           // Show success popup
           showPopup(
             'Thank you for signing up!',
-            'Thank you for signing up for this opportunity. The event host may reach out to you with further details (i.e. ride coordination). Otherwise, please arrive at the listed address at the designated time. Thank you for serving!',
-            'success'
+            'Thank you for signing up for this opportunity. The event host may reach out to you with further details (i.e. ride coordination). Otherwise, please arrive at the listed address at the designated time. Thank you for serving!\n\nInvite friends to serve with you!',
+            'success',
+            opportunityId
           );
         }
 
@@ -591,6 +595,28 @@ const AppContent: React.FC = () => {
 
     return userSignups;
   }, [currentUser, opportunities, signups]);
+
+  const shareOpportunity = async (opportunityId: number) => {
+    const inviteLink = `${window.location.origin}/opportunities/${opportunityId}`;
+    const message =
+      `Join me in volunteering with CampusCares!\n\nI just signed up for this opportunity and thought you might want to come serve with me.\n\nSign up here:
+      ${inviteLink}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Serve with me on CampusCares!",
+          text: message,
+          // url: inviteLink
+        });
+      } else {
+        await navigator.clipboard.writeText(inviteLink);
+        alert("Invite link copied!");
+      }
+    } catch (err) {
+      console.error("Share failed:", err);
+    }
+  };
 
   // New friend management system using backend endpoints
 
@@ -1075,6 +1101,8 @@ const AppContent: React.FC = () => {
         title={popupMessage.title}
         message={popupMessage.message}
         type={popupMessage.type}
+        opportunityId={popupMessage.opportunityId}
+        onInvite={shareOpportunity}
       />
     </>
   );
