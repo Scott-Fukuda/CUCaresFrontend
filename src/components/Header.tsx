@@ -116,7 +116,7 @@ const Header: React.FC<HeaderProps> = (props) => {
               </p>
             </div>
             <img
-              src={getProfilePictureUrl(user.profile_image)}
+              src={getProfilePictureUrl(user.profile_image, user.photoURL)}
               alt={user.name}
               className="h-10 w-10 rounded-full object-cover cursor-pointer"
               onClick={() => navigate(`/profile/${user.id}`)}

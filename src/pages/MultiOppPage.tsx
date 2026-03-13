@@ -685,7 +685,7 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
                                 className="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-full"
                               >
                                 <img
-                                  src={getProfilePictureUrl(p.profile_image)}
+                                  src={getProfilePictureUrl(p.profile_image, p.photoURL)}
                                   alt={p.name}
                                   className="w-6 h-6 rounded-full border border-gray-300 object-cover"
                                 />

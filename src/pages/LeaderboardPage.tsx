@@ -231,7 +231,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
             {rank}
           </span>
           <img
-            src={getProfilePictureUrl(user.profile_image)}
+            src={getProfilePictureUrl(user.profile_image, user.photoURL)}
             alt={user.name}
             className="h-10 w-10 rounded-full object-cover cursor-pointer flex-shrink-0"
             onClick={() => navigate(`/profile/${user.id}`)}

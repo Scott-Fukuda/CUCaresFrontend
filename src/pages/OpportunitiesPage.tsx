@@ -190,7 +190,6 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           </a>
         </div>
       </div> */}
-
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>

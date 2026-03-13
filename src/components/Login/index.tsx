@@ -102,7 +102,8 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
                   className="login-button login-button--test"
                   onClick={() => handleLoginTest(i + 1)}
                 >
-                  Sign in with test user {i + 1}
+                  <p>Sign in with test user {i + 1}</p>
+                  <p style={{ color: 'darkblue' }}>{i % 2 == 1 ? '(admin)' : ''}</p>
                 </button>
               )}
             </div>

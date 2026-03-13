@@ -18,6 +18,7 @@ import {
 export interface FirebaseUser {
   email: string;
   displayName: string;
+  photoURL: string;
   uid: string;
   getIdToken: () => Promise<string>;
 }
@@ -80,6 +81,7 @@ const mapFirebaseUser = (user: FirebaseAuthUser | null): FirebaseUser | null => 
   return {
     email: user.email || '',
     displayName: user.displayName || '',
+    photoURL: user.photoURL || '',
     uid: user.uid,
     getIdToken: () => user.getIdToken(),
   };
@@ -121,10 +123,14 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
+    console.log("Firebase user:", user);
+    console.log("photoURL:", user.photoURL);
+
     // Convert Firebase User to our FirebaseUser interface
     const firebaseUser: FirebaseUser = {
       email: user.email || '',
       displayName: user.displayName || '',
+      photoURL: user.photoURL || '',
       uid: user.uid,
       getIdToken: () => user.getIdToken(),
     };

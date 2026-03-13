@@ -37,6 +37,7 @@ import CarpoolPopup from './components/CarpoolPopup';
 import CarpoolPage from './pages/CarpoolPage';
 import HomePage from './pages/HomePage';
 import ServiceJournal from './pages/ServiceJournal';
+import AllOpportunitiesPage from './pages/AllOpportunitiesPage';
 import { useState } from "react";
 
 interface AppRouterProps {
@@ -298,6 +299,14 @@ const AppRouter: React.FC<AppRouterProps> = ({
                     <Route
                         path="/admin"
                         element={<AdminRoute />}
+                    />
+                    <Route
+                        path="/all-opportunities"
+                        element={
+                            currentUser.admin
+                                ? <AllOpportunitiesPage />
+                                : <Navigate to="/opportunities" replace />
+                        }
                     />
 
                     {/* Opportunity Detail */}

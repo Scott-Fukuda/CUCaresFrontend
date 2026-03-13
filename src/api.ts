@@ -4,9 +4,12 @@ import { canUnregisterFromOpportunity } from './utils/timeUtils';
 
 // Helper function to get profile picture URL
 // Returns a generic silhouette when no profile image is available
-export const getProfilePictureUrl = (profile_image?: string | null, userId?: number): string => {
+export const getProfilePictureUrl = (profile_image?: string | null, google_photo?: string | null): string => {
   if (profile_image) {
     return profile_image;
+  }
+  if (google_photo) {
+    return google_photo;
   }
   // Return a generic silhouette SVG
   return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236B7280'%3E%3Ccircle cx='12' cy='12' r='12' fill='white'/%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
@@ -136,7 +139,8 @@ export const getUsers = async (): Promise<User[]> => {
     phone: user.phone,
     car_seats: user.car_seats || 0,
     bio: user.bio,
-    carpool_waiver_signed: user.carpool_waiver_signed
+    carpool_waiver_signed: user.carpool_waiver_signed,
+    heard_about: user.heard_about || ''
   }));
 };
 
@@ -169,6 +173,7 @@ export const getUsersMinimal = async (): Promise<User[]> => {
     major: null,
     birthday: null,
     registration_date: null,
+    heard_about: null
   }));
 };
 
@@ -228,7 +233,8 @@ export const getUser = async (id: number): Promise<User> => {
     registration_date: response.registration_date,
     phone: response.phone,
     car_seats: response.car_seats || 0,
-    carpool_waiver_signed: response.carpool_waiver_signed || false
+    carpool_waiver_signed: response.carpool_waiver_signed || false,
+    heard_about: response.heard_about || ''
   };
 };
 export const updateUser = (id: number, data: object): Promise<User> => {
@@ -488,6 +494,7 @@ export const getAcceptedFriendships = async (userId: number): Promise<User[]> =>
         registration_date: '', // Not provided in friendship response
         registered: false, // Not provided in friendship response
         attended: false, // Not provided in friendship response
+        heard_about: '', // Not provided in friendship response
       }));
     }
     console.warn('Unexpected friends response structure:', result);
@@ -889,6 +896,7 @@ export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
           bio: user.bio,
           registered: involvedUser.registered || false,
           attended: involvedUser.attended || false,
+          heard_about: involvedUser.heard_about || ''
         };
       }) : [];
 
