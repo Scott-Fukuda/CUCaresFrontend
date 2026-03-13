@@ -384,7 +384,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
         <button
           onClick={!eventStarted ? handleButtonClick : undefined}
           disabled={
-            eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister) || (opportunity.name == 'Soup Kitchen')
+            eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister)
           }
           className={`opportunity-card__button ${eventStarted
             ? 'opportunity-card__button--started'
