@@ -37,7 +37,6 @@ interface ProfilePageProps {
 const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const navigate = useNavigate();
   const { id } = useParams();
-
   const {
     students,
     signups,
