@@ -195,7 +195,7 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
               const hoursUntilEvent = unregistrationInfo?.hoursUntilEvent ?? 0;
 
               const buttonDisabled =
-                eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister) || (multiopp.name == 'Soup Kitchen');
+                eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister);
               const buttonText = eventStarted
                 ? 'Event Already Started'
                 : isUserSignedUp
