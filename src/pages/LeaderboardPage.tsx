@@ -1,16 +1,16 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   User,
   Organization,
   SignUp,
   Opportunity,
-  OrganizationType,
   organizationTypes,
   FriendshipStatus,
   FriendshipsResponse,
 } from '../types';
 import { getProfilePictureUrl, getMonthlyPoints } from '../api';
 import { useNavigate } from 'react-router-dom';
+
 
 interface LeaderboardPageProps {
   allUsers: User[];
@@ -23,13 +23,16 @@ interface LeaderboardPageProps {
   handleRejectFriendRequest: (otherUserId: number) => void;
   checkFriendshipStatus: (otherUserId: number) => Promise<FriendshipStatus>;
   friendshipsData: FriendshipsResponse | null;
-  joinOrg: (orgId: number) => void; // Add joinOrg prop
-  leaveOrg: (orgId: number) => void; // Add leaveOrg prop
+  joinOrg: (orgId: number) => void;
+  leaveOrg: (orgId: number) => void;
 }
 
-type LeaderboardTab = 'Individuals' | 'All Organizations' | OrganizationType;
 
-const TABS: LeaderboardTab[] = ['Individuals', 'All Organizations', ...organizationTypes];
+type LeaderboardTab = 'Friends' | 'All Individuals' | 'All Organizations';
+
+
+const TABS: LeaderboardTab[] = ['Friends', 'All Individuals', 'All Organizations'];
+
 
 const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
   allUsers,
@@ -46,7 +49,8 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
   leaveOrg,
 }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<LeaderboardTab>('Individuals');
+  const [activeTab, setActiveTab] = useState<LeaderboardTab>('Friends');
+  const [orgFilter, setOrgFilter] = useState<string>('All');
   const [friendshipStatuses, setFriendshipStatuses] = useState<Map<number, FriendshipStatus>>(
     new Map()
   );
@@ -54,10 +58,12 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
   const [monthlyPointsData, setMonthlyPointsData] = useState<Map<number, number>>(new Map());
   const [isLoadingMonthlyPoints, setIsLoadingMonthlyPoints] = useState(false);
 
+
   // Helper function to get the start date for monthly points
   const getMonthlyPointsStartDate = (): string => {
     const now = new Date();
     const oct1_2025 = new Date('2025-10-01T00:00:00');
+
 
     if (now < oct1_2025) {
       // Before Oct 1, 2025, use Sept 16, 2025
@@ -69,20 +75,24 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
     }
   };
 
+
   // Load monthly points data
   useEffect(() => {
     const loadMonthlyPoints = async () => {
       if (pointsView !== 'monthly') return;
+
 
       setIsLoadingMonthlyPoints(true);
       try {
         const startDate = getMonthlyPointsStartDate();
         const response = await getMonthlyPoints(startDate);
 
+
         const pointsMap = new Map<number, number>();
         response.users.forEach(({ id, points }) => {
           pointsMap.set(id, points);
         });
+
 
         setMonthlyPointsData(pointsMap);
       } catch (error) {
@@ -94,11 +104,14 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
       }
     };
 
+
     loadMonthlyPoints();
   }, [pointsView]);
 
+
   const userPointsMap = useMemo(() => {
     const map = new Map<number, number>();
+
 
     if (pointsView === 'monthly' && monthlyPointsData.size > 0) {
       // Use monthly points data
@@ -112,21 +125,23 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
       });
     }
 
+
     return map;
   }, [allUsers, pointsView, monthlyPointsData]);
+
 
   const individualLeaderboard = useMemo(() => {
     const sortedUsers = [...allUsers]
       .map((user) => ({ user, points: userPointsMap.get(user.id) || 0 }))
       .sort((a, b) => b.points - a.points);
 
+
     // Add rank information with tie handling
     return sortedUsers.map((item, index) => {
       let rank = index + 1;
 
-      // If this user has the same points as the previous user, use the same rank
+
       if (index > 0 && sortedUsers[index - 1].points === item.points) {
-        // Find the first user with the same points to get their rank
         for (let i = index - 1; i >= 0; i--) {
           if (sortedUsers[i].points === item.points) {
             rank = i + 1;
@@ -136,13 +151,15 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
         }
       }
 
+
       return { ...item, rank };
     });
   }, [allUsers, userPointsMap]);
 
+
   const groupLeaderboard = useMemo(() => {
-    const filteredOrgs =
-      activeTab === 'All Organizations' ? allOrgs : allOrgs.filter((g) => g.type === activeTab);
+    const filteredOrgs = orgFilter === 'All' ? allOrgs : allOrgs.filter((g) => g.type === orgFilter);
+
 
     const sortedOrgs = filteredOrgs
       .map((org) => {
@@ -157,13 +174,13 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
       })
       .sort((a, b) => b.points - a.points);
 
+
     // Add rank information with tie handling
     return sortedOrgs.map((item, index) => {
       let rank = index + 1;
 
-      // If this org has the same points as the previous org, use the same rank
+
       if (index > 0 && sortedOrgs[index - 1].points === item.points) {
-        // Find the first org with the same points to get their rank
         for (let i = index - 1; i >= 0; i--) {
           if (sortedOrgs[i].points === item.points) {
             rank = i + 1;
@@ -173,14 +190,17 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
         }
       }
 
+
       return { ...item, rank };
     });
-  }, [allOrgs, allUsers, userPointsMap, activeTab]);
+  }, [allOrgs, allUsers, userPointsMap, orgFilter]);
+
 
   // Load friendship statuses for all users
   useEffect(() => {
     const loadFriendshipStatuses = async () => {
       const statuses = new Map<number, FriendshipStatus>();
+
 
       for (const user of allUsers) {
         if (user.id !== currentUser.id) {
@@ -194,15 +214,18 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
         }
       }
 
+
       setFriendshipStatuses(statuses);
     };
+
 
     if (currentUser) {
       loadFriendshipStatuses();
     }
   }, [allUsers, currentUser, checkFriendshipStatus]);
 
-  const getFriendshipStatus = (userId: number): FriendshipStatus => {
+
+  const getFriendshipStatus = useCallback((userId: number): FriendshipStatus => {
     // Check friendshipsData first for immediate updates
     if (friendshipsData) {
       const userData = friendshipsData.users.find((user) => user.user_id === userId);
@@ -211,9 +234,38 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
       }
     }
 
+
     // Fall back to cached statuses
     return friendshipStatuses.get(userId) || 'add';
-  };
+  }, [friendshipsData, friendshipStatuses]);
+
+
+  const friendsLeaderboard = useMemo(() => {
+    const filteredUsers = individualLeaderboard.filter(
+      (item) => item.user.id === currentUser.id || getFriendshipStatus(item.user.id) === 'friends'
+    );
+
+
+    // Re-calculate ranks for the friends list specifically
+    return filteredUsers.map((item, index) => {
+      let rank = index + 1;
+
+
+      if (index > 0 && filteredUsers[index - 1].points === item.points) {
+        for (let i = index - 1; i >= 0; i--) {
+          if (filteredUsers[i].points === item.points) {
+            rank = i + 1;
+          } else {
+            break;
+          }
+        }
+      }
+
+
+      return { ...item, rank };
+    });
+  }, [individualLeaderboard, getFriendshipStatus, currentUser.id]);
+
 
   const UserRow = ({ user, points, rank }: { user: User; points: number; rank: number }) => {
     const isCurrentUser = user.id === currentUser.id;
@@ -221,6 +273,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
     const isFriend = friendshipStatus === 'friends';
     const requestSent = friendshipStatus === 'sent';
     const requestReceived = friendshipStatus === 'received';
+
 
     return (
       <li
@@ -243,6 +296,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
             {user.name}
           </span>
         </div>
+
 
         {/* Mobile layout: stacked vertically */}
         <div className="flex flex-col items-end gap-1 sm:hidden">
@@ -280,6 +334,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
             ))}
           <span className="font-bold text-cornell-red text-sm">{points} pts</span>
         </div>
+
 
         {/* Desktop layout: horizontal */}
         <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
@@ -321,10 +376,12 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
     );
   };
 
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold tracking-tight text-gray-900">Leaderboard</h2>
+
 
         {/* Points View Options */}
         <div className="flex items-center gap-4">
@@ -361,13 +418,20 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
         </div>
       </div>
 
+
       <div className="mb-6">
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
             {TABS.map((tab) => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => {
+                  setActiveTab(tab);
+                  // Reset org filter if switching away from orgs tab
+                  if (tab !== 'All Organizations') {
+                    setOrgFilter('All');
+                  }
+                }}
                 className={`${
                   activeTab === tab
                     ? 'border-cornell-red text-cornell-red'
@@ -381,7 +445,27 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
         </div>
       </div>
 
+
       <div className="bg-white rounded-2xl shadow-lg p-6">
+        {activeTab === 'All Organizations' && (
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-sm font-medium text-gray-700">Filter by type:</span>
+            <select
+              value={orgFilter}
+              onChange={(e) => setOrgFilter(e.target.value)}
+              className="text-sm border border-gray-300 rounded-md focus:ring-cornell-red focus:border-cornell-red py-1.5 pl-3 pr-8 text-gray-700 bg-white"
+            >
+              <option value="All">Organization Type</option>
+              {organizationTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+
         {isLoadingMonthlyPoints && pointsView === 'monthly' ? (
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center gap-3 text-gray-500">
@@ -389,7 +473,18 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
               <span className="text-lg">Loading monthly leaderboard...</span>
             </div>
           </div>
-        ) : activeTab === 'Individuals' ? (
+        ) : activeTab === 'Friends' ? (
+          <ul className="divide-y divide-gray-200">
+            {friendsLeaderboard.map(({ user, points, rank }) => (
+              <UserRow key={user.id} user={user} points={points} rank={rank} />
+            ))}
+            {friendsLeaderboard.length <= 1 && (
+              <div className="py-8 text-center text-gray-500">
+                You haven't added any friends to the leaderboard yet!
+              </div>
+            )}
+          </ul>
+        ) : activeTab === 'All Individuals' ? (
           <ul className="divide-y divide-gray-200">
             {individualLeaderboard.map(({ user, points, rank }) => (
               <UserRow key={user.id} user={user} points={points} rank={rank} />
@@ -400,6 +495,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
             {groupLeaderboard.map(({ org, points, memberCount, rank }) => {
               const isJoined = currentUser.organizationIds?.includes(org.id) || false;
               const isCurrentUserHost = org.host_user_id === currentUser.id;
+
 
               return (
                 <li key={org.id} className="flex items-center justify-between py-4">
@@ -420,8 +516,10 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
                     </div>
                   </div>
 
+
                   <div className="flex items-center gap-3">
                     <span className="font-bold text-lg text-cornell-red">{points} PTS</span>
+
 
                     {isCurrentUserHost ? (
                       <span className="text-xs bg-cornell-red/10 text-cornell-red px-2 py-1 rounded-full font-medium">
@@ -452,23 +550,30 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
                 </li>
               );
             })}
+            {groupLeaderboard.length === 0 && (
+              <div className="py-8 text-center text-gray-500">
+                No organizations found for this category.
+              </div>
+            )}
           </ul>
         )}
       </div>
       <p className="mt-6 text-xs text-gray-500 text-center">
-            Click here to see our{" "}
-            <a
-              href="/terms_of_service.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-gray-700"
-            >
-              Terms of Service and Privacy Policy
-            </a>
-            .
-          </p>
+        Click here to see our{" "}
+        <a
+          href="/terms_of_service.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-gray-700"
+        >
+          Terms of Service and Privacy Policy
+        </a>
+        .
+      </p>
     </div>
   );
 };
 
+
 export default LeaderboardPage;
+

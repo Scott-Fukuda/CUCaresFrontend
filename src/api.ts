@@ -21,7 +21,10 @@ export const formatRegistrationDate = (date: Date = new Date()): string => {
 // A helper for making Acucaresbackend.onrender.comPI requests.
 // const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
 
-const ENDPOINT_URL = import.meta.env.VITE_ENDPOINT_URL;
+const ENDPOINT_URL = "http://127.0.0.1:8000"
+// import.meta.env.VITE_ENDPOINT_URL;
+
+
 
 // Helper to get Firebase token
 const getFirebaseToken = async (): Promise<string | null> => {

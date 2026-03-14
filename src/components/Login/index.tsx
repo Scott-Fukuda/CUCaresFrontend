@@ -17,6 +17,8 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurrentUser, mode }) => {
   const navigate = useNavigate();
   const env = import.meta.env.VITE_ENV;
+  // "development"
+
 
   useEffect(() => {
     AOS.init({ duration: 500 });
