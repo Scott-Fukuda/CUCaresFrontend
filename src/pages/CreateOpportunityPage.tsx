@@ -61,6 +61,7 @@ const transformOpportunityFromBackend = (opp: any): Opportunity | MultiOpp => {
       bio: user.bio,
       registered: involvedUser.registered || false,
       attended: involvedUser.attended || false,
+      heard_about: involvedUser.heard_about || '',
     };
   }) : [];
 

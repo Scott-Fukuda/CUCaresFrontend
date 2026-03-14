@@ -124,29 +124,6 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
           <p className="text-gray-600 text-sm mb-3">📍 {multiopp.address}</p>
         )}
 
-        {multiopp.name == 'Soup Kitchen' &&
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-            <div
-              style={{
-                backgroundColor: '#F8D7DA', // light red
-                color: '#721C24',            // dark red text
-                border: '1px solid #F5C6CB',
-                borderRadius: '6px',
-                padding: '6px 10px',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                // maxWidth: '220px',
-                display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px'
-              }}
-            >
-              <ErrorIcon style={{ color: '#D9534F', minWidth: '24px', minHeight: '24px' }} />
-              <p>
-                Due to unforeseen circumstances, the Salvation Army has canceled the weekend hot meal service until further notice. We apologize for the inconvenience!
-              </p>
-            </div>
-          </div>
-        }
-
         <div className="space-y-3 mb-4">
           <h4 className="text-sm font-semibold text-gray-800 mb-2">Upcoming Opportunities</h4>
           {displayOpportunities.length > 0 ? (
@@ -218,7 +195,7 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
               const hoursUntilEvent = unregistrationInfo?.hoursUntilEvent ?? 0;
 
               const buttonDisabled =
-                eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister) || (multiopp.name == 'Soup Kitchen');
+                eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister);
               const buttonText = eventStarted
                 ? 'Event Already Started'
                 : isUserSignedUp
@@ -275,7 +252,7 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
                       {participants.slice(0, 4).map((u) => (
                         <img
                           key={u.id}
-                          src={getProfilePictureUrl(u.profile_image || null)}
+                          src={getProfilePictureUrl(u.profile_image || null, u.photoURL)}
                           alt={u.name}
                           title={u.name}
                           className="w-6 h-6 rounded-full border-2 border-white object-cover"

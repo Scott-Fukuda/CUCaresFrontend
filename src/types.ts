@@ -10,6 +10,7 @@ export interface User {
   email: string; // Must be @cornell.edu or @ithaca.edu
   password?: string; // In a real app, this would be a hash. Storing for simulation.
   profile_image?: string; // Profile image URL from backend
+  photoURL?: string | null; // Google/Firebase profile image
   interests: string[];
   friendIds: number[];
   organizationIds: number[]; // Changed from groupIds to organizationIds
@@ -28,6 +29,7 @@ export interface User {
   car_seats: number; // Number of car seats available
   bio?: string; // bio
   carpool_waiver_signed?: boolean;
+  heard_about?: string;
 }
 
 export interface Opportunity {
@@ -271,6 +273,7 @@ export interface RideRider {
   user_id: string;
   pickup_location: string;
   profile_image?: string;
+  photoURL?: string;
   name: string;
   notes?: string
 }

@@ -186,6 +186,7 @@ const AppContent: React.FC = () => {
     title: string;
     message: string;
     type: 'success' | 'info' | 'warning' | 'error';
+    opportunityId?: number;
   }>({
     isOpen: false,
     title: '',
@@ -266,6 +267,7 @@ const AppContent: React.FC = () => {
       // Trigger Firebase Google sign-in popup
       //console.log('Triggering Firebase sign-in...');
       const firebaseUser = await signInWithGoogle();
+      console.log("Google photo:", firebaseUser.photoURL);
       //console.log('Firebase sign-in successful:', firebaseUser.email);
       const approvalCheck = await api.checkEmailApproval(firebaseUser.email);
 
@@ -341,7 +343,8 @@ const AppContent: React.FC = () => {
     academicLevel: string,
     major: string,
     birthday: string,
-    car_seats: number
+    car_seats: number,
+    heard_about?: string
   ) => {
     setAuthError(null);
 
@@ -355,6 +358,8 @@ const AppContent: React.FC = () => {
 
     const email = firebaseUser.email;
 
+    const photoURL = firebaseUser.photoURL;
+
     setIsLoading(true);
     try {
       const newUser: User = {
@@ -366,7 +371,7 @@ const AppContent: React.FC = () => {
         points: 0,
         friendIds: [],
         organizationIds: [],
-        profile_image: '',
+        profile_image: photoURL || '',
         admin: false, // Default to false for new users
         gender: gender || undefined,
         graduationYear,
@@ -375,7 +380,8 @@ const AppContent: React.FC = () => {
         birthday,
         car_seats, // Add car_seats from registration
         registration_date: api.formatRegistrationDate(), // Format: YYYY-MM-DDTHH:MM:SS
-        carpool_waiver_signed: false
+        carpool_waiver_signed: false,
+        heard_about
       };
 
       // API takes `name`, so we combine first and last, and include phone
@@ -383,6 +389,7 @@ const AppContent: React.FC = () => {
         name: `${firstName} ${lastName}`,
         email,
         phone,
+        profile_image: photoURL,
         gender: gender || null,
         graduation_year: graduationYear,
         academic_level: academicLevel,
@@ -390,7 +397,8 @@ const AppContent: React.FC = () => {
         birthday,
         car_seats, // Include car_seats in the API call
         registration_date: api.formatRegistrationDate(), // Format: YYYY-MM-DDTHH:MM:SS
-        carpool_waiver_signed: false
+        carpool_waiver_signed: false,
+        heard_about: heard_about
       });
 
       const finalNewUser = { ...newUser, ...responseUser };
@@ -415,13 +423,15 @@ const AppContent: React.FC = () => {
   const showPopup = (
     title: string,
     message: string,
-    type: 'success' | 'info' | 'warning' | 'error' = 'info'
+    type: 'success' | 'info' | 'warning' | 'error' = 'info',
+    opportunityId?: number
   ) => {
     setPopupMessage({
       isOpen: true,
       title,
       message,
       type,
+      opportunityId
     });
   };
 
@@ -499,8 +509,9 @@ const AppContent: React.FC = () => {
           // Show success popup
           showPopup(
             'Thank you for signing up!',
-            'Thank you for signing up for this opportunity. The event host may reach out to you with further details (i.e. ride coordination). Otherwise, please arrive at the listed address at the designated time. Thank you for serving!',
-            'success'
+            'Thank you for signing up for this opportunity. The event host may reach out to you with further details (i.e. ride coordination). Otherwise, please arrive at the listed address at the designated time. Thank you for serving!\n\nInvite friends to serve with you!',
+            'success',
+            opportunityId
           );
         }
 
@@ -585,6 +596,28 @@ const AppContent: React.FC = () => {
 
     return userSignups;
   }, [currentUser, opportunities, signups]);
+
+  const shareOpportunity = async (opportunityId: number) => {
+    const inviteLink = `${window.location.origin}/opportunities/${opportunityId}`;
+    const message =
+      `Join me in volunteering with CampusCares!\n\nI just signed up for this opportunity and thought you might want to come serve with me.\n\nSign up here:
+      ${inviteLink}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Serve with me on CampusCares!",
+          text: message,
+          // url: inviteLink
+        });
+      } else {
+        await navigator.clipboard.writeText(inviteLink);
+        alert("Invite link copied!");
+      }
+    } catch (err) {
+      console.error("Share failed:", err);
+    }
+  };
 
   // New friend management system using backend endpoints
 
@@ -1069,6 +1102,8 @@ const AppContent: React.FC = () => {
         title={popupMessage.title}
         message={popupMessage.message}
         type={popupMessage.type}
+        opportunityId={popupMessage.opportunityId}
+        onInvite={shareOpportunity}
       />
     </>
   );
