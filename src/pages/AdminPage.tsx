@@ -4,6 +4,7 @@ import * as api from '../api';
 import { auth } from '../firebase-config';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import ErrorIcon from '@mui/icons-material/Error';
 
 interface AdminPageProps {
   currentUser: User;
@@ -322,45 +323,55 @@ const AdminPage: React.FC<AdminPageProps> = ({
     }
   };
   const handleDownloadServiceDataCsv = async (startDate: string, endDate: string) => {
-  try {
-    const response = await api.getServiceDataCsv(startDate, endDate);
- 
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `service_data_${startDate}_to_${endDate}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error("Error downloading CSV:", err);
-    alert("Failed to download service data. Please try again.");
-  }
-};
+    try {
+      const response = await api.getServiceDataCsv(startDate, endDate);
 
-const promptAndDownloadCsv = async () => {
-  const today = new Date();
-  const twoMonthsAgo = new Date();
-  twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `service_data_${startDate}_to_${endDate}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error downloading CSV:", err);
+      alert("Failed to download service data. Please try again.");
+    }
+  };
 
-  const defaultStart = twoMonthsAgo.toISOString().split("T")[0];
-  const defaultEnd = today.toISOString().split("T")[0];
+  const promptAndDownloadCsv = async () => {
+    const today = new Date();
+    const twoMonthsAgo = new Date();
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
-  const startDate = window.prompt("Enter start date (YYYY-MM-DD):", defaultStart);
-  if (!startDate) return;
+    const defaultStart = twoMonthsAgo.toISOString().split("T")[0];
+    const defaultEnd = today.toISOString().split("T")[0];
 
-  const endDate = window.prompt("Enter end date (YYYY-MM-DD):", defaultEnd);
-  if (!endDate) return;
+    const startDate = window.prompt("Enter start date (YYYY-MM-DD):", defaultStart);
+    if (!startDate) return;
 
-  await handleDownloadServiceDataCsv(startDate, endDate);
-};
+    const endDate = window.prompt("Enter end date (YYYY-MM-DD):", defaultEnd);
+    if (!endDate) return;
+
+    await handleDownloadServiceDataCsv(startDate, endDate);
+  };
 
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
+      <div className="mb-8 flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Admin Panel</h1>
         <p className="text-gray-600">Review and approve pending opportunities and organizations.</p>
+        {unapprovedOpportunities.length > 0 &&
+          <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-red-200 bg-red-50 text-red-800">
+            <div className="flex-shrink-0 text-red-500">
+              <ErrorIcon />
+            </div>
+            <p className="text-sm font-medium">
+              There are opportunities to approve
+            </p>
+          </div>
+        }
       </div>
 
       {/* Statistics Section */}
@@ -461,37 +472,37 @@ const promptAndDownloadCsv = async () => {
 
       {/* Security Token Section */}
       {/* Security Token Section */}
-<div className="mb-8 p-6 bg-gray-50 rounded-lg border">
-  <h2 className="text-xl font-semibold text-gray-900 mb-4">Security Token</h2>
+      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Security Token</h2>
 
-  <div className="flex flex-col space-y-4">
-    <button
-      onClick={async () => {
-        setIsLoadingToken(true);
-        try {
-          const token = await handleGetSecurityToken();
-          if (token) {
-            await navigator.clipboard.writeText(token);
-            setShowCopied(true);
-            setTimeout(() => setShowCopied(false), 2000);
-          }
-        } finally {
-          setIsLoadingToken(false);
-        }
-      }}
-      disabled={isLoadingToken}
-      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 w-fit"
-    >
-      {isLoadingToken ? 'Getting Token...' : 'Get Security Token'}
-    </button>
+        <div className="flex flex-col space-y-4">
+          <button
+            onClick={async () => {
+              setIsLoadingToken(true);
+              try {
+                const token = await handleGetSecurityToken();
+                if (token) {
+                  await navigator.clipboard.writeText(token);
+                  setShowCopied(true);
+                  setTimeout(() => setShowCopied(false), 2000);
+                }
+              } finally {
+                setIsLoadingToken(false);
+              }
+            }}
+            disabled={isLoadingToken}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 w-fit"
+          >
+            {isLoadingToken ? 'Getting Token...' : 'Get Security Token'}
+          </button>
 
-    {showCopied && (
-      <div className="bg-green-100 text-green-800 px-3 py-2 rounded-md text-sm font-medium w-fit">
-        ✅ Copied!
+          {showCopied && (
+            <div className="bg-green-100 text-green-800 px-3 py-2 rounded-md text-sm font-medium w-fit">
+              ✅ Copied!
+            </div>
+          )}
+        </div>
       </div>
-    )}
-  </div>
-</div>
 
 
       {/* CSV Export Section */}
