@@ -1,4 +1,4 @@
-import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride } from './types';
+import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride, FeedOrderItem } from './types';
 import { auth } from './firebase-config';
 import { canUnregisterFromOpportunity } from './utils/timeUtils';
 
@@ -1354,6 +1354,20 @@ export const updateMultiOpp = (id: number, data: object): Promise<Opportunity> =
 export const deleteMultiOpp = (id: number): Promise<void> =>
   authenticatedRequest(`/multiopps/${id}`, {
     method: 'DELETE',
+  });
+
+// FEED ORDER endpoints
+// userId: the user whose order to fetch. Pass 0 for the global default (admin-set) order.
+export const getFeedOrder = async (userId: number): Promise<FeedOrderItem[]> => {
+  const result = await authenticatedRequest(`/feed-order?user_id=${userId}`);
+  return Array.isArray(result) ? result : [];
+};
+
+// userId: 0 = global default; otherwise the specific user's order.
+export const updateFeedOrder = (order: FeedOrderItem[], userId: number): Promise<FeedOrderItem[]> =>
+  authenticatedRequest('/feed-order', {
+    method: 'PUT',
+    body: JSON.stringify({ user_id: userId, order }),
   });
 
 // -- Cars --
