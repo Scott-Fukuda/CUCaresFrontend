@@ -111,7 +111,7 @@ export const initialBadges: Badge[] = [
 ];
 
 export const ourTeam: Member[] = [
-  {
+ {
     id: 14,
     name: 'Ailin Chen',
     picture: './team_pic/ailin.png',
@@ -119,7 +119,7 @@ export const ourTeam: Member[] = [
     study: 'ILR \'27',
     campusOrgs: ['AAIV', 'Cornell Political Union', 'Prep'],
     favoriteService:
-      'Through Prison Express, I was able to view artwork created by incarcerated youth and write letters in response. It’s a powerful way to connect with them, offer encouragement, and create a sense of shared humanity through art and words.',
+      'Through Prison Express, I was able to view artwork created by incarcerated youth and write letters in response. It\'s a powerful way to connect with them, offer encouragement, and create a sense of shared humanity through art and words.',
     role: 'Chief Marketing Officer',
   },
   {
@@ -129,7 +129,7 @@ export const ourTeam: Member[] = [
     hometown: 'Queens, NY',
     study: 'ILR \'28',
     campusOrgs: ['PAD', 'CIPEC', 'ACLU', 'CFA', 'Cornell Catholic'],
-    favoriteService: "Volunteering for my friend’s Indonesian Food Bazaar event and bringing together members of my community to celebrate Indonesian culture!",
+    favoriteService: "Volunteering for my friend's Indonesian Food Bazaar event and bringing together members of my community to celebrate Indonesian culture!",
     role: 'Communication Manager',
   },
   {
@@ -171,7 +171,7 @@ export const ourTeam: Member[] = [
     study: 'ILR \'28',
     campusOrgs: ['Cru', 'Club Hockey', 'SEGC', '180DC'],
     favoriteService:
-      'Adopt-A-Highway cleanup on a rainy Ithaca day–there’s something beautiful about digging in the dirt with some of your best friends.',
+      'Adopt-A-Highway cleanup on a rainy Ithaca day–there\'s something beautiful about digging in the dirt with some of your best friends.',
     role: 'Chief Executive Officer',
   },
   {
@@ -186,6 +186,17 @@ export const ourTeam: Member[] = [
     role: 'Director of Technical Development',
   },
   {
+    id: 423,
+    name: 'Juwon Byeon',
+    picture: './team_pic/juwon.png',
+    hometown: 'South Korea / USA',
+    study: 'CS \'29',
+    campusOrgs: ['Cru', 'WICC', 'Society of Women Engineers'],
+    favoriteService:
+      "Volunteering to help paint the walls of an old elementary school! It was very heartwarming to see the little cuties' faces light up when the walls were being filled with their wanted drawings 🥰",
+    role: 'Full Stack & Mobile App Developer',
+  },
+  {
     id: 168,
     name: 'Kate Shum',
     picture: './team_pic/kate.png',
@@ -194,6 +205,17 @@ export const ourTeam: Member[] = [
     campusOrgs: ['Bethany CCC'],
     favoriteService: "Volunteering at my local elementary school's after-school program!",
     role: 'Frontend Developer',
+  },
+  {
+    id: 280,
+    name: 'Kevin Levy',
+    picture: './team_pic/kevin.jpeg',
+    hometown: 'Baldwin, NY',
+    study: 'ILR \'27',
+    campusOrgs: ['Big Red Sports Network', 'Scheinman Conflict Resolution Club', 'ILR Black Student Union'],
+    favoriteService:
+      'Serving tables during the Neighbors Helping Neighbors pasta dinner at St. Catherine of Sienna Church was a great experience. I had a lot of fun interacting with fellow Cornell Students and the Tompkins County community while setting up dinner and serving tables. I got to make new friends and eat great food too. It was one of my first experiences interacting with the community in Ithaca outside of Cornell, so I am grateful for the pleasant introduction to an amazing community by being able to assist with this event!',
+    role: 'Outreach Manager',
   },
   {
     id: 12,
@@ -211,15 +233,9 @@ export const ourTeam: Member[] = [
     picture: './team_pic/leslie.png',
     hometown: 'Franklin, MA',
     study: 'BME \'28',
-    campusOrgs: [
-      'Cru',
-      'Big Red Buddies',
-      'Perfect Pair',
-      'CU Empower',
-      'Society of Women Engineers',
-    ],
+    campusOrgs: ['Cru', 'Big Red Buddies', 'Perfect Pair', 'CU Empower', 'Society of Women Engineers'],
     favoriteService:
-      'My favorite service experience was coaching 3rd and 4th grade girls’ soccer. All through high school, I was very involved in my town’s soccer program, including volunteer coaching. Over seven seasons, I had the privilege of watching each girl grow in skill and confidence while also learning to love the game. Building connections with every player and giving them the same fun and educational soccer experience I had as a child was incredibly rewarding. Last year, I even got to see two of the girls I once coached compete in the state semifinals. Watching their growth and continued passion for soccer was one of the most fulfilling moments of my coaching experience.',
+      'My favorite service experience was coaching 3rd and 4th grade girls\' soccer. All through high school, I was very involved in my town\'s soccer program, including volunteer coaching. Over seven seasons, I had the privilege of watching each girl grow in skill and confidence while also learning to love the game. Building connections with every player and giving them the same fun and educational soccer experience I had as a child was incredibly rewarding. Last year, I even got to see two of the girls I once coached compete in the state semifinals. Watching their growth and continued passion for soccer was one of the most fulfilling moments of my coaching experience.',
     role: 'Outreach Manager',
   },
   {
@@ -228,14 +244,21 @@ export const ourTeam: Member[] = [
     picture: './team_pic/mikayla.jpg',
     hometown: 'Westchester, NY',
     study: 'HD \'28',
-    campusOrgs: [
-      'Consulting @ Cornell',
-      'Medium Design Collective',
-      'Cornell Club Swim'
-    ],
+    campusOrgs: ['Consulting @ Cornell', 'Medium Design Collective', 'Cornell Club Swim'],
     favoriteService:
       'Fostering and volunteering at local shelters and Guiding Eyes for the Blind to help out our four legged friends find their forever homes!',
     role: 'Digital Design Strategist',
+  },
+  {
+    id: 220,
+    name: 'Reem Nasrallah',
+    picture: './team_pic/reem.jpeg',
+    hometown: 'Queens, New York City',
+    study: 'ILR \'28',
+    campusOrgs: ['The Cornell Daily Sun', 'Class Councils', 'Melodramatics'],
+    favoriteService:
+      'Packing and distributing free meals and supplies to low-income families in NYCHA housing complexes last summer!',
+    role: 'Outreach Manager',
   },
   {
     id: 142,
@@ -259,6 +282,17 @@ export const ourTeam: Member[] = [
     role: 'Chief Technology Officer',
   },
   {
+    id: 384,
+    name: 'Shelbey Malmgren',
+    picture: './team_pic/shelbey.JPG',
+    hometown: 'Chicago, IL',
+    study: 'CogSci & Gov \'28',
+    campusOrgs: ['Cornell Women\'s Rugby', 'Global Impact Club'],
+    favoriteService:
+      'Spending each summer supporting community food access efforts to low-income families in my hometown!',
+    role: 'Outreach Manager',
+  },
+  {
     id: 199,
     name: 'Tayten Han',
     picture: './team_pic/tayten.JPG',
@@ -274,29 +308,9 @@ export const ourTeam: Member[] = [
     picture: './team_pic/will.png',
     hometown: 'Kearny, NJ',
     study: 'ILR \'28',
-    campusOrgs: [
-      'Sports Business Society',
-      'Cru',
-      'Cornell American Cancer Society',
-      'Intramural Sports',
-    ],
+    campusOrgs: ['Sports Business Society', 'Cru', 'Cornell American Cancer Society', 'Intramural Sports'],
     favoriteService:
       "My favorite community service experience was volunteering at my town's public library. Over the summer, I helped organize events and worked with children on a variety of activities. I particularly enjoyed playing games with them, such as chess, checkers, ping pong. I was even able to improve my own arts and crafts skills while assisting with creative sessions. Volunteering at my town's library was an especially rewarding experience because it gave me the opportunity to engage with the youth in my community. Witnessing their passion and enthusiasm for learning new skills made me optimistic about the bright future of my town!",
     role: 'Chief Strategy Officer',
-  },
-  {
-    id: 423,
-    name: 'Juwon Byeon',
-    picture: './team_pic/juwon.png',
-    hometown: 'South Korea / USA',
-    study: 'CS \'29',
-    campusOrgs: [
-      'Cru',
-      'WICC',
-      'Society of Women Engineers',
-    ],
-    favoriteService:
-      "Volunteering to help paint the walls of an old elementary school! It was very heartwarming to see the little cuties' faces light up when the walls were being filled with their wanted drawings 🥰",
-    role: 'Full Stack & Mobile App Developer',
-  },
+  }
 ];
