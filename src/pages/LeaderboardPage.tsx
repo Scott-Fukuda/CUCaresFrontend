@@ -480,7 +480,7 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
             ))}
             {friendsLeaderboard.length <= 1 && (
               <div className="py-8 text-center text-gray-500">
-                You haven't added any friends to the leaderboard yet!
+                Add a friend to start competing!
               </div>
             )}
           </ul>
