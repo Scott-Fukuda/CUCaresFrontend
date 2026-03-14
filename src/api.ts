@@ -125,6 +125,7 @@ export const getUsers = async (): Promise<User[]> => {
     name: user.name,
     email: user.email,
     profile_image: user.profile_image,
+    photoURL: user.profile_image || null,
     interests: user.interests || [],
     friendIds: user.friends || [],
     organizationIds: (user.organizations || []).map((org: any) => org.id) || [],

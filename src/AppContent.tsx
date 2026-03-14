@@ -266,6 +266,7 @@ const AppContent: React.FC = () => {
       // Trigger Firebase Google sign-in popup
       //console.log('Triggering Firebase sign-in...');
       const firebaseUser = await signInWithGoogle();
+      console.log("Google photo:", firebaseUser.photoURL);
       //console.log('Firebase sign-in successful:', firebaseUser.email);
       const approvalCheck = await api.checkEmailApproval(firebaseUser.email);
 
