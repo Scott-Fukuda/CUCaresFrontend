@@ -215,6 +215,7 @@ const AppContent: React.FC = () => {
             api.getApprovedOrgs(),
             api.getMultiOpps(),
           ]);
+          console.log("usersData from API:", usersData);
 
           //console.log('API calls completed:', {
           //   usersCount: usersData.length,
@@ -344,6 +345,7 @@ const AppContent: React.FC = () => {
     major: string,
     birthday: string,
     car_seats: number,
+    subscribed: boolean,
     heard_about?: string
   ) => {
     setAuthError(null);
@@ -381,6 +383,7 @@ const AppContent: React.FC = () => {
         car_seats, // Add car_seats from registration
         registration_date: api.formatRegistrationDate(), // Format: YYYY-MM-DDTHH:MM:SS
         carpool_waiver_signed: false,
+        subscribed: true,
         heard_about
       };
 

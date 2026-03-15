@@ -29,6 +29,7 @@ export interface User {
   car_seats: number; // Number of car seats available
   bio?: string; // bio
   carpool_waiver_signed?: boolean;
+  subscribed: boolean;
   heard_about?: string;
 }
 

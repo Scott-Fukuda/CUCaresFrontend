@@ -159,6 +159,25 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
     updateInterests(newInterests);
   };
 
+  const handleSubscriptionUpdate = async () => {
+    if (!isCurrentUser) return;
+    try {
+      const newValue = !localUser.subscribed;
+      await updateUser(localUser.id, {
+        subscribed: newValue
+      });
+      setLocalUser((prev) => ({
+        ...prev,
+        subscribed: newValue
+      }));
+      setCurrentUser((prev) =>
+        prev ? { ...prev, subscribed: newValue } : prev
+      );
+    } catch (error) {
+      console.error("Error updating subscription:", error);
+    }
+  };
+
   const handleProfilePicUpdate = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isCurrentUser && e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -292,6 +311,18 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
 
           {(isCurrentUser || currentUser.admin) && (
             <div className="space-y-4">
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={handleSubscriptionUpdate}
+                  className={`font-bold py-2 px-4 rounded-lg transition-colors text-sm mt-4 ${
+                    localUser.subscribed
+                      ? "bg-gray-400 text-white hover:bg-gray-500"
+                      : "bg-cornell-red text-white hover:bg-red-800"
+                  }`}
+                >
+                  {localUser.subscribed ? "Unsubscribe from Emails" : "Subscribe to Emails"}
+                </button>
+              </div>
               <button
                 onClick={() => navigate(`/service-journal/${user.id}`)}
                 className="w-full font-bold py-2 px-4 rounded-lg transition-colors"
