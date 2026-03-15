@@ -13,6 +13,7 @@ interface RegisterProps {
     major: string,
     birthday: string,
     car_seats: number,
+    subscribed: boolean,
     heard_about?: string
   ) => void;
   onBackToLogin: () => void;
@@ -31,6 +32,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
   const [birthday, setBirthday] = useState('');
   const [hasCar, setHasCar] = useState<string>('');
   const [carSeats, setCarSeats] = useState<number>(0);
+  const [subscribed, setSubscribed] = useState<boolean>(true);
   const [heardAbout, setHeardAbout] = useState<string>("");
 
   const firebaseUser = auth.currentUser;
@@ -62,6 +64,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
       major.trim(),
       birthday.trim(),
       finalCarSeats,
+      subscribed,
       heardAbout || undefined
     );
   };
