@@ -279,6 +279,15 @@ export interface RideRider {
   notes?: string
 }
 
+export interface FeedOrderItem {
+  id: number;
+  is_multiopp: boolean;
+}
+
+export type FeedItem =
+  | { kind: 'opp'; data: Opportunity }
+  | { kind: 'multiopp'; data: MultiOpp };
+
 export interface Car {
   id: string;
   user_id: string;

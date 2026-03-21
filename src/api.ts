@@ -1,4 +1,4 @@
-import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride } from './types';
+import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride, FeedOrderItem } from './types';
 import { auth } from './firebase-config';
 import { canUnregisterFromOpportunity } from './utils/timeUtils';
 import { subscribe } from 'diagnostics_channel';
@@ -1377,6 +1377,18 @@ export const updateMultiOpp = (id: number, data: object): Promise<Opportunity> =
 export const deleteMultiOpp = (id: number): Promise<void> =>
   authenticatedRequest(`/multiopps/${id}`, {
     method: 'DELETE',
+  });
+
+// FEED ORDER endpoints
+export const getFeedOrder = async (): Promise<FeedOrderItem[]> => {
+  const result = await authenticatedRequest('/feed-order');
+  return Array.isArray(result?.order) ? result.order : [];
+};
+
+export const updateFeedOrder = (order: FeedOrderItem[]): Promise<{ id: number; order: FeedOrderItem[] }> =>
+  authenticatedRequest('/feed-order', {
+    method: 'PUT',
+    body: JSON.stringify({ order }),
   });
 
 // -- Cars --

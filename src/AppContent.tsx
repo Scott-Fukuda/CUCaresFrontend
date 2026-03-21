@@ -12,7 +12,8 @@ import {
   FriendshipStatus,
   FriendshipsResponse,
   UserWithFriendshipStatus,
-  MultiOpp
+  MultiOpp,
+  FeedOrderItem
 } from './types';
 import * as api from './api';
 import {
@@ -165,6 +166,12 @@ const AppContent: React.FC = () => {
   const { data: multiopps = [], isLoading: multioppsLoading } = useQuery({
     queryKey: ['multiopps'],
     queryFn: api.getMultiOpps
+  });
+
+  const { data: feedOrder = [] } = useQuery<FeedOrderItem[]>({
+    queryKey: ['feedOrder'],
+    queryFn: api.getFeedOrder,
+    enabled: !!currentUser,
   });
 
 
@@ -1056,6 +1063,7 @@ const AppContent: React.FC = () => {
           opportunities={opportunities}
           oppsLoading={oppsLoading}
           multiopp={multiopps}
+          feedOrder={feedOrder}
           // setOpportunities={setOpportunities}
           signups={signups}
           organizations={organizations}

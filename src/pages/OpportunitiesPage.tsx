@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Opportunity, User, SignUp, allInterests, Organization, MultiOpp } from '../types';
+import { Opportunity, User, SignUp, allInterests, Organization, MultiOpp, FeedOrderItem, FeedItem } from '../types';
 import OpportunityCard from '../components/OpportunityCard';
 import MultiOppCard from '../components/MultiOppCard';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,7 @@ interface OpportunitiesPageProps {
   allOrgs: Organization[];
   currentUserSignupsSet?: Set<number>;
   multiopps: MultiOpp[];
+  feedOrder: FeedOrderItem[];
   showCarpoolPopup?: number | null;
   setShowCarpoolPopup?: React.Dispatch<React.SetStateAction<number | null>>;
   showPopup?: (
@@ -39,6 +40,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   allOrgs,
   currentUserSignupsSet,
   multiopps,
+  feedOrder,
   showCarpoolPopup,
   setShowCarpoolPopup,
   showPopup,
@@ -50,76 +52,63 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   // const [causeFilter, setCauseFilter] = useState<string>('All');
   // const [dateFilter, setDateFilter] = useState<string>('');
 
-  const filteredOpportunities = useMemo(() => {
+  const feedItems = useMemo((): FeedItem[] => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // start of local day
+    today.setHours(0, 0, 0, 0);
 
-    return opportunities
+    // Filter standalone opps (approved, upcoming, visible, not part of a multiopp)
+    const standaloneOpps = opportunities
       .map((opp) => {
-        // Parse opp.date once as a local date
-        // Use the date as provided by the API without manipulation
         const [year, month, day] = opp.date.split('-').map(Number);
-        const actualDate = new Date(year, month - 1, day);
-
-        // Parse time and create a full datetime object
+        const localDate = new Date(year, month - 1, day);
         const [hours, minutes] = opp.time.split(':').map(Number);
         const fullDateTime = new Date(year, month - 1, day, hours, minutes);
-        return {
-          ...opp,
-          localDate: actualDate,
-          fullDateTime: fullDateTime,
-          actualDateString: actualDate.toISOString().split('T')[0], // YYYY-MM-DD format for comparison
-        };
+        return { ...opp, localDate, fullDateTime };
       })
       .filter((opp) => {
-        // Only approved opportunities
         if (!opp.approved) return false;
-
-        // Don't show past events - compare with actual date
-        return opp.localDate.getTime() >= today.getTime();
-      })
-      .filter((opp) => {
-        if (opp.visibility) {
-          // If opportunity is public (visibility.length === 0), always show it
-          if (opp.visibility.length === 0) return true;
-          // If opportunity is private, only show to logged-in users
-          if (!currentUser) return false;
-          if (currentUser.admin) return true;
-          const userOrgIds = currentUser.organizationIds || [];
-          return opp.visibility.some((orgId) => userOrgIds.includes(orgId));
-        }
-        // If visibility is not set, treat as public
-        return true;
-      })
-      .filter((opp) => {
-        return (!opp.multiopp)
-      })
-      .sort((a, b) => a.fullDateTime.getTime() - b.fullDateTime.getTime());
-  }, [opportunities, currentUser]);
-
-  const visibleMultiOpps = useMemo(() => {
-    return multiopps
-      .filter((multiopp) => {
+        if (opp.localDate.getTime() < today.getTime()) return false;
+        if (opp.multiopp) return false;
+        if (!opp.visibility || opp.visibility.length === 0) return true;
         if (!currentUser) return false;
-
-        if (!multiopp.visibility || multiopp.visibility.length === 0 || currentUser.admin) {
-          return true;
-        }
-
+        if (currentUser.admin) return true;
         const userOrgIds = currentUser.organizationIds || [];
-        return multiopp.visibility.some((orgId) => userOrgIds.includes(orgId));
-      })
-      .sort((a, b) => {
-        const isASalvationArmy =
-          (a.nonprofit || '').trim().toLowerCase() === 'the salvation army';
-        const isBSalvationArmy =
-          (b.nonprofit || '').trim().toLowerCase() === 'the salvation army';
-
-        if (isASalvationArmy && !isBSalvationArmy) return -1;
-        if (!isASalvationArmy && isBSalvationArmy) return 1;
-        return 0;
+        return opp.visibility.some((orgId) => userOrgIds.includes(orgId));
       });
-  }, [multiopps, currentUser]);
+
+    // Filter visible multiopps
+    const visibleMultiOpps = multiopps.filter((m) => {
+      if (!m.visibility || m.visibility.length === 0) return true;
+      if (!currentUser) return false;
+      if (currentUser.admin) return true;
+      const userOrgIds = currentUser.organizationIds || [];
+      return m.visibility.some((orgId) => userOrgIds.includes(orgId));
+    });
+
+    // Build position lookup from feedOrder — key: `${is_multiopp}-${id}`
+    const positionMap = new Map<string, number>(
+      feedOrder.map((item, index) => [`${item.is_multiopp}-${item.id}`, index])
+    );
+
+    const oppItems: FeedItem[] = standaloneOpps.map((opp) => ({ kind: 'opp', data: opp }));
+    const multiItems: FeedItem[] = visibleMultiOpps.map((m) => ({ kind: 'multiopp', data: m }));
+
+    return [...oppItems, ...multiItems].sort((a, b) => {
+      const keyA = `${a.kind === 'multiopp'}-${a.data.id}`;
+      const keyB = `${b.kind === 'multiopp'}-${b.data.id}`;
+      const posA = positionMap.get(keyA) ?? Infinity;
+      const posB = positionMap.get(keyB) ?? Infinity;
+      if (posA !== posB) return posA - posB;
+      // Fallback: chronological by first date
+      const dateA = a.kind === 'opp'
+        ? (a.data as typeof standaloneOpps[0]).fullDateTime.getTime()
+        : new Date(a.data.date).getTime();
+      const dateB = b.kind === 'opp'
+        ? (b.data as typeof standaloneOpps[0]).fullDateTime.getTime()
+        : new Date(b.data.date).getTime();
+      return dateA - dateB;
+    });
+  }, [opportunities, multiopps, currentUser, feedOrder]);
 
   const [showExternalSignupModal, setShowExternalSignupModal] = useState(false);
   const [showExternalUnsignupModal, setShowExternalUnsignupModal] = useState(false);
@@ -245,35 +234,47 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
 
       {/* Opportunities Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredOpportunities.map((opp) => {
-          // Use backend data directly - it's more reliable than trying to combine sources
-          let signedUpStudents: User[] = [];
+        {feedItems.map((item) => {
+          if (item.kind === 'multiopp') {
+            return (
+              <MultiOppCard
+                key={`multiopp-${item.data.id}`}
+                multiopp={item.data}
+                currentUser={currentUser}
+                allOrgs={allOrgs}
+                opportunitiesData={opportunities}
+                onSignUp={handleSignUp}
+                onUnSignUp={handleUnSignUp}
+                onExternalSignup={handleExternalSignup}
+                onExternalUnsignup={handleExternalUnsignup}
+              />
+            );
+          }
 
+          const opp = item.data;
+          let signedUpStudents: User[] = [];
           if (opp.involved_users && opp.involved_users.length > 0) {
-            // Use backend data directly - these are already transformed User objects
             signedUpStudents = opp.involved_users.filter(
-              (user) => user.registered === true || opp.host_id === user.id
+              (user: User) => user.registered === true || opp.host_id === user.id
             );
           } else {
-            // Fallback to local signups if no backend data
             const opportunitySignups = signups.filter((s) => s.opportunityId === opp.id);
             signedUpStudents = students.filter((student) =>
               opportunitySignups.some((s) => s.userId === student.id)
             );
           }
-
-          // Check if current user is signed up
           const isUserSignedUp = currentUser && currentUserSignupsSet ? (
             opp.involved_users
               ? opp.involved_users.some(
-                (user) =>
+                (user: User) =>
                   user.id === currentUser.id && (user.registered || opp.host_id === currentUser.id)
               )
-              : currentUserSignupsSet.has(opp.id)) : false;
+              : currentUserSignupsSet.has(opp.id)
+          ) : false;
 
           return (
             <OpportunityCard
-              key={opp.id}
+              key={`opp-${opp.id}`}
               opportunity={opp}
               signedUpStudents={signedUpStudents}
               currentUser={currentUser}
@@ -281,31 +282,17 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               onUnSignUp={handleUnSignUp}
               isUserSignedUp={isUserSignedUp}
               allOrgs={allOrgs}
-              onExternalSignup={handleExternalSignup} // Add the callback
-              onExternalUnsignup={handleExternalUnsignup} // Add the callback
+              onExternalSignup={handleExternalSignup}
+              onExternalUnsignup={handleExternalUnsignup}
               showPopup={showPopup}
             />
           );
         })}
-
-        {visibleMultiOpps.map((multiopp) => (
-          <MultiOppCard
-            key={multiopp.id}
-            multiopp={multiopp}
-            currentUser={currentUser}
-            allOrgs={allOrgs}
-            opportunitiesData={opportunities}
-            onSignUp={handleSignUp}
-            onUnSignUp={handleUnSignUp}
-            onExternalSignup={handleExternalSignup}
-            onExternalUnsignup={handleExternalUnsignup}
-          />
-        ))}
       </div>
 
       {oppsLoading ? (
         <div style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem', fontWeight: '600' }}>Loading...</div>
-      ) : filteredOpportunities.length === 0 && visibleMultiOpps.length === 0 ? (
+      ) : feedItems.length === 0 ? (
         <div className="col-span-full text-center py-12 px-6 bg-white rounded-2xl shadow-lg">
           <h3 className="text-xl font-semibold text-gray-800">
             There are currently no opportunities.

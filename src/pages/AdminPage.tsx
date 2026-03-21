@@ -1,6 +1,21 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Opportunity, Organization, User } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Opportunity, Organization, User, MultiOpp, FeedOrderItem, FeedItem } from '../types';
 import * as api from '../api';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { auth } from '../firebase-config';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -8,15 +23,95 @@ import { useNavigate } from 'react-router-dom';
 interface AdminPageProps {
   currentUser: User;
   opportunities: Opportunity[];
+  multiopps: MultiOpp[];
   // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
   organizations: Organization[];
   setOrganizations: React.Dispatch<React.SetStateAction<Organization[]>>;
   allUsers: User[];
 }
 
+// ── Sortable mini-card used in the Feed Order section ──────────────────────
+const SortableCard: React.FC<{ item: FeedItem }> = ({ item }) => {
+  const id = `${item.kind === 'multiopp'}-${item.data.id}`;
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const name = item.data.name;
+  const nonprofit = item.kind === 'opp' ? item.data.nonprofit : item.data.nonprofit;
+  const formatDate = (raw: string) => {
+    // Handle both 'YYYY-MM-DD' and full ISO strings
+    const d = raw.includes('T') ? new Date(raw) : new Date(raw + 'T00:00:00');
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const rawDate = item.kind === 'opp'
+    ? item.data.date
+    : (() => {
+        const upcoming = item.data.opportunities
+          ?.slice()
+          .sort((a, b) => a.date.localeCompare(b.date))
+          .find((o) => {
+            const d = o.date.includes('T') ? new Date(o.date) : new Date(o.date + 'T00:00:00');
+            return d >= today;
+          });
+        return upcoming?.date ?? null;
+      })();
+
+  const date = rawDate ? formatDate(rawDate) : 'No future occurrences';
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm"
+    >
+      {/* Drag handle */}
+      <button
+        {...attributes}
+        {...listeners}
+        className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
+        aria-label="Drag to reorder"
+      >
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M7 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm6 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM7 8a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm6 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-6 6a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm6 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
+        </svg>
+      </button>
+
+      {/* Type badge */}
+      <span className={`flex-shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${
+        item.kind === 'multiopp'
+          ? 'bg-purple-100 text-purple-700'
+          : 'bg-blue-100 text-blue-700'
+      }`}>
+        {item.kind === 'multiopp' ? 'RECURRING' : 'ONE-TIME'}
+      </span>
+
+      {/* Info */}
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-gray-900 truncate">{name}</p>
+        {nonprofit && (
+          <p className="text-xs text-gray-500 truncate">{nonprofit}</p>
+        )}
+      </div>
+
+      {/* Date */}
+      <span className="flex-shrink-0 text-xs text-gray-400">{date}</span>
+    </div>
+  );
+};
+
 const AdminPage: React.FC<AdminPageProps> = ({
   currentUser,
   opportunities,
+  multiopps,
   // setOpportunities,
   organizations,
   setOrganizations,
@@ -24,6 +119,85 @@ const AdminPage: React.FC<AdminPageProps> = ({
 }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+
+  // ── Feed Order state ───────────────────────────────────────────────────────
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [orderSaveStatus, setOrderSaveStatus] = useState<'idle' | 'saved' | 'error'>('idle');
+
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  // Build initial feed list from saved order + all approved opps/multiopps
+  useEffect(() => {
+    const buildFeedItems = async () => {
+      let savedOrder: FeedOrderItem[] = [];
+      try {
+        savedOrder = await api.getFeedOrder();
+      } catch (_) {}
+
+      const positionMap = new Map<string, number>(
+        savedOrder.map((item, index) => [`${item.is_multiopp}-${item.id}`, index])
+      );
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const standaloneOpps: FeedItem[] = opportunities
+        .filter((o) => o.approved && !o.multiopp)
+        .map((o) => ({ kind: 'opp' as const, data: o }));
+
+      const multiItems: FeedItem[] = multiopps
+        .filter((m) => m.approved !== false)
+        .map((m) => ({ kind: 'multiopp' as const, data: m }));
+
+      const all: FeedItem[] = [...standaloneOpps, ...multiItems];
+
+      all.sort((a, b) => {
+        const keyA = `${a.kind === 'multiopp'}-${a.data.id}`;
+        const keyB = `${b.kind === 'multiopp'}-${b.data.id}`;
+        const posA = positionMap.get(keyA) ?? Infinity;
+        const posB = positionMap.get(keyB) ?? Infinity;
+        return posA - posB;
+      });
+
+      setFeedItems(all);
+    };
+
+    buildFeedItems();
+  }, [opportunities, multiopps]);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setFeedItems((items) => {
+      const ids = items.map((i) => `${i.kind === 'multiopp'}-${i.data.id}`);
+      const oldIndex = ids.indexOf(active.id as string);
+      const newIndex = ids.indexOf(over.id as string);
+      return arrayMove(items, oldIndex, newIndex);
+    });
+    setOrderSaveStatus('idle');
+  };
+
+  const handleSaveFeedOrder = async () => {
+    setIsSavingOrder(true);
+    setOrderSaveStatus('idle');
+    try {
+      const order: FeedOrderItem[] = feedItems.map((item) => ({
+        id: item.data.id,
+        is_multiopp: item.kind === 'multiopp',
+      }));
+      await api.updateFeedOrder(order);
+      queryClient.invalidateQueries({ queryKey: ['feedOrder'] });
+      setOrderSaveStatus('saved');
+      setTimeout(() => setOrderSaveStatus('idle'), 2500);
+    } catch {
+      setOrderSaveStatus('error');
+    } finally {
+      setIsSavingOrder(false);
+    }
+  };
+  // ── End Feed Order ─────────────────────────────────────────────────────────
+
   // Helper function to get user name by ID
   const getUserNameById = (userId?: number): string => {
     if (!userId) return 'Unknown';
@@ -807,6 +981,51 @@ const promptAndDownloadCsv = async () => {
           </div>
         </>
       )}
+
+      {/* Feed Order Section */}
+      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xl font-semibold text-gray-900">Feed Order</h2>
+          <div className="flex items-center gap-3">
+            {orderSaveStatus === 'saved' && (
+              <span className="text-sm text-green-600 font-medium">Saved!</span>
+            )}
+            {orderSaveStatus === 'error' && (
+              <span className="text-sm text-red-600 font-medium">Save failed</span>
+            )}
+            <button
+              onClick={handleSaveFeedOrder}
+              disabled={isSavingOrder}
+              className="bg-cornell-red text-white px-4 py-2 rounded-lg hover:bg-red-800 transition-colors font-medium disabled:opacity-50"
+            >
+              {isSavingOrder ? 'Saving…' : 'Save Order'}
+            </button>
+          </div>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          Drag cards to set the default display order on the Opportunities page. Events and series are interleaved.
+        </p>
+
+        {feedItems.length === 0 ? (
+          <p className="text-sm text-gray-400 italic">No approved opportunities yet.</p>
+        ) : (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext
+              items={feedItems.map((i) => `${i.kind === 'multiopp'}-${i.data.id}`)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="flex flex-col gap-2">
+                {feedItems.map((item) => (
+                  <SortableCard
+                    key={`${item.kind === 'multiopp'}-${item.data.id}`}
+                    item={item}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+      </div>
     </div>
   );
 };
