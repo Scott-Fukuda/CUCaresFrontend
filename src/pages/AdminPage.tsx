@@ -32,7 +32,7 @@ interface AdminPageProps {
 
 // ── Sortable mini-card used in the Feed Order section ──────────────────────
 const SortableCard: React.FC<{ item: FeedItem }> = ({ item }) => {
-  const id = `${item.kind === 'opp' ? 'opp' : 'multiopp'}-${item.data.id}`;
+  const id = `${item.kind === 'multiopp'}-${item.data.id}`;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
   const style: React.CSSProperties = {
@@ -43,11 +43,29 @@ const SortableCard: React.FC<{ item: FeedItem }> = ({ item }) => {
 
   const name = item.data.name;
   const nonprofit = item.kind === 'opp' ? item.data.nonprofit : item.data.nonprofit;
-  const date = item.kind === 'opp'
-    ? new Date(item.data.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    : item.data.opportunities?.[0]
-      ? new Date(item.data.opportunities[0].date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : '—';
+  const formatDate = (raw: string) => {
+    // Handle both 'YYYY-MM-DD' and full ISO strings
+    const d = raw.includes('T') ? new Date(raw) : new Date(raw + 'T00:00:00');
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const rawDate = item.kind === 'opp'
+    ? item.data.date
+    : (() => {
+        const upcoming = item.data.opportunities
+          ?.slice()
+          .sort((a, b) => a.date.localeCompare(b.date))
+          .find((o) => {
+            const d = o.date.includes('T') ? new Date(o.date) : new Date(o.date + 'T00:00:00');
+            return d >= today;
+          });
+        return upcoming?.date ?? null;
+      })();
+
+  const date = rawDate ? formatDate(rawDate) : 'No future occurrences';
 
   return (
     <div
@@ -73,7 +91,7 @@ const SortableCard: React.FC<{ item: FeedItem }> = ({ item }) => {
           ? 'bg-purple-100 text-purple-700'
           : 'bg-blue-100 text-blue-700'
       }`}>
-        {item.kind === 'multiopp' ? 'SERIES' : 'EVENT'}
+        {item.kind === 'multiopp' ? 'RECURRING' : 'ONE-TIME'}
       </span>
 
       {/* Info */}
@@ -114,11 +132,11 @@ const AdminPage: React.FC<AdminPageProps> = ({
     const buildFeedItems = async () => {
       let savedOrder: FeedOrderItem[] = [];
       try {
-        savedOrder = await api.getFeedOrder(0); // 0 = global default order
+        savedOrder = await api.getFeedOrder();
       } catch (_) {}
 
       const positionMap = new Map<string, number>(
-        savedOrder.map((item) => [`${item.item_type}-${item.item_id}`, item.position])
+        savedOrder.map((item, index) => [`${item.is_multiopp}-${item.id}`, index])
       );
 
       const today = new Date();
@@ -135,8 +153,8 @@ const AdminPage: React.FC<AdminPageProps> = ({
       const all: FeedItem[] = [...standaloneOpps, ...multiItems];
 
       all.sort((a, b) => {
-        const keyA = `${a.kind === 'opp' ? 'opp' : 'multiopp'}-${a.data.id}`;
-        const keyB = `${b.kind === 'opp' ? 'opp' : 'multiopp'}-${b.data.id}`;
+        const keyA = `${a.kind === 'multiopp'}-${a.data.id}`;
+        const keyB = `${b.kind === 'multiopp'}-${b.data.id}`;
         const posA = positionMap.get(keyA) ?? Infinity;
         const posB = positionMap.get(keyB) ?? Infinity;
         return posA - posB;
@@ -152,7 +170,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     setFeedItems((items) => {
-      const ids = items.map((i) => `${i.kind === 'opp' ? 'opp' : 'multiopp'}-${i.data.id}`);
+      const ids = items.map((i) => `${i.kind === 'multiopp'}-${i.data.id}`);
       const oldIndex = ids.indexOf(active.id as string);
       const newIndex = ids.indexOf(over.id as string);
       return arrayMove(items, oldIndex, newIndex);
@@ -164,12 +182,11 @@ const AdminPage: React.FC<AdminPageProps> = ({
     setIsSavingOrder(true);
     setOrderSaveStatus('idle');
     try {
-      const order: FeedOrderItem[] = feedItems.map((item, index) => ({
-        item_type: item.kind === 'opp' ? 'opp' : 'multiopp',
-        item_id: item.data.id,
-        position: index,
+      const order: FeedOrderItem[] = feedItems.map((item) => ({
+        id: item.data.id,
+        is_multiopp: item.kind === 'multiopp',
       }));
-      await api.updateFeedOrder(order, 0); // 0 = global default
+      await api.updateFeedOrder(order);
       queryClient.invalidateQueries({ queryKey: ['feedOrder'] });
       setOrderSaveStatus('saved');
       setTimeout(() => setOrderSaveStatus('idle'), 2500);
@@ -994,13 +1011,13 @@ const promptAndDownloadCsv = async () => {
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext
-              items={feedItems.map((i) => `${i.kind === 'opp' ? 'opp' : 'multiopp'}-${i.data.id}`)}
+              items={feedItems.map((i) => `${i.kind === 'multiopp'}-${i.data.id}`)}
               strategy={verticalListSortingStrategy}
             >
               <div className="flex flex-col gap-2">
                 {feedItems.map((item) => (
                   <SortableCard
-                    key={`${item.kind === 'opp' ? 'opp' : 'multiopp'}-${item.data.id}`}
+                    key={`${item.kind === 'multiopp'}-${item.data.id}`}
                     item={item}
                   />
                 ))}

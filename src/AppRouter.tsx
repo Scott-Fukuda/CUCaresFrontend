@@ -147,6 +147,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
             <AdminPage
                 currentUser={currentUser}
                 opportunities={opportunities}
+                multiopps={multiopp}
                 // setOpportunities={setOpportunities}
                 organizations={organizations}
                 setOrganizations={setOrganizations}

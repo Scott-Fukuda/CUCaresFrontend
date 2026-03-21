@@ -1357,17 +1357,15 @@ export const deleteMultiOpp = (id: number): Promise<void> =>
   });
 
 // FEED ORDER endpoints
-// userId: the user whose order to fetch. Pass 0 for the global default (admin-set) order.
-export const getFeedOrder = async (userId: number): Promise<FeedOrderItem[]> => {
-  const result = await authenticatedRequest(`/feed-order?user_id=${userId}`);
-  return Array.isArray(result) ? result : [];
+export const getFeedOrder = async (): Promise<FeedOrderItem[]> => {
+  const result = await authenticatedRequest('/feed-order');
+  return Array.isArray(result?.order) ? result.order : [];
 };
 
-// userId: 0 = global default; otherwise the specific user's order.
-export const updateFeedOrder = (order: FeedOrderItem[], userId: number): Promise<FeedOrderItem[]> =>
+export const updateFeedOrder = (order: FeedOrderItem[]): Promise<{ id: number; order: FeedOrderItem[] }> =>
   authenticatedRequest('/feed-order', {
     method: 'PUT',
-    body: JSON.stringify({ user_id: userId, order }),
+    body: JSON.stringify({ order }),
   });
 
 // -- Cars --

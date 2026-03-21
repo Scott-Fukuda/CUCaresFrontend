@@ -169,8 +169,8 @@ const AppContent: React.FC = () => {
   });
 
   const { data: feedOrder = [] } = useQuery<FeedOrderItem[]>({
-    queryKey: ['feedOrder', currentUser?.id],
-    queryFn: () => api.getFeedOrder(currentUser!.id),
+    queryKey: ['feedOrder'],
+    queryFn: api.getFeedOrder,
     enabled: !!currentUser,
   });
 

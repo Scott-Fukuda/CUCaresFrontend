@@ -279,9 +279,8 @@ export interface RideRider {
 }
 
 export interface FeedOrderItem {
-  item_type: 'opp' | 'multiopp';
-  item_id: number;
-  position: number;
+  id: number;
+  is_multiopp: boolean;
 }
 
 export type FeedItem =

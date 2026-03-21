@@ -85,17 +85,17 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       return m.visibility.some((orgId) => userOrgIds.includes(orgId));
     });
 
-    // Build position lookup from feedOrder
+    // Build position lookup from feedOrder — key: `${is_multiopp}-${id}`
     const positionMap = new Map<string, number>(
-      feedOrder.map((item) => [`${item.item_type}-${item.item_id}`, item.position])
+      feedOrder.map((item, index) => [`${item.is_multiopp}-${item.id}`, index])
     );
 
     const oppItems: FeedItem[] = standaloneOpps.map((opp) => ({ kind: 'opp', data: opp }));
     const multiItems: FeedItem[] = visibleMultiOpps.map((m) => ({ kind: 'multiopp', data: m }));
 
     return [...oppItems, ...multiItems].sort((a, b) => {
-      const keyA = `${a.kind === 'opp' ? 'opp' : 'multiopp'}-${a.data.id}`;
-      const keyB = `${b.kind === 'opp' ? 'opp' : 'multiopp'}-${b.data.id}`;
+      const keyA = `${a.kind === 'multiopp'}-${a.data.id}`;
+      const keyB = `${b.kind === 'multiopp'}-${b.data.id}`;
       const posA = positionMap.get(keyA) ?? Infinity;
       const posB = positionMap.get(keyB) ?? Infinity;
       if (posA !== posB) return posA - posB;
