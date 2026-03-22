@@ -161,7 +161,7 @@ export const ourTeam: Member[] = [
     study: 'CS \'28',
     campusOrgs: ['Cru', 'WICC'],
     favoriteService: "Volunteering as a camp counselor for an overnight science camp for 5th graders!",
-    role: 'Frontend & Mobile App Developer',
+    role: 'Full Stack & Mobile App Developer',
   },
   {
     id: 2,
