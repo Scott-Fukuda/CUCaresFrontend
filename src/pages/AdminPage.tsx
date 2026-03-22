@@ -1135,7 +1135,7 @@ const promptAndDownloadCsv = async () => {
             {/* Hidden (invisible multiopps only) */}
             <div>
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                Hidden from Feed
+                Hidden from Feed (Recurring Only)
               </h3>
               <SortableContext items={invisibleItems.map(itemKey)} strategy={verticalListSortingStrategy}>
                 <DroppableZone id="invisible" className="flex flex-col gap-2 min-h-[64px] border-2 border-dashed border-gray-300 rounded-lg p-2">
