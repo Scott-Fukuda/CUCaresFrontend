@@ -54,6 +54,7 @@ interface AppRouterProps {
     // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[] | []>>;
     multiopp: MultiOpp[];
     feedOrder: FeedOrderItem[];
+    invisibleMultioppIds: number[];
     allOpps: (Opportunity | MultiOpp)[];
     setAllOpps: React.Dispatch<React.SetStateAction<(Opportunity | MultiOpp)[] | []>>;
     allTimeMyOpps: (Opportunity)[];
@@ -106,6 +107,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
     // setOpportunities,
     multiopp,
     feedOrder,
+    invisibleMultioppIds,
     allOpps,
     setAllOpps,
     allTimeMyOpps,
@@ -219,6 +221,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                             <OpportunitiesPage
                                 multiopps={multiopp}
                                 feedOrder={feedOrder}
+                                invisibleMultioppIds={invisibleMultioppIds}
                                 opportunities={opportunities}
                                 oppsLoading={oppsLoading}
                                 students={students}

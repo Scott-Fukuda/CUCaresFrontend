@@ -20,6 +20,7 @@ interface OpportunitiesPageProps {
   currentUserSignupsSet?: Set<number>;
   multiopps: MultiOpp[];
   feedOrder: FeedOrderItem[];
+  invisibleMultioppIds: number[];
   showCarpoolPopup?: number | null;
   setShowCarpoolPopup?: React.Dispatch<React.SetStateAction<number | null>>;
   showPopup?: (
@@ -41,6 +42,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   currentUserSignupsSet,
   multiopps,
   feedOrder,
+  invisibleMultioppIds,
   showCarpoolPopup,
   setShowCarpoolPopup,
   showPopup,
@@ -76,8 +78,10 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         return opp.visibility.some((orgId) => userOrgIds.includes(orgId));
       });
 
-    // Filter visible multiopps
+    // Filter visible multiopps (excluding invisible ones set by admin)
+    const invisibleSet = new Set(invisibleMultioppIds);
     const visibleMultiOpps = multiopps.filter((m) => {
+      if (invisibleSet.has(m.id)) return false;
       if (!m.visibility || m.visibility.length === 0) return true;
       if (!currentUser) return false;
       if (currentUser.admin) return true;
@@ -108,7 +112,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         : new Date(b.data.date).getTime();
       return dateA - dateB;
     });
-  }, [opportunities, multiopps, currentUser, feedOrder]);
+  }, [opportunities, multiopps, currentUser, feedOrder, invisibleMultioppIds]);
 
   const [showExternalSignupModal, setShowExternalSignupModal] = useState(false);
   const [showExternalUnsignupModal, setShowExternalUnsignupModal] = useState(false);

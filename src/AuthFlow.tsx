@@ -114,6 +114,8 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
                 signups={signups}
                 currentUser={null}
                 oppsLoading={oppsLoading}
+                feedOrder={[]}
+                invisibleMultioppIds={[]}
               />
             </div>
           </div>
