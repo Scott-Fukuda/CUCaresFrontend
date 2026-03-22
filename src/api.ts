@@ -1,4 +1,4 @@
-import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride, FeedOrderItem } from './types';
+import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride, FeedOrderItem, FeedOrderResponse } from './types';
 import { auth } from './firebase-config';
 import { canUnregisterFromOpportunity } from './utils/timeUtils';
 
@@ -1357,15 +1357,24 @@ export const deleteMultiOpp = (id: number): Promise<void> =>
   });
 
 // FEED ORDER endpoints
-export const getFeedOrder = async (): Promise<FeedOrderItem[]> => {
+export const getFeedOrder = async (): Promise<FeedOrderResponse> => {
   const result = await authenticatedRequest('/feed-order');
-  return Array.isArray(result?.order) ? result.order : [];
+  return {
+    order: Array.isArray(result?.order) ? result.order : [],
+    invisible_multiopps: Array.isArray(result?.invisible_multiopps) ? result.invisible_multiopps : [],
+  };
 };
 
-export const updateFeedOrder = (order: FeedOrderItem[]): Promise<{ id: number; order: FeedOrderItem[] }> =>
+export const updateFeedOrder = (order: FeedOrderItem[]): Promise<FeedOrderResponse> =>
   authenticatedRequest('/feed-order', {
     method: 'PUT',
     body: JSON.stringify({ order }),
+  });
+
+export const updateInvisibleMultiopps = (ids: number[]): Promise<{ invisible_multiopps: number[] }> =>
+  authenticatedRequest('/feed-order/invisible-multiopps', {
+    method: 'PUT',
+    body: JSON.stringify({ invisible_multiopps: ids }),
   });
 
 // -- Cars --

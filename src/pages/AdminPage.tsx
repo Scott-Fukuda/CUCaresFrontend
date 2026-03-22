@@ -1,13 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Opportunity, Organization, User, MultiOpp, FeedOrderItem, FeedItem } from '../types';
 import * as api from '../api';
 import {
   DndContext,
   closestCenter,
+  pointerWithin,
+  getFirstCollision,
   PointerSensor,
   useSensor,
   useSensors,
   DragEndEvent,
+  DragOverEvent,
+  DragStartEvent,
+  DragOverlay,
+  UniqueIdentifier,
+  useDroppable,
+  CollisionDetection,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -16,6 +24,11 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+
+const DroppableZone: React.FC<{ id: string; children: React.ReactNode; className?: string }> = ({ id, children, className }) => {
+  const { setNodeRef } = useDroppable({ id });
+  return <div ref={setNodeRef} className={className}>{children}</div>;
+};
 import { auth } from '../firebase-config';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -121,60 +134,147 @@ const AdminPage: React.FC<AdminPageProps> = ({
   const navigate = useNavigate();
 
   // ── Feed Order state ───────────────────────────────────────────────────────
-  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
+  const [visibleItems, setVisibleItems] = useState<FeedItem[]>([]);
+  const [invisibleItems, setInvisibleItems] = useState<FeedItem[]>([]); // multiopps only
+  const [activeItem, setActiveItem] = useState<FeedItem | null>(null);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
   const [orderSaveStatus, setOrderSaveStatus] = useState<'idle' | 'saved' | 'error'>('idle');
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  );
 
-  // Build initial feed list from saved order + all approved opps/multiopps
+  const itemKey = (item: FeedItem) => `${item.kind === 'multiopp'}-${item.data.id}`;
+
+  // visibleRef/invisibleRef mirror state for reads inside DnD handlers
+  const visibleRef = useRef<FeedItem[]>([]);
+  const invisibleRef = useRef<FeedItem[]>([]);
+  useEffect(() => { visibleRef.current = visibleItems; }, [visibleItems]);
+  useEffect(() => { invisibleRef.current = invisibleItems; }, [invisibleItems]);
+
+  // Tracks which container the dragged item currently lives in — updated
+  // synchronously in handleDragOver so handleDragEnd always sees the right value.
+  const activeContainerRef = useRef<'visible' | 'invisible' | null>(null);
+
+  // Prefer pointer-within detection (works for empty containers), fall back to closest center
+  const collisionDetection: CollisionDetection = (args) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) return pointerCollisions;
+    return getFirstCollision(closestCenter(args)) ? closestCenter(args) : [];
+  };
+
+  const findContainerForId = (id: UniqueIdentifier): 'visible' | 'invisible' | null => {
+    if (id === 'visible' || id === 'invisible') return id as 'visible' | 'invisible';
+    if (visibleRef.current.some((i) => itemKey(i) === id)) return 'visible';
+    if (invisibleRef.current.some((i) => itemKey(i) === id)) return 'invisible';
+    return null;
+  };
+
   useEffect(() => {
     const buildFeedItems = async () => {
       let savedOrder: FeedOrderItem[] = [];
+      let savedInvisible: number[] = [];
       try {
-        savedOrder = await api.getFeedOrder();
+        const resp = await api.getFeedOrder();
+        savedOrder = resp.order;
+        savedInvisible = resp.invisible_multiopps;
       } catch (_) {}
 
       const positionMap = new Map<string, number>(
         savedOrder.map((item, index) => [`${item.is_multiopp}-${item.id}`, index])
       );
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const invisibleSet = new Set(savedInvisible);
 
       const standaloneOpps: FeedItem[] = opportunities
         .filter((o) => o.approved && !o.multiopp)
         .map((o) => ({ kind: 'opp' as const, data: o }));
 
-      const multiItems: FeedItem[] = multiopps
+      const allMultiItems: FeedItem[] = multiopps
         .filter((m) => m.approved !== false)
         .map((m) => ({ kind: 'multiopp' as const, data: m }));
 
-      const all: FeedItem[] = [...standaloneOpps, ...multiItems];
-
-      all.sort((a, b) => {
-        const keyA = `${a.kind === 'multiopp'}-${a.data.id}`;
-        const keyB = `${b.kind === 'multiopp'}-${b.data.id}`;
-        const posA = positionMap.get(keyA) ?? Infinity;
-        const posB = positionMap.get(keyB) ?? Infinity;
+      const visible: FeedItem[] = [
+        ...standaloneOpps,
+        ...allMultiItems.filter((i) => !invisibleSet.has(i.data.id)),
+      ].sort((a, b) => {
+        const posA = positionMap.get(itemKey(a)) ?? Infinity;
+        const posB = positionMap.get(itemKey(b)) ?? Infinity;
         return posA - posB;
       });
 
-      setFeedItems(all);
+      const invisible: FeedItem[] = allMultiItems.filter((i) => invisibleSet.has(i.data.id));
+
+      setVisibleItems(visible);
+      setInvisibleItems(invisible);
     };
 
     buildFeedItems();
   }, [opportunities, multiopps]);
 
+  const handleDragStart = (event: DragStartEvent) => {
+    const id = event.active.id;
+    const item =
+      visibleRef.current.find((i) => itemKey(i) === id) ||
+      invisibleRef.current.find((i) => itemKey(i) === id) ||
+      null;
+    setActiveItem(item);
+    activeContainerRef.current = findContainerForId(id);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeContainer = activeContainerRef.current;
+    const overContainer = findContainerForId(over.id);
+
+    if (!activeContainer || !overContainer || activeContainer === overContainer) return;
+
+    // Only multiopps can move to invisible
+    const movingItem =
+      visibleRef.current.find((i) => itemKey(i) === active.id) ||
+      invisibleRef.current.find((i) => itemKey(i) === active.id);
+    if (!movingItem || movingItem.kind !== 'multiopp') return;
+
+    if (activeContainer === 'visible' && overContainer === 'invisible') {
+      setVisibleItems((prev) => prev.filter((i) => itemKey(i) !== active.id));
+      setInvisibleItems((prev) => [...prev, movingItem]);
+    } else {
+      setInvisibleItems((prev) => prev.filter((i) => itemKey(i) !== active.id));
+      setVisibleItems((prev) => [...prev, movingItem]);
+    }
+    // Update synchronously so handleDragEnd sees the correct container
+    activeContainerRef.current = overContainer;
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
-    setFeedItems((items) => {
-      const ids = items.map((i) => `${i.kind === 'multiopp'}-${i.data.id}`);
-      const oldIndex = ids.indexOf(active.id as string);
-      const newIndex = ids.indexOf(over.id as string);
-      return arrayMove(items, oldIndex, newIndex);
-    });
+    setActiveItem(null);
+    const container = activeContainerRef.current;
+    activeContainerRef.current = null;
+
+    if (!over || active.id === over.id || !container) return;
+
+    // Cross-container moves are already done in handleDragOver.
+    // Only handle same-container reordering here.
+    const overContainer = findContainerForId(over.id);
+    if (container !== overContainer) return;
+
+    if (container === 'visible') {
+      setVisibleItems((items) => {
+        const ids = items.map(itemKey);
+        const oldIndex = ids.indexOf(active.id as string);
+        const newIndex = ids.indexOf(over.id as string);
+        return oldIndex === -1 || newIndex === -1 ? items : arrayMove(items, oldIndex, newIndex);
+      });
+    } else {
+      setInvisibleItems((items) => {
+        const ids = items.map(itemKey);
+        const oldIndex = ids.indexOf(active.id as string);
+        const newIndex = ids.indexOf(over.id as string);
+        return oldIndex === -1 || newIndex === -1 ? items : arrayMove(items, oldIndex, newIndex);
+      });
+    }
     setOrderSaveStatus('idle');
   };
 
@@ -182,11 +282,15 @@ const AdminPage: React.FC<AdminPageProps> = ({
     setIsSavingOrder(true);
     setOrderSaveStatus('idle');
     try {
-      const order: FeedOrderItem[] = feedItems.map((item) => ({
+      const order: FeedOrderItem[] = visibleItems.map((item) => ({
         id: item.data.id,
         is_multiopp: item.kind === 'multiopp',
       }));
-      await api.updateFeedOrder(order);
+      const invisibleIds = invisibleItems.map((i) => i.data.id);
+      await Promise.all([
+        api.updateFeedOrder(order),
+        api.updateInvisibleMultiopps(invisibleIds),
+      ]);
       queryClient.invalidateQueries({ queryKey: ['feedOrder'] });
       setOrderSaveStatus('saved');
       setTimeout(() => setOrderSaveStatus('idle'), 2500);
@@ -1003,26 +1107,52 @@ const promptAndDownloadCsv = async () => {
           </div>
         </div>
         <p className="text-sm text-gray-500 mb-4">
-          Drag cards to set the default display order on the Opportunities page. Events and series are interleaved.
+          Drag cards to reorder. Move series cards into the Hidden section to hide them from the feed.
         </p>
 
-        {feedItems.length === 0 ? (
+        {visibleItems.length === 0 && invisibleItems.length === 0 ? (
           <p className="text-sm text-gray-400 italic">No approved opportunities yet.</p>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext
-              items={feedItems.map((i) => `${i.kind === 'multiopp'}-${i.data.id}`)}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="flex flex-col gap-2">
-                {feedItems.map((item) => (
-                  <SortableCard
-                    key={`${item.kind === 'multiopp'}-${item.data.id}`}
-                    item={item}
-                  />
-                ))}
-              </div>
-            </SortableContext>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={collisionDetection}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+          >
+            {/* Visible feed */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Visible</h3>
+              <SortableContext items={visibleItems.map(itemKey)} strategy={verticalListSortingStrategy}>
+                <DroppableZone id="visible" className="flex flex-col gap-2 min-h-[48px]">
+                  {visibleItems.map((item) => (
+                    <SortableCard key={itemKey(item)} item={item} />
+                  ))}
+                </DroppableZone>
+              </SortableContext>
+            </div>
+
+            {/* Hidden (invisible multiopps only) */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Hidden from Feed
+              </h3>
+              <SortableContext items={invisibleItems.map(itemKey)} strategy={verticalListSortingStrategy}>
+                <DroppableZone id="invisible" className="flex flex-col gap-2 min-h-[64px] border-2 border-dashed border-gray-300 rounded-lg p-2">
+                  {invisibleItems.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic text-center py-4">Drag series cards here to hide them</p>
+                  ) : (
+                    invisibleItems.map((item) => (
+                      <SortableCard key={itemKey(item)} item={item} />
+                    ))
+                  )}
+                </DroppableZone>
+              </SortableContext>
+            </div>
+
+            <DragOverlay>
+              {activeItem ? <SortableCard item={activeItem} /> : null}
+            </DragOverlay>
           </DndContext>
         )}
       </div>

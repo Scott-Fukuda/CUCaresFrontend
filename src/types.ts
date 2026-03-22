@@ -283,6 +283,12 @@ export interface FeedOrderItem {
   is_multiopp: boolean;
 }
 
+export interface FeedOrderResponse {
+  id?: number;
+  order: FeedOrderItem[];
+  invisible_multiopps: number[];
+}
+
 export type FeedItem =
   | { kind: 'opp'; data: Opportunity }
   | { kind: 'multiopp'; data: MultiOpp };

@@ -13,7 +13,8 @@ import {
   FriendshipsResponse,
   UserWithFriendshipStatus,
   MultiOpp,
-  FeedOrderItem
+  FeedOrderItem,
+  FeedOrderResponse,
 } from './types';
 import * as api from './api';
 import {
@@ -168,11 +169,13 @@ const AppContent: React.FC = () => {
     queryFn: api.getMultiOpps
   });
 
-  const { data: feedOrder = [] } = useQuery<FeedOrderItem[]>({
+  const { data: feedOrderResponse } = useQuery<FeedOrderResponse>({
     queryKey: ['feedOrder'],
     queryFn: api.getFeedOrder,
     enabled: !!currentUser,
   });
+  const feedOrder: FeedOrderItem[] = feedOrderResponse?.order ?? [];
+  const invisibleMultioppIds: number[] = feedOrderResponse?.invisible_multiopps ?? [];
 
 
   // Friendships data from backend
@@ -1060,6 +1063,7 @@ const AppContent: React.FC = () => {
           oppsLoading={oppsLoading}
           multiopp={multiopps}
           feedOrder={feedOrder}
+          invisibleMultioppIds={invisibleMultioppIds}
           // setOpportunities={setOpportunities}
           signups={signups}
           organizations={organizations}
