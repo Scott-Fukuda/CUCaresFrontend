@@ -392,7 +392,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                       type="tel"
                       value={editingPhone}
                       onChange={(e) => setEditingPhone(e.target.value)}
-                      placeholder="e.g. 607-555-0123"
+                      placeholder="e.g. 012-345-6789"
                       className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent transition-all"
                     />
                   ) : (
