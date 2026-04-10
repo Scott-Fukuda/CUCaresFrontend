@@ -313,7 +313,55 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
           {(isCurrentUser || currentUser.admin) && (
             <div className="space-y-4">
               <div className="flex justify-center mt-4">
-                <button
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "18px",
+                  }}
+                >
+                  <div
+                    style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                    <span style={{ fontSize: "18px", fontWeight: 600, color: "#1f2937" }}>
+                      Email newsletter
+                    </span>
+                    <span style={{ fontSize: "14px", color: "#767676" }}>
+                      Get notified about upcoming opportunities
+                    </span>
+                  </div>
+                  <label style={{ position: "relative", width: "44px", height: "28px" }}>
+                    <input
+                      type="checkbox"
+                      checked={localUser.subscribed}
+                      onChange={handleSubscriptionUpdate}
+                      style={{ opacity: 0, width: 0, height: 0 }}
+                    />
+                    <span
+                      style={{
+                        position: "absolute",
+                        cursor: "pointer",
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: localUser.subscribed ? "#b31b1b" : "#d9d9d9",
+                        border: localUser.subscribed ? "2px solid #b31b1b" : "2px solid #757575",
+                         borderRadius: "24px",
+                        transition: "0.25s",
+                      }}
+                    />
+                    <span
+                      style={{
+                        position: "absolute",
+                        height: "20.5px", width: "20.5px",
+                        left: localUser.subscribed ? "19px" : "4px",
+                        bottom: "4px",
+                        backgroundColor: localUser.subscribed ? "#ffffff" : "#757575",
+                        borderRadius: "50%",
+                        transition: "0.3s",
+                      }}
+                    />
+                  </label>
+                </div>
+                {/* <button
                   onClick={handleSubscriptionUpdate}
                   className={`font-bold py-2 px-4 rounded-lg transition-colors text-sm mt-4 ${
                     localUser.subscribed
@@ -322,7 +370,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                   }`}
                 >
                   {localUser.subscribed ? "Unsubscribe from Emails" : "Subscribe to Emails"}
-                </button>
+                </button> */}
               </div>
               <button
                 onClick={() => navigate(`/service-journal/${user.id}`)}
