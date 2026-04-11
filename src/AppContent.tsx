@@ -249,7 +249,7 @@ const AppContent: React.FC = () => {
             api.getApprovedOrgs(),
             api.getMultiOpps(),
           ]);
-          console.log("usersData from API:", usersData);
+          // console.log("usersData from API:", usersData);
 
           //console.log('API calls completed:', {
           //   usersCount: usersData.length,
