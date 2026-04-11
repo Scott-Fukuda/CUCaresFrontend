@@ -92,6 +92,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
   const [editingBio, setEditingBio] = useState(user.bio || '');
   const [savingBio, setSavingBio] = useState(false);
   const [localUser, setLocalUser] = useState(user); // Add local user state
+  const [editingPhone, setEditingPhone] = useState(user.phone || '');
 
   React.useEffect(() => {
     window.scrollTo(0, 0);
@@ -418,6 +419,46 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                 <p className="text-sm text-gray-500">{localUser.bio || 'No bio added yet.'}</p>
               )}
             </div>
+
+            {/* Phone Number Section */}
+            {isCurrentUser && (
+              <div className="mt-10 bg-white p-6 rounded-2xl shadow-lg border-l-4 border-cornell-red">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-gray-800">Private Information</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-cornell-red bg-red-50 px-2 py-1 rounded-full border border-red-100">
+                    Private to you
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                    Phone Number
+                  </label>
+                  
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      value={editingPhone}
+                      onChange={(e) => setEditingPhone(e.target.value)}
+                      placeholder="e.g. 012-345-6789"
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent transition-all"
+                    />
+                  ) : (
+                    <div className="flex items-center gap-3 group">
+                      <div className="p-2 bg-gray-100 rounded-lg group-hover:bg-red-50 transition-colors">
+                        <svg xmlns="http://w3.org" className="h-4 w-4 text-gray-500 group-hover:text-cornell-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-700 font-medium">
+                        {user.phone || <span className="text-gray-400 italic font-normal">No phone number on file</span>}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {isCurrentUser && (
               <>
                 {!isEditing ? (
@@ -433,10 +474,10 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                       onClick={async () => {
                         setSavingBio(true);
                         try {
-                          const updatedUser = await updateUser(user.id, { bio: editingBio });
+                          const updatedUser = await updateUser(user.id, { bio: editingBio, phone: editingPhone });
                           // Update local user state
-                          setLocalUser({ ...localUser, bio: editingBio });
-                          setCurrentUser((prev) => ({ ...prev!, bio: editingBio }));
+                          setLocalUser({ ...localUser, bio: editingBio, phone: editingPhone });
+                          setCurrentUser((prev) => ({ ...prev!, bio: editingBio, phone: editingPhone }));
                           setIsEditing(false);
                         } catch (error) {
                           console.error('Error saving bio:', error);
