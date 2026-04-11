@@ -27,7 +27,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import AuthFlow from './AuthFlow';
 import AppRouter from './AppRouter';
 import PopupMessage from './components/PopupMessage';
+import ConfirmDialog from './components/ConfirmDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { canUnregisterFromOpportunity, formatTimeUntilEvent } from './utils/timeUtils';
 import { Zoomies } from 'ldrs/react'
 import 'ldrs/react/Zoomies.css'
 
@@ -193,6 +195,28 @@ const AppContent: React.FC = () => {
     message: '',
     type: 'info',
   });
+
+  const unregisterConfirmResolverRef = useRef<((value: boolean) => void) | null>(null);
+  const [unregisterConfirm, setUnregisterConfirm] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
+
+  const resolveUnregisterConfirm = useCallback((confirmed: boolean) => {
+    const resolve = unregisterConfirmResolverRef.current;
+    unregisterConfirmResolverRef.current = null;
+    setUnregisterConfirm(null);
+    resolve?.(confirmed);
+  }, []);
+
+  const requestUnregisterConfirm = useCallback(
+    (title: string, message: string) =>
+      new Promise<boolean>((resolve) => {
+        unregisterConfirmResolverRef.current = resolve;
+        setUnregisterConfirm({ title, message });
+      }),
+    []
+  );
 
   // Add state for tracking first-time registration
   const [showPostRegistrationSetup, setShowPostRegistrationSetup] = useState(false);
@@ -524,20 +548,33 @@ const AppContent: React.FC = () => {
     }, [currentUser]);
 
   const handleUnSignUp = useCallback(
-    async (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => {
-      if (!currentUser) return;
-      // const isMultiOpp = allOpps?.some(
-      //   (opp) => 'opportunities' in opp && opp.id === opportunityId
-      // );
-      // if (isMultiOpp) {
-      //   console.log('Skipping signup — this is a MultiOpp container, not an event.');
-      //   return;
-      // }
+    async (opportunityId: number, opportunityDate?: string, opportunityTime?: string): Promise<boolean> => {
+      if (!currentUser) return false;
 
       // Find the opportunity to check if user is host
       const opportunity = opportunities.find((opp) => opp.id === opportunityId);
       const isAdminOrHost =
         currentUser.admin || (opportunity && opportunity.host_id === currentUser.id);
+
+      let confirmMessage =
+        'Are you sure you want to unregister from this opportunity? If you unregister within 7 hours of the event, an email will be sent to the event organizer.';
+      if (opportunityDate && opportunityTime && !isAdminOrHost) {
+        const { canUnregister, hoursUntilEvent } = canUnregisterFromOpportunity(
+          opportunityDate,
+          opportunityTime
+        );
+        if (!canUnregister) {
+          confirmMessage += `\n\nYou are within 7 hours of the scheduled start (${formatTimeUntilEvent(hoursUntilEvent)}). If this was a mistake, contact the event organizer after canceling.`;
+        }
+      }
+
+      const confirmed = await requestUnregisterConfirm(
+        'Unregister from this opportunity?',
+        confirmMessage
+      );
+      if (!confirmed) {
+        return false;
+      }
 
       // Store original state for potential rollback
       const originalSignups = [...signups];
@@ -553,21 +590,23 @@ const AppContent: React.FC = () => {
           opportunity_id: opportunityId,
           opportunityDate,
           opportunityTime,
-          isAdminOrHost, // Pass admin/host status
+          isAdminOrHost,
         });
 
         // Refresh opportunities to get updated involved_users from backend
         // const updatedOpps = await api.getCurrentOpportunities();
         // setOpportunities(updatedOpps);
         await queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+        return true;
       } catch (e: any) {
         console.error('Error in handleUnSignUp:', e);
         // Revert local state on error
         setSignups(originalSignups);
         alert(`Error un-registering: ${e.message}`);
+        return false;
       }
     },
-    [currentUser, opportunities, signups]
+    [currentUser, opportunities, signups, queryClient, requestUnregisterConfirm]
   );
 
   const currentUserSignupsSet = useMemo(() => {
@@ -1104,6 +1143,16 @@ const AppContent: React.FC = () => {
         type={popupMessage.type}
         opportunityId={popupMessage.opportunityId}
         onInvite={shareOpportunity}
+      />
+
+      <ConfirmDialog
+        isOpen={!!unregisterConfirm}
+        title={unregisterConfirm?.title ?? ''}
+        message={unregisterConfirm?.message ?? ''}
+        confirmLabel="Unregister"
+        cancelLabel="Cancel"
+        onConfirm={() => resolveUnregisterConfirm(true)}
+        onCancel={() => resolveUnregisterConfirm(false)}
       />
     </>
   );

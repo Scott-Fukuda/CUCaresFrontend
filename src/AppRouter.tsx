@@ -64,7 +64,11 @@ interface AppRouterProps {
     handleSendFriendRequest: (friendId: number) => void;
     leaderboardUsers: User[];
     handleSignUp: (opportunityId: number) => void;
-    handleUnSignUp: (opportunityId: number) => void;
+    handleUnSignUp: (
+        opportunityId: number,
+        opportunityDate?: string,
+        opportunityTime?: string
+    ) => Promise<boolean>;
     currentUserSignupsSet: Set<number>;
     handleAcceptFriendRequest: (otherUserId: number) => void;
     handleRejectFriendRequest: (otherUserId: number) => void;

@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { MultiOpp, Organization, Opportunity, User } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl } from '../api';
-import { canUnregisterFromOpportunity, formatTimeUntilEvent } from '../utils/timeUtils';
 import ErrorIcon from '@mui/icons-material/Error';
 
 interface MultiOppCardProps {
@@ -187,21 +186,11 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
                 normalizedTime ?? (oppDate ? formatLocalTime(oppDate) : undefined);
               const redirectUrl = opp.redirect_url;
 
-              const unregistrationInfo =
-                isUserSignedUp && derivedDateString && derivedTimeString
-                  ? canUnregisterFromOpportunity(derivedDateString, derivedTimeString)
-                  : null;
-              const canUnregister = unregistrationInfo?.canUnregister ?? true;
-              const hoursUntilEvent = unregistrationInfo?.hoursUntilEvent ?? 0;
-
-              const buttonDisabled =
-                eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister);
+              const buttonDisabled = eventStarted || (!canSignUp && !isUserSignedUp);
               const buttonText = eventStarted
                 ? 'Event Already Started'
                 : isUserSignedUp
-                  ? canUnregister
-                    ? 'Signed Up ✓'
-                    : `Unregistration Closed (${formatTimeUntilEvent(hoursUntilEvent)})`
+                  ? 'Signed Up ✓'
                   : canSignUp
                     ? redirectUrl
                       ? 'Sign Up Externally'
@@ -281,9 +270,7 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
                       ${!buttonDisabled &&
                         (
                           isUserSignedUp
-                            ? canUnregister
-                              ? 'bg-green-600 hover:bg-green-700'
-                              : 'bg-orange-500'
+                            ? 'bg-green-600 hover:bg-green-700'
                             : canSignUp
                               ? 'bg-cornell-red hover:bg-red-800'
                               : ''

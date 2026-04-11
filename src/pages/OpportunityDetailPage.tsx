@@ -26,7 +26,7 @@ interface OpportunityDetailPageProps {
     opportunityId: number,
     opportunityDate?: string,
     opportunityTime?: string
-  ) => void;
+  ) => Promise<boolean>;
   allOrgs: Organization[];
   currentUserSignupsSet: Set<number>;
   allTimeMyOpps: Opportunity[];
@@ -157,11 +157,12 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
           );
         }
 
-        const confirmed = window.confirm(
-          "Are you sure you want to un-register from this opportunity?"
+        const unregistered = await handleUnSignUp(
+          opportunity.id,
+          opportunity.date,
+          opportunity.time
         );
-        if (confirmed) {
-          await handleUnSignUp(opportunity.id, opportunity.date, opportunity.time);
+        if (unregistered) {
           alert("You have been unregistered successfully.");
         }
         return; // stop here after un-sign-up

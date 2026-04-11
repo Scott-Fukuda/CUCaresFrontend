@@ -2,11 +2,7 @@ import React, { useMemo } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl, removeCarpoolUser } from '../../api';
-import {
-  canUnregisterFromOpportunity,
-  formatTimeUntilEvent,
-  calculateEndTime,
-} from '../../utils/timeUtils';
+import { calculateEndTime } from '../../utils/timeUtils';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import './index.scss';
@@ -74,15 +70,6 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   const canSignUp = availableSlots > 0 && !isUserSignedUp;
   const eventStarted = new Date() >= new Date(`${opportunity.date}T${opportunity.time}`);
   const isUserHost = currentUser ? opportunity.host_id === currentUser.id : false;
-
-  // Check if user can unregister (7-hour rule)
-  const unregistrationCheck = useMemo(() => {
-    if (!isUserSignedUp) return null;
-    return canUnregisterFromOpportunity(opportunity.date, opportunity.time);
-  }, [isUserSignedUp, opportunity.date, opportunity.time]);
-
-  const canUnregister = unregistrationCheck?.canUnregister ?? true;
-  const timeUntilEvent = unregistrationCheck?.hoursUntilEvent ?? 0;
 
   const handleCardClick = (e: React.MouseEvent) => {
     if (!currentUser) { navigate('/sign-up'); return; }
@@ -383,15 +370,11 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
 
         <button
           onClick={!eventStarted ? handleButtonClick : undefined}
-          disabled={
-            eventStarted || (!canSignUp && !isUserSignedUp) || (isUserSignedUp && !canUnregister)
-          }
+          disabled={eventStarted || (!canSignUp && !isUserSignedUp)}
           className={`opportunity-card__button ${eventStarted
             ? 'opportunity-card__button--started'
             : isUserSignedUp
-              ? canUnregister
-                ? 'opportunity-card__button--signed-up'
-                : 'opportunity-card__button--unregister-closed'
+              ? 'opportunity-card__button--signed-up'
               : canSignUp
                 ? 'opportunity-card__button--available'
                 : 'opportunity-card__button--unavailable'
@@ -400,24 +383,13 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
           {eventStarted
             ? 'Event Already Started'
             : isUserSignedUp
-              ? canUnregister
-                ? 'Signed Up ✓'
-                : `Unregistration Closed (${formatTimeUntilEvent(timeUntilEvent)})`
+              ? 'Signed Up ✓'
               : canSignUp
                 ? opportunity.redirect_url
                   ? 'Sign Up Externally'
                   : 'Sign Up'
                 : 'No Slots Available'}
         </button>
-
-        {isUserSignedUp && !canUnregister && (
-          <div className="opportunity-card__warning">
-            <p className="opportunity-card__warning-text">
-              ⚠️ Unregistration closed within 7 hours of event. Contact organizer if you need to
-              cancel.
-            </p>
-          </div>
-        )}
 
         {opportunity.tags && Array.isArray(opportunity.tags) && opportunity.tags.length > 0 && (
           <div className="opportunity-card__tags">

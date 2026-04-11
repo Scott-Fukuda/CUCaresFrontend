@@ -9,7 +9,11 @@ interface OpportunitySearchPageProps {
   allOrgs: Organization[];
   currentUser: User;
   handleSignUp: (opportunityId: number) => void;
-  handleUnSignUp: (opportunityId: number, opportunityDate?: string, opportunityTime?: string) => void;
+  handleUnSignUp: (
+    opportunityId: number,
+    opportunityDate?: string,
+    opportunityTime?: string
+  ) => Promise<boolean>;
   currentUserSignupsSet: Set<number>;
   signups: SignUp[];
   showPopup?: (

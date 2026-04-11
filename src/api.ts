@@ -1,7 +1,5 @@
 import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride } from './types';
 import { auth } from './firebase-config';
-import { canUnregisterFromOpportunity } from './utils/timeUtils';
-
 // Helper function to get profile picture URL
 // Returns a generic silhouette when no profile image is available
 export const getProfilePictureUrl = (profile_image?: string | null, google_photo?: string | null): string => {
@@ -978,19 +976,8 @@ export const unregisterForOpp = async (data: {
   opportunity_id: number;
   opportunityDate?: string;
   opportunityTime?: string;
-  isAdminOrHost?: boolean; // New parameter to bypass 7-hour rule
+  isAdminOrHost?: boolean;
 }) => {
-  // Validate 7-hour window only if user is not admin or host
-  if (data.opportunityDate && data.opportunityTime && !data.isAdminOrHost) {
-    const { canUnregister } = canUnregisterFromOpportunity(
-      data.opportunityDate,
-      data.opportunityTime
-    );
-    if (!canUnregister) {
-      throw new Error('Cannot unregister within 7 hours of the event');
-    }
-  }
-
   return authenticatedRequest('/unregister-opp', {
     method: 'POST',
     body: JSON.stringify({
