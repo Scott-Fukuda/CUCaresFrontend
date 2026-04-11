@@ -18,11 +18,12 @@ export const formatRegistrationDate = (date: Date = new Date()): string => {
   return date.toISOString().slice(0, 19);
 };
 
-// A helper for making Acucaresbackend.onrender.comPI requests.
-// const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
-
-const ENDPOINT_URL = "http://127.0.0.1:8000"
-// import.meta.env.VITE_ENDPOINT_URL;
+// A helper for making Acucaresbackend.onrender.com API requests.
+// Prefer the environment variable but fall back to the production URL so
+// the frontend doesn't build requests to `undefined` when VITE_ENDPOINT_URL
+// is not provided (e.g. during local dev without env setup).
+const ENDPOINT_URL = import.meta.env.VITE_ENDPOINT_URL || 'https://cucaresbackend.onrender.com';
+// Local dev example: "http://127.0.0.1:8000"
 
 
 

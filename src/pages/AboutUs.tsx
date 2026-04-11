@@ -1,90 +1,121 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 import { Member, User } from '../types';
 import { ourTeam } from '../data/initialData';
-import { useNavigate } from 'react-router-dom';
 
-const TeamMemberCard: React.FC<{ member: Member }> = ({ member }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const maxLength = 120; // Character limit for truncated text
-  const shouldTruncate = member.favoriteService.length > maxLength;
-  const displayText =
-    isExpanded || !shouldTruncate
-      ? member.favoriteService
-      : member.favoriteService.substring(0, maxLength) + '...';
+/**
+ * Simplified Card: Square image with role and name.
+ */
+const SimplifiedMemberCard: React.FC<{ 
+  member: Member; 
+  isSelected: boolean;
+  onClick: () => void 
+}> = ({ member, isSelected, onClick }) => (
+  <button 
+    onClick={onClick}
+    className={`flex flex-col items-start text-left transition-all duration-300 hover:opacity-80 ${
+      isSelected ? 'ring-2 ring-cornell-red ring-offset-4 rounded-lg' : ''
+    }`}
+  >
+    <div className="w-full aspect-square bg-[#6b6b6b] rounded-lg mb-3 overflow-hidden shadow-sm">
+      {member.picture && (
+        <img 
+          src={member.picture} 
+          alt={member.name} 
+          className="w-full h-full object-cover" 
+        />
+      )}
+    </div>
+    <h3 className="text-lg font-bold text-gray-900 leading-tight">{member.name}</h3>
+    <p className="text-sm text-[#b94538] font-medium">{member.role}</p>
+  </button>
+);
 
-  return (
-    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
-      <div className="text-center flex-1 flex flex-col">
-        <div className="mb-4">
-          {member.picture ? (
-            <img
-              src={member.picture}
-              alt={member.name}
-              className="w-24 h-24 rounded-full object-cover mx-auto border-4 border-cornell-red/20"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = '/default-profile.png';
-              }}
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-cornell-red/10 mx-auto flex items-center justify-center border-4 border-cornell-red/20">
-              <span className="text-2xl font-bold text-cornell-red">
-                {member.name
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
-        <p className="text-cornell-red font-semibold mb-1">{member.role}</p>
-        <p className="text-gray-600 font-medium mb-1">{member.major}</p>
-        <p className="text-gray-600 text-sm mb-2">Class of {member.class}</p>
-        <p className="text-gray-500 text-sm mb-3">📍 {member.hometown}</p>
-
-        <div className="mb-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">Campus Organizations</h4>
-          <div className="flex flex-wrap gap-1 justify-center">
-            {member.campusOrgs.map((org, index) => (
-              <span
-                key={index}
-                className="text-xs bg-cornell-red/10 text-cornell-red px-2 py-1 rounded-full font-medium"
-              >
-                {org}
-              </span>
-            ))}
+/**
+ * Expanded Profile: Comprehensive view using MUI Close icon.
+ */
+const ExpandedProfile: React.FC<{ 
+  member: Member; 
+  onClose: () => void 
+}> = ({ member, onClose }) => (
+  <div className="col-span-full bg-white rounded-xl p-8 mb-10 relative flex flex-col md:flex-row gap-8 shadow-md border border-gray-100 animate-in fade-in slide-in-from-top-4 duration-300">
+    <button 
+      onClick={onClose} 
+      className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors"
+      aria-label="Close profile"
+    >
+      <CloseIcon sx={{ fontSize: 28 }} />
+    </button>
+    
+    <div className="w-full md:w-64 flex-shrink-0">
+      {/* Updated Image Container */}
+      <div className="aspect-square bg-[#6b6b6b] rounded-lg mb-4 shadow-sm overflow-hidden">
+        {member.picture ? (
+          <img 
+            src={member.picture} 
+            alt={member.name} 
+            className="w-full h-full object-cover" 
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/default-profile.png'; // Fallback if image fails to load
+            }}
+          />
+        ) : (
+          /* Fallback initials if no picture exists */
+          <div className="w-full h-full flex items-center justify-center text-white font-bold text-4xl">
+            {member.name.split(' ').map(n => n[0]).join('')}
           </div>
-        </div>
+        )}
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 leading-tight">{member.name}</h2>
+      <p className="text-lg text-[#b94538] font-semibold">{member.role}</p>
+    </div>
 
-        <div className="border-t pt-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">Favorite Service Experience</h4>
-          <p className="text-sm text-gray-600 italic leading-relaxed mb-2">"{displayText}"</p>
-          {shouldTruncate && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation(); // ⛔ prevent parent click
-                setIsExpanded(!isExpanded);
-              }}
-              className="text-xs text-cornell-red hover:text-red-800 font-medium transition-colors duration-200"
-            >
-              {isExpanded ? 'See Less' : 'See More'}
-            </button>
-          )}
-        </div>
+    <div className="flex-grow">
+      <div className="flex flex-wrap gap-x-6 gap-y-2 mb-6 text-sm md:text-base border-b pb-4 border-gray-200">
+        <p><span className="font-bold">Major:</span> {member.major}</p>
+        <p><span className="font-bold">Year:</span> {member.class}</p>
+        <p><span className="font-bold">Hometown:</span> {member.hometown}</p>
+      </div>
+      
+      <div className="mb-6">
+        <h4 className="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Campus involvements:</h4>
+        <p className="text-gray-700">{member.campusOrgs.join(', ')}</p>
+      </div>
+
+      <div>
+        <h4 className="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Favorite service experience:</h4>
+        <p className="text-gray-700 leading-relaxed italic">
+          "{member.favoriteService}"
+        </p>
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 interface AboutUsProps {
-  currentUser: User | null
+  currentUser: User | null;
 }
 
 const AboutUsPage: React.FC<AboutUsProps> = ({ currentUser }) => {
-  const teamMembers = ourTeam; // Get the team members array
-  const navigate = useNavigate();
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('Full Team');
+
+  const departments = ['Full Team', 'Business Development', 'Marketing', 'Outreach', 'Tech'];
+  
+  const filteredDepartments = useMemo(() => {
+    const categories = ['Business Development', 'Marketing', 'Outreach', 'Tech'];
+    if (activeTab === 'Full Team') {
+      return categories.map(dept => ({
+        name: dept,
+        members: ourTeam.filter(m => m.department === dept)
+      }));
+    }
+    return [{
+      name: activeTab,
+      members: ourTeam.filter(m => m.department === activeTab)
+    }];
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -109,28 +140,12 @@ const AboutUsPage: React.FC<AboutUsProps> = ({ currentUser }) => {
             <div className="text-left">
               <div className="mb-8 flex flex-col md:flex-row md:items-start md:space-x-6 space-y-4 md:space-y-0">
                 <div className="w-16 h-16 md:w-20 md:h-20 bg-cornell-red/10 rounded-full flex items-center justify-center flex-shrink-0 mx-auto md:mx-0">
-                  <svg
-                    className="w-8 h-8 md:w-10 md:h-10 text-cornell-red"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
+                  <svg className="w-8 h-8 md:w-10 md:h-10 text-cornell-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
                 <div>
-                  {/* <h3 className="text-2xl font-bold text-gray-900 mb-4">About CampusCares</h3> */}
                   <p className="text-sm md:text-lg text-gray-700 leading-relaxed">
                     We believe in the power of service to transform communities, build friendships,
                     and cultivate unity. We seek to catalyze change by equipping students with
@@ -145,15 +160,11 @@ const AboutUsPage: React.FC<AboutUsProps> = ({ currentUser }) => {
                     CampusCares, an online platform to mobilize Cornell students to create genuine
                     social impact.
                   </p>
-
                   <br />
                   <p className="text-sm md:text-lg text-gray-700 leading-relaxed">
                     CampusCares connects you with a wide range of nonprofit partners—all in one
                     simple, free platform. You can discover causes you care about, help your student
                     organizations climb the leaderboard, and meet new friends through volunteering.
-                    We open doors to new opportunities, motivate you to stay involved, and help
-                    bridge the Cornell and Ithaca communities. We seek to support the bold missions
-                    of local organizations while empowering students to make a real difference.
                   </p>
                 </div>
               </div>
@@ -165,50 +176,99 @@ const AboutUsPage: React.FC<AboutUsProps> = ({ currentUser }) => {
         <section className="mb-20">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Team</h2>
-            <div className="w-24 h-1 bg-cornell-red mx-auto mb-8"></div>
+            <div className="w-24 h-1 bg-cornell-red mx-auto mb-12"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {teamMembers.map((member) => (
-              <button
-                key={member.id}
-                className="clickable-card"
-                onClick={() => {
-                  if (!currentUser) return;
-                  else navigate(`/profile/${member.id}`);
-                }}
-              >
-                <TeamMemberCard member={member} />
-              </button>
-            ))}
+          {/* Department Tabs - Full Width Update */}
+          <div className="mb-16">
+            <div className="flex w-full bg-gray-100 p-1.5 rounded-full shadow-inner">
+              {departments.map((dept) => (
+                <button
+                  key={dept}
+                  onClick={() => {
+                    setActiveTab(dept);
+                    setSelectedMemberId(null);
+                  }}
+                  className={`flex-1 px-2 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-300 ${
+                    activeTab === dept 
+                      ? 'bg-cornell-red text-white shadow-md' 
+                      : 'text-gray-500 hover:text-gray-800'
+                  }`}
+                >
+                  {dept}
+                </button>
+              ))}
+            </div>
           </div>
+          
+              {/* Departmental Groups */}
+    {filteredDepartments.map((dept) => {
+      // Group members into rows based on the current screen size (using 4 for desktop)
+      // This logic ensures the expanded profile injects itself after the correct row
+      const itemsPerRow = 4;
+      const rows = [];
+      for (let i = 0; i < dept.members.length; i += itemsPerRow) {
+        rows.push(dept.members.slice(i, i + itemsPerRow));
+      }
+
+      return (
+        <div key={dept.name} className="mb-16">
+          <h3 className="text-2xl font-bold text-gray-900 mb-8">
+            {dept.name}
+          </h3>
+          
+          <div className="flex flex-col gap-y-12">
+            {rows.map((row, rowIndex) => {
+              // Check if the selected member is in THIS specific row
+              const selectedInRow = row.find(m => m.id === selectedMemberId);
+
+              return (
+                <React.Fragment key={rowIndex}>
+                  {/* The Grid Row */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12">
+                    {row.map((member) => (
+                      <SimplifiedMemberCard 
+                        key={member.id}
+                        member={member}
+                        isSelected={selectedMemberId === member.id}
+                        onClick={() => setSelectedMemberId(member.id === selectedMemberId ? null : member.id)}
+                      />
+                    ))}
+              </div>
+
+              {/* The Injected Profile (Only if the member is in this row) */}
+              {selectedInRow && (
+                <div className="w-full animate-in fade-in slide-in-from-top-2 duration-300">
+                  <ExpandedProfile 
+                    member={selectedInRow} 
+                    onClose={() => setSelectedMemberId(null)} 
+                  />
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    </div>
+  );
+})}
         </section>
 
         {/* Call to Action */}
         <section className="text-center">
           <div className="bg-cornell-red rounded-2xl shadow-lg p-8 md:p-12 text-white">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Make a Difference?</h2>
-
-            <button
-              onClick={() => navigate('/opportunities')}
-              className="bg-white text-cornell-red px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors duration-300"
-            >
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Make a Difference?</h2>
+            <button className="bg-white text-cornell-red px-10 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all shadow-md">
               Explore Opportunities
             </button>
           </div>
+          <p className="text-xs text-gray-500 mt-8">
+            Click here to see our{' '}
+            <a href="/terms_of_service.pdf" className="underline hover:text-gray-700">
+              Terms of Service and Privacy Policy
+            </a>.
+          </p>
         </section>
-        <p className="text-xs text-gray-500 mt-6 text-center">
-          Click here to see our{' '}
-          <a
-            href="/terms_of_service.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-gray-700"
-          >
-            Terms of Service and Privacy Policy
-          </a>
-          .
-        </p>
       </div>
     </div>
   );

@@ -121,6 +121,7 @@ export const ourTeam: Member[] = [
     favoriteService:
       'Adopt-A-Highway cleanup on a rainy Ithaca day–there’s something beautiful about digging in the dirt with some of your best friends.',
     role: 'Chief Executive Officer',
+    department: 'Business Development',
   },
   {
     id: 12,
@@ -132,6 +133,7 @@ export const ourTeam: Member[] = [
     campusOrgs: ['Cornell Business Review', 'Cornell Votes', 'Housing and Res Life'],
     favoriteService: 'I had the wonderful opportunity to help clean trails at the Adirondacks.',
     role: 'Chief Operating Officer',
+    department: 'Outreach',
   },
   {
     id: 15,
@@ -143,6 +145,7 @@ export const ourTeam: Member[] = [
     campusOrgs: ['Cru', 'CUAir'],
     favoriteService: 'Moving couches with the boys in Tyvek suits in the rain 😤',
     role: 'Chief Technology Officer',
+    department: 'Tech',
   },
   {
     id: 14,
@@ -155,6 +158,7 @@ export const ourTeam: Member[] = [
     favoriteService:
       'Through Prison Express, I was able to view artwork created by incarcerated youth and write letters in response. It’s a powerful way to connect with them, offer encouragement, and create a sense of shared humanity through art and words.',
     role: 'Chief Marketing Officer',
+    department: 'Marketing',
   },
   {
     id: 3,
@@ -167,6 +171,7 @@ export const ourTeam: Member[] = [
     favoriteService:
       'Volunteering with HEART to teach elementary school students about health has been one of my most meaningful experiences. Introducing concepts like nutrition, exercise, and wellness at an early age showed me how education can empower young people to make informed choices and build healthier futures.',
     role: 'Chief Growth Officer',
+    department: 'Business Development',
   },
 
   {
@@ -180,6 +185,7 @@ export const ourTeam: Member[] = [
     favoriteService:
       'Helping clean local trails to make them more accessible to the public back in Washington!',
     role: 'Director of Technical Development',
+    department: 'Tech',
   },
   {
     id: 17,
@@ -197,6 +203,7 @@ export const ourTeam: Member[] = [
     favoriteService:
       "My favorite community service experience was volunteering at my town's public library. Over the summer, I helped organize events and worked with children on a variety of activities. I particularly enjoyed playing games with them, such as chess, checkers, ping pong. I was even able to improve my own arts and crafts skills while assisting with creative sessions. Volunteering at my town's library was an especially rewarding experience because it gave me the opportunity to engage with the youth in my community. Witnessing their passion and enthusiasm for learning new skills made me optimistic about the bright future of my town!",
     role: 'Chief Strategy Officer',
+    department: 'Outreach',
   },
   {
     id: 142,
@@ -209,6 +216,7 @@ export const ourTeam: Member[] = [
     favoriteService:
       'Any time I am able to coach soccer in my hometown Buffalo, New York. There is something so special to me giving back to a community that has shaped me into the person I am today.',
     role: 'Director of Partnerships',
+    department: 'Outreach',
   },
   {
     id: 106,
@@ -227,6 +235,7 @@ export const ourTeam: Member[] = [
     favoriteService:
       'My favorite service experience was coaching 3rd and 4th grade girls’ soccer. All through high school, I was very involved in my town’s soccer program, including volunteer coaching. Over seven seasons, I had the privilege of watching each girl grow in skill and confidence while also learning to love the game. Building connections with every player and giving them the same fun and educational soccer experience I had as a child was incredibly rewarding. Last year, I even got to see two of the girls I once coached compete in the state semifinals. Watching their growth and continued passion for soccer was one of the most fulfilling moments of my coaching experience.',
     role: 'Outreach Manager',
+    department: 'Outreach',
   },
   {
     id: 168,
@@ -238,6 +247,7 @@ export const ourTeam: Member[] = [
     campusOrgs: ['Bethany CCC'],
     favoriteService: "Volunteering at my local elementary school's after-school program!",
     role: 'Frontend Developer',
+    department: 'Tech',
   },
   {
     id: 283,
@@ -249,6 +259,7 @@ export const ourTeam: Member[] = [
     campusOrgs: ['PAD', 'CIPEC', 'ACLU', 'CFA', 'Cornell Catholic'],
     favoriteService: "Volunteering for my friend’s Indonesian Food Bazaar event and bringing together members of my community to celebrate Indonesian culture!",
     role: 'Communication Manager',
+    department: 'Marketing',
   },
   {
     id: 199,
@@ -260,6 +271,7 @@ export const ourTeam: Member[] = [
     campusOrgs: ['CULSR', 'M&A Club', 'Moot Court'],
     favoriteService: "Volunteering at multiple after-school programs at my local middle schools!",
     role: 'Brand Strategy Manager',
+    department: 'Marketing',
   },
   {
     id: 93,
@@ -271,5 +283,6 @@ export const ourTeam: Member[] = [
     campusOrgs: ['Cru', 'Hack4Impact'],
     favoriteService: "My favorite community service experience is teaching elementary school students music and seeing how proud they are when they can play the songs they love!",
     role: 'Product Manager',
+    department: 'Tech',
   },
 ];
