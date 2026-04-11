@@ -451,7 +451,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                         </svg>
                       </div>
                       <p className="text-gray-700 font-medium">
-                        {user.phone || <span className="text-gray-400 italic font-normal">No phone number on file</span>}
+                        {localUser.phone || <span className="text-gray-400 italic font-normal">No phone number on file</span>}
                       </p>
                     </div>
                   )}
@@ -466,7 +466,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                     onClick={() => setIsEditing(true)}
                     className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm mt-4"
                   >
-                    {user.bio ? 'Edit Bio' : 'Add Bio'}
+                    {localUser.bio ? 'Edit Bio' : 'Add Bio'}
                   </button>
                 ) : (
                   <div className="flex gap-2 mt-4">
