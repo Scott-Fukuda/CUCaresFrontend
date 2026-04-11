@@ -466,7 +466,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                     onClick={() => setIsEditing(true)}
                     className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm mt-4"
                   >
-                    {user.bio ? 'Edit Bio' : 'Add Bio'}
+                    {user.bio ? 'Edit Bio' : 'Edit Bio'}
                   </button>
                 ) : (
                   <div className="flex gap-2 mt-4">
