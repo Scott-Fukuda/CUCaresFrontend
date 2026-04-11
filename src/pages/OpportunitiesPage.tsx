@@ -15,7 +15,7 @@ interface OpportunitiesPageProps {
     opportunityId: number,
     opportunityDate?: string,
     opportunityTime?: string
-  ) => void;
+  ) => Promise<boolean>;
   allOrgs: Organization[];
   currentUserSignupsSet?: Set<number>;
   multiopps: MultiOpp[];

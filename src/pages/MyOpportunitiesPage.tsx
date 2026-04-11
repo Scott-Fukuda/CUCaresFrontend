@@ -12,7 +12,7 @@ interface MyOpportunitiesPageProps {
     opportunityId: number,
     opportunityDate?: string,
     opportunityTime?: string
-  ) => void;
+  ) => Promise<boolean>;
   currentUserSignupsSet: Set<number>;
   showPopup: (
     title: string,

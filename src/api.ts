@@ -1000,19 +1000,8 @@ export const unregisterForOpp = async (data: {
   opportunity_id: number;
   opportunityDate?: string;
   opportunityTime?: string;
-  isAdminOrHost?: boolean; // New parameter to bypass 7-hour rule
+  isAdminOrHost?: boolean;
 }) => {
-  // Validate 7-hour window only if user is not admin or host
-  if (data.opportunityDate && data.opportunityTime && !data.isAdminOrHost) {
-    const { canUnregister } = canUnregisterFromOpportunity(
-      data.opportunityDate,
-      data.opportunityTime
-    );
-    if (!canUnregister) {
-      throw new Error('Cannot unregister within 7 hours of the event');
-    }
-  }
-
   return authenticatedRequest('/unregister-opp', {
     method: 'POST',
     body: JSON.stringify({
