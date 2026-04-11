@@ -422,7 +422,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
 
             {/* Phone Number Section */}
             {isCurrentUser && (
-              <div className="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-cornell-red">
+              <div className="mt-10 bg-white p-6 rounded-2xl shadow-lg border-l-4 border-cornell-red">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-bold text-gray-800">Private Information</h3>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-cornell-red bg-red-50 px-2 py-1 rounded-full border border-red-100">
