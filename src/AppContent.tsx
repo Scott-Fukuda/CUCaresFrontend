@@ -12,7 +12,9 @@ import {
   FriendshipStatus,
   FriendshipsResponse,
   UserWithFriendshipStatus,
-  MultiOpp
+  MultiOpp,
+  FeedOrderItem,
+  FeedOrderResponse,
 } from './types';
 import * as api from './api';
 import {
@@ -169,6 +171,14 @@ const AppContent: React.FC = () => {
     queryFn: api.getMultiOpps
   });
 
+  const { data: feedOrderResponse } = useQuery<FeedOrderResponse>({
+    queryKey: ['feedOrder'],
+    queryFn: api.getFeedOrder,
+    enabled: !!currentUser,
+  });
+  const feedOrder: FeedOrderItem[] = feedOrderResponse?.order ?? [];
+  const invisibleMultioppIds: number[] = feedOrderResponse?.invisible_multiopps ?? [];
+
 
   // Friendships data from backend
   const [friendshipsData, setFriendshipsData] = useState<FriendshipsResponse | null>(null);
@@ -239,6 +249,7 @@ const AppContent: React.FC = () => {
             api.getApprovedOrgs(),
             api.getMultiOpps(),
           ]);
+          console.log("usersData from API:", usersData);
 
           //console.log('API calls completed:', {
           //   usersCount: usersData.length,
@@ -368,6 +379,7 @@ const AppContent: React.FC = () => {
     major: string,
     birthday: string,
     car_seats: number,
+    subscribed: boolean,
     heard_about?: string
   ) => {
     setAuthError(null);
@@ -405,6 +417,7 @@ const AppContent: React.FC = () => {
         car_seats, // Add car_seats from registration
         registration_date: api.formatRegistrationDate(), // Format: YYYY-MM-DDTHH:MM:SS
         carpool_waiver_signed: false,
+        subscribed: true,
         heard_about
       };
 
@@ -1092,6 +1105,8 @@ const AppContent: React.FC = () => {
           opportunities={opportunities}
           oppsLoading={oppsLoading}
           multiopp={multiopps}
+          feedOrder={feedOrder}
+          invisibleMultioppIds={invisibleMultioppIds}
           // setOpportunities={setOpportunities}
           signups={signups}
           organizations={organizations}

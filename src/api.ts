@@ -1,5 +1,8 @@
-import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride } from './types';
+import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride, FeedOrderItem, FeedOrderResponse } from './types';
 import { auth } from './firebase-config';
+import { canUnregisterFromOpportunity } from './utils/timeUtils';
+import { subscribe } from 'diagnostics_channel';
+
 // Helper function to get profile picture URL
 // Returns a generic silhouette when no profile image is available
 export const getProfilePictureUrl = (profile_image?: string | null, google_photo?: string | null): string => {
@@ -139,6 +142,7 @@ export const getUsers = async (): Promise<User[]> => {
     car_seats: user.car_seats || 0,
     bio: user.bio,
     carpool_waiver_signed: user.carpool_waiver_signed,
+    subscribed: user.subscribed,
     heard_about: user.heard_about || ''
   }));
 };
@@ -162,6 +166,7 @@ export const getUsersMinimal = async (): Promise<User[]> => {
     car_seats: user.car_seats || 0,
     carpool_waiver_signed: user.carpool_waiver_signed,
     bio: user.bio || '',
+    subscribed: user.subscribed,
 
     // These remain empty for minimal payloads
     interests: [],
@@ -233,6 +238,7 @@ export const getUser = async (id: number): Promise<User> => {
     phone: response.phone,
     car_seats: response.car_seats || 0,
     carpool_waiver_signed: response.carpool_waiver_signed || false,
+    subscribed: response.subscribed,
     heard_about: response.heard_about || ''
   };
 };
@@ -241,6 +247,16 @@ export const updateUser = (id: number, data: object): Promise<User> => {
   return authenticatedRequest(`/users/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
+  });
+};
+
+export const updateSubscription = async (
+  userId: number,
+  subscribed: boolean
+) => {
+  return authenticatedRequest(`/users/${userId}`, {
+    method: "PUT",
+    body: JSON.stringify({ subscribed })
   });
 };
 
@@ -305,6 +321,12 @@ export const getUserEmails = async (): Promise<string[]> => {
 
   // OR if it's wrapped differently:
   // return response.emails || response || [];
+};
+
+// Get all subscribed user emails - returns array of email strings
+export const getSubscribedUserEmails = async (): Promise<string[]> => {
+  const response = await authenticatedRequest('/users/emails/subscribed');
+  return response || [];
 };
 
 // --- Organizations (Groups) ---
@@ -493,6 +515,7 @@ export const getAcceptedFriendships = async (userId: number): Promise<User[]> =>
         registration_date: '', // Not provided in friendship response
         registered: false, // Not provided in friendship response
         attended: false, // Not provided in friendship response
+        subscribed: false,
         heard_about: '', // Not provided in friendship response
       }));
     }
@@ -895,6 +918,7 @@ export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
           bio: user.bio,
           registered: involvedUser.registered || false,
           attended: involvedUser.attended || false,
+          subscribed: involvedUser.subscribed,
           heard_about: involvedUser.heard_about || ''
         };
       }) : [];
@@ -1342,6 +1366,27 @@ export const updateMultiOpp = (id: number, data: object): Promise<Opportunity> =
 export const deleteMultiOpp = (id: number): Promise<void> =>
   authenticatedRequest(`/multiopps/${id}`, {
     method: 'DELETE',
+  });
+
+// FEED ORDER endpoints
+export const getFeedOrder = async (): Promise<FeedOrderResponse> => {
+  const result = await authenticatedRequest('/feed-order');
+  return {
+    order: Array.isArray(result?.order) ? result.order : [],
+    invisible_multiopps: Array.isArray(result?.invisible_multiopps) ? result.invisible_multiopps : [],
+  };
+};
+
+export const updateFeedOrder = (order: FeedOrderItem[]): Promise<FeedOrderResponse> =>
+  authenticatedRequest('/feed-order', {
+    method: 'PUT',
+    body: JSON.stringify({ order }),
+  });
+
+export const updateInvisibleMultiopps = (ids: number[]): Promise<{ invisible_multiopps: number[] }> =>
+  authenticatedRequest('/feed-order/invisible-multiopps', {
+    method: 'PUT',
+    body: JSON.stringify({ invisible_multiopps: ids }),
   });
 
 // -- Cars --

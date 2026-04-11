@@ -29,6 +29,7 @@ export interface User {
   car_seats: number; // Number of car seats available
   bio?: string; // bio
   carpool_waiver_signed?: boolean;
+  subscribed: boolean;
   heard_about?: string;
 }
 
@@ -277,6 +278,21 @@ export interface RideRider {
   name: string;
   notes?: string
 }
+
+export interface FeedOrderItem {
+  id: number;
+  is_multiopp: boolean;
+}
+
+export interface FeedOrderResponse {
+  id?: number;
+  order: FeedOrderItem[];
+  invisible_multiopps: number[];
+}
+
+export type FeedItem =
+  | { kind: 'opp'; data: Opportunity }
+  | { kind: 'multiopp'; data: MultiOpp };
 
 export interface Car {
   id: string;

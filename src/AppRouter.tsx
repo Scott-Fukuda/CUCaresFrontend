@@ -14,6 +14,7 @@ import {
     FriendshipsResponse,
     UserWithFriendshipStatus,
     MultiOpp,
+    FeedOrderItem,
 } from './types';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
@@ -52,6 +53,8 @@ interface AppRouterProps {
     oppsLoading: boolean;
     // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[] | []>>;
     multiopp: MultiOpp[];
+    feedOrder: FeedOrderItem[];
+    invisibleMultioppIds: number[];
     allOpps: (Opportunity | MultiOpp)[];
     setAllOpps: React.Dispatch<React.SetStateAction<(Opportunity | MultiOpp)[] | []>>;
     allTimeMyOpps: (Opportunity)[];
@@ -107,6 +110,8 @@ const AppRouter: React.FC<AppRouterProps> = ({
     opportunities,
     // setOpportunities,
     multiopp,
+    feedOrder,
+    invisibleMultioppIds,
     allOpps,
     setAllOpps,
     allTimeMyOpps,
@@ -148,6 +153,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
             <AdminPage
                 currentUser={currentUser}
                 opportunities={opportunities}
+                multiopps={multiopp}
                 // setOpportunities={setOpportunities}
                 organizations={organizations}
                 setOrganizations={setOrganizations}
@@ -218,6 +224,8 @@ const AppRouter: React.FC<AppRouterProps> = ({
                         element={
                             <OpportunitiesPage
                                 multiopps={multiopp}
+                                feedOrder={feedOrder}
+                                invisibleMultioppIds={invisibleMultioppIds}
                                 opportunities={opportunities}
                                 oppsLoading={oppsLoading}
                                 students={students}

@@ -1,23 +1,130 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Opportunity, Organization, User } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
+import { Opportunity, Organization, User, MultiOpp, FeedOrderItem, FeedItem } from '../types';
 import * as api from '../api';
+import {
+  DndContext,
+  closestCenter,
+  pointerWithin,
+  getFirstCollision,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragOverEvent,
+  DragStartEvent,
+  DragOverlay,
+  UniqueIdentifier,
+  useDroppable,
+  CollisionDetection,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+const DroppableZone: React.FC<{ id: string; children: React.ReactNode; className?: string }> = ({ id, children, className }) => {
+  const { setNodeRef } = useDroppable({ id });
+  return <div ref={setNodeRef} className={className}>{children}</div>;
+};
 import { auth } from '../firebase-config';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import ErrorIcon from '@mui/icons-material/Error';
 
 interface AdminPageProps {
   currentUser: User;
   opportunities: Opportunity[];
+  multiopps: MultiOpp[];
   // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
   organizations: Organization[];
   setOrganizations: React.Dispatch<React.SetStateAction<Organization[]>>;
   allUsers: User[];
 }
 
+// ── Sortable mini-card used in the Feed Order section ──────────────────────
+const SortableCard: React.FC<{ item: FeedItem }> = ({ item }) => {
+  const id = `${item.kind === 'multiopp'}-${item.data.id}`;
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const name = item.data.name;
+  const nonprofit = item.kind === 'opp' ? item.data.nonprofit : item.data.nonprofit;
+  const formatDate = (raw: string) => {
+    // Handle both 'YYYY-MM-DD' and full ISO strings
+    const d = raw.includes('T') ? new Date(raw) : new Date(raw + 'T00:00:00');
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const rawDate = item.kind === 'opp'
+    ? item.data.date
+    : (() => {
+        const upcoming = item.data.opportunities
+          ?.slice()
+          .sort((a, b) => a.date.localeCompare(b.date))
+          .find((o) => {
+            const d = o.date.includes('T') ? new Date(o.date) : new Date(o.date + 'T00:00:00');
+            return d >= today;
+          });
+        return upcoming?.date ?? null;
+      })();
+
+  const date = rawDate ? formatDate(rawDate) : 'No future occurrences';
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm"
+    >
+      {/* Drag handle */}
+      <button
+        {...attributes}
+        {...listeners}
+        className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
+        aria-label="Drag to reorder"
+      >
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M7 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm6 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM7 8a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm6 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-6 6a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm6 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
+        </svg>
+      </button>
+
+      {/* Type badge */}
+      <span className={`flex-shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${
+        item.kind === 'multiopp'
+          ? 'bg-purple-100 text-purple-700'
+          : 'bg-blue-100 text-blue-700'
+      }`}>
+        {item.kind === 'multiopp' ? 'RECURRING' : 'ONE-TIME'}
+      </span>
+
+      {/* Info */}
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-gray-900 truncate">{name}</p>
+        {nonprofit && (
+          <p className="text-xs text-gray-500 truncate">{nonprofit}</p>
+        )}
+      </div>
+
+      {/* Date */}
+      <span className="flex-shrink-0 text-xs text-gray-400">{date}</span>
+    </div>
+  );
+};
+
 const AdminPage: React.FC<AdminPageProps> = ({
   currentUser,
   opportunities,
+  multiopps,
   // setOpportunities,
   organizations,
   setOrganizations,
@@ -25,6 +132,176 @@ const AdminPage: React.FC<AdminPageProps> = ({
 }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+
+  // ── Feed Order state ───────────────────────────────────────────────────────
+  const [visibleItems, setVisibleItems] = useState<FeedItem[]>([]);
+  const [invisibleItems, setInvisibleItems] = useState<FeedItem[]>([]); // multiopps only
+  const [activeItem, setActiveItem] = useState<FeedItem | null>(null);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [orderSaveStatus, setOrderSaveStatus] = useState<'idle' | 'saved' | 'error'>('idle');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  );
+
+  const itemKey = (item: FeedItem) => `${item.kind === 'multiopp'}-${item.data.id}`;
+
+  // visibleRef/invisibleRef mirror state for reads inside DnD handlers
+  const visibleRef = useRef<FeedItem[]>([]);
+  const invisibleRef = useRef<FeedItem[]>([]);
+  useEffect(() => { visibleRef.current = visibleItems; }, [visibleItems]);
+  useEffect(() => { invisibleRef.current = invisibleItems; }, [invisibleItems]);
+
+  // Tracks which container the dragged item currently lives in — updated
+  // synchronously in handleDragOver so handleDragEnd always sees the right value.
+  const activeContainerRef = useRef<'visible' | 'invisible' | null>(null);
+
+  // Prefer pointer-within detection (works for empty containers), fall back to closest center
+  const collisionDetection: CollisionDetection = (args) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) return pointerCollisions;
+    return getFirstCollision(closestCenter(args)) ? closestCenter(args) : [];
+  };
+
+  const findContainerForId = (id: UniqueIdentifier): 'visible' | 'invisible' | null => {
+    if (id === 'visible' || id === 'invisible') return id as 'visible' | 'invisible';
+    if (visibleRef.current.some((i) => itemKey(i) === id)) return 'visible';
+    if (invisibleRef.current.some((i) => itemKey(i) === id)) return 'invisible';
+    return null;
+  };
+
+  useEffect(() => {
+    const buildFeedItems = async () => {
+      let savedOrder: FeedOrderItem[] = [];
+      let savedInvisible: number[] = [];
+      try {
+        const resp = await api.getFeedOrder();
+        savedOrder = resp.order;
+        savedInvisible = resp.invisible_multiopps;
+      } catch (_) {}
+
+      const positionMap = new Map<string, number>(
+        savedOrder.map((item, index) => [`${item.is_multiopp}-${item.id}`, index])
+      );
+      const invisibleSet = new Set(savedInvisible);
+
+      const standaloneOpps: FeedItem[] = opportunities
+        .filter((o) => o.approved && !o.multiopp)
+        .map((o) => ({ kind: 'opp' as const, data: o }));
+
+      const allMultiItems: FeedItem[] = multiopps
+        .filter((m) => m.approved !== false)
+        .map((m) => ({ kind: 'multiopp' as const, data: m }));
+
+      const visible: FeedItem[] = [
+        ...standaloneOpps,
+        ...allMultiItems.filter((i) => !invisibleSet.has(i.data.id)),
+      ].sort((a, b) => {
+        const posA = positionMap.get(itemKey(a)) ?? Infinity;
+        const posB = positionMap.get(itemKey(b)) ?? Infinity;
+        return posA - posB;
+      });
+
+      const invisible: FeedItem[] = allMultiItems.filter((i) => invisibleSet.has(i.data.id));
+
+      setVisibleItems(visible);
+      setInvisibleItems(invisible);
+    };
+
+    buildFeedItems();
+  }, [opportunities, multiopps]);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const id = event.active.id;
+    const item =
+      visibleRef.current.find((i) => itemKey(i) === id) ||
+      invisibleRef.current.find((i) => itemKey(i) === id) ||
+      null;
+    setActiveItem(item);
+    activeContainerRef.current = findContainerForId(id);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeContainer = activeContainerRef.current;
+    const overContainer = findContainerForId(over.id);
+
+    if (!activeContainer || !overContainer || activeContainer === overContainer) return;
+
+    // Only multiopps can move to invisible
+    const movingItem =
+      visibleRef.current.find((i) => itemKey(i) === active.id) ||
+      invisibleRef.current.find((i) => itemKey(i) === active.id);
+    if (!movingItem || movingItem.kind !== 'multiopp') return;
+
+    if (activeContainer === 'visible' && overContainer === 'invisible') {
+      setVisibleItems((prev) => prev.filter((i) => itemKey(i) !== active.id));
+      setInvisibleItems((prev) => [...prev, movingItem]);
+    } else {
+      setInvisibleItems((prev) => prev.filter((i) => itemKey(i) !== active.id));
+      setVisibleItems((prev) => [...prev, movingItem]);
+    }
+    // Update synchronously so handleDragEnd sees the correct container
+    activeContainerRef.current = overContainer;
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveItem(null);
+    const container = activeContainerRef.current;
+    activeContainerRef.current = null;
+
+    if (!over || active.id === over.id || !container) return;
+
+    // Cross-container moves are already done in handleDragOver.
+    // Only handle same-container reordering here.
+    const overContainer = findContainerForId(over.id);
+    if (container !== overContainer) return;
+
+    if (container === 'visible') {
+      setVisibleItems((items) => {
+        const ids = items.map(itemKey);
+        const oldIndex = ids.indexOf(active.id as string);
+        const newIndex = ids.indexOf(over.id as string);
+        return oldIndex === -1 || newIndex === -1 ? items : arrayMove(items, oldIndex, newIndex);
+      });
+    } else {
+      setInvisibleItems((items) => {
+        const ids = items.map(itemKey);
+        const oldIndex = ids.indexOf(active.id as string);
+        const newIndex = ids.indexOf(over.id as string);
+        return oldIndex === -1 || newIndex === -1 ? items : arrayMove(items, oldIndex, newIndex);
+      });
+    }
+    setOrderSaveStatus('idle');
+  };
+
+  const handleSaveFeedOrder = async () => {
+    setIsSavingOrder(true);
+    setOrderSaveStatus('idle');
+    try {
+      const order: FeedOrderItem[] = visibleItems.map((item) => ({
+        id: item.data.id,
+        is_multiopp: item.kind === 'multiopp',
+      }));
+      const invisibleIds = invisibleItems.map((i) => i.data.id);
+      await Promise.all([
+        api.updateFeedOrder(order),
+        api.updateInvisibleMultiopps(invisibleIds),
+      ]);
+      queryClient.invalidateQueries({ queryKey: ['feedOrder'] });
+      setOrderSaveStatus('saved');
+      setTimeout(() => setOrderSaveStatus('idle'), 2500);
+    } catch {
+      setOrderSaveStatus('error');
+    } finally {
+      setIsSavingOrder(false);
+    }
+  };
+  // ── End Feed Order ─────────────────────────────────────────────────────────
+
   // Helper function to get user name by ID
   const getUserNameById = (userId?: number): string => {
     if (!userId) return 'Unknown';
@@ -244,7 +521,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
       setIsLoadingEmails(true);
       setError(null);
 
-      const emails = await api.getUserEmails();
+      const emails = await api.getSubscribedUserEmails();
       setUserEmails(emails);
       setShowEmails(true);
     } catch (error: any) {
@@ -323,55 +600,45 @@ const AdminPage: React.FC<AdminPageProps> = ({
     }
   };
   const handleDownloadServiceDataCsv = async (startDate: string, endDate: string) => {
-    try {
-      const response = await api.getServiceDataCsv(startDate, endDate);
+  try {
+    const response = await api.getServiceDataCsv(startDate, endDate);
+ 
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `service_data_${startDate}_to_${endDate}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Error downloading CSV:", err);
+    alert("Failed to download service data. Please try again.");
+  }
+};
 
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `service_data_${startDate}_to_${endDate}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Error downloading CSV:", err);
-      alert("Failed to download service data. Please try again.");
-    }
-  };
+const promptAndDownloadCsv = async () => {
+  const today = new Date();
+  const twoMonthsAgo = new Date();
+  twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
-  const promptAndDownloadCsv = async () => {
-    const today = new Date();
-    const twoMonthsAgo = new Date();
-    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+  const defaultStart = twoMonthsAgo.toISOString().split("T")[0];
+  const defaultEnd = today.toISOString().split("T")[0];
 
-    const defaultStart = twoMonthsAgo.toISOString().split("T")[0];
-    const defaultEnd = today.toISOString().split("T")[0];
+  const startDate = window.prompt("Enter start date (YYYY-MM-DD):", defaultStart);
+  if (!startDate) return;
 
-    const startDate = window.prompt("Enter start date (YYYY-MM-DD):", defaultStart);
-    if (!startDate) return;
+  const endDate = window.prompt("Enter end date (YYYY-MM-DD):", defaultEnd);
+  if (!endDate) return;
 
-    const endDate = window.prompt("Enter end date (YYYY-MM-DD):", defaultEnd);
-    if (!endDate) return;
-
-    await handleDownloadServiceDataCsv(startDate, endDate);
-  };
+  await handleDownloadServiceDataCsv(startDate, endDate);
+};
 
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8 flex flex-col gap-2">
+      <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Admin Panel</h1>
         <p className="text-gray-600">Review and approve pending opportunities and organizations.</p>
-        {unapprovedOpportunities.length > 0 &&
-          <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-red-200 bg-red-50 text-red-800">
-            <div className="flex-shrink-0 text-red-500">
-              <ErrorIcon />
-            </div>
-            <p className="text-sm font-medium">
-              There are opportunities to approve
-            </p>
-          </div>
-        }
       </div>
 
       {/* Statistics Section */}
@@ -472,37 +739,37 @@ const AdminPage: React.FC<AdminPageProps> = ({
 
       {/* Security Token Section */}
       {/* Security Token Section */}
-      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Security Token</h2>
+<div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+  <h2 className="text-xl font-semibold text-gray-900 mb-4">Security Token</h2>
 
-        <div className="flex flex-col space-y-4">
-          <button
-            onClick={async () => {
-              setIsLoadingToken(true);
-              try {
-                const token = await handleGetSecurityToken();
-                if (token) {
-                  await navigator.clipboard.writeText(token);
-                  setShowCopied(true);
-                  setTimeout(() => setShowCopied(false), 2000);
-                }
-              } finally {
-                setIsLoadingToken(false);
-              }
-            }}
-            disabled={isLoadingToken}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 w-fit"
-          >
-            {isLoadingToken ? 'Getting Token...' : 'Get Security Token'}
-          </button>
+  <div className="flex flex-col space-y-4">
+    <button
+      onClick={async () => {
+        setIsLoadingToken(true);
+        try {
+          const token = await handleGetSecurityToken();
+          if (token) {
+            await navigator.clipboard.writeText(token);
+            setShowCopied(true);
+            setTimeout(() => setShowCopied(false), 2000);
+          }
+        } finally {
+          setIsLoadingToken(false);
+        }
+      }}
+      disabled={isLoadingToken}
+      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 w-fit"
+    >
+      {isLoadingToken ? 'Getting Token...' : 'Get Security Token'}
+    </button>
 
-          {showCopied && (
-            <div className="bg-green-100 text-green-800 px-3 py-2 rounded-md text-sm font-medium w-fit">
-              ✅ Copied!
-            </div>
-          )}
-        </div>
+    {showCopied && (
+      <div className="bg-green-100 text-green-800 px-3 py-2 rounded-md text-sm font-medium w-fit">
+        ✅ Copied!
       </div>
+    )}
+  </div>
+</div>
 
 
       {/* CSV Export Section */}
@@ -818,6 +1085,77 @@ const AdminPage: React.FC<AdminPageProps> = ({
           </div>
         </>
       )}
+
+      {/* Feed Order Section */}
+      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xl font-semibold text-gray-900">Feed Order</h2>
+          <div className="flex items-center gap-3">
+            {orderSaveStatus === 'saved' && (
+              <span className="text-sm text-green-600 font-medium">Saved!</span>
+            )}
+            {orderSaveStatus === 'error' && (
+              <span className="text-sm text-red-600 font-medium">Save failed</span>
+            )}
+            <button
+              onClick={handleSaveFeedOrder}
+              disabled={isSavingOrder}
+              className="bg-cornell-red text-white px-4 py-2 rounded-lg hover:bg-red-800 transition-colors font-medium disabled:opacity-50"
+            >
+              {isSavingOrder ? 'Saving…' : 'Save Order'}
+            </button>
+          </div>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          Drag cards to reorder. Move series cards into the Hidden section to hide them from the feed.
+        </p>
+
+        {visibleItems.length === 0 && invisibleItems.length === 0 ? (
+          <p className="text-sm text-gray-400 italic">No approved opportunities yet.</p>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={collisionDetection}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+          >
+            {/* Visible feed */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Visible</h3>
+              <SortableContext items={visibleItems.map(itemKey)} strategy={verticalListSortingStrategy}>
+                <DroppableZone id="visible" className="flex flex-col gap-2 min-h-[48px]">
+                  {visibleItems.map((item) => (
+                    <SortableCard key={itemKey(item)} item={item} />
+                  ))}
+                </DroppableZone>
+              </SortableContext>
+            </div>
+
+            {/* Hidden (invisible multiopps only) */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Hidden from Feed (Recurring Only)
+              </h3>
+              <SortableContext items={invisibleItems.map(itemKey)} strategy={verticalListSortingStrategy}>
+                <DroppableZone id="invisible" className="flex flex-col gap-2 min-h-[64px] border-2 border-dashed border-gray-300 rounded-lg p-2">
+                  {invisibleItems.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic text-center py-4">Drag series cards here to hide them</p>
+                  ) : (
+                    invisibleItems.map((item) => (
+                      <SortableCard key={itemKey(item)} item={item} />
+                    ))
+                  )}
+                </DroppableZone>
+              </SortableContext>
+            </div>
+
+            <DragOverlay>
+              {activeItem ? <SortableCard item={activeItem} /> : null}
+            </DragOverlay>
+          </DndContext>
+        )}
+      </div>
     </div>
   );
 };
