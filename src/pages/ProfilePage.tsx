@@ -451,7 +451,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                         </svg>
                       </div>
                       <p className="text-gray-700 font-medium">
-                        {user.phone || <span className="text-gray-400 italic font-normal">No phone number on file</span>}
+                        {localUser.phone || <span className="text-gray-400 italic font-normal">No phone number on file</span>}
                       </p>
                     </div>
                   )}
@@ -466,7 +466,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                     onClick={() => setIsEditing(true)}
                     className="bg-cornell-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors text-sm mt-4"
                   >
-                    {user.bio ? 'Edit Bio' : 'Add Bio'}
+                    {localUser.bio ? 'Edit Bio' : 'Add Bio'}
                   </button>
                 ) : (
                   <div className="flex gap-2 mt-4">
@@ -476,9 +476,16 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
                         try {
                           const updatedUser = await updateUser(user.id, { bio: editingBio, phone: editingPhone });
                           // Update local user state
-                          setLocalUser({ ...localUser, bio: editingBio, phone: editingPhone });
-                          setCurrentUser((prev) => ({ ...prev!, bio: editingBio, phone: editingPhone }));
-                          setIsEditing(false);
+                          if (updatedUser) {
+                            setLocalUser(updatedUser);
+                            setCurrentUser(updatedUser);
+                            
+                            setIsEditing(false);
+                          } else {
+                            setLocalUser((prev: any) => ({ ...prev, bio: editingBio, phone: editingPhone }));
+                            setCurrentUser((prev: any) => ({ ...prev, bio: editingBio, phone: editingPhone }));
+                            setIsEditing(false);
+                          }
                         } catch (error) {
                           console.error('Error saving bio:', error);
                           alert('Failed to save bio. Please try again.');
