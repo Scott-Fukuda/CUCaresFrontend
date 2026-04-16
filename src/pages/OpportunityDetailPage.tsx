@@ -655,10 +655,12 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
                   <span className="font-semibold">Time:</span>{' '}
                   {displayTime} – {displayEndTime}
                 </p>
-                <p>
-                  <span className="font-semibold">Location:</span>{' '}
-                  {opportunity.address}
-                </p>
+                {opportunity.address && (
+                  <p>
+                    <span className="font-semibold">Location:</span>{' '}
+                    {opportunity.address}
+                  </p>
+                )}
               </div>
             )}
             {canManageOpportunity && (
@@ -1290,20 +1292,21 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
 
             </div>
           )}
-          <div className="bg-white p-6 rounded-2xl shadow-lg">
-            <h4 className="text-lg font-bold mb-2">Location</h4>
-            <div className="mb-4">
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(opportunity.address)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-cornell-red hover:text-red-800 underline"
-              >
-                {opportunity.address}
-              </a>
+          {opportunity.address && (
+            <div className="bg-white p-6 rounded-2xl shadow-lg">
+              <h4 className="text-lg font-bold mb-2">Location</h4>
+              <div className="mb-4">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(opportunity.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cornell-red hover:text-red-800 underline"
+                >
+                  {opportunity.address}
+                </a>
+              </div>
             </div>
-
-          </div>
+          )}
 
           {/* Causes and Tags Section */}
           {(opportunity.causes && opportunity.causes.length > 0) || (opportunity.tags && opportunity.tags.length > 0) ? (
