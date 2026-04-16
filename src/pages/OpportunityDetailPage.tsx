@@ -655,6 +655,10 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
                   <span className="font-semibold">Time:</span>{' '}
                   {displayTime} – {displayEndTime}
                 </p>
+                <p>
+                  <span className="font-semibold">Location:</span>{' '}
+                  {opportunity.address}
+                </p>
               </div>
             )}
             {canManageOpportunity && (
