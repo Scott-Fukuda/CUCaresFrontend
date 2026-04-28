@@ -34,6 +34,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
   const [carSeats, setCarSeats] = useState<number>(0);
   const [subscribed, setSubscribed] = useState<boolean>(true);
   const [heardAbout, setHeardAbout] = useState<string>("");
+  const [tosChecked, setTosChecked] = useState(false);
 
   const firebaseUser = auth.currentUser;
   const userEmail = firebaseUser?.email || '';
@@ -257,9 +258,29 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
+        <label className="flex items-start gap-2 text-sm text-gray-500 text-left cursor-pointer">
+          <input
+            type="checkbox"
+            checked={tosChecked}
+            onChange={e => setTosChecked(e.target.checked)}
+            className="mt-0.5 flex-shrink-0 cursor-pointer"
+          />
+          <span>
+            By selecting &ldquo;Complete Registration,&rdquo; I agree to the{' '}
+            <a
+              href="/terms_of_service.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-gray-800"
+            >
+              Terms of Service and Privacy Policy
+            </a>
+          </span>
+        </label>
+
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || !tosChecked}
           className="w-full bg-cornell-red text-white font-bold py-3 px-4 rounded-lg hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? 'Creating Account...' : 'Complete Registration'}

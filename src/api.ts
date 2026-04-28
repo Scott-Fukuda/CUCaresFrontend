@@ -23,7 +23,6 @@ export const formatRegistrationDate = (date: Date = new Date()): string => {
 };
 
 // A helper for making Acucaresbackend.onrender.comPI requests.
-// const ENDPOINT_URL = 'https://cucaresbackend.onrender.com'
 
 const ENDPOINT_URL = import.meta.env.VITE_ENDPOINT_URL;
 
@@ -1180,8 +1179,7 @@ export const createWaiver = async (data: {
 
   return response.json();
 };
-// api.ts
-const BASE_URL = 'https://cucaresbackend.onrender.com'; // adjust if you store it elsewhere
+
 
 /**
  * Fetches user CSV data from the backend.
@@ -1193,7 +1191,7 @@ export const getUserCsv = async (): Promise<string> => {
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  const response = await fetch(`${BASE_URL}/api/users/csv`, {
+  const response = await fetch(`${ENDPOINT_URL}/api/users/csv`, {
     method: 'GET',
     headers,
   });
@@ -1216,7 +1214,7 @@ export const getOpportunityCsv = async (): Promise<string> => {
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  const response = await fetch(`${BASE_URL}/api/opps/csv`, {
+  const response = await fetch(`${ENDPOINT_URL}/api/opps/csv`, {
     method: 'GET',
     headers,
   });
@@ -1242,7 +1240,7 @@ export const getServiceDataCsv = async (
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${BASE_URL}/api/service-data/org/`, {
+  const response = await fetch(`${ENDPOINT_URL}/api/service-data/org/`, {
     method: "POST",
     headers,
     body: JSON.stringify({

@@ -118,17 +118,6 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
               .
             </p>
 
-            <p className="login-terms">
-              By signing {ver}, you agree to our{' '}
-              <a
-                href="/terms_of_service.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Terms of Service and Privacy Policy
-              </a>
-              .
-            </p>
           </div>
         </div>
       </div>
