@@ -453,7 +453,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 currentUser={currentUser}
                                 allOrgs={organizations}
                                 onSignUp={(id) => handleSignUp(id)}
-                                staticId={9}
+                                staticId={84}
                             />
                         }
                     />
