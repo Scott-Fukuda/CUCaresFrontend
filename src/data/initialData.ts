@@ -312,5 +312,16 @@ export const ourTeam: Member[] = [
     favoriteService:
       "My favorite community service experience was volunteering at my town's public library. Over the summer, I helped organize events and worked with children on a variety of activities. I particularly enjoyed playing games with them, such as chess, checkers, ping pong. I was even able to improve my own arts and crafts skills while assisting with creative sessions. Volunteering at my town's library was an especially rewarding experience because it gave me the opportunity to engage with the youth in my community. Witnessing their passion and enthusiasm for learning new skills made me optimistic about the bright future of my town!",
     role: 'Chief Strategy Officer',
+  },
+  {
+    id: 58,
+    name: 'Vincent Nguyen',
+    picture: './team_pic/vincent.jpeg',
+    hometown: 'Richmond, VA',
+    study: 'CS \'28',
+    campusOrgs: ['Cornell Webdev', 'Cornell Class Councils', 'Cornell Beef Cattle Club'],
+    favoriteService:
+      "My favorite community service experience was tutoring high school students in multiple subjects. I ran a tutoring club at my high school for three years, where I worked with peers to help students with any subjects they were struggling with.",
+    role: 'Full Stack Developer',
   }
 ];
