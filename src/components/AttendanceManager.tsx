@@ -18,21 +18,22 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({
   const [showDurationPopup, setShowDurationPopup] = useState(false);
   const [durationHours, setDurationHours] = useState(0);
   const [durationMinutes, setDurationMinutes] = useState(0);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  // Initialize attendedUsers with actual attendance data from backend
+  // Sync attendedUsers from backend whenever attendance data changes, but don't
+  // overwrite while the user is actively editing in update mode.
   useEffect(() => {
+    if (isUpdating) return;
     if (opportunity.attendance_marked && opportunity.involved_users) {
       const attendedUserIds = new Set<number>();
-
       opportunity.involved_users.forEach((user) => {
         if (user.attended === true) {
           attendedUserIds.add(user.id);
         }
       });
-
       setAttendedUsers(attendedUserIds);
     }
-  }, [opportunity.attendance_marked, opportunity.involved_users]);
+  }, [opportunity.attendance_marked, opportunity.involved_users, isUpdating]);
 
   const handleAttendanceToggle = (userId: number) => {
     setAttendedUsers((prev) => {
@@ -47,12 +48,14 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({
   };
 
   const handleSubmitClick = () => {
-    if (isSubmitting || opportunity.attendance_marked) return;
+    if (isSubmitting || (opportunity.attendance_marked && !isUpdating)) return;
     setShowDurationPopup(true);
   };
 
   const handleDurationSubmit = async () => {
     if (isSubmitting) return;
+
+    const userIds = Array.from(attendedUsers);
 
     setIsSubmitting(true);
     try {
@@ -60,7 +63,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({
       const totalMinutes = durationHours * 60 + durationMinutes;
 
       await api.markAttendance({
-        user_ids: Array.from(attendedUsers),
+        user_ids: userIds,
         opportunity_id: opportunity.id,
         duration: totalMinutes,
       });
@@ -69,6 +72,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({
       opportunity.attendance_marked = true;
 
       setShowDurationPopup(false);
+      setIsUpdating(false);
       onAttendanceSubmitted();
     } catch (error: any) {
       alert(`Error submitting attendance: ${error.message}`);
@@ -160,13 +164,13 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({
                   type="checkbox"
                   checked={attendedUsers.has(participant.id)}
                   onChange={() => handleAttendanceToggle(participant.id)}
-                  disabled={isAttendanceMarked}
+                  disabled={isAttendanceMarked && !isUpdating}
                   className="w-4 h-4 text-cornell-red border-gray-300 rounded focus:ring-cornell-red disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <span
-                  className={`text-sm font-medium ${isAttendanceMarked ? 'text-gray-400' : 'text-gray-700'}`}
+                  className={`text-sm font-medium ${isAttendanceMarked && !isUpdating ? 'text-gray-400' : 'text-gray-700'}`}
                 >
-                  {isAttendanceMarked
+                  {isAttendanceMarked && !isUpdating
                     ? attendedUsers.has(participant.id)
                       ? 'Attended'
                       : 'Did not attend'
@@ -178,20 +182,40 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({
         </div>
       </div>
 
-      <button
-        onClick={handleSubmitClick}
-        disabled={isSubmitting || isAttendanceMarked}
-        className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-colors ${!isSubmitting && !isAttendanceMarked
-            ? 'bg-cornell-red hover:bg-red-800'
-            : 'bg-gray-400 cursor-not-allowed'
-          }`}
-      >
-        {isAttendanceMarked
-          ? 'Attendance Already Submitted'
-          : isSubmitting
+      <div className="flex gap-2">
+        <button
+          onClick={handleSubmitClick}
+          disabled={isSubmitting || (isAttendanceMarked && !isUpdating)}
+          className={`flex-1 py-3 px-4 rounded-lg font-bold text-white transition-colors ${!isSubmitting && (!isAttendanceMarked || isUpdating)
+              ? 'bg-cornell-red hover:bg-red-800'
+              : 'bg-gray-400 cursor-not-allowed'
+            }`}
+        >
+          {isSubmitting
             ? 'Submitting...'
-            : `Submit Attendance (${attendedUsers.size} marked)`}
-      </button>
+            : isUpdating
+              ? `Update Attendance (${attendedUsers.size} marked)`
+              : isAttendanceMarked
+                ? 'Attendance Already Submitted'
+                : `Submit Attendance (${attendedUsers.size} marked)`}
+        </button>
+        {isAttendanceMarked && !isUpdating && (
+          <button
+            onClick={() => setIsUpdating(true)}
+            className="py-3 px-4 rounded-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+          >
+            Update
+          </button>
+        )}
+        {isUpdating && (
+          <button
+            onClick={() => setIsUpdating(false)}
+            className="py-3 px-4 rounded-lg font-bold text-white bg-gray-500 hover:bg-gray-600 transition-colors"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
 
       {/* Duration Popup */}
       {showDurationPopup && (
