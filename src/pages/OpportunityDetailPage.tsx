@@ -86,12 +86,13 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
   const [userLookupResults, setUserLookupResults] = useState<User[]>([]); // Changed to array
   const [isRegisteringUser, setIsRegisteringUser] = useState(false);
 
-  // Use involved_users from backend if available, but filter to only registered users
-  // Note: For hosts, being in involved_users means they're signed up, regardless of registered flag
+  // Transfer host state
+  const [showTransferHost, setShowTransferHost] = useState(false);
+  const [selectedTransferUserId, setSelectedTransferUserId] = useState<number | ''>('');
+  const [isTransferringHost, setIsTransferringHost] = useState(false);
+
   const signedUpStudents = opportunity.involved_users
-    ? opportunity.involved_users.filter(
-      (user) => user.registered === true || opportunity.host_id === user.id
-    )
+    ? opportunity.involved_users.filter((user) => user.registered === true)
     : students.filter((student) => {
       const signupUserIds = signups
         .filter((s) => s.opportunityId === opportunity.id)
@@ -99,19 +100,20 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       return signupUserIds.includes(student.id);
     });
 
-  // Check if current user is signed up by looking in involved_users from backend
-  // This persists across login/logout cycles
-  // Note: For hosts, being in involved_users means they're signed up, regardless of registered flag
   const isUserSignedUp = opportunity.involved_users
     ? opportunity.involved_users.some(
-      (user) =>
-        user.id === currentUser.id &&
-        (user.registered === true || opportunity.host_id === user.id)
+      (user) => user.id === currentUser.id && user.registered === true
     )
     : currentUserSignupsSet.has(opportunity.id);
 
   const isUserHost = opportunity.host_id === currentUser.id;
   const canManageOpportunity = isUserHost || currentUser.admin;
+
+  const eligibleHostUsers = students.filter(
+    (user) =>
+      user.admin === true ||
+      (opportunity.host_org_id !== undefined && user.organizationIds.includes(opportunity.host_org_id))
+  );
   const availableSlots = opportunity.total_slots - signedUpStudents.length;
   const canSignUp = availableSlots > 0 && !isUserSignedUp;
   const allowCarpool = opportunity.allow_carpool;
@@ -286,6 +288,27 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
     } catch (error) {
       console.error('Error unregistering user:', error);
       alert('Failed to unregister user.');
+    }
+  };
+
+  const handleTransferHost = async () => {
+    if (!selectedTransferUserId) return;
+    const newHost = eligibleHostUsers.find((u) => u.id === selectedTransferUserId);
+    if (!newHost) return;
+    const confirmed = window.confirm(`Transfer host to ${newHost.name}?`);
+    if (!confirmed) return;
+    setIsTransferringHost(true);
+    try {
+      await updateOpportunity(opportunity.id, { host_user_id: selectedTransferUserId });
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+      setShowTransferHost(false);
+      setSelectedTransferUserId('');
+      alert(`Host transferred to ${newHost.name}.`);
+    } catch (error) {
+      console.error('Error transferring host:', error);
+      alert('Failed to transfer host.');
+    } finally {
+      setIsTransferringHost(false);
     }
   };
 
@@ -1164,6 +1187,52 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
                   )}
                 </div>
               </div>
+              {/* Transfer Host */}
+              <div className="bg-white p-6 rounded-2xl shadow-lg">
+                <h4 className="text-lg font-bold mb-4">Transfer Host</h4>
+                {!showTransferHost ? (
+                  <button
+                    onClick={() => setShowTransferHost(true)}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Transfer Host
+                  </button>
+                ) : (
+                  <div className="space-y-3">
+                    <select
+                      value={selectedTransferUserId}
+                      onChange={(e) => setSelectedTransferUserId(e.target.value === '' ? '' : Number(e.target.value))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      <option value="">Select new host...</option>
+                      {eligibleHostUsers
+                        .filter((u) => u.id !== opportunity.host_id)
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map((u) => (
+                          <option key={u.id} value={u.id}>
+                            {u.name}{u.admin ? ' (admin)' : ''}
+                          </option>
+                        ))}
+                    </select>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleTransferHost}
+                        disabled={!selectedTransferUserId || isTransferringHost}
+                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                      >
+                        {isTransferringHost ? 'Transferring...' : 'Confirm'}
+                      </button>
+                      <button
+                        onClick={() => { setShowTransferHost(false); setSelectedTransferUserId(''); }}
+                        className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Admin Unapprove Button - Now visible to admins and hosts */}
               {currentUser.admin && opportunity.approved !== false && (
                 <div className="bg-white p-6 rounded-2xl shadow-lg">
