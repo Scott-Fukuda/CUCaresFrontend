@@ -1,12 +1,14 @@
 import './index.scss';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useState, useMemo, useEffect } from "react"
 import CarpoolFormPopup from '../../components/CarpoolFormPopup';
 import DriverFormPopup from '../../components/DriverFormPopup';
 import WaiverPopup from '../../components/WaiverPopup';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { getOpportunity, getRides, getProfilePictureUrl, removeRider } from '../../api';
+import { getOpportunity, getRides, getProfilePictureUrl, removeRider, deleteRide } from '../../api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Opportunity, User, Ride } from '../../types';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
@@ -25,6 +27,8 @@ interface CarpoolPageProps {
 const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => {
     const [showRiderForm, setShowRiderForm] = useState(false);
     const [selectedRideId, setSelectedRideId] = useState('');
+    const [rideToDelete, setRideToDelete] = useState<Ride | null>(null);
+    const [isDeletingRide, setIsDeletingRide] = useState(false);
     const [showWaiverPopup, setShowWaiverPopup] = useState<boolean>(!currentUser.carpool_waiver_signed);
     const { id: opportunityId } = useParams();
     const location = useLocation();
@@ -107,6 +111,35 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
         setShowDriverPopup(true);
     }
 
+    // Admins can always cancel a ride; the driver can only do so before rides close
+    const canDeleteRide = (ride: Ride) =>
+        !!currentUser.admin || (ride.driver_id == currentUser.id.toString() && canUnregister);
+
+    const onDeleteRide = async () => {
+        if (!rideToDelete || isDeletingRide) return;
+
+        setIsDeletingRide(true);
+        try {
+            await deleteRide(rideToDelete.id, currentUser.id);
+            queryClient.invalidateQueries({ queryKey: ['rides', carpoolId] });
+            setRideToDelete(null);
+            showPopup(
+                'Ride Cancelled',
+                'The ride was removed and everyone who signed up for it has been notified.',
+                'success'
+            );
+        } catch (err) {
+            setRideToDelete(null);
+            showPopup(
+                'Failed to Cancel Ride',
+                'Something went wrong cancelling this ride, please try again.',
+                'error'
+            );
+        } finally {
+            setIsDeletingRide(false);
+        }
+    }
+
     return (
         <div className="carpool-page">
             <Tooltip id="rider-tooltip" className="small-tooltip" />
@@ -181,6 +214,17 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
                                         <p>{seatsLeft} Seat{seatsLeft == 1 ? '' : 's'} Available</p>
                                     </div>
                                 </div>
+                                {canDeleteRide(ride) &&
+                                    <button
+                                        className="cp-card-delete"
+                                        aria-label={`Cancel ${ride.driver_name}'s ride`}
+                                        data-tooltip-id="rider-tooltip"
+                                        data-tooltip-content="Cancel this ride"
+                                        onClick={() => setRideToDelete(ride)}
+                                    >
+                                        <DeleteOutlineIcon />
+                                    </button>
+                                }
                             </div>
                             <button
                                 className="btn-red"
@@ -218,6 +262,24 @@ const CarpoolPage: React.FC<CarpoolPageProps> = ({ currentUser, showPopup }) => 
                     showPopup={showPopup}
                 />
             }
+
+            <ConfirmDialog
+                isOpen={!!rideToDelete}
+                title="Cancel this ride?"
+                message={
+                    rideToDelete
+                        ? `This will remove ${rideToDelete.driver_id == currentUser.id.toString() ? 'your' : `${rideToDelete.driver_name}'s`} ride from the carpool.` +
+                        (rideToDelete.riders.length > 0
+                            ? `\n\n${rideToDelete.riders.length} rider${rideToDelete.riders.length == 1 ? '' : 's'} will lose their spot and be notified that the ride was cancelled.`
+                            : '') +
+                        '\n\nThis cannot be undone.'
+                        : ''
+                }
+                confirmLabel={isDeletingRide ? 'Cancelling...' : 'Cancel Ride'}
+                cancelLabel="Keep Ride"
+                onConfirm={onDeleteRide}
+                onCancel={() => setRideToDelete(null)}
+            />
 
             {showWaiverPopup &&
                 <WaiverPopup

@@ -128,6 +128,29 @@
                 height: 60px;
             }
 
+            .cp-card-delete {
+                margin-left: auto;
+                align-self: flex-start;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 4px;
+                border-radius: 50%;
+                color: #999;
+                cursor: pointer;
+                transition: background-color 0.2s, color 0.2s;
+
+                svg {
+                    width: 20px;
+                    height: 20px;
+                }
+
+                &:hover {
+                    background-color: rgba($red, 0.1);
+                    color: $red;
+                }
+            }
+
             .cp-card-header-text {
                 display: flex;
                 flex-direction: column;

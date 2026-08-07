@@ -1465,6 +1465,18 @@ export const removeCarpoolUser = async (data: object) => {
   }
 }
 
+// Cancels a whole ride. The backend only allows this for the ride's driver or an admin.
+export const deleteRide = async (rideId: string, userId: number) => {
+  try {
+    await authenticatedRequest(`/rides/${rideId}`, {
+      method: 'DELETE',
+      body: JSON.stringify({ user_id: userId })
+    });
+  } catch (err) {
+    throw err;
+  }
+}
+
 export const getRides = async (carpoolId: number): Promise<Ride[]> => {
   try {
     const res = await authenticatedRequest(`/rides/${carpoolId}`);
