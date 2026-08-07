@@ -1,5 +1,5 @@
 import { todo } from 'node:test';
-import { User, Opportunity, SignUp, Badge, Organization, Member } from '../types';
+import { User, Opportunity, SignUp, Badge, Organization, Member, Quote } from '../types';
 
 const countSignupsForCause = (
   cause: string,
@@ -324,4 +324,53 @@ export const ourTeam: Member[] = [
       "My favorite community service experience was tutoring high school students in multiple subjects. I ran a tutoring club at my high school for three years, where I worked with peers to help students with any subjects they were struggling with.",
     role: 'Full Stack Developer',
   }
+];
+
+/**
+ * Quotes shown at the bottom of the opportunity detail page.
+ *
+ * Attributed quotes are well-documented ones about service and community.
+ * Unattributed entries are CampusCares' own voice — keep them that way rather
+ * than assigning them to someone.
+ */
+export const missionQuotes: Quote[] = [
+  {
+    text: 'Everybody can be great, because anybody can serve.',
+    author: 'Martin Luther King Jr.',
+  },
+  {
+    text: 'No one has ever become poor by giving.',
+    author: 'Anne Frank',
+  },
+  {
+    text: 'How wonderful it is that nobody need wait a single moment before starting to improve the world.',
+    author: 'Anne Frank',
+  },
+  {
+    text: 'Service to others is the rent you pay for your room here on earth.',
+    author: 'Muhammad Ali',
+  },
+  {
+    text: 'The best way to find yourself is to lose yourself in the service of others.',
+    author: 'Mahatma Gandhi',
+  },
+  {
+    text: 'Alone we can do so little; together we can do so much.',
+    author: 'Helen Keller',
+  },
+  {
+    text: "Every hour you give is an hour someone else doesn't have to face alone.",
+  },
+  {
+    text: 'Community isn\'t somewhere you live. It\'s something you build, one afternoon at a time.',
+  },
+  {
+    text: "You don't need a title to make a difference. You just need to show up.",
+  },
+  {
+    text: 'Small commitments, repeated often, are how a neighborhood changes.',
+  },
+  {
+    text: 'The people you serve today are the people you share a community with tomorrow.',
+  },
 ];
