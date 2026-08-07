@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import { Opportunity, User, SignUp, allInterests, Organization, MultiOpp, FeedOrderItem, FeedItem } from '../types';
+import React, { useState, useMemo, useCallback } from 'react';
+import { Opportunity, User, SignUp, allInterests, Organization, MultiOpp, FeedOrderItem, FeedItem, FriendshipsResponse } from '../types';
 import OpportunityCard from '../components/OpportunityCard';
 import MultiOppCard from '../components/MultiOppCard';
+import FriendsGoingSection from '../components/FriendsGoingSection';
+import { useFriendsGoingOpportunities } from '../hooks/useFriendsGoingOpportunities';
 import { useNavigate } from 'react-router-dom';
 import MainFooter from '../components/MainFooter';
 
@@ -28,7 +30,8 @@ interface OpportunitiesPageProps {
     message: string,
     type: 'success' | 'info' | 'warning' | 'error'
   ) => void;
-  oppsLoading: boolean
+  oppsLoading: boolean;
+  friendshipsData?: FriendshipsResponse | null;
 }
 
 const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
@@ -46,7 +49,8 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   showCarpoolPopup,
   setShowCarpoolPopup,
   showPopup,
-  oppsLoading
+  oppsLoading,
+  friendshipsData
 }) => {
   const navigate = useNavigate();
 
@@ -173,6 +177,62 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     setSelectedOpportunity(null);
   };
 
+  // Standalone opportunities the user is allowed to see, already filtered by feedItems
+  const visibleOpportunities = useMemo(
+    () =>
+      feedItems
+        .filter((item) => item.kind === 'opp')
+        .map((item) => item.data as Opportunity),
+    [feedItems]
+  );
+
+  const friendsGoingOpportunities = useFriendsGoingOpportunities(
+    visibleOpportunities,
+    friendshipsData,
+    currentUser,
+    feedOrder
+  );
+
+  const renderOpportunityCard = useCallback(
+    (opp: Opportunity) => {
+      let signedUpStudents: User[] = [];
+      if (opp.involved_users && opp.involved_users.length > 0) {
+        signedUpStudents = opp.involved_users.filter(
+          (user: User) => user.registered === true || opp.host_id === user.id
+        );
+      } else {
+        const opportunitySignups = signups.filter((s) => s.opportunityId === opp.id);
+        signedUpStudents = students.filter((student) =>
+          opportunitySignups.some((s) => s.userId === student.id)
+        );
+      }
+      const isUserSignedUp = currentUser && currentUserSignupsSet ? (
+        opp.involved_users
+          ? opp.involved_users.some(
+            (user: User) =>
+              user.id === currentUser.id && (user.registered || opp.host_id === currentUser.id)
+          )
+          : currentUserSignupsSet.has(opp.id)
+      ) : false;
+
+      return (
+        <OpportunityCard
+          opportunity={opp}
+          signedUpStudents={signedUpStudents}
+          currentUser={currentUser}
+          onSignUp={handleSignUp}
+          onUnSignUp={handleUnSignUp}
+          isUserSignedUp={isUserSignedUp}
+          allOrgs={allOrgs}
+          onExternalSignup={handleExternalSignup}
+          onExternalUnsignup={handleExternalUnsignup}
+          showPopup={showPopup}
+        />
+      );
+    },
+    [signups, students, currentUser, currentUserSignupsSet, handleSignUp, handleUnSignUp, allOrgs, showPopup]
+  );
+
   return (
     <>
       {/* Banner */}
@@ -255,44 +315,20 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
             );
           }
 
-          const opp = item.data;
-          let signedUpStudents: User[] = [];
-          if (opp.involved_users && opp.involved_users.length > 0) {
-            signedUpStudents = opp.involved_users.filter(
-              (user: User) => user.registered === true || opp.host_id === user.id
-            );
-          } else {
-            const opportunitySignups = signups.filter((s) => s.opportunityId === opp.id);
-            signedUpStudents = students.filter((student) =>
-              opportunitySignups.some((s) => s.userId === student.id)
-            );
-          }
-          const isUserSignedUp = currentUser && currentUserSignupsSet ? (
-            opp.involved_users
-              ? opp.involved_users.some(
-                (user: User) =>
-                  user.id === currentUser.id && (user.registered || opp.host_id === currentUser.id)
-              )
-              : currentUserSignupsSet.has(opp.id)
-          ) : false;
-
+          const opp = item.data as Opportunity;
           return (
-            <OpportunityCard
-              key={`opp-${opp.id}`}
-              opportunity={opp}
-              signedUpStudents={signedUpStudents}
-              currentUser={currentUser}
-              onSignUp={handleSignUp}
-              onUnSignUp={handleUnSignUp}
-              isUserSignedUp={isUserSignedUp}
-              allOrgs={allOrgs}
-              onExternalSignup={handleExternalSignup}
-              onExternalUnsignup={handleExternalUnsignup}
-              showPopup={showPopup}
-            />
+            <React.Fragment key={`opp-${opp.id}`}>
+              {renderOpportunityCard(opp)}
+            </React.Fragment>
           );
         })}
       </div>
+
+      {/* Friends are going to these opportunities */}
+      <FriendsGoingSection
+        rankedOpportunities={friendsGoingOpportunities}
+        renderCard={renderOpportunityCard}
+      />
 
       {oppsLoading ? (
         <div style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem', fontWeight: '600' }}>Loading...</div>
