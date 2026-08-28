@@ -12,6 +12,7 @@ import {
 } from '../api';
 import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
+import MissionQuote from '../components/MissionQuote';
 import { upload } from '@testing-library/user-event/dist/upload';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -1507,6 +1508,8 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
           )}
         </div>
       </div>
+
+      <MissionQuote />
     </div>
   );
 };

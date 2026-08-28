@@ -244,6 +244,12 @@ export interface Member {
   role: string;
 }
 
+export interface Quote {
+  text: string;
+  /** Omitted for CampusCares' own lines, which are intentionally unattributed. */
+  author?: string;
+}
+
 export interface Waiver {
   id: string;
   typed_name: string;
