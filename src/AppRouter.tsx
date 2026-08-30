@@ -238,6 +238,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
                                 showCarpoolPopup={showCarpoolPopup}
                                 setShowCarpoolPopup={setShowCarpoolPopup}
                                 showPopup={showPopup}
+                                friendshipsData={friendshipsData}
                             />
                         }
                     />
