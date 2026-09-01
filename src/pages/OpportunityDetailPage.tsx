@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import {
   getProfilePictureUrl,
@@ -9,13 +9,14 @@ import {
   getCurrentOpportunities,
   uploadProfilePicture,
   getOpportunityAttendance,
+  getOpportunity,
 } from '../api';
 import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 import MissionQuote from '../components/MissionQuote';
 import { upload } from '@testing-library/user-event/dist/upload';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface OpportunityDetailPageProps {
   opportunities: Opportunity[];
@@ -34,7 +35,54 @@ interface OpportunityDetailPageProps {
   // setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
 }
 
-const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
+type OpportunityDetailContentProps = OpportunityDetailPageProps & {
+  opportunity: Opportunity;
+};
+
+/**
+ * Resolves the opportunity for /opportunity/:id before the page renders.
+ *
+ * Neither list the app holds in memory is complete: `opportunities` comes from
+ * /opps/current, which drops anything dated before yesterday, and `allTimeMyOpps`
+ * only holds opps the current user registered for or hosted. Plenty of entry
+ * points link outside both windows — the admin All Opportunities table reads the
+ * unfiltered /opps, multiopp children can be any date, and pasted URLs can be
+ * anything — so fall back to fetching by id, which applies no such filter.
+ */
+const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = (props) => {
+  const { opportunities, allTimeMyOpps } = props;
+  const { id } = useParams();
+  const oppId = parseInt(id!);
+
+  const localOpportunity = useMemo(
+    () =>
+      allTimeMyOpps?.find((o) => o.id === oppId) ??
+      opportunities.find((o) => o.id === oppId),
+    [allTimeMyOpps, opportunities, oppId]
+  );
+
+  // Only hits the network when the in-memory lists come up empty.
+  const { data: fetchedOpportunity, isLoading } = useQuery({
+    queryKey: ['opportunity', oppId],
+    queryFn: () => getOpportunity(oppId),
+    enabled: !localOpportunity && !Number.isNaN(oppId),
+  });
+
+  const opportunity = localOpportunity ?? fetchedOpportunity;
+
+  if (!opportunity) {
+    // Don't flash "not found" while the fallback fetch is still in flight.
+    if (isLoading) return <p>Loading opportunity...</p>;
+    return <p>Opportunity not found.</p>;
+  }
+
+  // Keyed by id so navigating between opportunities remounts the form state
+  // below rather than carrying the previous opportunity's values over.
+  return <OpportunityDetailContent {...props} opportunity={opportunity} key={opportunity.id} />;
+};
+
+const OpportunityDetailContent: React.FC<OpportunityDetailContentProps> = ({
+  opportunity,
   opportunities,
   students,
   signups,
@@ -47,14 +95,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
   // setOpportunities,
 }) => {
   const navigate = useNavigate();
-  const { id } = useParams();
   const queryClient = useQueryClient();
-
-  // If allTimeMyOpps is empty, then it uses allOpps (aka. default 'opportunities')
-  const opportunity = allTimeMyOpps && allTimeMyOpps.length > 0 ? allTimeMyOpps.find((o) => o.id === parseInt(id!)) : opportunities.find((o) => o.id === parseInt(id!));
-
-  if (!opportunity) return <p>Opportunity not found.</p>;
-
 
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -225,6 +266,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
         //   prev.map((opp) => (opp.id === opportunity.id ? updatedOpportunity : opp))
         // );
         queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+        queryClient.invalidateQueries({ queryKey: ['opportunity'] });
       }
 
       alert('Attendance submitted successfully!');
@@ -262,6 +304,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       const updatedOpps = await getCurrentOpportunities();
       // setOpportunities(updatedOpps);
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['opportunity'] });
       // alert('User registered successfully!');
     } catch (error) {
       console.error('Error registering user:', error);
@@ -285,6 +328,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       const updatedOpps = await getCurrentOpportunities();
       // setOpportunities(updatedOpps);
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['opportunity'] });
       alert('User unregistered successfully!');
     } catch (error) {
       console.error('Error unregistering user:', error);
@@ -302,6 +346,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
     try {
       await updateOpportunity(opportunity.id, { host_user_id: selectedTransferUserId });
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['opportunity'] });
       setShowTransferHost(false);
       setSelectedTransferUserId('');
       alert(`Host transferred to ${newHost.name}.`);
@@ -332,6 +377,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       //   )
       // );
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['opportunity'] });
 
       alert('Opportunity has been unapproved successfully!');
     } catch (error: any) {
@@ -353,6 +399,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       //   prevOpportunities.filter((opp) => opp.id !== opportunity.id)
       // );
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['opportunity'] });
 
       alert('Opportunity has been deleted successfully!');
       // Navigate back to opportunities page
@@ -381,6 +428,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
 
       await updateOpportunity(opportunity.id, updateData);
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['opportunity'] });
 
       // Update the local opportunity object to reflect changes
       Object.assign(opportunity, {
@@ -516,6 +564,7 @@ const OpportunityDetailPage: React.FC<OpportunityDetailPageProps> = ({
       //   )
       // );
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['opportunity'] });
 
       // Clear the selected image and preview
       setSelectedImage(null);

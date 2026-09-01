@@ -335,8 +335,8 @@ export const ourTeam: Member[] = [
  */
 export const missionQuotes: Quote[] = [
   {
-    text: 'Everybody can be great, because anybody can serve.',
-    author: 'Martin Luther King Jr.',
+    text: 'The greatest among you shall be your servant.',
+    author: 'Jesus, Matthew 23:11 ESV',
   },
   {
     text: 'No one has ever become poor by giving.',
@@ -347,30 +347,7 @@ export const missionQuotes: Quote[] = [
     author: 'Anne Frank',
   },
   {
-    text: 'Service to others is the rent you pay for your room here on earth.',
-    author: 'Muhammad Ali',
-  },
-  {
-    text: 'The best way to find yourself is to lose yourself in the service of others.',
-    author: 'Mahatma Gandhi',
-  },
-  {
     text: 'Alone we can do so little; together we can do so much.',
     author: 'Helen Keller',
-  },
-  {
-    text: "Every hour you give is an hour someone else doesn't have to face alone.",
-  },
-  {
-    text: 'Community isn\'t somewhere you live. It\'s something you build, one afternoon at a time.',
-  },
-  {
-    text: "You don't need a title to make a difference. You just need to show up.",
-  },
-  {
-    text: 'Small commitments, repeated often, are how a neighborhood changes.',
-  },
-  {
-    text: 'The people you serve today are the people you share a community with tomorrow.',
   },
 ];
