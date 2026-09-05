@@ -865,6 +865,11 @@ export const getOpportunity = async (id: number): Promise<Opportunity> => {
 };
 
 
+export const getApprovedOpportunitiesCount = async (): Promise<number> => {
+  const response = await authenticatedRequest('/opps/approved?per_page=1');
+  return response.pagination?.total ?? 0;
+};
+
 export const getUnapprovedOpportunities = async (): Promise<Opportunity[]> => {
   try {
     const response = await authenticatedRequest('/opps/unapproved');

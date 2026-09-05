@@ -312,6 +312,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
   const [selectedOrganizations, setSelectedOrganizations] = useState<Set<number>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [unapprovedOpportunities, setUnapprovedOpportunities] = useState<Opportunity[]>([]);
+  const [approvedOpportunitiesCount, setApprovedOpportunitiesCount] = useState<number>(0);
   const [unapprovedOrganizations, setUnapprovedOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -339,13 +340,15 @@ const AdminPage: React.FC<AdminPageProps> = ({
         setLoading(true);
         setError(null);
 
-        const [opportunities, organizations] = await Promise.all([
+        const [opportunities, organizations, approvedCount] = await Promise.all([
           api.getUnapprovedOpportunities(),
           api.getUnapprovedOrgs(),
+          api.getApprovedOpportunitiesCount(),
         ]);
 
         setUnapprovedOpportunities(opportunities);
         setUnapprovedOrganizations(organizations);
+        setApprovedOpportunitiesCount(approvedCount);
       } catch (err: any) {
         console.error('Error fetching unapproved data:', err);
         setError(err.message || 'Failed to fetch unapproved data');
@@ -434,6 +437,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
     const originalOrganizations = [...organizations];
     const originalUnapprovedOpportunities = [...unapprovedOpportunities];
     const originalUnapprovedOrganizations = [...unapprovedOrganizations];
+    const originalApprovedOpportunitiesCount = approvedOpportunitiesCount;
 
     try {
       // Immediately update frontend state (optimistic update)
@@ -462,6 +466,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
       setUnapprovedOrganizations((prev) =>
         prev.filter((org) => !selectedOrganizations.has(org.id))
       );
+      setApprovedOpportunitiesCount((prev) => prev + selectedOpportunities.size);
 
       // Clear selections
       setSelectedOpportunities(new Set());
@@ -486,6 +491,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
       setOrganizations(originalOrganizations);
       setUnapprovedOpportunities(originalUnapprovedOpportunities);
       setUnapprovedOrganizations(originalUnapprovedOrganizations);
+      setApprovedOpportunitiesCount(originalApprovedOpportunitiesCount);
 
       alert(`Error approving items: ${error.message}`);
     } finally {
@@ -691,7 +697,7 @@ const promptAndDownloadCsv = async () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Approved Opportunities</p>
               <p className="text-2xl font-semibold text-gray-900">
-                {opportunities.filter((opp) => opp.approved !== false).length}
+                {approvedOpportunitiesCount}
               </p>
             </div>
           </div>
