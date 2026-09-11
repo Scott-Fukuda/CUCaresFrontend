@@ -186,11 +186,42 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     [feedItems]
   );
 
+  // Multiopp series the user is allowed to see, already filtered by feedItems
+  const visibleMultiOpps = useMemo(
+    () =>
+      feedItems
+        .filter((item) => item.kind === 'multiopp')
+        .map((item) => item.data as MultiOpp),
+    [feedItems]
+  );
+
+  /**
+   * Upcoming sessions of those series — the friends section shows one of these
+   * per series. `multiopp.opportunities` can't be used here: it omits the
+   * `registered` flag, so it can't say who is actually going.
+   */
+  const visibleMultiOppSessions = useMemo(() => {
+    const visibleIds = new Set(visibleMultiOpps.map((m) => m.id));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return opportunities.filter((opp) => {
+      const multioppId = opp.multiopp_id ?? opp.multiopp?.id;
+      if (multioppId === undefined || multioppId === null) return false;
+      if (!visibleIds.has(multioppId)) return false;
+      if (!opp.approved) return false;
+      const [year, month, day] = opp.date.split('-').map(Number);
+      return new Date(year, month - 1, day).getTime() >= today.getTime();
+    });
+  }, [opportunities, visibleMultiOpps]);
+
   const friendsGoingOpportunities = useFriendsGoingOpportunities(
     visibleOpportunities,
     friendshipsData,
     currentUser,
-    feedOrder
+    feedOrder,
+    visibleMultiOpps,
+    visibleMultiOppSessions
   );
 
   const renderOpportunityCard = useCallback(
