@@ -125,7 +125,9 @@ export const studentGroupCategories: StudentGroupCategory[] = [
 
 export type OrganizationType =
   | 'Fraternity'
-  | 'Sorority'
+  | 'Multicultural Fraternity'
+  | 'Panhellenic Sorority'
+  | 'Business Fraternity'
   | 'Professional Club'
   | 'Sports Team'
   | 'Performing Arts Group'
@@ -136,7 +138,9 @@ export type OrganizationType =
   | 'Other';
 export const organizationTypes: OrganizationType[] = [
   'Fraternity',
-  'Sorority',
+  'Multicultural Fraternity',
+  'Panhellenic Sorority',
+  'Business Fraternity',
   'Professional Club',
   'Sports Team',
   'Performing Arts Group',
