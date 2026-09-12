@@ -6,7 +6,7 @@ import HomePage from './pages/HomePage';
 import { User } from './types';
 import AboutUsPage from './pages/AboutUs';
 import HomeHeader from './components/HomeHeader';
-import OpportunitiesPage from './pages/OpportunitiesPage';
+import ExplorePage from './pages/ExplorePage';
 import { Opportunity, MultiOpp, Organization, SignUp } from './types';
 
 interface AuthFlowProps {
@@ -106,16 +106,13 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
           <div >
             <HomeHeader />
             <div style={{ padding: '100px 50px' }}>
-              <OpportunitiesPage
+              <ExplorePage
                 multiopps={multiopp}
                 opportunities={opportunities}
                 students={students}
                 allOrgs={organizations}
                 signups={signups}
-                currentUser={null}
                 oppsLoading={oppsLoading}
-                feedOrder={[]}
-                invisibleMultioppIds={[]}
               />
             </div>
           </div>

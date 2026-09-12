@@ -3,6 +3,7 @@ import { Opportunity, User, SignUp, Organization } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl, removeCarpoolUser } from '../../api';
 import { calculateEndTime } from '../../utils/timeUtils';
+import { signInRedirectState } from '../../utils/authRedirect';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import './index.scss';
@@ -71,8 +72,14 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   const eventStarted = new Date() >= new Date(`${opportunity.date}T${opportunity.time}`);
   const isUserHost = currentUser ? opportunity.host_id === currentUser.id : false;
 
+  // Signed-out visitors (the Explore page) get the sign-in prompt, and come
+  // back to this opportunity once they are signed in.
+  const promptSignIn = () => {
+    navigate('/sign-up', { state: signInRedirectState(`/opportunity/${opportunity.id}`) });
+  };
+
   const handleCardClick = (e: React.MouseEvent) => {
-    if (!currentUser) { navigate('/sign-up'); return; }
+    if (!currentUser) { promptSignIn(); return; }
 
     // Prevent navigation if the signup button or a group link was clicked
     if ((e.target as HTMLElement).closest('button, [data-clickable-org]')) {
@@ -82,7 +89,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   };
 
   const handleButtonClick = async () => {
-    if (!currentUser) navigate('/sign-up');
+    if (!currentUser) { promptSignIn(); return; }
 
     if (currentUser && isUserSignedUp) {
       if (opportunity.allow_carpool) {
