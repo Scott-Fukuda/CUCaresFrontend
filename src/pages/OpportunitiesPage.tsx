@@ -407,7 +407,16 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           rel="noopener noreferrer"
           className="underline hover:text-gray-700"
         >
-          Terms of Service and Privacy Policy
+          Terms of Service
+        </a>
+        and 
+        <a
+          href="/privacy_policy.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-gray-700"
+        >
+          Privacy Policy
         </a>
         .
       </p>
