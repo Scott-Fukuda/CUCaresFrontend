@@ -275,7 +275,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, error, i
             >
               Terms of Service
             </a>
-            and 
+            {" "}and{" "}
             <a
               href="/privacy_policy.pdf"
               target="_blank"

@@ -608,7 +608,7 @@ const ProfilePage: React.FC<ProfilePageProps> = (props) => {
         >
           Terms of Service
         </a>
-        and 
+        {" "}and{" "}
         <a
           href="/privacy_policy.pdf"
           target="_blank"

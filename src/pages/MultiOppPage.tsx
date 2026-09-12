@@ -778,7 +778,7 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
         >
           Terms of Service
         </a>
-        and 
+        {" "}and{" "}
         <a
           href="/privacy_policy.pdf"
           target="_blank"

@@ -228,7 +228,7 @@ const AboutUsPage: React.FC<AboutUsProps> = ({ currentUser }) => {
           >
             Terms of Service
           </a>
-          and 
+          {" "}and{" "}
           <a
             href="/privacy_policy.pdf"
             target="_blank"

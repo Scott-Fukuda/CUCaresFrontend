@@ -440,7 +440,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         >
           Terms of Service
         </a>
-        and 
+        {" "}and{" "}
         <a
           href="/privacy_policy.pdf"
           target="_blank"
