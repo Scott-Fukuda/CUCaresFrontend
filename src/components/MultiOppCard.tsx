@@ -3,6 +3,7 @@ import { MultiOpp, Organization, Opportunity, User } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl } from '../api';
 import ErrorIcon from '@mui/icons-material/Error';
+import { signInRedirectState } from '../utils/authRedirect';
 
 interface MultiOppCardProps {
   multiopp: MultiOpp;
@@ -90,8 +91,15 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
     return { displayOpportunities, opportunityMap: map };
   }, [multiopp, opportunitiesData]);
 
+  // Signed-out visitors (the Explore page) get the sign-in prompt, and come back
+  // to the event they clicked once they are signed in.
+  const promptSignIn = (returnTo: string) => {
+    navigate('/sign-up', { state: signInRedirectState(returnTo) });
+  };
+
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return;
+    if (!currentUser) { promptSignIn(`/multiopp/${multiopp.id}`); return; }
     navigate(`/multiopp/${multiopp.id}`);
   };
 
@@ -200,6 +208,7 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
               const handleButtonClick = (e: React.MouseEvent) => {
                 e.stopPropagation();
                 if (buttonDisabled) return;
+                if (!currentUser) { promptSignIn(`/opportunity/${opp.id}`); return; }
 
                 if (isUserSignedUp) {
                   if (redirectUrl && onExternalUnsignup) {
