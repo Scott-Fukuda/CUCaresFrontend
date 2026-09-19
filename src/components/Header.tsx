@@ -112,7 +112,7 @@ const Header: React.FC<HeaderProps> = (props) => {
             <div className="text-right hidden lg:block">
               <p className="font-semibold text-gray-800">Welcome, {user.name}!</p>
               <p className="text-sm text-gray-600">
-                <span className="font-bold text-cornell-red">{points}</span> points earned ✨
+                <span className="font-bold text-cornell-red">{points}</span> points earned
               </p>
             </div>
             <img
