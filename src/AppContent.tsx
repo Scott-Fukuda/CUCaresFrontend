@@ -292,7 +292,7 @@ const AppContent: React.FC = () => {
         try {
           if (!approvalCheck.is_approved) {
             setAuthError(
-              'Your email is not approved for this platform. Please contact team@campuscares.us for access.'
+              'Your email is not approved for this platform. Please contact ejm376@cornell.edu for access.'
             );
             setIsLoading(false);
             await signOut();
@@ -303,7 +303,7 @@ const AppContent: React.FC = () => {
         } catch (error) {
           console.error('Error checking email approval:', error);
           setAuthError(
-            'Unable to verify email approval. Please try again or contact team@campuscares.us.'
+            'Unable to verify email approval. Please try again or contact ejm376@cornell.edu.'
           );
           setIsLoading(false);
           await signOut();

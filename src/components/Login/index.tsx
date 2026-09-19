@@ -112,8 +112,8 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
           <div className="bottom-info">
             <p className="login-contact">
               Not a student? Reach out to{' '}
-              <a href="mailto:team@campuscares.us">
-                team@campuscares.us
+              <a href="mailto:ejm376@cornell.edu">
+                ejm376@cornell.edu
               </a>
               .
             </p>
