@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { allInterests, Opportunity, Organization, MultiOpp } from '../types';
+import { ORG_PRESETS, applyOrgPreset, orgIdsForPreset } from '../utils/orgPresets';
 import { useNavigate, useLocation } from 'react-router-dom';
 import * as api from '../api';
 import { formatDateTimeForBackend } from '../utils/timeUtils';
@@ -226,6 +227,19 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
       const next = exists ? current.filter((id) => id !== orgId) : [...current, orgId];
       return { ...prev, visibility: next } as typeof prev;
     });
+  };
+
+  const applyPreset = (presetId: string) => {
+    const preset = ORG_PRESETS.find((p) => p.id === presetId);
+    if (!preset) return;
+    setFormData((prev) => {
+      const current: number[] = Array.isArray(prev.visibility) ? prev.visibility : [];
+      return { ...prev, visibility: applyOrgPreset(current, preset, organizations) } as typeof prev;
+    });
+  };
+
+  const clearOrgSelection = () => {
+    setFormData((prev) => ({ ...prev, visibility: [] }) as typeof prev);
   };
 
   const isOrgSelected = (orgId: number) => {
@@ -804,9 +818,34 @@ const CreateOpportunityPage: React.FC<CreateOpportunityPageProps> = ({
 
             {formData.isPrivate && (
               <div className="mt-3">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select organizations allowed to see this event
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Select organizations allowed to see this event
+                  </label>
+                  <button
+                    type="button"
+                    onClick={clearOrgSelection}
+                    disabled={!Array.isArray(formData.visibility) || formData.visibility.length === 0}
+                    className="text-sm text-cornell-red font-semibold hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed"
+                  >
+                    Clear all
+                  </button>
+                </div>
+                {/* Controlled at "" so picking the same preset twice still fires */}
+                <select
+                  value=""
+                  onChange={(e) => applyPreset(e.target.value)}
+                  className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+                >
+                  <option value="" disabled>
+                    Quick select by group type...
+                  </option>
+                  {ORG_PRESETS.map((preset) => (
+                    <option key={preset.id} value={preset.id}>
+                      {preset.label} ({orgIdsForPreset(preset, organizations).length})
+                    </option>
+                  ))}
+                </select>
                 <input
                   type="text"
                   placeholder="Filter organizations..."

@@ -32,20 +32,12 @@ import PopupMessage from './components/PopupMessage';
 import ConfirmDialog from './components/ConfirmDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { canUnregisterFromOpportunity, formatTimeUntilEvent } from './utils/timeUtils';
+import { AUTH_ROUTES, RedirectState, resolveRedirectPath } from './utils/authRedirect';
 import { Zoomies } from 'ldrs/react'
 import 'ldrs/react/Zoomies.css'
 
 type AuthView = 'login' | 'register';
 
-type RedirectState = {
-  from?: {
-    pathname: string;
-    search?: string;
-    hash?: string;
-  };
-};
-
-const AUTH_ROUTES = new Set(['/login', '/register', '/about-us', '/', '/explore']);
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
@@ -57,20 +49,8 @@ const AppContent: React.FC = () => {
     latestLocationRef.current = location;
   }, [location]);
 
-  const getRedirectPath = () => {
-    const currentLocation = latestLocationRef.current;
-    const state = currentLocation.state as RedirectState | null;
-    const from = state?.from;
-    if (from?.pathname) {
-      if (AUTH_ROUTES.has(from.pathname)) {
-        return '/opportunities';
-      }
-      const search = from.search ?? '';
-      const hash = from.hash ?? '';
-      return `${from.pathname}${search}${hash}`;
-    }
-    return '/opportunities';
-  };
+  const getRedirectPath = () =>
+    resolveRedirectPath(latestLocationRef.current.state as RedirectState | null);
 
   const getAuthRedirectState = (): RedirectState => {
     const currentLocation = latestLocationRef.current;
