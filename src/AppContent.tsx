@@ -32,7 +32,14 @@ import PopupMessage from './components/PopupMessage';
 import ConfirmDialog from './components/ConfirmDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { canUnregisterFromOpportunity, formatTimeUntilEvent } from './utils/timeUtils';
-import { AUTH_ROUTES, RedirectState, resolveRedirectPath } from './utils/authRedirect';
+import {
+  AUTH_ROUTES,
+  RedirectState,
+  clearIntendedPath,
+  consumeIntendedPath,
+  rememberIntendedPath,
+  resolveRedirectPath,
+} from './utils/authRedirect';
 import { Zoomies } from 'ldrs/react'
 import 'ldrs/react/Zoomies.css'
 
@@ -43,28 +50,49 @@ const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const latestLocationRef = useRef(location);
+  /**
+   * Guards the one navigation that follows signing in.
+   *
+   * Two things race to perform it: the sign-in handler and the auth-state
+   * subscription, and in development StrictMode mounts that subscription twice,
+   * so it can fire twice for a single sign-in. Whoever gets there second finds
+   * the remembered destination already spent and would send the user to the
+   * default page, undoing the first, correct navigation. First one wins.
+   */
+  const postSignInRedirectRef = useRef(false);
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     latestLocationRef.current = location;
   }, [location]);
 
+  // Consuming the stored path here is what forgets it: it is used once, on the
+  // one navigation that follows a successful sign-in.
   const getRedirectPath = () =>
-    resolveRedirectPath(latestLocationRef.current.state as RedirectState | null);
+    resolveRedirectPath(
+      latestLocationRef.current.state as RedirectState | null,
+      consumeIntendedPath()
+    );
+
+  /** Sends a just-signed-in user to where they were headed, exactly once. */
+  const redirectAfterSignIn = () => {
+    if (postSignInRedirectRef.current) return;
+    if (!AUTH_ROUTES.has(latestLocationRef.current.pathname)) return;
+    postSignInRedirectRef.current = true;
+    navigate(getRedirectPath(), { replace: true, state: null });
+  };
 
   const getAuthRedirectState = (): RedirectState => {
     const currentLocation = latestLocationRef.current;
     const existingState = currentLocation.state as RedirectState | null;
-    if (existingState?.from) {
-      return existingState;
-    }
-    return {
-      from: {
-        pathname: currentLocation.pathname,
-        search: currentLocation.search,
-        hash: currentLocation.hash,
-      },
+    const from = existingState?.from ?? {
+      pathname: currentLocation.pathname,
+      search: currentLocation.search,
+      hash: currentLocation.hash,
     };
+    // Survives the trip through registration, which router state does not.
+    rememberIntendedPath(from.pathname, from.search, from.hash);
+    return { from };
   };
   const queryClient = useQueryClient();
 
@@ -78,6 +106,7 @@ const AppContent: React.FC = () => {
       if (!mounted) return;
       if (!firebaseUser) {
         setCurrentUser(null);
+        postSignInRedirectRef.current = false;
         setAuthChecked(true);
         setIsLoading(false);
         return;
@@ -94,11 +123,7 @@ const AppContent: React.FC = () => {
           if (response.success && response.exists) {
             const existingUser = await api.getUserByEmail(firebaseUser.email, token);
             setCurrentUser(existingUser);
-            const currentLocation = latestLocationRef.current;
-            if (AUTH_ROUTES.has(currentLocation.pathname)) {
-              const redirectPath = getRedirectPath();
-              navigate(redirectPath, { replace: true, state: null });
-            }
+            redirectAfterSignIn();
           } else {
             setCurrentUser(null);
             const response = await api.checkEmailApproval(firebaseUser.email);
@@ -328,8 +353,7 @@ const AppContent: React.FC = () => {
           const existingUser = await api.getUserByEmail(firebaseUser.email, token);
 
           setCurrentUser(existingUser);
-          const redirectPath = getRedirectPath();
-          navigate(redirectPath, { replace: true, state: null });
+          redirectAfterSignIn();
         } else {
           // User doesn't exist, redirect to registration
           if (approvalCheck.is_approved || firebaseUser.email.toLowerCase().endsWith('@cornell.edu') || firebaseUser.email.toLowerCase().endsWith('@ithaca.edu')) {
@@ -463,6 +487,9 @@ const AppContent: React.FC = () => {
       setCurrentUser(null);
       setAuthError(null);
       setAuthView('login');
+      // Whatever they were headed for belongs to the session that just ended.
+      clearIntendedPath();
+      postSignInRedirectRef.current = false;
       navigate('/opportunities');
     })();
   };

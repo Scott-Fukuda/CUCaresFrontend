@@ -3,7 +3,7 @@ import { MultiOpp, Organization, Opportunity, User } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl } from '../api';
 import ErrorIcon from '@mui/icons-material/Error';
-import { signInRedirectState } from '../utils/authRedirect';
+import { rememberIntendedPath, signInRedirectState } from '../utils/authRedirect';
 
 interface MultiOppCardProps {
   multiopp: MultiOpp;
@@ -94,6 +94,7 @@ const MultiOppCard: React.FC<MultiOppCardProps> = ({
   // Signed-out visitors (the Explore page) get the sign-in prompt, and come back
   // to the event they clicked once they are signed in.
   const promptSignIn = (returnTo: string) => {
+    rememberIntendedPath(returnTo);
     navigate('/sign-up', { state: signInRedirectState(returnTo) });
   };
 

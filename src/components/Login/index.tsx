@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { loginTest } from '../../api';
 import { User } from '../../types';
+import { RedirectState, consumeIntendedPath, resolveRedirectPath } from '../../utils/authRedirect';
 import './index.scss';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -16,6 +17,7 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurrentUser, mode }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const env = import.meta.env.VITE_ENV;
 
   useEffect(() => {
@@ -33,7 +35,12 @@ const Login: React.FC<LoginProps> = ({ onGoogleSignIn, error, isLoading, setCurr
       const data: User = await res.json();
       setCurrentUser(data);
 
-      navigate("/");
+      // The test login bypasses Firebase, so it has to honour the remembered
+      // destination itself — nothing else runs on this path.
+      navigate(
+        resolveRedirectPath(location.state as RedirectState | null, consumeIntendedPath()),
+        { replace: true, state: null }
+      );
     } catch (err) {
     }
   }

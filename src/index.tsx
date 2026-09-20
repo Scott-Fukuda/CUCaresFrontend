@@ -2,6 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { captureEntryPath } from './utils/authRedirect';
+
+// Before React mounts and the router starts redirecting: a visitor who opened
+// /opportunity/583 while signed out is sent to sign in, and comes back here.
+captureEntryPath();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

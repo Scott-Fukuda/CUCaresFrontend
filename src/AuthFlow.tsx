@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { RedirectState, rememberIntendedPath } from './utils/authRedirect';
 import Login from './components/Login';
 import Register from './components/Register';
 import HomePage from './pages/HomePage';
@@ -23,6 +24,21 @@ interface AuthFlowProps {
   oppsLoading: boolean
 }
 
+/**
+ * Sends a signed-out deep link to the login page, remembering the destination
+ * both in router state and in storage — state alone doesn't survive the visitor
+ * switching between the login and sign-up pages.
+ */
+const DeepLinkSignIn: React.FC<{ redirectState: RedirectState }> = ({ redirectState }) => {
+  const from = redirectState.from;
+
+  useEffect(() => {
+    if (from) rememberIntendedPath(from.pathname, from.search, from.hash);
+  }, [from]);
+
+  return <Navigate to="/login" state={redirectState} replace />;
+};
+
 const AuthFlow: React.FC<AuthFlowProps> = ({
   handleGoogleSignIn,
   handleRegister,
@@ -39,8 +55,8 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const getRedirectState = () => {
-    const existingState = location.state as { from?: { pathname: string; search?: string; hash?: string } } | null;
+  const getRedirectState = (): RedirectState => {
+    const existingState = location.state as RedirectState | null;
     if (existingState?.from) {
       return existingState;
     }
@@ -117,7 +133,12 @@ const AuthFlow: React.FC<AuthFlowProps> = ({
             </div>
           </div>
         } />
-        <Route path="*" element={<Navigate to="/" state={getRedirectState()} replace />} />
+        {/*
+          * A signed-out visitor following a link to a real page — /opportunity/583
+          * from a text message, say — lands here. Send them to sign in and hold on
+          * to where they were going, rather than dropping them on the home page.
+          */}
+        <Route path="*" element={<DeepLinkSignIn redirectState={getRedirectState()} />} />
       </Routes>
     </div>
   );

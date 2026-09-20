@@ -3,7 +3,7 @@ import { Opportunity, User, SignUp, Organization } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { getProfilePictureUrl, removeCarpoolUser } from '../../api';
 import { calculateEndTime } from '../../utils/timeUtils';
-import { signInRedirectState } from '../../utils/authRedirect';
+import { rememberIntendedPath, signInRedirectState } from '../../utils/authRedirect';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import './index.scss';
@@ -75,7 +75,9 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
   // Signed-out visitors (the Explore page) get the sign-in prompt, and come
   // back to this opportunity once they are signed in.
   const promptSignIn = () => {
-    navigate('/sign-up', { state: signInRedirectState(`/opportunity/${opportunity.id}`) });
+    const returnTo = `/opportunity/${opportunity.id}`;
+    rememberIntendedPath(returnTo);
+    navigate('/sign-up', { state: signInRedirectState(returnTo) });
   };
 
   const handleCardClick = (e: React.MouseEvent) => {

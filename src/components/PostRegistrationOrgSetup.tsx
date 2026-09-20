@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Organization, User, OrganizationType, organizationTypes } from '../types';
+import { consumeIntendedPath, resolveRedirectPath } from '../utils/authRedirect';
 import { useNavigate } from 'react-router-dom';
 
 interface PostRegistrationOrgSetupProps {
@@ -246,7 +247,8 @@ const PostRegistrationOrgSetup: React.FC<PostRegistrationOrgSetupProps> = ({
             You can always manage your organizations later in the Groups section.
           </p>
           <button
-            onClick={() => navigate('/opportunities')}
+            // A brand-new user who arrived from a shared link finishes the trip here.
+            onClick={() => navigate(resolveRedirectPath(null, consumeIntendedPath()), { replace: true })}
             className="bg-cornell-red text-white px-8 py-3 rounded-lg hover:bg-red-800 transition-colors font-semibold text-lg"
           >
             Continue to CampusCares

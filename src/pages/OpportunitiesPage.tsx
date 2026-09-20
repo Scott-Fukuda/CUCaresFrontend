@@ -4,9 +4,10 @@ import OpportunityCard from '../components/OpportunityCard';
 import MultiOppCard from '../components/MultiOppCard';
 import FriendsGoingSection from '../components/FriendsGoingSection';
 import { useFriendsGoingOpportunities } from '../hooks/useFriendsGoingOpportunities';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import MainFooter from '../components/MainFooter';
 import { buildFeedItems } from '../utils/feed';
+import { rememberIntendedPath } from '../utils/authRedirect';
 
 interface OpportunitiesPageProps {
   opportunities: Opportunity[];
@@ -54,6 +55,7 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   friendshipsData
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Filter functionality disabled
   // const [causeFilter, setCauseFilter] = useState<string>('All');
@@ -88,6 +90,8 @@ const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const handleExternalSignupConfirm = () => {
     if (selectedOpportunity) {
       if (!currentUser) {
+        // Come back to this page after signing in, not the default landing page.
+        rememberIntendedPath(location.pathname, location.search, location.hash);
         navigate('/login');
         return;
       }
