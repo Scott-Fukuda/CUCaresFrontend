@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { RedirectState, rememberIntendedPath } from './utils/authRedirect';
+import { isInvitePath } from './utils/inviteLink';
 import Login from './components/Login';
 import Register from './components/Register';
 import HomePage from './pages/HomePage';
@@ -36,7 +37,11 @@ const DeepLinkSignIn: React.FC<{ redirectState: RedirectState }> = ({ redirectSt
     if (from) rememberIntendedPath(from.pathname, from.search, from.hash);
   }, [from]);
 
-  return <Navigate to="/login" state={redirectState} replace />;
+  // An invite link is aimed at people who don't have an account yet, so open
+  // the sign-up side of the prompt; both sides sign in the same way.
+  const destination = from && isInvitePath(from.pathname) ? '/sign-up' : '/login';
+
+  return <Navigate to={destination} state={redirectState} replace />;
 };
 
 const AuthFlow: React.FC<AuthFlowProps> = ({

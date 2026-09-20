@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import InviteLinkGenerator from '../components/InviteLinkGenerator';
 import { Opportunity, Organization, User, MultiOpp, FeedOrderItem, FeedItem } from '../types';
 import * as api from '../api';
 import {
@@ -646,6 +647,8 @@ const promptAndDownloadCsv = async () => {
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Admin Panel</h1>
         <p className="text-gray-600">Review and approve pending opportunities and organizations.</p>
       </div>
+
+      <InviteLinkGenerator organizations={organizations} opportunities={opportunities} />
 
       {/* Statistics Section */}
       <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">

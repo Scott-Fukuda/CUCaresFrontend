@@ -32,6 +32,7 @@ import CreateOpportunityPage from './pages/CreateOpportunityPage';
 import { initialBadges } from './data/initialData'; // Using initial data for badges
 import AboutUsPage from './pages/AboutUs';
 import PostRegistrationOrgSetup from './components/PostRegistrationOrgSetup';
+import InvitePage from './pages/InvitePage';
 import MultiOppPage from './pages/MultiOppPage';
 import Waiver from './pages/Waiver';
 import CarpoolPopup from './components/CarpoolPopup';
@@ -63,6 +64,7 @@ interface AppRouterProps {
     organizations: Organization[];
     setOrganizations: React.Dispatch<React.SetStateAction<Organization[] | []>>;
     joinOrg: (orgId: number) => void;
+    joinOrgViaInvite: (orgId: number) => Promise<boolean>;
     leaveOrg: (orgId: number) => void;
     handleSendFriendRequest: (friendId: number) => void;
     leaderboardUsers: User[];
@@ -120,6 +122,7 @@ const AppRouter: React.FC<AppRouterProps> = ({
     organizations,
     setOrganizations,
     joinOrg,
+    joinOrgViaInvite,
     leaveOrg,
     handleSendFriendRequest,
     handleSignUp,
@@ -319,6 +322,18 @@ const AppRouter: React.FC<AppRouterProps> = ({
                             currentUser.admin
                                 ? <AllOpportunitiesPage />
                                 : <Navigate to="/opportunities" replace />
+                        }
+                    />
+
+                    {/* Invite link: join the org, then straight to the event */}
+                    <Route
+                        path="/invite/:orgId/:oppId"
+                        element={
+                            <InvitePage
+                                currentUser={currentUser}
+                                organizations={organizations}
+                                joinOrgViaInvite={joinOrgViaInvite}
+                            />
                         }
                     />
 

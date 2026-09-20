@@ -446,6 +446,9 @@ const AppContent: React.FC = () => {
 
       setStudents((prev) => [...prev, finalNewUser]);
       setCurrentUser(finalNewUser);
+      // Claim the post-sign-in redirect so the auth-state subscription doesn't
+      // fire a second one and send the new user to the default page instead.
+      postSignInRedirectRef.current = true;
       const redirectPath = getRedirectPath();
       navigate(redirectPath, { replace: true, state: null });
       setShowPostRegistrationSetup(true);
@@ -999,6 +1002,32 @@ const AppContent: React.FC = () => {
     },
     [currentUser, organizations]
   );
+  /**
+   * Joins an org for the invite-link flow.
+   *
+   * `joinOrg` announces itself with alerts, which would interrupt the automatic
+   * hand-off to the opportunity, so this reports success by return value and
+   * lets the invite page show its own status.
+   */
+  const joinOrgViaInvite = useCallback(
+    async (orgId: number): Promise<boolean> => {
+      if (!currentUser) return false;
+      if ((currentUser.organizationIds ?? []).includes(orgId)) return true;
+
+      try {
+        await api.registerForOrg({ user_id: currentUser.id, organization_id: orgId });
+        const updatedUser = await api.getUser(currentUser.id);
+        setCurrentUser(updatedUser);
+        setStudents((prev) => prev.map((s) => (s.id === currentUser.id ? updatedUser : s)));
+        return true;
+      } catch (e: any) {
+        console.error('Invite join failed:', e?.message || e);
+        return false;
+      }
+    },
+    [currentUser]
+  );
+
   const leaveOrg = useCallback(
     async (orgId: number) => {
       if (
@@ -1119,6 +1148,7 @@ const AppContent: React.FC = () => {
           organizations={organizations}
           setOrganizations={setOrganizations}
           joinOrg={joinOrg}
+          joinOrgViaInvite={joinOrgViaInvite}
           leaveOrg={leaveOrg}
           handleSendFriendRequest={handleSendFriendRequest}
           handleSignUp={handleSignUp}
