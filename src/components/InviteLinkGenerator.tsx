@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import QRCode from 'qrcode';
 import { Opportunity, Organization } from '../types';
 import { buildInviteUrl } from '../utils/inviteLink';
+import { calculateEndTime } from '../utils/timeUtils';
 
 interface InviteLinkGeneratorProps {
   organizations: Organization[];
@@ -9,6 +10,29 @@ interface InviteLinkGeneratorProps {
 }
 
 const QR_PIXELS = 320;
+
+const formatStartTime = (date: string, time: string): string => {
+  const [year, month, day] = date.split('-').map(Number);
+  const [hours, minutes] = time.split(':').map(Number);
+  return new Date(year, month - 1, day, hours, minutes).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
+
+/**
+ * Enough to tell two events apart in a flat dropdown.
+ *
+ * Several events share a name, a date and even a start time — recurring series
+ * run back-to-back slots — so the label carries the time slot and, as the only
+ * guaranteed tiebreaker, the id.
+ */
+const optionLabel = (opp: Opportunity): string => {
+  const start = formatStartTime(opp.date, opp.time);
+  const end = calculateEndTime(opp.date, opp.time, opp.duration ?? 0);
+  return `#${opp.id} — ${opp.name} — ${opp.date}, ${start}–${end}`;
+};
 
 /** Upcoming first, since an invite for a past event is rarely what's wanted. */
 const sortOpportunities = (opportunities: Opportunity[]): Opportunity[] => {
@@ -129,7 +153,7 @@ const InviteLinkGenerator: React.FC<InviteLinkGeneratorProps> = ({
             <option value="">Select an opportunity...</option>
             {sortedOpps.map((opp) => (
               <option key={opp.id} value={opp.id}>
-                {opp.name} — {opp.date}
+                {optionLabel(opp)}
               </option>
             ))}
           </select>
@@ -145,7 +169,7 @@ const InviteLinkGenerator: React.FC<InviteLinkGeneratorProps> = ({
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-700 mb-2">
               Joins <span className="font-semibold">{selectedOrg?.name}</span> and opens{' '}
-              <span className="font-semibold">{selectedOpp?.name}</span>.
+              <span className="font-semibold">{selectedOpp && optionLabel(selectedOpp)}</span>.
             </p>
             <div className="flex items-center gap-2 mb-3">
               <input
