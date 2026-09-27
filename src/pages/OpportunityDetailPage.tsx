@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Opportunity, User, SignUp, Organization } from '../types';
 import {
   getProfilePictureUrl,
@@ -14,6 +14,7 @@ import {
 import { formatDateTimeForBackend, calculateEndTime } from '../utils/timeUtils';
 import AttendanceManager from '../components/AttendanceManager';
 import MissionQuote from '../components/MissionQuote';
+import BannerDownloadButton from '../components/BannerDownloadButton';
 import { upload } from '@testing-library/user-event/dist/upload';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -114,6 +115,7 @@ const OpportunityDetailContent: React.FC<OpportunityDetailContentProps> = ({
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const bannerImageRef = useRef<HTMLImageElement | null>(null);
 
   // Slot limit management state
   const [isEditingSlots, setIsEditingSlots] = useState(false);
@@ -656,8 +658,9 @@ const OpportunityDetailContent: React.FC<OpportunityDetailContentProps> = ({
 
   return (
     <div>
-      <div className="relative mb-8 rounded-2xl overflow-hidden">
+      <div className="group relative mb-8 rounded-2xl overflow-hidden">
         <img
+          ref={bannerImageRef}
           src={opportunity.imageUrl || '/backup.jpeg'}
           alt={opportunity.name}
           className="w-full h-64 md:h-80 object-cover"
@@ -670,6 +673,7 @@ const OpportunityDetailContent: React.FC<OpportunityDetailContentProps> = ({
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+        <BannerDownloadButton imageRef={bannerImageRef} name={opportunity.name} />
         <div className="absolute bottom-0 left-0 p-8">
           <h1 className="text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">
             {opportunity.name}
