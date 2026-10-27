@@ -1,4 +1,5 @@
 import './index.scss';
+import AnnouncementBanner from '../../components/AnnouncementBanner';
 import cover1 from '../../assets/images/cover1.png';
 import cover2 from '../../assets/images/cover2.png';
 import cover3 from '../../assets/images/cover3.png';
@@ -171,14 +172,7 @@ const HomePage = () => {
 
     return (
         <div className="homepage">
-            {/* <div className="campus-cares-banner">
-                <div className="banner-content">
-                    
-                    <a href="https://forms.gle/DRD4P8BWCPm5kS4n6" target="_blank" rel="noopener noreferrer">
-                        <span className="banner-badge">Join the CampusCares team (Outreach, Tech, and Marketing)! Click to apply</span>
-                    </a>
-                </div>
-            </div> */}
+            <AnnouncementBanner />
             <div className="main">
                 {isMobile &&
                     <div className="main-content mb">

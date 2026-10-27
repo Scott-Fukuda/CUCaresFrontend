@@ -1,4 +1,4 @@
-import { User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride, FeedOrderItem, FeedOrderResponse } from './types';
+import { Announcement, User, MinimalUser, Opportunity, Organization, SignUp, Car, Friendship, FriendshipStatus, FriendshipsResponse, MiniOpp, MultiOpp, Waiver, Ride, FeedOrderItem, FeedOrderResponse } from './types';
 import { auth } from './firebase-config';
 import { canUnregisterFromOpportunity } from './utils/timeUtils';
 import { subscribe } from 'diagnostics_channel';
@@ -1261,6 +1261,27 @@ export const getServiceDataCsv = async (
   return await response;
 };
 
+
+// ANNOUNCEMENT (site-wide banner) endpoints
+
+/**
+ * Unauthenticated on purpose: the banner shows on the public home page, so this
+ * has to work with no signed-in user.
+ */
+export const getAnnouncement = async (): Promise<Announcement> => {
+  const result = await request('/announcement');
+  return {
+    enabled: !!result?.enabled,
+    message: typeof result?.message === 'string' ? result.message : '',
+    link: typeof result?.link === 'string' ? result.link : '',
+  };
+};
+
+export const updateAnnouncement = (announcement: Announcement): Promise<Announcement> =>
+  authenticatedRequest('/announcement', {
+    method: 'PUT',
+    body: JSON.stringify(announcement),
+  });
 
 // MULTIOPP endpoints
 export const getMultiOpps = async (): Promise<MultiOpp[]> => {

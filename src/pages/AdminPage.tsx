@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import InviteLinkGenerator from '../components/InviteLinkGenerator';
+import AnnouncementAdmin from '../components/AnnouncementAdmin';
 import { Opportunity, Organization, User, MultiOpp, FeedOrderItem, FeedItem } from '../types';
 import * as api from '../api';
 import {
@@ -122,6 +123,23 @@ const SortableCard: React.FC<{ item: FeedItem }> = ({ item }) => {
   );
 };
 
+/**
+ * The admin panel's sections, grouped by what someone is there to do.
+ *
+ * Everything used to sit in one long column, which buried the drag-and-drop
+ * feed editor and the approval queues below several screens of one-off tools.
+ * One tab is open at a time so each panel gets the whole width.
+ */
+const ADMIN_TABS = [
+  { id: 'overview', label: 'Overview', description: 'Totals and shortcuts.' },
+  { id: 'approvals', label: 'Approvals', description: 'Opportunities and organizations awaiting review.' },
+  { id: 'feed', label: 'Feed order', description: 'Drag to reorder the feed and hide series.' },
+  { id: 'outreach', label: 'Outreach', description: 'Announcement banner and invite links.' },
+  { id: 'data', label: 'Users & data', description: 'Emails, CSV exports and the security token.' },
+] as const;
+
+type AdminTabId = (typeof ADMIN_TABS)[number]['id'];
+
 const AdminPage: React.FC<AdminPageProps> = ({
   currentUser,
   opportunities,
@@ -133,6 +151,8 @@ const AdminPage: React.FC<AdminPageProps> = ({
 }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+
+  const [activeTab, setActiveTab] = useState<AdminTabId>('overview');
 
   // ── Feed Order state ───────────────────────────────────────────────────────
   const [visibleItems, setVisibleItems] = useState<FeedItem[]>([]);
@@ -641,15 +661,48 @@ const promptAndDownloadCsv = async () => {
 };
 
 
+  const pendingCount = unapprovedOpportunities.length + unapprovedOrganizations.length;
+  const activeTabMeta = ADMIN_TABS.find((tab) => tab.id === activeTab);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Admin Panel</h1>
-        <p className="text-gray-600">Review and approve pending opportunities and organizations.</p>
+        <p className="text-gray-600">{activeTabMeta?.description}</p>
       </div>
 
-      <InviteLinkGenerator organizations={organizations} opportunities={opportunities} />
 
+      {/* Tabs: each panel is a full working area, so only one is open at a time */}
+      <div className="mb-8 border-b border-gray-200">
+        <nav className="-mb-px flex gap-1 overflow-x-auto" aria-label="Admin sections">
+          {ADMIN_TABS.map((tab) => {
+            const isActive = tab.id === activeTab;
+            const badge = tab.id === 'approvals' ? pendingCount : 0;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex-shrink-0 flex items-center gap-2 px-4 py-3 border-b-2 font-semibold text-sm transition-colors ${
+                  isActive
+                    ? 'border-cornell-red text-cornell-red'
+                    : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'
+                }`}
+              >
+                {tab.label}
+                {badge > 0 && (
+                  <span className="bg-cornell-red text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {activeTab === 'overview' && (
+        <>
       {/* Statistics Section */}
       <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-lg border">
@@ -745,161 +798,11 @@ const promptAndDownloadCsv = async () => {
           View All Opportunities
         </button>
       </div>
+        </>
+      )}
 
-      {/* Security Token Section */}
-      {/* Security Token Section */}
-<div className="mb-8 p-6 bg-gray-50 rounded-lg border">
-  <h2 className="text-xl font-semibold text-gray-900 mb-4">Security Token</h2>
-
-  <div className="flex flex-col space-y-4">
-    <button
-      onClick={async () => {
-        setIsLoadingToken(true);
-        try {
-          const token = await handleGetSecurityToken();
-          if (token) {
-            await navigator.clipboard.writeText(token);
-            setShowCopied(true);
-            setTimeout(() => setShowCopied(false), 2000);
-          }
-        } finally {
-          setIsLoadingToken(false);
-        }
-      }}
-      disabled={isLoadingToken}
-      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 w-fit"
-    >
-      {isLoadingToken ? 'Getting Token...' : 'Get Security Token'}
-    </button>
-
-    {showCopied && (
-      <div className="bg-green-100 text-green-800 px-3 py-2 rounded-md text-sm font-medium w-fit">
-        ✅ Copied!
-      </div>
-    )}
-  </div>
-</div>
-
-
-      {/* CSV Export Section */}
-      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">CSV Data Export</h2>
-        <p className="text-sm text-gray-600 mb-4">
-          Download complete user or opportunity data in CSV format.
-        </p>
-
-        <div className="flex flex-wrap gap-4">
-          <button
-            onClick={handleDownloadUsersCsv}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-          >
-            Download User CSV
-          </button>
-
-          <button
-            onClick={handleDownloadOppsCsv}
-            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
-          >
-            Download Opportunity CSV
-          </button>
-
-          <button
-            onClick={promptAndDownloadCsv}
-            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors font-medium"
-          >
-            Download Service Data CSV
-          </button>
-        </div>
-      </div>
-
-      {/* User Emails Section */}
-      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">User Emails</h2>
-        <div className="flex flex-col space-y-4">
-          <button
-            onClick={handleGetUserEmails}
-            disabled={isLoadingEmails}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 w-fit"
-          >
-            {isLoadingEmails ? 'Loading Emails...' : 'Get All User Emails'}
-          </button>
-
-          {showEmails && userEmails.length > 0 && (
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                User Emails ({userEmails.length} total):
-              </label>
-              <div className="bg-white border border-gray-300 rounded-lg p-3">
-                <textarea
-                  value={userEmails.join('\n')}
-                  readOnly
-                  className="w-full h-48 p-2 text-sm font-mono bg-gray-50 border border-gray-200 rounded resize-none"
-                  placeholder="Emails will appear here..."
-                />
-                <div className="mt-2 flex space-x-2">
-                  <button
-                    onClick={() => navigator.clipboard.writeText(userEmails.join('\n'))}
-                    className="text-sm bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 transition-colors"
-                  >
-                    Copy All Emails
-                  </button>
-                  <button
-                    onClick={() => navigator.clipboard.writeText(userEmails.join(', '))}
-                    className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors"
-                  >
-                    Copy as Comma-Separated
-                  </button>
-                  <button
-                    onClick={() => setShowEmails(false)}
-                    className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors"
-                  >
-                    Hide Emails
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {showEmails && userEmails.length === 0 && (
-            <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
-              <p>No user emails found.</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Add Approved Email Section */}
-      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Add Approved Email</h2>
-        <p className="text-sm text-gray-600 mb-4">
-          Add email addresses to the approved list for non-Cornell users.
-        </p>
-        <div className="flex flex-col space-y-4">
-          <div className="flex gap-4">
-            <input
-              type="email"
-              value={approvedEmail}
-              onChange={(e) => setApprovedEmail(e.target.value)}
-              placeholder="Enter email address (e.g., user@example.com)"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:border-transparent"
-              disabled={isAddingEmail}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleAddApprovedEmail();
-                }
-              }}
-            />
-            <button
-              onClick={handleAddApprovedEmail}
-              disabled={isAddingEmail || !approvedEmail.trim()}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isAddingEmail ? 'Adding...' : 'Add Email'}
-            </button>
-          </div>
-        </div>
-      </div>
-
+      {activeTab === 'approvals' && (
+        <>
       {/* Loading State */}
       {loading && (
         <div className="text-center py-12">
@@ -1094,7 +997,11 @@ const promptAndDownloadCsv = async () => {
           </div>
         </>
       )}
+        </>
+      )}
 
+      {activeTab === 'feed' && (
+        <>
       {/* Feed Order Section */}
       <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
         <div className="flex items-center justify-between mb-2">
@@ -1165,6 +1072,174 @@ const promptAndDownloadCsv = async () => {
           </DndContext>
         )}
       </div>
+        </>
+      )}
+
+      {activeTab === 'outreach' && (
+        <>
+      <AnnouncementAdmin />
+
+      <InviteLinkGenerator organizations={organizations} opportunities={opportunities} />
+        </>
+      )}
+
+      {activeTab === 'data' && (
+        <>
+      {/* Security Token Section */}
+<div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+  <h2 className="text-xl font-semibold text-gray-900 mb-4">Security Token</h2>
+
+  <div className="flex flex-col space-y-4">
+    <button
+      onClick={async () => {
+        setIsLoadingToken(true);
+        try {
+          const token = await handleGetSecurityToken();
+          if (token) {
+            await navigator.clipboard.writeText(token);
+            setShowCopied(true);
+            setTimeout(() => setShowCopied(false), 2000);
+          }
+        } finally {
+          setIsLoadingToken(false);
+        }
+      }}
+      disabled={isLoadingToken}
+      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 w-fit"
+    >
+      {isLoadingToken ? 'Getting Token...' : 'Get Security Token'}
+    </button>
+
+    {showCopied && (
+      <div className="bg-green-100 text-green-800 px-3 py-2 rounded-md text-sm font-medium w-fit">
+        ✅ Copied!
+      </div>
+    )}
+  </div>
+</div>
+
+
+      {/* CSV Export Section */}
+      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">CSV Data Export</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Download complete user or opportunity data in CSV format.
+        </p>
+
+        <div className="flex flex-wrap gap-4">
+          <button
+            onClick={handleDownloadUsersCsv}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          >
+            Download User CSV
+          </button>
+
+          <button
+            onClick={handleDownloadOppsCsv}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+          >
+            Download Opportunity CSV
+          </button>
+
+          <button
+            onClick={promptAndDownloadCsv}
+            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors font-medium"
+          >
+            Download Service Data CSV
+          </button>
+        </div>
+      </div>
+
+      {/* User Emails Section */}
+      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">User Emails</h2>
+        <div className="flex flex-col space-y-4">
+          <button
+            onClick={handleGetUserEmails}
+            disabled={isLoadingEmails}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 w-fit"
+          >
+            {isLoadingEmails ? 'Loading Emails...' : 'Get All User Emails'}
+          </button>
+
+          {showEmails && userEmails.length > 0 && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                User Emails ({userEmails.length} total):
+              </label>
+              <div className="bg-white border border-gray-300 rounded-lg p-3">
+                <textarea
+                  value={userEmails.join('\n')}
+                  readOnly
+                  className="w-full h-48 p-2 text-sm font-mono bg-gray-50 border border-gray-200 rounded resize-none"
+                  placeholder="Emails will appear here..."
+                />
+                <div className="mt-2 flex space-x-2">
+                  <button
+                    onClick={() => navigator.clipboard.writeText(userEmails.join('\n'))}
+                    className="text-sm bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 transition-colors"
+                  >
+                    Copy All Emails
+                  </button>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(userEmails.join(', '))}
+                    className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors"
+                  >
+                    Copy as Comma-Separated
+                  </button>
+                  <button
+                    onClick={() => setShowEmails(false)}
+                    className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors"
+                  >
+                    Hide Emails
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showEmails && userEmails.length === 0 && (
+            <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
+              <p>No user emails found.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Add Approved Email Section */}
+      <div className="mb-8 p-6 bg-gray-50 rounded-lg border">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Add Approved Email</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Add email addresses to the approved list for non-Cornell users.
+        </p>
+        <div className="flex flex-col space-y-4">
+          <div className="flex gap-4">
+            <input
+              type="email"
+              value={approvedEmail}
+              onChange={(e) => setApprovedEmail(e.target.value)}
+              placeholder="Enter email address (e.g., user@example.com)"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cornell-red focus:border-transparent"
+              disabled={isAddingEmail}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleAddApprovedEmail();
+                }
+              }}
+            />
+            <button
+              onClick={handleAddApprovedEmail}
+              disabled={isAddingEmail || !approvedEmail.trim()}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isAddingEmail ? 'Adding...' : 'Add Email'}
+            </button>
+          </div>
+        </div>
+      </div>
+        </>
+      )}
+
     </div>
   );
 };

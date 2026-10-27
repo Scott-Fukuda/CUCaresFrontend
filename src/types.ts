@@ -289,6 +289,13 @@ export interface RideRider {
   notes?: string
 }
 
+/** Site-wide banner message, controlled by admins. */
+export interface Announcement {
+  enabled: boolean;
+  message: string;
+  link: string;
+}
+
 export interface FeedOrderItem {
   id: number;
   is_multiopp: boolean;
