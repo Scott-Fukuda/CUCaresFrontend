@@ -57,7 +57,7 @@ const SortableCard: React.FC<{ item: FeedItem }> = ({ item }) => {
   };
 
   const name = item.data.name;
-  const nonprofit = item.data.nonprofit ? item.data.nonprofit : '';
+  const nonprofit = item.kind === 'opp' ? item.data.nonprofit : item.data.nonprofit;
   const formatDate = (raw: string) => {
     // Handle both 'YYYY-MM-DD' and full ISO strings
     const d = raw.includes('T') ? new Date(raw) : new Date(raw + 'T00:00:00');
@@ -893,7 +893,7 @@ const promptAndDownloadCsv = async () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {opp.nonprofit || 'Community Organization'}
+                            {opp.nonprofit}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {getUserNameById(opp.host_id)}
