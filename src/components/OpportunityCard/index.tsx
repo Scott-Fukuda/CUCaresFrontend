@@ -246,7 +246,7 @@ const OpportunityCard: React.FC<OpportunityCardProps> = ({
         <div className="opportunity-card__header">
           <div className="opportunity-card__nonprofit-container">
             <span className="opportunity-card__nonprofit">
-              {opportunity.nonprofit}
+              {opportunity.nonprofit || 'Community Organization'}
             </span>
             {isUserHost && (
               <span className="opportunity-card__host-badge">

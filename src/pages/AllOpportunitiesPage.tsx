@@ -29,9 +29,9 @@ const AllOpportunitiesPage: React.FC = () => {
   }, [allTimeOpps]);
 
   const uniqueNonprofits = useMemo(() => {
-    const names = allTimeOpps
-      .map((o) => o.nonprofit)
-      .filter((n): n is string => !!n);
+    const names = (allTimeOpps ?? [])
+    .map((o) => o?.nonprofit)
+    .filter((n): n is string => !!n);
     return Array.from(new Set(names)).sort();
   }, [allTimeOpps]);
 
