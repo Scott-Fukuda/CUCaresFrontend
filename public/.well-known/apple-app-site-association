@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["JMVAURPQ7C.com.campuscares.app"],
+        "components": [
+          { "/": "/opportunity/*" },
+          { "/": "/multiopp/*" }
+        ]
+      }
+    ]
+  }
+}
