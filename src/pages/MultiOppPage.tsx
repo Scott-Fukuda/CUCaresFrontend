@@ -361,7 +361,9 @@ const MultiOppDetailPage: React.FC<MultiOppDetailPageProps> = ({
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-        <BannerDownloadButton imageRef={bannerImageRef} name={multiopp.name} />
+        {currentUser.admin && (
+          <BannerDownloadButton imageRef={bannerImageRef} name={multiopp.name} />
+        )}
         <div className="absolute bottom-0 left-0 p-8">
           <h1 className="text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">{multiopp.name}</h1>
           {multiopp.nonprofit && <h2 className="text-2xl font-semibold text-white/90 drop-shadow-lg">{multiopp.nonprofit}</h2>}

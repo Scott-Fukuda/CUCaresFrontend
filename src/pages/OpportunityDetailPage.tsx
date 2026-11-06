@@ -673,7 +673,9 @@ const OpportunityDetailContent: React.FC<OpportunityDetailContentProps> = ({
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-        <BannerDownloadButton imageRef={bannerImageRef} name={opportunity.name} />
+        {currentUser.admin && (
+          <BannerDownloadButton imageRef={bannerImageRef} name={opportunity.name} />
+        )}
         <div className="absolute bottom-0 left-0 p-8">
           <h1 className="text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">
             {opportunity.name}
