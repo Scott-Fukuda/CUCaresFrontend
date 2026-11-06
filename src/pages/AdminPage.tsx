@@ -334,6 +334,8 @@ const AdminPage: React.FC<AdminPageProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [unapprovedOpportunities, setUnapprovedOpportunities] = useState<Opportunity[]>([]);
   const [approvedOpportunitiesCount, setApprovedOpportunitiesCount] = useState<number>(0);
+  // null = still loading or failed; the cards show a dash rather than a misleading 0
+  const [volunteerStats, setVolunteerStats] = useState<api.VolunteerStats | null>(null);
   const [unapprovedOrganizations, setUnapprovedOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -379,6 +381,14 @@ const AdminPage: React.FC<AdminPageProps> = ({
     };
 
     fetchUnapprovedData();
+  }, []);
+
+  // Fetched separately so a failure here doesn't block the approval queues above
+  useEffect(() => {
+    api
+      .getVolunteerStats()
+      .then(setVolunteerStats)
+      .catch((err) => console.error('Error fetching volunteer stats:', err));
   }, []);
 
   const handleOpportunityToggle = (oppId: number) => {
@@ -704,7 +714,7 @@ const promptAndDownloadCsv = async () => {
       {activeTab === 'overview' && (
         <>
       {/* Statistics Section */}
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-lg border">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -782,6 +792,66 @@ const promptAndDownloadCsv = async () => {
               <p className="text-sm font-medium text-gray-500">Approved Organizations</p>
               <p className="text-2xl font-semibold text-gray-900">
                 {organizations.filter((org) => org.approved !== false).length}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-lg border">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">
+                Volunteers in {volunteerStats?.year ?? new Date().getFullYear()}
+              </p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {volunteerStats ? volunteerStats.unique_volunteers.toLocaleString() : '—'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-lg border">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-yellow-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">
+                Volunteer Hours in {volunteerStats?.year ?? new Date().getFullYear()}
+              </p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {volunteerStats ? volunteerStats.total_hours.toLocaleString() : '—'}
               </p>
             </div>
           </div>

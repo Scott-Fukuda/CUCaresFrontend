@@ -1261,6 +1261,16 @@ export const getServiceDataCsv = async (
   return await response;
 };
 
+export interface VolunteerStats {
+  year: number;
+  unique_volunteers: number;
+  total_hours: number;
+}
+
+// Year-to-date attendance totals (admin only). Defaults to the current year.
+export const getVolunteerStats = (year?: number): Promise<VolunteerStats> =>
+  authenticatedRequest(`/service-data/stats${year ? `?year=${year}` : ''}`);
+
 
 // ANNOUNCEMENT (site-wide banner) endpoints
 
